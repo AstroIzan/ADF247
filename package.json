@@ -1,0 +1,26 @@
+{
+  "name": "adf247",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install:all": "npm install --prefix database && npm install --prefix api && npm install --prefix client",
+    "dev": "concurrently -n api,client \"npm run dev --prefix api\" \"npm run start --prefix client\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AstroIzan/ADF247.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/AstroIzan/ADF247/issues"
+  },
+  "homepage": "https://github.com/AstroIzan/ADF247#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
