@@ -1,0 +1,42 @@
+USERS
+	- Id [PK | AI]
+	- NCarnet [UK]
+	- Name [VARCHAR]
+	- LastName [VARCHAR NULLABLE]
+	- Password [VARCHAR]
+	- IsActive [BOOL]
+	- CreatedAt [DATE (DD-MM-YYYY HH-MM-SS.MS)]
+	- UpdatedAt [DATE (DD-MM-YYYY HH-MM-SS.MS)]
+	
+ROLES
+	- Id [PK | AI]
+	- NCarnet [FK Users(NCarnet)]
+	- IsCapOperatiu [BOOL]
+	- IsCapColla [BOOL]
+	- IsAdmin [BOOL]
+	- IsGroc [BOOL]
+	
+CONVOCATORIES
+	- Id [PK | AI]
+	- Date [DATE (DD-MM-YYYY)]
+	- Title [VARCHAR]
+	- UbiSortida [VARCHAR]
+	- Responsable [FK Users(NCarnet)]
+	- ConvoType [FK ConvoTypes(Id)]
+	- MoreThan2 [BOOL]
+	- StartTime [DATE (DD-MM-YYYY HH-MM-SS.MS)]
+	- FinalTime [DATE (DD-MM-YYYY HH-MM-SS.MS)]
+	- IsActive [BOOL]
+	
+CONVOTYPES
+	- Id [PK | AI]
+	- Type [VARCHAR]
+	
+RESPOSTES
+	- Id [PK | AI]
+	- ConvoId [FK Convocatories(Id)]
+	- User [FK Users(NCarnet)]
+	- IsCustom [BOOL]
+	- CustomText [VARCHAR NULLABLE]
+	- FullHorari [BOOL]
+	- Response [BOOL]
