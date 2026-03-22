@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Convocatoria, ConvoType, User } from '../../services/data.service';
@@ -17,11 +17,11 @@ type ConvocatoriaFormData = Partial<Convocatoria> & {
 export class ConvosComponent {
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
   readonly todayDate = this.toDateInputValue(new Date());
-  @Input() convocatorias: Convocatoria[] = [];
-  @Input() convoTypes: ConvoType[] = [];
-  @Input() users: User[] = [];
-  @Input() loading = false;
-  @Input() error = '';
+  convocatorias = input<Convocatoria[]>([]);
+  convoTypes = input<ConvoType[]>([]);
+  users = input<User[]>([]);
+  loading = input(false);
+  error = input('');
   @Output() onChanged = new EventEmitter<Convocatoria>();
   readonly hourOptions = this.buildHourOptions();
   readonly minuteOptions = this.buildMinuteOptions();
@@ -66,7 +66,7 @@ export class ConvosComponent {
     const fromTime = activeFilters.dateFrom ? new Date(activeFilters.dateFrom).setHours(0, 0, 0, 0) : null;
     const toTime = activeFilters.dateTo ? new Date(activeFilters.dateTo).setHours(23, 59, 59, 999) : null;
 
-    return this.convocatorias.filter((convo) => {
+    return this.convocatorias().filter((convo) => {
       const matchesTitle = !titleQuery || (convo.title || '').toLowerCase().includes(titleQuery);
       const matchesType = activeFilters.convoTypeId === 'all' || String(convo.convoTypeId) === activeFilters.convoTypeId;
       const matchesResponsable = activeFilters.responsableId === 'all' || String(convo.responsableId) === activeFilters.responsableId;
@@ -324,13 +324,13 @@ export class ConvosComponent {
 
   getUserName(userId?: number): string {
     if (!userId) return '-';
-    const user = this.users.find((u) => u.id === userId);
+    const user = this.users().find((u) => u.id === userId);
     return user ? `${user.name} ${user.lastName || ''}` : '-';
   }
 
   getConvoTypeName(typeId?: number): string {
     if (!typeId) return '-';
-    const type = this.convoTypes.find((t) => t.id === typeId);
+    const type = this.convoTypes().find((t) => t.id === typeId);
     return type ? type.name : '-';
   }
 
@@ -437,7 +437,7 @@ export class ConvosComponent {
       return false;
     }
 
-    const type = this.convoTypes.find((item) => item.id === convoTypeId);
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /incendi/i.test(type.name));
   }
 
@@ -446,7 +446,7 @@ export class ConvosComponent {
       return false;
     }
 
-    const type = this.convoTypes.find((item) => item.id === convoTypeId);
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /guardia/i.test(type.name));
   }
 
@@ -455,7 +455,7 @@ export class ConvosComponent {
       return '';
     }
 
-    const type = this.convoTypes.find((item) => item.id === convoTypeId);
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return type?.defaultLocation?.trim() || '';
   }
 

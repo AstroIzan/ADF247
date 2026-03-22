@@ -9,11 +9,11 @@
     </div>
   </div>
 
-  @if (error) {
-    <div class="error-alert">{{ error }}</div>
+  @if (error()) {
+    <div class="error-alert">{{ error() }}</div>
   }
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading">Cargando convocatorias...</div>
   } @else if (filteredConvocatorias().length > 0) {
     <div class="table-responsive">
@@ -86,7 +86,7 @@
             <label>Tipo de convocatoria</label>
             <select [value]="filters().convoTypeId" (change)="updateFilterField('convoTypeId', $any($event.target).value)">
               <option value="all">Todos</option>
-              @for (type of convoTypes; track type.id) {
+              @for (type of convoTypes(); track type.id) {
                 <option [value]="type.id">{{ type.name }}</option>
               }
             </select>
@@ -96,7 +96,7 @@
             <label>Responsable</label>
             <select [value]="filters().responsableId" (change)="updateFilterField('responsableId', $any($event.target).value)">
               <option value="all">Todos</option>
-              @for (user of users; track user.id) {
+              @for (user of users(); track user.id) {
                 <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
               }
             </select>
@@ -176,7 +176,7 @@
               name="convoType"
             >
               <option [value]="undefined">Selecciona un tipo</option>
-              @for (type of convoTypes; track type.id) {
+              @for (type of convoTypes(); track type.id) {
                 <option [value]="type.id">{{ type.name }}</option>
               }
             </select>
@@ -214,7 +214,7 @@
               name="responsable"
             >
               <option [value]="undefined">Selecciona un responsable</option>
-              @for (user of users; track user.id) {
+              @for (user of users(); track user.id) {
                 <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
               }
             </select>
