@@ -3,9 +3,9 @@
 		<header class="top-nav">
 			<div class="top-nav-left">
 				<div class="logo">ADF247</div>
-				<button class="nav-btn" routerLink="/home" routerLinkActive="active">Inicio</button>
+				<button class="nav-btn" routerLink="/home" routerLinkActive="active">Inici</button>
 				@if (authService.isAdmin()) {
-					<button class="nav-btn" routerLink="/dashboard" routerLinkActive="active">Dashboard</button>
+					<button class="nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
 				}
 			</div>
 
@@ -17,7 +17,7 @@
 					}
 					| {{ authService.getCachedName() }} {{ authService.getCachedLastName() || '' }}
 				</span>
-				<button class="nav-btn logout" (click)="authService.logout()">Salir</button>
+				<button class="nav-btn logout" (click)="authService.logout()">Sortir</button>
 			</div>
 		</header>
 	}

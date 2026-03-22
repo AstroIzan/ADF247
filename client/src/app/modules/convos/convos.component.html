@@ -1,11 +1,11 @@
 <div class="convos-container">
   <div class="convos-header">
-    <h2>Gestion de Convocatorias</h2>
+    <h2>Gestió de Convocatòries</h2>
     <div class="header-actions">
-      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de convocatorias">
+      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de convocatòries">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
-      <button (click)="openForm()" class="btn btn-primary">+ Nueva Convocatoria</button>
+      <button (click)="openForm()" class="btn btn-primary">+ Nova Convocatòria</button>
     </div>
   </div>
 
@@ -14,21 +14,21 @@
   }
 
   @if (loading()) {
-    <div class="loading">Cargando convocatorias...</div>
+    <div class="loading">Carregant convocatòries...</div>
   } @else if (filteredConvocatorias().length > 0) {
     <div class="table-responsive">
       <table class="convos-table">
         <thead>
           <tr>
-            <th>Fecha</th>
-            <th>Titulo</th>
-            <th>Tipo</th>
-            <th>Ubicacion</th>
+            <th>Data</th>
+            <th>Títol</th>
+            <th>Tipus</th>
+            <th>Ubicació</th>
             <th>Responsable</th>
-            <th>Respuestas</th>
+            <th>Respostes</th>
             <th>Sortida</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th>Estat</th>
+            <th>Accions</th>
           </tr>
         </thead>
         <tbody>
@@ -54,7 +54,7 @@
                 <button (click)="openForm(convo)" class="btn btn-sm btn-edit">Editar</button>
                 @if (deleteConfirming() === convo.id) {
                   <button (click)="deleteConvocatoria(convo.id)" class="btn btn-sm btn-danger">Confirmar</button>
-                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancelar</button>
+                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
                 } @else {
                   <button (click)="deleteConvocatoria(convo.id)" class="btn btn-sm btn-danger">Eliminar</button>
                 }
@@ -65,27 +65,27 @@
       </table>
     </div>
   } @else {
-    <div class="empty-state">No hay convocatorias con los filtros aplicados</div>
+    <div class="empty-state">No hi ha convocatòries amb els filtres aplicats</div>
   }
 
   @if (showFilters()) {
     <div class="modal-overlay" (click)="closeFilters()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Filtros de Convocatorias</h3>
+          <h3>Filtres de Convocatòries</h3>
           <button (click)="closeFilters()" class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>Titulo</label>
-            <input type="text" [value]="filters().title" (input)="updateFilterField('title', $any($event.target).value)" placeholder="Buscar por titulo" />
+            <label>Títol</label>
+            <input type="text" [value]="filters().title" (input)="updateFilterField('title', $any($event.target).value)" placeholder="Cercar per títol" />
           </div>
 
           <div class="form-group">
-            <label>Tipo de convocatoria</label>
+            <label>Tipus de convocatòria</label>
             <select [value]="filters().convoTypeId" (change)="updateFilterField('convoTypeId', $any($event.target).value)">
-              <option value="all">Todos</option>
+              <option value="all">Tots</option>
               @for (type of convoTypes(); track type.id) {
                 <option [value]="type.id">{{ type.name }}</option>
               }
@@ -95,7 +95,7 @@
           <div class="form-group">
             <label>Responsable</label>
             <select [value]="filters().responsableId" (change)="updateFilterField('responsableId', $any($event.target).value)">
-              <option value="all">Todos</option>
+              <option value="all">Tots</option>
               @for (user of users(); track user.id) {
                 <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
               }
@@ -103,11 +103,11 @@
           </div>
 
           <div class="form-group">
-            <label>Estado</label>
+            <label>Estat</label>
             <select [value]="filters().status" (change)="updateFilterField('status', $any($event.target).value)">
-              <option value="all">Todos</option>
-              <option value="active">Activas</option>
-              <option value="inactive">Inactivas</option>
+              <option value="all">Tots</option>
+              <option value="active">Actives</option>
+              <option value="inactive">Inactives</option>
             </select>
           </div>
 
@@ -123,7 +123,7 @@
         </div>
 
         <div class="modal-footer">
-          <button (click)="resetFilters()" class="btn btn-secondary">Limpiar</button>
+          <button (click)="resetFilters()" class="btn btn-secondary">Netejar</button>
           <button (click)="closeFilters()" class="btn btn-primary">Aplicar</button>
         </div>
       </div>
@@ -134,7 +134,7 @@
     <div class="modal-overlay" (click)="closeForm()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>{{ editingId() ? 'Editar Convocatoria' : 'Nueva Convocatoria' }}</h3>
+          <h3>{{ editingId() ? 'Editar Convocatòria' : 'Nova Convocatòria' }}</h3>
           <button (click)="closeForm()" class="close-btn">&times;</button>
         </div>
 

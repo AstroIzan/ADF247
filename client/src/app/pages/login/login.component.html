@@ -5,31 +5,31 @@
         <span>ADF</span>
         <span>247</span>
       </div>
-      <h2>Iniciar Sesion</h2>
-      <p class="subtitle">Panel de Gestión de Guardia</p>
+      <h2>Iniciar Sessió</h2>
+      <p class="subtitle">Gestió de Convocatòries</p>
 
       <form (ngSubmit)="onSubmit()" class="login-form">
         <div class="form-group">
-          <label for="nCarnet">Numero de carnet</label>
+          <label for="nCarnet">Número de carnet</label>
           <input
             type="text"
             id="nCarnet"
             [(ngModel)]="nCarnet"
             name="nCarnet"
-            placeholder="Ej: 247/GI/225"
+            placeholder="Ex: 247/GI/225"
             required
             [disabled]="loading()"
           />
         </div>
 
         <div class="form-group">
-          <label for="password">Contrasena</label>
+          <label for="password">Contrasenya</label>
           <input
             type="password"
             id="password"
             [(ngModel)]="password"
             name="password"
-            placeholder="Introduce tu contrasena"
+            placeholder="Introdueix la contrasenya"
             required
             [disabled]="loading()"
           />
@@ -44,7 +44,7 @@
           class="login-btn"
           [disabled]="loading()"
         >
-          {{ loading() ? 'Conectando...' : 'Entrar al panel' }}
+          {{ loading() ? 'Connectant...' : 'Entrar al panell' }}
         </button>
       </form>
     </div>

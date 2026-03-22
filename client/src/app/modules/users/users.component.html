@@ -1,11 +1,11 @@
 <div class="users-container">
   <div class="users-header">
-    <h2>Gestion de Usuarios</h2>
+    <h2>Gestió d'Usuaris</h2>
     <div class="header-actions">
-      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de usuarios">
+      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de usuaris">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
-      <button (click)="openForm()" class="btn btn-primary">+ Nuevo Usuario</button>
+      <button (click)="openForm()" class="btn btn-primary">+ Nou Usuari</button>
     </div>
   </div>
 
@@ -14,19 +14,19 @@
   }
 
   @if (loading()) {
-    <div class="loading">Cargando usuarios...</div>
+    <div class="loading">Carregant usuaris...</div>
   } @else if (filteredUsers().length > 0) {
     <div class="table-responsive">
       <table class="users-table">
         <thead>
           <tr>
-            <th>N Carnet</th>
-            <th>Indicativo</th>
-            <th>Nombre</th>
-            <th>Apellido</th>
-            <th>Roles</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th>Nº Carnet</th>
+            <th>Indicatiu</th>
+            <th>Nom</th>
+            <th>Cognoms</th>
+            <th>Rols</th>
+            <th>Estat</th>
+            <th>Accions</th>
           </tr>
         </thead>
         <tbody>
@@ -49,14 +49,14 @@
               </td>
               <td>
                 <span [class]="user.isActive ? 'badge-active' : 'badge-inactive'">
-                  {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                  {{ user.isActive ? 'Actiu' : 'Inactiu' }}
                 </span>
               </td>
               <td class="actions">
                 <button (click)="openForm(user)" class="btn btn-sm btn-edit">Editar</button>
                 @if (deleteConfirming() === user.id) {
                   <button (click)="deleteUser(user.id)" class="btn btn-sm btn-danger">Confirmar</button>
-                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancelar</button>
+                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
                 } @else {
                   <button (click)="deleteUser(user.id)" class="btn btn-sm btn-danger">Eliminar</button>
                 }
@@ -67,48 +67,48 @@
       </table>
     </div>
   } @else {
-    <div class="empty-state">No hay usuarios con los filtros aplicados</div>
+    <div class="empty-state">No hi ha usuaris amb els filtres aplicats</div>
   }
 
   @if (showFilters()) {
     <div class="modal-overlay" (click)="closeFilters()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Filtros de Usuarios</h3>
+          <h3>Filtres d'Usuaris</h3>
           <button (click)="closeFilters()" class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>Permiso</label>
+            <label>Permís</label>
             <select [value]="filters().role" (change)="updateFilterField('role', $any($event.target).value)">
-              <option value="all">Todos</option>
+              <option value="all">Tots</option>
               <option value="isAdmin">Admin</option>
               <option value="isCapOperatiu">Cap Operatiu</option>
               <option value="isCapColla">Cap Colla</option>
               <option value="isGroc">Groc</option>
-              <option value="none">Sin permisos</option>
+              <option value="none">Sense permisos</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" [value]="filters().name" (input)="updateFilterField('name', $any($event.target).value)" placeholder="Nombre o apellido" />
+            <label>Nom</label>
+            <input type="text" [value]="filters().name" (input)="updateFilterField('name', $any($event.target).value)" placeholder="Nom o cognoms" />
           </div>
 
           <div class="form-group">
-            <label>Indicativo</label>
-            <input type="text" [value]="filters().nIndicatiu" (input)="updateFilterField('nIndicatiu', $any($event.target).value)" placeholder="Ej: BR-12" />
+            <label>Indicatiu</label>
+            <input type="text" [value]="filters().nIndicatiu" (input)="updateFilterField('nIndicatiu', $any($event.target).value)" placeholder="Ex: BR-12" />
           </div>
 
           <div class="form-group">
-            <label>Numero de carnet</label>
-            <input type="text" [value]="filters().nCarnet" (input)="updateFilterField('nCarnet', $any($event.target).value)" placeholder="Ej: 247001" />
+            <label>Número de carnet</label>
+            <input type="text" [value]="filters().nCarnet" (input)="updateFilterField('nCarnet', $any($event.target).value)" placeholder="Ex: 247001" />
           </div>
         </div>
 
         <div class="modal-footer">
-          <button (click)="resetFilters()" class="btn btn-secondary">Limpiar</button>
+          <button (click)="resetFilters()" class="btn btn-secondary">Netejar</button>
           <button (click)="closeFilters()" class="btn btn-primary">Aplicar</button>
         </div>
       </div>
@@ -119,13 +119,13 @@
     <div class="modal-overlay" (click)="closeForm()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>{{ editingId() ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+          <h3>{{ editingId() ? 'Editar Usuari' : 'Nou Usuari' }}</h3>
           <button (click)="closeForm()" class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>N Carnet *</label>
+            <label>Nº Carnet *</label>
             <input
               type="text"
               [value]="formData().nCarnet || ''"
