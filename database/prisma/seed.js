@@ -1,4 +1,7 @@
 ﻿const prisma = require('./prisma')
+const bcrypt = require('bcrypt')
+
+const PASSWORD_SALT_ROUNDS = 10
 
 async function main() {
   console.log('\ud83c\udf31 Iniciando seed completo de la BBDD...')
@@ -27,13 +30,15 @@ async function main() {
   const userMap = {}
 
   for (let u of usuariosData) {
+    const hashedPassword = await bcrypt.hash(u.password, PASSWORD_SALT_ROUNDS)
+
     const user = await prisma.user.create({
       data: {
         name: u.name,
         lastName: u.lastName,
         nCarnet: u.nCarnet,
         nIndicatiu: u.nIndicatiu,
-        password: u.password,
+        password: hashedPassword,
         isActive: true,
         roles: {
           create: {

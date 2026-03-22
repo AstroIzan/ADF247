@@ -1,0 +1,779 @@
+{
+  "info": {
+    "name": "ADF247 API",
+    "description": "Coleccion Postman para el estado actual del backend ADF247.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "GET /health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "health"
+              ]
+            },
+            "description": "Comprueba que la API esta levantada."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "POST /api/auth/login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Login responde 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "var json = pm.response.json();",
+                  "",
+                  "if (json && json.accessToken) {",
+                  "  pm.collectionVariables.set('token', json.accessToken);",
+                  "}",
+                  "",
+                  "if (json && json.refreshToken) {",
+                  "  pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "}",
+                  "",
+                  "if (json && json.user && json.user.id) {",
+                  "  pm.collectionVariables.set('userId', String(json.user.id));",
+                  "}",
+                  "",
+                  "if (json && json.user && json.user.nCarnet) {",
+                  "  pm.collectionVariables.set('userNCarnet', json.user.nCarnet);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nCarnet\": \"{{userNCarnet}}\",\n  \"password\": \"{{userPassword}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Inicia sesion y guarda token/userId/userNCarnet en variables de coleccion."
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/auth/refresh",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  var json = pm.response.json();",
+                  "  if (json && json.accessToken) {",
+                  "    pm.collectionVariables.set('token', json.accessToken);",
+                  "  }",
+                  "  if (json && json.refreshToken) {",
+                  "    pm.collectionVariables.set('refreshToken', json.refreshToken);",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Renueva access token y refresh token sin cerrar sesion."
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/auth/me",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "Devuelve el perfil autenticado usando el Bearer token guardado."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /api/users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/users/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/users",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  var json = pm.response.json();",
+                  "  if (json && json.id) {",
+                  "    pm.collectionVariables.set('newUserId', String(json.id));",
+                  "  }",
+                  "}",
+                  ""
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Nuevo\",\n  \"lastName\": \"Usuario\",\n  \"nCarnet\": \"247/TEST/001\",\n  \"nIndicatiu\": \"S99\",\n  \"password\": \"TestPass123\",\n  \"isActive\": true,\n  \"roles\": {\n    \"isAdmin\": false,\n    \"isGroc\": true,\n    \"isCapColla\": false,\n    \"isCapOperatiu\": false\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/users/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Usuario Actualizado\",\n  \"isActive\": true,\n  \"roles\": {\n    \"isAdmin\": true\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/users/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{newUserId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{newUserId}}"
+              ]
+            },
+            "description": "Usa newUserId generado por el POST de usuarios para evitar borrar usuarios del seed."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Convos",
+      "item": [
+        {
+          "name": "GET /api/convos/types",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/convos/types/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/types/{{convoTypeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "types",
+                "{{convoTypeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/convos/types",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  var json = pm.response.json();",
+                  "  if (json && json.id) {",
+                  "    pm.collectionVariables.set('newConvoTypeId', String(json.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dispositivo Especial\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/types",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "types"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/convos/types/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dispositivo Especial Actualizado\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/types/{{newConvoTypeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "types",
+                "{{newConvoTypeId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/convos",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/convos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/convos/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/{{convoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "{{convoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/convos",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  var json = pm.response.json();",
+                  "  if (json && json.id) {",
+                  "    pm.collectionVariables.set('newConvoId', String(json.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"2026-04-15T00:00:00.000Z\",\n  \"title\": \"Salida Preventiva\",\n  \"ubiSortida\": \"base\",\n  \"responsableId\": {{userId}},\n  \"convoTypeId\": {{convoTypeId}},\n  \"moreThan2\": true,\n  \"startTime\": \"2026-04-15T09:00:00.000Z\",\n  \"finalTime\": \"2026-04-15T13:00:00.000Z\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/convos",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/convos/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Salida Preventiva Actualizada\",\n  \"moreThan2\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/{{newConvoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "{{newConvoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/convos/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/{{newConvoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "{{newConvoId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/convos/types/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/convos/types/{{newConvoTypeId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "convos",
+                "types",
+                "{{newConvoTypeId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dispo",
+      "item": [
+        {
+          "name": "GET /api/dispo",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dispo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dispo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/dispo?convoId=:convoId",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dispo?convoId={{convoId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dispo"
+              ],
+              "query": [
+                {
+                  "key": "convoId",
+                  "value": "{{convoId}}"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/dispo/:id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dispo/{{responseId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dispo",
+                "{{responseId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "POST /api/dispo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  var json = pm.response.json();",
+                  "  if (json && json.id) {",
+                  "    pm.collectionVariables.set('newResponseId', String(json.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"convoId\": {{convoId}},\n  \"userNCarnet\": \"{{userNCarnet}}\",\n  \"isCustom\": false,\n  \"fullHorari\": true,\n  \"response\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dispo",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dispo"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/dispo/:id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isCustom\": true,\n  \"customText\": \"Solo disponible hasta las 11:00\",\n  \"fullHorari\": false,\n  \"response\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/dispo/{{newResponseId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dispo",
+                "{{newResponseId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/dispo/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/dispo/{{newResponseId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "dispo",
+                "{{newResponseId}}"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "refreshToken",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": "2"
+    },
+    {
+      "key": "newUserId",
+      "value": ""
+    },
+    {
+      "key": "userNCarnet",
+      "value": "247/GI/215"
+    },
+    {
+      "key": "userPassword",
+      "value": "Airline2"
+    },
+    {
+      "key": "convoTypeId",
+      "value": "1"
+    },
+    {
+      "key": "newConvoTypeId",
+      "value": ""
+    },
+    {
+      "key": "convoId",
+      "value": "1"
+    },
+    {
+      "key": "newConvoId",
+      "value": ""
+    },
+    {
+      "key": "responseId",
+      "value": "1"
+    },
+    {
+      "key": "newResponseId",
+      "value": ""
+    }
+  ]
+}
