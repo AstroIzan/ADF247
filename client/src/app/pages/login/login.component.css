@@ -3,7 +3,7 @@
   display: grid;
   place-items: center;
   padding: 24px;
-  background: #f5f5f5;
+  background: linear-gradient(125deg, rgba(240, 176, 0, 0.96) 0%, rgba(207, 143, 0, 0.95) 62%, rgba(176, 121, 4, 0.95) 100%);
 }
 
 .login-shell {
@@ -27,7 +27,7 @@
 }
 
 .logo-header {
-  font-size: 48px;
+  font-size: 60px;
   font-weight: 900;
   letter-spacing: 3px;
   text-transform: uppercase;
