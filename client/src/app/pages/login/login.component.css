@@ -34,6 +34,10 @@
   color: #1f1f1f;
   margin-bottom: 24px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  line-height: 0.9;
+  align-items: center;
 }
 
 .login-box h2 {
@@ -120,13 +124,13 @@ input:disabled {
   font-weight: 600;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 9px 20px rgba(40, 167, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15);
   width: 100%;
 }
 
 .login-btn:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(40, 167, 69, 0.4);
+  box-shadow: 0 6px 16px rgba(40, 167, 69, 0.18);
 }
 
 .login-btn:disabled {
