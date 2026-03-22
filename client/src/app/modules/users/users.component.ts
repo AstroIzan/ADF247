@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, User } from '../../services/data.service';
@@ -11,9 +11,9 @@ import { DataService, User } from '../../services/data.service';
   styleUrl: './users.component.css'
 })
 export class UsersComponent {
-  @Input() users: User[] = [];
-  @Input() loading = false;
-  @Input() error = '';
+  users = input<User[]>([]);
+  loading = input(false);
+  error = input('');
   @Output() onChanged = new EventEmitter<void>();
 
   showForm = signal(false);
@@ -50,7 +50,7 @@ export class UsersComponent {
     const indicatiuQuery = activeFilters.nIndicatiu.trim().toLowerCase();
     const carnetQuery = activeFilters.nCarnet.trim().toLowerCase();
 
-    return this.users.filter((user) => {
+    return this.users().filter((user) => {
       const matchesName =
         !nameQuery ||
         `${user.name || ''} ${user.lastName || ''}`.toLowerCase().includes(nameQuery);

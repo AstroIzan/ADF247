@@ -9,11 +9,11 @@
     </div>
   </div>
 
-  @if (error) {
-    <div class="error-alert">{{ error }}</div>
+  @if (error()) {
+    <div class="error-alert">{{ error() }}</div>
   }
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading">Cargando respuestas...</div>
   } @else if (filteredRespuestas().length > 0) {
     <div class="table-responsive">
@@ -108,7 +108,7 @@
             <label>Usuario</label>
             <select [value]="filters().userNCarnet" (change)="updateFilterField('userNCarnet', $any($event.target).value)">
               <option value="all">Todos</option>
-              @for (user of users; track user.nCarnet) {
+              @for (user of users(); track user.nCarnet) {
                 <option [value]="user.nCarnet">{{ user.name }} {{ user.lastName }} ({{ user.nCarnet }})</option>
               }
             </select>
@@ -118,7 +118,7 @@
             <label>Convocatoria</label>
             <select [value]="filters().convoId" (change)="updateFilterField('convoId', $any($event.target).value)">
               <option value="all">Todas</option>
-              @for (convo of convocatorias; track convo.id) {
+              @for (convo of convocatorias(); track convo.id) {
                 <option [value]="convo.id">{{ convo.title }}</option>
               }
             </select>
@@ -151,7 +151,7 @@
               name="convo"
             >
               <option [value]="undefined">Selecciona una convocatoria</option>
-              @for (convo of convocatorias; track convo.id) {
+              @for (convo of convocatorias(); track convo.id) {
                 <option [value]="convo.id">{{ convo.title }}</option>
               }
             </select>
@@ -166,7 +166,7 @@
               name="user"
             >
               <option [value]="''">Selecciona un usuario</option>
-              @for (user of users; track user.nCarnet) {
+              @for (user of users(); track user.nCarnet) {
                 <option [value]="user.nCarnet">{{ user.name }} {{ user.lastName }} ({{ user.nCarnet }})</option>
               }
             </select>

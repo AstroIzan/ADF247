@@ -9,11 +9,11 @@
     </div>
   </div>
 
-  @if (error) {
-    <div class="error-alert">{{ error }}</div>
+  @if (error()) {
+    <div class="error-alert">{{ error() }}</div>
   }
 
-  @if (loading) {
+  @if (loading()) {
     <div class="loading">Cargando usuarios...</div>
   } @else if (filteredUsers().length > 0) {
     <div class="table-responsive">

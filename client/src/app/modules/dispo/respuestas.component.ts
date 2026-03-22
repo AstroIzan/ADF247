@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Respuesta, Convocatoria, User } from '../../services/data.service';
@@ -11,11 +11,11 @@ import { DataService, Respuesta, Convocatoria, User } from '../../services/data.
   styleUrl: './respuestas.component.css'
 })
 export class RespuestasComponent {
-  @Input() respuestas: Respuesta[] = [];
-  @Input() convocatorias: Convocatoria[] = [];
-  @Input() users: User[] = [];
-  @Input() loading = false;
-  @Input() error = '';
+  respuestas = input<Respuesta[]>([]);
+  convocatorias = input<Convocatoria[]>([]);
+  users = input<User[]>([]);
+  loading = input(false);
+  error = input('');
   @Output() onChanged = new EventEmitter<void>();
 
   showForm = signal(false);
@@ -44,7 +44,7 @@ export class RespuestasComponent {
   filteredRespuestas = computed(() => {
     const activeFilters = this.filters();
 
-    return this.respuestas.filter((respuesta) => {
+    return this.respuestas().filter((respuesta) => {
       const matchesResponse =
         activeFilters.response === 'all' ||
         (activeFilters.response === 'yes' ? respuesta.response : !respuesta.response);
@@ -183,13 +183,13 @@ export class RespuestasComponent {
 
   getConvoTitle(convoId?: number): string {
     if (!convoId) return '-';
-    const convo = this.convocatorias.find((c) => c.id === convoId);
+    const convo = this.convocatorias().find((c) => c.id === convoId);
     return convo ? convo.title : '-';
   }
 
   getUserName(nCarnet?: string): string {
     if (!nCarnet) return '-';
-    const user = this.users.find((u) => u.nCarnet === nCarnet);
+    const user = this.users().find((u) => u.nCarnet === nCarnet);
     return user ? `${user.name} ${user.lastName || ''}` : nCarnet;
   }
 }
