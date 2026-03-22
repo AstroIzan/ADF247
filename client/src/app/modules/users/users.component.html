@@ -1,0 +1,246 @@
+<div class="users-container">
+  <div class="users-header">
+    <h2>Gestion de Usuarios</h2>
+    <div class="header-actions">
+      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de usuarios">
+        <span class="filter-icon" aria-hidden="true"></span>
+      </button>
+      <button (click)="openForm()" class="btn btn-primary">+ Nuevo Usuario</button>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-alert">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading">Cargando usuarios...</div>
+  } @else if (filteredUsers().length > 0) {
+    <div class="table-responsive">
+      <table class="users-table">
+        <thead>
+          <tr>
+            <th>N Carnet</th>
+            <th>Indicativo</th>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Roles</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (user of filteredUsers(); track user.id) {
+            <tr>
+              <td>{{ user.nCarnet }}</td>
+              <td>{{ user.nIndicatiu || '-' }}</td>
+              <td>{{ user.name }}</td>
+              <td>{{ user.lastName || '-' }}</td>
+              <td>
+                @if (getRoleLabels(user).length === 0) {
+                  <span>-</span>
+                } @else {
+                  <div class="role-chips">
+                    @for (label of getRoleLabels(user); track label) {
+                      <span class="role-chip">{{ label }}</span>
+                    }
+                  </div>
+                }
+              </td>
+              <td>
+                <span [class]="user.isActive ? 'badge-active' : 'badge-inactive'">
+                  {{ user.isActive ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button (click)="openForm(user)" class="btn btn-sm btn-edit">Editar</button>
+                @if (deleteConfirming() === user.id) {
+                  <button (click)="deleteUser(user.id)" class="btn btn-sm btn-danger">Confirmar</button>
+                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancelar</button>
+                } @else {
+                  <button (click)="deleteUser(user.id)" class="btn btn-sm btn-danger">Eliminar</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">No hay usuarios con los filtros aplicados</div>
+  }
+
+  @if (showFilters()) {
+    <div class="modal-overlay" (click)="closeFilters()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Filtros de Usuarios</h3>
+          <button (click)="closeFilters()" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Permiso</label>
+            <select [value]="filters().role" (change)="updateFilterField('role', $any($event.target).value)">
+              <option value="all">Todos</option>
+              <option value="isAdmin">Admin</option>
+              <option value="isCapOperatiu">Cap Operatiu</option>
+              <option value="isCapColla">Cap Colla</option>
+              <option value="isGroc">Groc</option>
+              <option value="none">Sin permisos</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Nombre</label>
+            <input type="text" [value]="filters().name" (input)="updateFilterField('name', $any($event.target).value)" placeholder="Nombre o apellido" />
+          </div>
+
+          <div class="form-group">
+            <label>Indicativo</label>
+            <input type="text" [value]="filters().nIndicatiu" (input)="updateFilterField('nIndicatiu', $any($event.target).value)" placeholder="Ej: BR-12" />
+          </div>
+
+          <div class="form-group">
+            <label>Numero de carnet</label>
+            <input type="text" [value]="filters().nCarnet" (input)="updateFilterField('nCarnet', $any($event.target).value)" placeholder="Ej: 247001" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="resetFilters()" class="btn btn-secondary">Limpiar</button>
+          <button (click)="closeFilters()" class="btn btn-primary">Aplicar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="modal-overlay" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingId() ? 'Editar Usuario' : 'Nuevo Usuario' }}</h3>
+          <button (click)="closeForm()" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>N Carnet *</label>
+            <input
+              type="text"
+              [value]="formData().nCarnet || ''"
+              (change)="updateFormField('nCarnet', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Indicativo</label>
+            <input
+              type="text"
+              [value]="formData().nIndicatiu || ''"
+              (change)="updateFormField('nIndicatiu', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Nombre *</label>
+            <input
+              type="text"
+              [value]="formData().name || ''"
+              (change)="updateFormField('name', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Apellido</label>
+            <input
+              type="text"
+              [value]="formData().lastName || ''"
+              (change)="updateFormField('lastName', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          @if (!editingId()) {
+            <div class="form-group">
+              <label>Contrasena *</label>
+              <input
+                type="password"
+                [value]="formData().password || ''"
+                (change)="updateFormField('password', $any($event.target).value)"
+                [disabled]="formSubmitting()"
+              />
+            </div>
+          }
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="formData().isActive"
+                (change)="updateFormField('isActive', $any($event.target).checked)"
+                [disabled]="formSubmitting()"
+              />
+              Activo
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Roles</label>
+            <div class="roles-grid">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isAdmin"
+                  (change)="updateRoleField('isAdmin', $any($event.target).checked)"
+                  [disabled]="formSubmitting()"
+                />
+                Admin
+              </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isGroc"
+                  (change)="updateRoleField('isGroc', $any($event.target).checked)"
+                  [disabled]="formSubmitting()"
+                />
+                Groc
+              </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isCapColla"
+                  (change)="updateRoleField('isCapColla', $any($event.target).checked)"
+                  [disabled]="formSubmitting()"
+                />
+                Cap Colla
+              </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isCapOperatiu"
+                  (change)="updateRoleField('isCapOperatiu', $any($event.target).checked)"
+                  [disabled]="formSubmitting()"
+                />
+                Cap Operatiu
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancelar</button>
+          <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
+            {{ formSubmitting() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

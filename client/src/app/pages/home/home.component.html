@@ -1,0 +1,233 @@
+<div class="home-container">
+  <header class="home-header">
+    <div class="home-header-left">
+      <h1>Inicio</h1>
+      <p>Selecciona una fecha y revisa las convocatorias del dia.</p>
+    </div>
+  </header>
+
+  <section class="home-grid">
+    <article class="calendar-card">
+      <h2>Calendario</h2>
+      <div class="calendar-widget">
+        <div class="calendar-toolbar">
+          <button type="button" class="month-btn" (click)="previousMonth()">&lt;</button>
+          <h3>{{ monthLabel() }}</h3>
+          <button type="button" class="month-btn" (click)="nextMonth()">&gt;</button>
+        </div>
+
+        <div class="weekdays">
+          @for (day of weekDays; track day) {
+            <span>{{ day }}</span>
+          }
+        </div>
+
+        <div class="days-grid">
+          @for (cell of calendarDays(); track cell.key) {
+            @let daySummary = getDaySummary(cell.key);
+            <button
+              type="button"
+              class="day-cell"
+              [class.out-month]="!cell.inCurrentMonth"
+              [class.selected]="cell.isSelected"
+              [class.today]="cell.isToday"
+              (click)="selectCalendarDate(cell.date)"
+            >
+              <span class="day-number">{{ cell.date.getDate() }}</span>
+
+              @if (daySummary.total > 0) {
+                <span class="day-markers" title="{{ daySummary.responded }} respondidas / {{ daySummary.pending }} pendientes">
+                  @if (daySummary.responded > 0) {
+                    <span class="marker marker-answered"></span>
+                  }
+                  @if (daySummary.pending > 0) {
+                    <span class="marker marker-pending"></span>
+                  }
+                </span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+    </article>
+
+    <article class="convos-card">
+      <h2>Convocatorias del dia</h2>
+
+      @if (loading()) {
+        <div class="loading">Cargando convocatorias...</div>
+      } @else if (error()) {
+        <div class="error-alert">{{ error() }}</div>
+      } @else if (dayConvos().length === 0) {
+        <div class="empty-state">No hay convocatorias para este dia.</div>
+      } @else {
+        <ul class="convos-list">
+          @for (convo of dayConvos(); track convo.id) {
+            @let roleSummary = getConvocatoriaRoleSummary(convo.id);
+            <li>
+              <div class="convo-top">
+                <h3>{{ convo.title }}</h3>
+                <span
+                  class="answer-status"
+                  [class.available]="getMyRespuesta(convo.id)?.response === true"
+                  [class.unavailable]="getMyRespuesta(convo.id)?.response === false"
+                >
+                  {{ getMyRespuestaLabel(convo.id) }}
+                </span>
+              </div>
+              <p><strong>Tipo:</strong> {{ convo.convoType?.name || convo.convoTypeId }}</p>
+              <p><strong>Ubicacion:</strong> {{ convo.ubiSortida }}</p>
+              <p><strong>Inicio:</strong> {{ convo.startTime | date:'shortTime' }}</p>
+              @if (convo.finalTime) {
+                <p><strong>Fin:</strong> {{ convo.finalTime | date:'shortTime' }}</p>
+              }
+
+              <div class="convo-bottom-row">
+                @if (getMyRespuesta(convo.id); as myRespuesta) {
+                  <div class="answer-actions answer-actions-answered">
+                    <button
+                      type="button"
+                      class="btn btn-edit btn-xs"
+                      [disabled]="respondingConvoId() === convo.id"
+                      (click)="openCustomModal(convo)"
+                    >
+                      Modificar
+                    </button>
+                  </div>
+                } @else {
+                  <div class="answer-actions">
+                    <button
+                      type="button"
+                      class="btn btn-primary btn-sm"
+                      [disabled]="respondingConvoId() === convo.id"
+                      (click)="respondToConvocatoria(convo.id, true)"
+                    >
+                      ACEPTAR
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-sm"
+                      [disabled]="respondingConvoId() === convo.id"
+                      (click)="respondToConvocatoria(convo.id, false)"
+                    >
+                      DENEGAR
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-edit btn-sm"
+                      [disabled]="respondingConvoId() === convo.id"
+                      (click)="openCustomModal(convo)"
+                    >
+                      PERSONALIZAR
+                    </button>
+                  </div>
+                }
+
+                <div class="convo-response-counters">
+                  <span class="response-counter response-counter-green" title="No groc">
+                    {{ roleSummary.noGroc }}
+                  </span>
+                  <span class="response-counter response-counter-yellow" title="Groc">
+                    {{ roleSummary.groc }}
+                  </span>
+                </div>
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </article>
+  </section>
+
+  @if (showCustomModal() && customConvo()) {
+    <div class="modal-overlay" (click)="closeCustomModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Respuesta personalizada</h3>
+          <button class="close-btn" (click)="closeCustomModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Convocatoria:</strong> {{ customConvo()!.title }}</p>
+          <p><strong>Ubicacion:</strong> {{ customConvo()!.ubiSortida }}</p>
+          <p><strong>Fecha:</strong> {{ customConvo()!.date | date:'fullDate' }}</p>
+          <p><strong>Opciones custom:</strong> disponibilidad, horario completo y nota personalizada.</p>
+
+          <div class="form-group">
+            <label>Disponibilidad</label>
+            <div class="custom-choice-row">
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.choice-active]="customResponse().response"
+                (click)="updateCustomField('response', true)"
+              >
+                Si puedo
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.choice-active]="!customResponse().response"
+                (click)="updateCustomField('response', false)"
+              >
+                No puedo
+              </button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="customResponse().fullHorari"
+                (change)="updateCustomField('fullHorari', $any($event.target).checked)"
+              />
+              Disponible todo el horario
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label>Horario custom (opcional)</label>
+            <div class="time-range-row">
+              <input
+                type="time"
+                [value]="customResponse().customStartTime"
+                (input)="updateCustomField('customStartTime', $any($event.target).value)"
+              />
+              <span>a</span>
+              <input
+                type="time"
+                [value]="customResponse().customEndTime"
+                (input)="updateCustomField('customEndTime', $any($event.target).value)"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Comentario personalizado (opcional)</label>
+            <textarea
+              rows="4"
+              [value]="customResponse().customText"
+              (input)="updateCustomField('customText', $any($event.target).value)"
+              placeholder="Escribe un comentario breve..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          @if (hasExistingResponseForCustomConvo()) {
+            <button
+              class="btn btn-danger"
+              [disabled]="respondingConvoId() === customConvo()!.id"
+              (click)="deleteCustomResponse()"
+            >
+              Eliminar respuesta
+            </button>
+          }
+          <button class="btn btn-secondary" (click)="closeCustomModal()">Cancelar</button>
+          <button class="btn btn-primary" (click)="saveCustomResponse()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

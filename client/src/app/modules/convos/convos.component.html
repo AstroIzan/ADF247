@@ -1,0 +1,250 @@
+<div class="convos-container">
+  <div class="convos-header">
+    <h2>Gestion de Convocatorias</h2>
+    <div class="header-actions">
+      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de convocatorias">
+        <span class="filter-icon" aria-hidden="true"></span>
+      </button>
+      <button (click)="openForm()" class="btn btn-primary">+ Nueva Convocatoria</button>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-alert">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading">Cargando convocatorias...</div>
+  } @else if (filteredConvocatorias().length > 0) {
+    <div class="table-responsive">
+      <table class="convos-table">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Titulo</th>
+            <th>Tipo</th>
+            <th>Ubicacion</th>
+            <th>Responsable</th>
+            <th>Respuestas</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (convo of filteredConvocatorias(); track convo.id) {
+            <tr>
+              <td>{{ formatDate(convo.date) }}</td>
+              <td>{{ convo.title }}</td>
+              <td>{{ getConvoTypeName(convo.convoTypeId) }}</td>
+              <td>{{ convo.ubiSortida }}</td>
+              <td>{{ getUserName(convo.responsableId) }}</td>
+              <td>{{ convo._count?.respostas || 0 }}</td>
+              <td>
+                <span [class]="convo.isActive ? 'badge-active' : 'badge-inactive'">
+                  {{ convo.isActive ? 'Activa' : 'Inactiva' }}
+                </span>
+              </td>
+              <td class="actions">
+                <button (click)="openForm(convo)" class="btn btn-sm btn-edit">Editar</button>
+                @if (deleteConfirming() === convo.id) {
+                  <button (click)="deleteConvocatoria(convo.id)" class="btn btn-sm btn-danger">Confirmar</button>
+                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancelar</button>
+                } @else {
+                  <button (click)="deleteConvocatoria(convo.id)" class="btn btn-sm btn-danger">Eliminar</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  } @else {
+    <div class="empty-state">No hay convocatorias con los filtros aplicados</div>
+  }
+
+  @if (showFilters()) {
+    <div class="modal-overlay" (click)="closeFilters()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Filtros de Convocatorias</h3>
+          <button (click)="closeFilters()" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Titulo</label>
+            <input type="text" [value]="filters().title" (input)="updateFilterField('title', $any($event.target).value)" placeholder="Buscar por titulo" />
+          </div>
+
+          <div class="form-group">
+            <label>Tipo de convocatoria</label>
+            <select [value]="filters().convoTypeId" (change)="updateFilterField('convoTypeId', $any($event.target).value)">
+              <option value="all">Todos</option>
+              @for (type of convoTypes; track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Responsable</label>
+            <select [value]="filters().responsableId" (change)="updateFilterField('responsableId', $any($event.target).value)">
+              <option value="all">Todos</option>
+              @for (user of users; track user.id) {
+                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Estado</label>
+            <select [value]="filters().status" (change)="updateFilterField('status', $any($event.target).value)">
+              <option value="all">Todos</option>
+              <option value="active">Activas</option>
+              <option value="inactive">Inactivas</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Fecha desde</label>
+            <input type="date" [value]="filters().dateFrom" (change)="updateFilterField('dateFrom', $any($event.target).value)" />
+          </div>
+
+          <div class="form-group">
+            <label>Fecha hasta</label>
+            <input type="date" [value]="filters().dateTo" (change)="updateFilterField('dateTo', $any($event.target).value)" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="resetFilters()" class="btn btn-secondary">Limpiar</button>
+          <button (click)="closeFilters()" class="btn btn-primary">Aplicar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showForm()) {
+    <div class="modal-overlay" (click)="closeForm()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>{{ editingId() ? 'Editar Convocatoria' : 'Nueva Convocatoria' }}</h3>
+          <button (click)="closeForm()" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Fecha *</label>
+            <input
+              type="datetime-local"
+              [value]="formData().date || ''"
+              (change)="updateFormField('date', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Titulo *</label>
+            <input
+              type="text"
+              [value]="formData().title || ''"
+              (change)="updateFormField('title', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Tipo de Convocatoria *</label>
+            <select
+              [(ngModel)]="formData().convoTypeId"
+              (change)="updateFormField('convoTypeId', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+              name="convoType"
+            >
+              <option [value]="undefined">Selecciona un tipo</option>
+              @for (type of convoTypes; track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Ubicacion Salida</label>
+            <input
+              type="text"
+              [value]="formData().ubiSortida || ''"
+              (change)="updateFormField('ubiSortida', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Responsable *</label>
+            <select
+              [(ngModel)]="formData().responsableId"
+              (change)="updateFormField('responsableId', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+              name="responsable"
+            >
+              <option [value]="undefined">Selecciona un responsable</option>
+              @for (user of users; track user.id) {
+                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Hora de Inicio</label>
+            <input
+              type="time"
+              [value]="formData().startTime || ''"
+              (change)="updateFormField('startTime', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Hora de Fin</label>
+            <input
+              type="time"
+              [value]="formData().finalTime || ''"
+              (change)="updateFormField('finalTime', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="formData().moreThan2"
+                (change)="updateFormField('moreThan2', $any($event.target).checked)"
+                [disabled]="formSubmitting()"
+              />
+              Mas de 2 participantes
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="formData().isActive"
+                (change)="updateFormField('isActive', $any($event.target).checked)"
+                [disabled]="formSubmitting()"
+              />
+              Activa
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancelar</button>
+          <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
+            {{ formSubmitting() ? 'Guardando...' : 'Guardar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

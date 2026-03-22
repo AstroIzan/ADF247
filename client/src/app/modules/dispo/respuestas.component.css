@@ -1,0 +1,49 @@
+.respuestas-container {
+  padding: 8px;
+}
+
+.respuestas-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.respuestas-header h2 {
+  margin: 0;
+  font-size: clamp(20px, 2.6vw, 28px);
+  color: #222;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.icon-filter-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border-radius: 10px;
+  background: #4d4d4d;
+  color: #fff;
+}
+
+.filter-icon {
+  width: 14px;
+  height: 14px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 0, 62% 46%, 62% 100%, 38% 100%, 38% 46%);
+}
+
+.actions {
+  white-space: nowrap;
+  display: flex;
+  gap: 6px;
+}

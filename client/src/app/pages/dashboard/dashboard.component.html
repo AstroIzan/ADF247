@@ -1,0 +1,98 @@
+<div class="dashboard-container">
+  <div class="dashboard-content">
+    <section class="dashboard-title">
+      <h1>ADF247 Dashboard</h1>
+      <p>Vista operativa para gestionar todo el flujo diario</p>
+    </section>
+
+    <section class="quick-stats">
+      <article>
+        <h3>Usuarios</h3>
+        <strong>{{ users().length }}</strong>
+      </article>
+      <article>
+        <h3>Convocatorias</h3>
+        <strong>{{ convocatorias().length }}</strong>
+      </article>
+      <article>
+        <h3>Tipos</h3>
+        <strong>{{ convoTypes().length }}</strong>
+      </article>
+      <article>
+        <h3>Respuestas</h3>
+        <strong>{{ respuestas().length }}</strong>
+      </article>
+    </section>
+
+    <nav class="tabs-navigation">
+      <button 
+        (click)="activeTab.set('users')"
+        [class.active]="activeTab() === 'users'"
+        class="tab-btn"
+      >
+        👥 Usuarios
+      </button>
+      <button 
+        (click)="activeTab.set('convos')"
+        [class.active]="activeTab() === 'convos'"
+        class="tab-btn"
+      >
+        📋 Convocatorias
+      </button>
+      <button 
+        (click)="activeTab.set('convo-types')"
+        [class.active]="activeTab() === 'convo-types'"
+        class="tab-btn"
+      >
+        🏷️ Tipos de Convocatoria
+      </button>
+      <button 
+        (click)="activeTab.set('respuestas')"
+        [class.active]="activeTab() === 'respuestas'"
+        class="tab-btn"
+      >
+        ✅ Respuestas / Disponibilidad
+      </button>
+    </nav>
+
+    <div class="tab-content">
+      @if (activeTab() === 'users') {
+        <app-users 
+          [users]="users()"
+          [loading]="loadingUsers()"
+          [error]="userError()"
+          (onChanged)="onUserChanged()"
+        ></app-users>
+      }
+
+      @if (activeTab() === 'convos') {
+        <app-convos 
+          [convocatorias]="convocatorias()"
+          [convoTypes]="convoTypes()"
+          [loading]="loadingConvos()"
+          [error]="convoError()"
+          [users]="users()"
+          (onChanged)="onConvoChanged()"
+        ></app-convos>
+      }
+
+      @if (activeTab() === 'convo-types') {
+        <app-convo-types 
+          [convoTypes]="convoTypes()"
+          (onChanged)="loadConvoTypes()"
+        ></app-convo-types>
+      }
+
+      @if (activeTab() === 'respuestas') {
+        <app-respuestas 
+          [respuestas]="respuestas()"
+          [convocatorias]="convocatorias()"
+          [users]="users()"
+          [loading]="loadingRespuestas()"
+          [error]="respuestaError()"
+          (onChanged)="onRespuestaChanged()"
+        ></app-respuestas>
+      }
+    </div>
+  </div>
+</div>

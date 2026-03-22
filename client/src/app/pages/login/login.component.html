@@ -1,0 +1,61 @@
+<div class="login-container">
+  <section class="login-shell">
+    <aside class="login-brand">
+      <p class="kicker">ADF247</p>
+      <h1>Panel de Guardia</h1>
+      <p class="lead">
+        Gestiona usuarios, convocatorias y disponibilidades desde una interfaz limpia,
+        rápida y orientada al trabajo diario.
+      </p>
+      <div class="brand-pills">
+        <span>Control</span>
+        <span>Rapidez</span>
+        <span>Seguridad</span>
+      </div>
+    </aside>
+
+    <div class="login-box">
+      <h2>Iniciar Sesion</h2>
+
+      <form (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="nCarnet">Numero de carnet</label>
+          <input
+            type="text"
+            id="nCarnet"
+            [(ngModel)]="nCarnet"
+            name="nCarnet"
+            placeholder="Ej: 247/GI/225"
+            required
+            [disabled]="loading()"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="password">Contrasena</label>
+          <input
+            type="password"
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Introduce tu contrasena"
+            required
+            [disabled]="loading()"
+          />
+        </div>
+
+        @if (errorMessage()) {
+          <div class="error-message">{{ errorMessage() }}</div>
+        }
+
+        <button
+          type="submit"
+          class="login-btn"
+          [disabled]="loading()"
+        >
+          {{ loading() ? 'Conectando...' : 'Entrar al panel' }}
+        </button>
+      </form>
+    </div>
+  </section>
+</div>
