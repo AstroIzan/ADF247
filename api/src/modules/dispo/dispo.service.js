@@ -5,6 +5,7 @@ const {
   createDispoDtoError,
   mapRespuestaToDto,
 } = require('./dispo.dto')
+const { recalculateAutoAssignedResponsable } = require('../convos/convos.service')
 
 const respuestaInclude = {
   convocatoria: true,
@@ -173,6 +174,8 @@ async function createRespuesta(payload) {
       include: respuestaInclude,
     })
 
+    await recalculateAutoAssignedResponsable(respuesta.convoId)
+
     return mapRespuestaToDto(respuesta)
   } catch (error) {
     throw mapPrismaError(error)
@@ -221,6 +224,8 @@ async function updateRespuesta(id, payload) {
       include: respuestaInclude,
     })
 
+    await recalculateAutoAssignedResponsable(respuesta.convoId)
+
     return mapRespuestaToDto(respuesta)
   } catch (error) {
     throw mapPrismaError(error)
@@ -228,13 +233,15 @@ async function updateRespuesta(id, payload) {
 }
 
 async function deleteRespuesta(id) {
-  await findRespuestaOrThrow(id)
+  const existing = await findRespuestaOrThrow(id)
 
   try {
     const respuesta = await database.respuesta.delete({
       where: { id },
       include: respuestaInclude,
     })
+
+    await recalculateAutoAssignedResponsable(existing.convoId)
 
     return mapRespuestaToDto(respuesta)
   } catch (error) {

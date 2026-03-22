@@ -5,6 +5,7 @@ datasource db {
 
 generator client {
   provider = "prisma-client-js"
+  output   = "../generated/client"
 }
 
 model User {
@@ -34,8 +35,11 @@ model Role {
 }
 
 model ConvoType {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id              Int     @id @default(autoincrement())
+  name            String  @unique
+  minGrocSortida  Int     @default(0)
+  minVerdSortida  Int     @default(0)
+  defaultLocation String?
 
   convocatories Convocatoria[]
 }
@@ -53,6 +57,8 @@ model Convocatoria {
   startTime     DateTime
   finalTime     DateTime?
   isActive      Boolean   @default(true)
+  autoAssignResponsable Boolean @default(false)
+  sortida       Boolean   @default(false)
 
   respostas Respuesta[]
 }

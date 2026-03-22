@@ -72,7 +72,7 @@
           [loading]="loadingConvos()"
           [error]="convoError()"
           [users]="users()"
-          (onChanged)="onConvoChanged()"
+          (onChanged)="onConvoChanged($event)"
         ></app-convos>
       }
 

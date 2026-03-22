@@ -23,6 +23,9 @@ export interface User {
 export interface ConvoType {
   id: number;
   name: string;
+  minGrocSortida: number;
+  minVerdSortida: number;
+  defaultLocation?: string | null;
 }
 
 export interface Convocatoria {
@@ -36,6 +39,9 @@ export interface Convocatoria {
   finalTime?: string;
   moreThan2: boolean;
   isActive: boolean;
+  autoAssignResponsable: boolean;
+  sortida: boolean;
+  responseCount?: number;
   user?: User;
   convoType?: ConvoType;
   _count?: {

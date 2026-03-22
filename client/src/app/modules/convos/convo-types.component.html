@@ -16,6 +16,8 @@
           <div class="type-info">
             <h4>{{ type.name }}</h4>
             <small>ID: {{ type.id }}</small>
+            <small>Min. groc: {{ type.minGrocSortida || 0 }} | Min. verd: {{ type.minVerdSortida || 0 }}</small>
+            <small>Ubicacion por defecto: {{ type.defaultLocation || '-' }}</small>
           </div>
           <div class="type-actions">
             <button (click)="openForm(type)" class="btn btn-sm btn-edit">Editar</button>
@@ -78,6 +80,41 @@
               (change)="updateFormField('name', $any($event.target).value)"
               [disabled]="formSubmitting()"
               placeholder="Ej: Intervencion, Despliegue, Formacion..."
+            />
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Minimo groc para sortida</label>
+              <input
+                type="number"
+                min="0"
+                [value]="formData().minGrocSortida ?? 0"
+                (change)="updateFormField('minGrocSortida', $any($event.target).valueAsNumber)"
+                [disabled]="formSubmitting()"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Minimo verd para sortida</label>
+              <input
+                type="number"
+                min="0"
+                [value]="formData().minVerdSortida ?? 0"
+                (change)="updateFormField('minVerdSortida', $any($event.target).valueAsNumber)"
+                [disabled]="formSubmitting()"
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Ubicacion por defecto</label>
+            <input
+              type="text"
+              [value]="formData().defaultLocation || ''"
+              (change)="updateFormField('defaultLocation', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+              placeholder="Ej: Brigadas"
             />
           </div>
         </div>

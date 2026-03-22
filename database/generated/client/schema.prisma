@@ -1,0 +1,76 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/client"
+}
+
+model User {
+  id         Int      @id @default(autoincrement())
+  nCarnet    String   @unique
+  nIndicatiu String?
+  name       String
+  lastName   String?
+  password   String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  roles         Role[]
+  convocatories Convocatoria[] @relation("ConvocatoriaResponsable")
+  respostas     Respuesta[]
+}
+
+model Role {
+  id            Int     @id @default(autoincrement())
+  nCarnet       String
+  user          User    @relation(fields: [nCarnet], references: [nCarnet])
+  isCapOperatiu Boolean @default(false)
+  isCapColla    Boolean @default(false)
+  isAdmin       Boolean @default(false)
+  isGroc        Boolean @default(false)
+}
+
+model ConvoType {
+  id              Int     @id @default(autoincrement())
+  name            String  @unique
+  minGrocSortida  Int     @default(0)
+  minVerdSortida  Int     @default(0)
+  defaultLocation String?
+
+  convocatories Convocatoria[]
+}
+
+model Convocatoria {
+  id                    Int       @id @default(autoincrement())
+  date                  DateTime
+  title                 String
+  ubiSortida            String
+  responsableId         Int
+  user                  User      @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
+  convoTypeId           Int
+  convoType             ConvoType @relation(fields: [convoTypeId], references: [id])
+  moreThan2             Boolean   @default(false)
+  startTime             DateTime
+  finalTime             DateTime?
+  isActive              Boolean   @default(true)
+  autoAssignResponsable Boolean   @default(false)
+  sortida               Boolean   @default(false)
+
+  respostas Respuesta[]
+}
+
+model Respuesta {
+  id           Int          @id @default(autoincrement())
+  convoId      Int
+  convocatoria Convocatoria @relation(fields: [convoId], references: [id])
+  userNCarnet  String
+  user         User         @relation(fields: [userNCarnet], references: [nCarnet])
+  isCustom     Boolean      @default(false)
+  customText   String?
+  fullHorari   Boolean      @default(false)
+  response     Boolean
+}

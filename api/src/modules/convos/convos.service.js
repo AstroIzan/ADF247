@@ -19,6 +19,14 @@ const convocatoriaInclude = {
   },
 }
 
+const autoAssignCandidateInclude = {
+  user: {
+    include: {
+      roles: true,
+    },
+  },
+}
+
 function createServiceError(message, statusCode = 500, details) {
   const error = new Error(message)
   error.statusCode = statusCode
@@ -79,6 +87,46 @@ async function ensureConvoTypeExists(convoTypeId) {
 
 function getDefaultConvocatoriaTitle(convoTypeName, date) {
   return `${convoTypeName} - ${date.toISOString().slice(0, 10)}`
+}
+
+function getDefaultLocationForConvoType(convoType) {
+  if (convoType?.defaultLocation) {
+    return convoType.defaultLocation
+  }
+
+  if (/guardia|incendi/i.test(convoType?.name || '')) {
+    return 'Brigadas'
+  }
+
+  return null
+}
+
+function getUserPriority(user) {
+  const role = Array.isArray(user?.roles) ? user.roles[0] : null
+
+  if (role?.isCapOperatiu) return 0
+  if (role?.isCapColla) return 1
+  if (role?.isGroc) return 2
+  return 3
+}
+
+function shouldMarkSortida(convoType, positiveResponses) {
+  const minimumGroc = convoType?.minGrocSortida ?? 0
+  const minimumVerd = convoType?.minVerdSortida ?? 0
+
+  const counts = positiveResponses.reduce((acc, respuesta) => {
+    const role = Array.isArray(respuesta.user?.roles) ? respuesta.user.roles[0] : null
+
+    if (role?.isGroc) {
+      acc.groc += 1
+    } else {
+      acc.verd += 1
+    }
+
+    return acc
+  }, { groc: 0, verd: 0 })
+
+  return counts.groc >= minimumGroc && counts.verd >= minimumVerd
 }
 
 function mapPrismaError(error) {
@@ -180,9 +228,15 @@ async function createConvocatoria(payload) {
   await ensureConvoTypeExists(createDto.convoTypeId)
 
   const convoType = await findConvoTypeOrThrow(createDto.convoTypeId)
+  const resolvedLocation = createDto.ubiSortida || getDefaultLocationForConvoType(convoType)
+
+  if (!resolvedLocation) {
+    throw createConvosDtoError('El campo "ubiSortida" es obligatorio.')
+  }
 
   const data = {
     ...createDto,
+    ubiSortida: resolvedLocation,
     title: createDto.title || getDefaultConvocatoriaTitle(convoType.name, createDto.date),
   }
 
@@ -210,6 +264,16 @@ async function updateConvocatoria(id, payload) {
     await ensureConvoTypeExists(updateDto.convoTypeId)
   }
 
+  if (updateDto.ubiSortida === undefined) {
+    const finalConvoTypeId = updateDto.convoTypeId ?? existingConvocatoria.convoTypeId
+    const convoType = await findConvoTypeOrThrow(finalConvoTypeId)
+    const defaultLocation = getDefaultLocationForConvoType(convoType)
+
+    if (!existingConvocatoria.ubiSortida && defaultLocation) {
+      updateDto.ubiSortida = defaultLocation
+    }
+  }
+
   const finalStartTime = updateDto.startTime ?? existingConvocatoria.startTime
   const finalTimeSent = Object.prototype.hasOwnProperty.call(updateDto, 'finalTime')
   const finalFinalTime = finalTimeSent ? updateDto.finalTime : existingConvocatoria.finalTime
@@ -224,6 +288,11 @@ async function updateConvocatoria(id, payload) {
       data: updateDto,
       include: convocatoriaInclude,
     })
+
+    if (convocatoria.autoAssignResponsable) {
+      await recalculateAutoAssignedResponsable(convocatoria.id)
+      return getConvocatoriaById(convocatoria.id)
+    }
 
     return mapConvocatoriaToDto(convocatoria)
   } catch (error) {
@@ -246,6 +315,98 @@ async function deleteConvocatoria(id) {
   }
 }
 
+async function recalculateAutoAssignedResponsable(convoId) {
+  const convocatoria = await database.convocatoria.findUnique({
+    where: { id: convoId },
+    include: {
+      convoType: true,
+    },
+  })
+
+  if (!convocatoria?.autoAssignResponsable) {
+    return convocatoria
+  }
+
+  const positiveResponses = await database.respuesta.findMany({
+    where: {
+      convoId,
+      response: true,
+      user: {
+        isActive: true,
+      },
+    },
+    include: autoAssignCandidateInclude,
+  })
+
+  const sortedCandidates = positiveResponses
+    .filter((respuesta) => respuesta.user)
+    .sort((left, right) => {
+      const priorityDiff = getUserPriority(left.user) - getUserPriority(right.user)
+
+      if (priorityDiff !== 0) {
+        return priorityDiff
+      }
+
+      return new Date(left.user.createdAt).getTime() - new Date(right.user.createdAt).getTime()
+    })
+
+  const selectedCandidate = sortedCandidates[0]?.user
+
+  if (!selectedCandidate || selectedCandidate.id === convocatoria.responsableId) {
+    return convocatoria
+  }
+
+  return database.convocatoria.update({
+    where: { id: convoId },
+    data: {
+      responsableId: selectedCandidate.id,
+    },
+    include: convocatoriaInclude,
+  })
+}
+
+async function updateSortidaForTomorrow(referenceDate = new Date()) {
+  const startOfTomorrow = new Date(referenceDate)
+  startOfTomorrow.setHours(0, 0, 0, 0)
+  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1)
+
+  const endOfTomorrow = new Date(startOfTomorrow)
+  endOfTomorrow.setDate(endOfTomorrow.getDate() + 1)
+
+  const convocatorias = await database.convocatoria.findMany({
+    where: {
+      date: {
+        gte: startOfTomorrow,
+        lt: endOfTomorrow,
+      },
+      isActive: true,
+    },
+    include: {
+      convoType: true,
+      respostas: {
+        where: {
+          response: true,
+          user: {
+            isActive: true,
+          },
+        },
+        include: autoAssignCandidateInclude,
+      },
+    },
+  })
+
+  await Promise.all(convocatorias.map((convocatoria) => {
+    const nextSortida = shouldMarkSortida(convocatoria.convoType, convocatoria.respostas || [])
+
+    return database.convocatoria.update({
+      where: { id: convocatoria.id },
+      data: {
+        sortida: convocatoria.sortida || nextSortida,
+      },
+    })
+  }))
+}
+
 module.exports = {
   createConvocatoria,
   createConvoType,
@@ -257,6 +418,8 @@ module.exports = {
   getConvocatoriaById,
   getConvoTypeById,
   mapPrismaError,
+  recalculateAutoAssignedResponsable,
+  updateSortidaForTomorrow,
   updateConvocatoria,
   updateConvoType,
 }

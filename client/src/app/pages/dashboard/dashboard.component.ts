@@ -129,9 +129,27 @@ export class DashboardComponent implements OnInit {
     this.loadUsers();
   }
 
-  onConvoChanged() {
-    this.loadConvocatorias();
-    this.loadConvoTypes();
+  onConvoChanged(convo: any) {
+    // Si convo es null, es un delete, hacer reload completo
+    if (!convo) {
+      this.loadConvocatorias();
+      this.loadConvoTypes();
+      return;
+    }
+
+    // Para update/create, actualizar el array local
+    const currentConvos = this.convocatorias();
+    const existingIndex = currentConvos.findIndex(c => c.id === convo.id);
+
+    if (existingIndex >= 0) {
+      // Es un update, reemplazar en el array
+      const updated = [...currentConvos];
+      updated[existingIndex] = convo;
+      this.convocatorias.set(updated);
+    } else {
+      // Es un create, añadir al inicio
+      this.convocatorias.set([convo, ...currentConvos]);
+    }
   }
 
   onRespuestaChanged() {

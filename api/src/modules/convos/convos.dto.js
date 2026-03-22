@@ -117,6 +117,18 @@ function buildConvoTypeCreateDto(payload) {
       fieldName: 'name',
       required: true,
     }),
+    minGrocSortida: normalizeInteger(payload.minGrocSortida, {
+      fieldName: 'minGrocSortida',
+      min: 0,
+    }) ?? 0,
+    minVerdSortida: normalizeInteger(payload.minVerdSortida, {
+      fieldName: 'minVerdSortida',
+      min: 0,
+    }) ?? 0,
+    defaultLocation: normalizeText(payload.defaultLocation, {
+      fieldName: 'defaultLocation',
+      nullable: true,
+    }) ?? null,
   }
 }
 
@@ -133,6 +145,27 @@ function buildConvoTypeUpdateDto(payload) {
     dto.name = normalizedName
   }
 
+  if (payload.minGrocSortida !== undefined) {
+    dto.minGrocSortida = normalizeInteger(payload.minGrocSortida, {
+      fieldName: 'minGrocSortida',
+      min: 0,
+    })
+  }
+
+  if (payload.minVerdSortida !== undefined) {
+    dto.minVerdSortida = normalizeInteger(payload.minVerdSortida, {
+      fieldName: 'minVerdSortida',
+      min: 0,
+    })
+  }
+
+  if (payload.defaultLocation !== undefined) {
+    dto.defaultLocation = normalizeText(payload.defaultLocation, {
+      fieldName: 'defaultLocation',
+      nullable: true,
+    })
+  }
+
   if (Object.keys(dto).length === 0) {
     throw createConvosDtoError('Debes enviar al menos un campo para actualizar el tipo de convocatoria.')
   }
@@ -146,13 +179,15 @@ function buildConvocatoriaCreateDto(payload) {
   const dto = {
     date: normalizeDate(payload.date, { fieldName: 'date', required: true }),
     title: normalizeText(payload.title, { fieldName: 'title' }),
-    ubiSortida: normalizeText(payload.ubiSortida, { fieldName: 'ubiSortida', required: true }),
+    ubiSortida: normalizeText(payload.ubiSortida, { fieldName: 'ubiSortida' }),
     responsableId: normalizeInteger(payload.responsableId, { fieldName: 'responsableId', required: true }),
     convoTypeId: normalizeInteger(payload.convoTypeId, { fieldName: 'convoTypeId', required: true }),
     moreThan2: normalizeBoolean(payload.moreThan2, 'moreThan2') ?? false,
     startTime: normalizeDate(payload.startTime, { fieldName: 'startTime', required: true }),
     finalTime: normalizeDate(payload.finalTime, { fieldName: 'finalTime', nullable: true }),
     isActive: normalizeBoolean(payload.isActive, 'isActive') ?? true,
+    autoAssignResponsable: normalizeBoolean(payload.autoAssignResponsable, 'autoAssignResponsable') ?? false,
+    sortida: normalizeBoolean(payload.sortida, 'sortida') ?? false,
   }
 
   if (dto.finalTime && dto.finalTime < dto.startTime) {
@@ -212,6 +247,14 @@ function buildConvocatoriaUpdateDto(payload) {
     dto.isActive = normalizeBoolean(payload.isActive, 'isActive')
   }
 
+  if (payload.autoAssignResponsable !== undefined) {
+    dto.autoAssignResponsable = normalizeBoolean(payload.autoAssignResponsable, 'autoAssignResponsable')
+  }
+
+  if (payload.sortida !== undefined) {
+    dto.sortida = normalizeBoolean(payload.sortida, 'sortida')
+  }
+
   if (Object.keys(dto).length === 0) {
     throw createConvosDtoError('Debes enviar al menos un campo para actualizar la convocatoria.')
   }
@@ -223,6 +266,9 @@ function mapConvoTypeToDto(convoType) {
   return {
     id: convoType.id,
     name: convoType.name,
+    minGrocSortida: convoType.minGrocSortida,
+    minVerdSortida: convoType.minVerdSortida,
+    defaultLocation: convoType.defaultLocation,
   }
 }
 
@@ -247,6 +293,8 @@ function mapConvocatoriaToDto(convocatoria) {
     startTime: convocatoria.startTime,
     finalTime: convocatoria.finalTime,
     isActive: convocatoria.isActive,
+    autoAssignResponsable: convocatoria.autoAssignResponsable,
+    sortida: convocatoria.sortida,
     responseCount: convocatoria._count?.respostas ?? 0,
   }
 }

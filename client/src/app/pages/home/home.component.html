@@ -4,6 +4,14 @@
       <h1>Inicio</h1>
       <p>Selecciona una fecha y revisa las convocatorias del dia.</p>
     </div>
+
+    @if (authService.isAdmin()) {
+      <div class="home-header-actions">
+        <button type="button" class="btn btn-primary" (click)="openCreateConvoModal()">
+          + Crear Convocatoria
+        </button>
+      </div>
+    }
   </header>
 
   <section class="home-grid">
@@ -25,28 +33,40 @@
         <div class="days-grid">
           @for (cell of calendarDays(); track cell.key) {
             @let daySummary = getDaySummary(cell.key);
+            @let dayAvailability = getDayAvailability(cell.key);
             <button
               type="button"
               class="day-cell"
               [class.out-month]="!cell.inCurrentMonth"
               [class.selected]="cell.isSelected"
               [class.today]="cell.isToday"
+              [class.day-closed]="dayAvailability.total > 0 && dayAvailability.open === 0"
               (click)="selectCalendarDate(cell.date)"
             >
               <span class="day-number">{{ cell.date.getDate() }}</span>
 
-              @if (daySummary.total > 0) {
-                <span class="day-markers" title="{{ daySummary.responded }} respondidas / {{ daySummary.pending }} pendientes">
-                  @if (daySummary.responded > 0) {
-                    <span class="marker marker-answered"></span>
-                  }
-                  @if (daySummary.pending > 0) {
-                    <span class="marker marker-pending"></span>
+              @if (dayAvailability.total > 0) {
+                <span class="day-markers" title="{{ daySummary.pending }} pendientes / {{ daySummary.responded }} respondidas / {{ dayAvailability.closed }} cerradas">
+                  @if (dayAvailability.open === 0) {
+                    <span class="marker marker-closed">{{ dayAvailability.closed }}</span>
+                  } @else {
+                    @if (daySummary.pending > 0) {
+                      <span class="marker marker-pending">{{ daySummary.pending }}</span>
+                    }
+                    @if (daySummary.responded > 0) {
+                      <span class="marker marker-responded">{{ daySummary.responded }}</span>
+                    }
                   }
                 </span>
               }
             </button>
           }
+        </div>
+
+        <div class="calendar-legend">
+          <span class="legend-item legend-pending"><span class="legend-dot"></span>Pendientes</span>
+          <span class="legend-item legend-responded"><span class="legend-dot"></span>Respondidas</span>
+          <span class="legend-item legend-closed"><span class="legend-dot"></span>Cerradas</span>
         </div>
       </div>
     </article>
@@ -61,80 +81,102 @@
       } @else if (dayConvos().length === 0) {
         <div class="empty-state">No hay convocatorias para este dia.</div>
       } @else {
-        <ul class="convos-list">
-          @for (convo of dayConvos(); track convo.id) {
-            @let roleSummary = getConvocatoriaRoleSummary(convo.id);
-            <li>
-              <div class="convo-top">
-                <h3>{{ convo.title }}</h3>
-                <span
-                  class="answer-status"
-                  [class.available]="getMyRespuesta(convo.id)?.response === true"
-                  [class.unavailable]="getMyRespuesta(convo.id)?.response === false"
-                >
-                  {{ getMyRespuestaLabel(convo.id) }}
-                </span>
-              </div>
-              <p><strong>Tipo:</strong> {{ convo.convoType?.name || convo.convoTypeId }}</p>
-              <p><strong>Ubicacion:</strong> {{ convo.ubiSortida }}</p>
-              <p><strong>Inicio:</strong> {{ convo.startTime | date:'shortTime' }}</p>
-              @if (convo.finalTime) {
-                <p><strong>Fin:</strong> {{ convo.finalTime | date:'shortTime' }}</p>
-              }
+        <div class="convos-list-scroll" [class.scroll-active]="dayConvos().length > 3">
+          <ul class="convos-list">
+            @for (convo of dayConvos(); track convo.id) {
+              @let roleSummary = getConvocatoriaRoleSummary(convo.id);
+              <li [class.convo-locked]="isConvocatoriaClosed(convo)">
+                <div class="convo-top">
+                  <h3>{{ convo.title }}</h3>
+                  <div class="convo-top-right">
+                    @if (authService.isAdmin()) {
+                      <button
+                        type="button"
+                        class="admin-convo-btn"
+                        (click)="openAdminConvoModal(convo)"
+                        title="Gestionar convocatoria"
+                      >
+                        ✎
+                      </button>
+                    }
 
-              <div class="convo-bottom-row">
-                @if (getMyRespuesta(convo.id); as myRespuesta) {
-                  <div class="answer-actions answer-actions-answered">
-                    <button
-                      type="button"
-                      class="btn btn-edit btn-xs"
-                      [disabled]="respondingConvoId() === convo.id"
-                      (click)="openCustomModal(convo)"
-                    >
-                      Modificar
-                    </button>
+                    @if (isConvocatoriaClosed(convo)) {
+                      <span class="answer-status unavailable">No disponible</span>
+                    } @else {
+                      <span
+                        class="answer-status"
+                        [class.available]="getMyRespuesta(convo.id)?.response === true"
+                        [class.unavailable]="getMyRespuesta(convo.id)?.response === false"
+                      >
+                        {{ getMyRespuestaLabel(convo.id) }}
+                      </span>
+                    }
                   </div>
-                } @else {
-                  <div class="answer-actions">
-                    <button
-                      type="button"
-                      class="btn btn-primary btn-sm"
-                      [disabled]="respondingConvoId() === convo.id"
-                      (click)="respondToConvocatoria(convo.id, true)"
-                    >
-                      ACEPTAR
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-secondary btn-sm"
-                      [disabled]="respondingConvoId() === convo.id"
-                      (click)="respondToConvocatoria(convo.id, false)"
-                    >
-                      DENEGAR
-                    </button>
-                    <button
-                      type="button"
-                      class="btn btn-edit btn-sm"
-                      [disabled]="respondingConvoId() === convo.id"
-                      (click)="openCustomModal(convo)"
-                    >
-                      PERSONALIZAR
-                    </button>
-                  </div>
+                </div>
+                <p><strong>Tipo:</strong> {{ convo.convoType?.name || convo.convoTypeId }}</p>
+                <p><strong>Responsable:</strong> {{ getResponsableName(convo.responsableId) }}</p>
+                <p><strong>Ubicacion:</strong> {{ convo.ubiSortida }}</p>
+                <p><strong>Inicio:</strong> {{ convo.startTime | date:'shortTime' }}</p>
+                @if (convo.finalTime) {
+                  <p><strong>Fin:</strong> {{ convo.finalTime | date:'shortTime' }}</p>
                 }
 
-                <div class="convo-response-counters">
-                  <span class="response-counter response-counter-green" title="No groc">
-                    {{ roleSummary.noGroc }}
-                  </span>
-                  <span class="response-counter response-counter-yellow" title="Groc">
-                    {{ roleSummary.groc }}
-                  </span>
+                <div class="convo-bottom-row">
+                  @if (getMyRespuesta(convo.id); as myRespuesta) {
+                    <div class="answer-actions answer-actions-answered">
+                      <button
+                        type="button"
+                        class="btn btn-edit btn-xs"
+                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                        (click)="openCustomModal(convo)"
+                      >
+                        Modificar
+                      </button>
+                    </div>
+                  } @else {
+                    <div class="answer-actions">
+                      <button
+                        type="button"
+                        class="btn btn-primary btn-sm"
+                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                        (click)="respondToConvocatoria(convo.id, true)"
+                      >
+                        ACEPTAR
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm"
+                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                        (click)="respondToConvocatoria(convo.id, false)"
+                      >
+                        DENEGAR
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-edit btn-sm"
+                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                        (click)="openCustomModal(convo)"
+                      >
+                        PERSONALIZAR
+                      </button>
+                    </div>
+                  }
+
+                  @if (canViewConvocatoriaSummary(convo)) {
+                    <div class="convo-response-counters">
+                      <span class="response-counter response-counter-green" title="No groc">
+                        {{ roleSummary.noGroc }}
+                      </span>
+                      <span class="response-counter response-counter-yellow" title="Groc">
+                        {{ roleSummary.groc }}
+                      </span>
+                    </div>
+                  }
                 </div>
-              </div>
-            </li>
-          }
-        </ul>
+              </li>
+            }
+          </ul>
+        </div>
       }
     </article>
   </section>
@@ -189,17 +231,31 @@
           <div class="form-group">
             <label>Horario custom (opcional)</label>
             <div class="time-range-row">
-              <input
-                type="time"
-                [value]="customResponse().customStartTime"
-                (input)="updateCustomField('customStartTime', $any($event.target).value)"
-              />
+              <div class="time-field">
+                <input
+                  #customStartTimeInput
+                  type="time"
+                  step="60"
+                  [value]="customResponse().customStartTime"
+                  (change)="updateCustomField('customStartTime', $any($event.target).value)"
+                />
+                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(customStartTimeInput, 'customStartTime')">
+                  <span class="time-picker-icon" aria-hidden="true"></span>
+                </button>
+              </div>
               <span>a</span>
-              <input
-                type="time"
-                [value]="customResponse().customEndTime"
-                (input)="updateCustomField('customEndTime', $any($event.target).value)"
-              />
+              <div class="time-field">
+                <input
+                  #customEndTimeInput
+                  type="time"
+                  step="60"
+                  [value]="customResponse().customEndTime"
+                  (change)="updateCustomField('customEndTime', $any($event.target).value)"
+                />
+                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(customEndTimeInput, 'customEndTime')">
+                  <span class="time-picker-icon" aria-hidden="true"></span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -226,6 +282,549 @@
           }
           <button class="btn btn-secondary" (click)="closeCustomModal()">Cancelar</button>
           <button class="btn btn-primary" (click)="saveCustomResponse()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showAdminConvoModal() && adminConvo()) {
+    <div class="modal-overlay" (click)="closeAdminConvoModal()">
+      <div class="modal modal-wide" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Gestion de Convocatoria</h3>
+          <button class="close-btn" (click)="closeAdminConvoModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Titulo</label>
+              <input
+                type="text"
+                [value]="adminConvoForm().title"
+                (input)="updateAdminConvoField('title', $any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Fecha</label>
+              <input
+                type="date"
+                [value]="adminConvoForm().date"
+                (change)="updateAdminConvoField('date', $any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Hora inicio</label>
+              <div class="time-field">
+                <input
+                  #adminStartTimeInput
+                  type="time"
+                  step="60"
+                  [value]="adminConvoForm().startTime"
+                  (change)="updateAdminConvoField('startTime', $any($event.target).value)"
+                />
+                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(adminStartTimeInput, 'adminStartTime')">
+                  <span class="time-picker-icon" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Hora fin</label>
+              <div class="time-field">
+                <input
+                  #adminEndTimeInput
+                  type="time"
+                  step="60"
+                  [value]="adminConvoForm().finalTime"
+                  (change)="updateAdminConvoField('finalTime', $any($event.target).value)"
+                />
+                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(adminEndTimeInput, 'adminEndTime')">
+                  <span class="time-picker-icon" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Ubicacion</label>
+              <input
+                type="text"
+                [value]="adminConvoForm().ubiSortida"
+                (input)="updateAdminConvoField('ubiSortida', $any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Tipo</label>
+              <select
+                [value]="adminConvoForm().convoTypeId || ''"
+                (change)="updateAdminConvoField('convoTypeId', $any($event.target).value)"
+              >
+                <option value="">Selecciona tipo</option>
+                @for (type of convoTypes(); track type.id) {
+                  <option [value]="type.id">{{ type.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Responsable</label>
+              <select
+                [value]="adminConvoForm().responsableId || ''"
+                (change)="updateAdminConvoField('responsableId', $any($event.target).value)"
+              >
+                <option value="">Selecciona responsable</option>
+                @for (user of users(); track user.id) {
+                  <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="adminConvoForm().autoAssignResponsable"
+                  (change)="updateAdminConvoField('autoAssignResponsable', $any($event.target).checked)"
+                />
+                Autoasignar responsable segun respuestas
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="adminConvoForm().isActive"
+                  (change)="updateAdminConvoField('isActive', $any($event.target).checked)"
+                />
+                Convocatoria activa
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="adminConvoForm().sortida"
+                  (change)="updateAdminConvoField('sortida', $any($event.target).checked)"
+                />
+                Sortida
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="adminConvoForm().moreThan2"
+                (change)="updateAdminConvoField('moreThan2', $any($event.target).checked)"
+              />
+              Mas de 2 participantes
+            </label>
+          </div>
+
+          <h4 class="responses-title">Respuestas de usuarios</h4>
+          @if (getRespuestasForConvocatoria(adminConvo()!.id).length === 0) {
+            <p class="empty-state">No hay respuestas registradas.</p>
+          } @else {
+            <div class="table-responsive">
+              <table class="respuestas-table">
+                <thead>
+                  <tr>
+                    <th>Usuario</th>
+                    <th>Disponible</th>
+                    <th>Custom</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (respuesta of getRespuestasForConvocatoria(adminConvo()!.id); track respuesta.id) {
+                    <tr>
+                      <td>{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</td>
+                      <td>
+                        <span [class]="respuesta.response ? 'badge-yes' : 'badge-no'">
+                          {{ respuesta.response ? 'Si' : 'No' }}
+                        </span>
+                      </td>
+                      <td>
+                        @if (respuesta.customText) {
+                          <button
+                            type="button"
+                            class="btn btn-sm btn-edit"
+                            (click)="openCustomTextModal(respuesta.customText)"
+                          >
+                            Ver custom
+                          </button>
+                        } @else {
+                          <span>-</span>
+                        }
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeAdminConvoModal()">Cerrar</button>
+          <button class="btn btn-primary" [disabled]="adminConvoSaving()" (click)="saveAdminConvoChanges()">
+            {{ adminConvoSaving() ? 'Guardando...' : 'Guardar cambios' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showCustomTextModal()) {
+    <div class="modal-overlay" (click)="closeCustomTextModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Texto custom</h3>
+          <button class="close-btn" (click)="closeCustomTextModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p>{{ customTextPreview() }}</p>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" (click)="closeCustomTextModal()">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showCreateConvoModal()) {
+    <div class="modal-overlay" (click)="closeCreateConvoModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Nueva convocatoria</h3>
+          <button class="close-btn" (click)="closeCreateConvoModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          @if (createConvoError()) {
+            <div class="error-alert create-convo-error-banner">
+              <strong>Revisa los campos</strong>
+              <p>{{ createConvoError() }}</p>
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Titulo</label>
+            <input
+              type="text"
+              [value]="createConvoForm().title"
+              (input)="updateCreateConvoField('title', $any($event.target).value)"
+            />
+          </div>
+
+          @if (!isGuardiaTypeSelected() && !isSemanalTypeSelected() && !isIncendiTypeSelected()) {
+            <div class="form-group">
+              <label>Fecha (dia seleccionado)</label>
+              <input
+                type="date"
+                [value]="createConvoForm().date"
+                (change)="updateCreateConvoField('date', $any($event.target).value)"
+              />
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Ubicacion</label>
+            <input
+              type="text"
+              [value]="createConvoForm().ubiSortida"
+              (input)="updateCreateConvoField('ubiSortida', $any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Tipo</label>
+            <select
+              [value]="createConvoForm().convoTypeId || ''"
+              (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
+            >
+              <option value="">Selecciona tipo</option>
+              @for (type of convoTypes(); track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
+          </div>
+
+          @if (isGuardiaTypeSelected()) {
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Rango desde</label>
+                <input
+                  type="date"
+                  [value]="createConvoForm().guardiaRangeStart"
+                  (change)="updateCreateConvoField('guardiaRangeStart', $any($event.target).value)"
+                />
+              </div>
+              <div class="form-group">
+                <label>Rango hasta</label>
+                <input
+                  type="date"
+                  [value]="createConvoForm().guardiaRangeEnd"
+                  (change)="updateCreateConvoField('guardiaRangeEnd', $any($event.target).value)"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Turnos de guardia</label>
+              <div class="guardia-turns-grid">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="createConvoForm().guardiaMorning"
+                    (change)="updateCreateConvoField('guardiaMorning', $any($event.target).checked)"
+                  />
+                  Manana (12:00 - 16:00)
+                </label>
+
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="createConvoForm().guardiaAfternoon"
+                    (change)="updateCreateConvoField('guardiaAfternoon', $any($event.target).checked)"
+                  />
+                  Tarde (16:00 - 20:00)
+                </label>
+              </div>
+            </div>
+
+            <p class="guardia-help-text">
+              Se generara una convocatoria por turno y por cada dia laborable (lunes a viernes) dentro del rango.
+            </p>
+          } @else if (isSemanalTypeSelected()) {
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Dia inicio</label>
+                <input
+                  type="date"
+                  [value]="createConvoForm().semanalRangeStart"
+                  (change)="updateCreateConvoField('semanalRangeStart', $any($event.target).value)"
+                />
+              </div>
+              <div class="form-group">
+                <label>Dia final</label>
+                <input
+                  type="date"
+                  [value]="createConvoForm().semanalRangeEnd"
+                  (change)="updateCreateConvoField('semanalRangeEnd', $any($event.target).value)"
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <div class="weekly-slots-header">
+                <label>Franjas horarias</label>
+                <button type="button" class="btn btn-sm btn-edit" (click)="addSemanalSlot()">+ Row</button>
+              </div>
+
+              <div class="weekly-slots-list">
+                @for (slot of createConvoForm().semanalSlots; track $index) {
+                  <div class="weekly-slot-row">
+                    <div class="time-field">
+                      <input
+                        #semanalStartInput
+                        type="time"
+                        step="60"
+                        [value]="slot.start"
+                        (change)="updateSemanalSlot($index, 'start', $any($event.target).value)"
+                      />
+                      <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(semanalStartInput, 'semanalStartTime', $index)">
+                        <span class="time-picker-icon" aria-hidden="true"></span>
+                      </button>
+                    </div>
+                    <span>a</span>
+                    <div class="time-field">
+                      <input
+                        #semanalEndInput
+                        type="time"
+                        step="60"
+                        [value]="slot.end"
+                        (change)="updateSemanalSlot($index, 'end', $any($event.target).value)"
+                      />
+                      <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(semanalEndInput, 'semanalEndTime', $index)">
+                        <span class="time-picker-icon" aria-hidden="true"></span>
+                      </button>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-secondary"
+                      [disabled]="createConvoForm().semanalSlots.length <= 1"
+                      (click)="removeSemanalSlot($index)"
+                    >
+                      -
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <p class="guardia-help-text">
+              Se generara una convocatoria por cada franja y por cada dia del rango seleccionado.
+            </p>
+          } @else if (isIncendiTypeSelected()) {
+            <div class="form-group">
+              <label>Fecha (dia en curso)</label>
+              <input
+                type="date"
+                [value]="createConvoForm().date"
+                disabled
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Tiempo de respuesta (Incendi)</label>
+              <div class="custom-choice-row">
+                @for (minutes of incendiReadyOptions; track minutes) {
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.choice-active]="createConvoForm().incendiReadyInMinutes === minutes"
+                    (click)="updateCreateConvoField('incendiReadyInMinutes', minutes)"
+                  >
+                    {{ minutes }} mins
+                  </button>
+                }
+              </div>
+            </div>
+
+            <p class="guardia-help-text">
+              Inicio automatico en el margen seleccionado desde ahora. Hora final automatica a +4 horas.
+            </p>
+          } @else {
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Hora inicio</label>
+                <div class="time-field">
+                  <input
+                    #createStartTimeInput
+                    type="time"
+                    step="60"
+                    [value]="createConvoForm().startTime"
+                    (change)="updateCreateConvoField('startTime', $any($event.target).value)"
+                  />
+                  <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(createStartTimeInput, 'createStartTime')">
+                    <span class="time-picker-icon" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Hora fin</label>
+                <div class="time-field">
+                  <input
+                    #createEndTimeInput
+                    type="time"
+                    step="60"
+                    [value]="createConvoForm().finalTime"
+                    (change)="updateCreateConvoField('finalTime', $any($event.target).value)"
+                  />
+                  <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(createEndTimeInput, 'createEndTime')">
+                    <span class="time-picker-icon" aria-hidden="true"></span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Responsable</label>
+            <select
+              [value]="createConvoForm().responsableId || ''"
+              (change)="updateCreateConvoField('responsableId', $any($event.target).value)"
+            >
+              <option value="">Selecciona responsable</option>
+              @for (user of users(); track user.id) {
+                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="createConvoForm().autoAssignResponsable"
+                (change)="updateCreateConvoField('autoAssignResponsable', $any($event.target).checked)"
+              />
+              Autoasignar responsable segun respuestas
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="createConvoForm().isActive"
+                (change)="updateCreateConvoField('isActive', $any($event.target).checked)"
+              />
+              Convocatoria activa
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [checked]="createConvoForm().sortida"
+                (change)="updateCreateConvoField('sortida', $any($event.target).checked)"
+              />
+              Sortida
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeCreateConvoModal()">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="creatingConvo()" (click)="createConvocatoriaFromHome()">
+            {{ creatingConvo() ? 'Creando...' : 'Crear convocatoria' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showTimeMenu()) {
+    <div class="modal-overlay" (click)="closeTimeMenu()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Seleccionar hora</h3>
+          <button class="close-btn" (click)="closeTimeMenu()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Hora</label>
+              <select [value]="timeMenuHour()" (change)="updateTimeMenuHour($any($event.target).value)">
+                <option value="">HH</option>
+                @for (hour of hourOptions; track hour) {
+                  <option [value]="hour">{{ hour }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Minuto</label>
+              <select [value]="timeMenuMinute()" (change)="updateTimeMenuMinute($any($event.target).value)">
+                <option value="">MM</option>
+                @for (minute of minuteOptions; track minute) {
+                  <option [value]="minute">{{ minute }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer time-menu-actions">
+          <button class="btn btn-secondary" (click)="closeTimeMenu()">Cancelar</button>
+          <button class="btn btn-primary" [disabled]="!timeMenuHour() || !timeMenuMinute()" (click)="applyTimeMenuSelection()">Usar hora</button>
         </div>
       </div>
     </div>

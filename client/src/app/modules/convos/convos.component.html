@@ -26,6 +26,7 @@
             <th>Ubicacion</th>
             <th>Responsable</th>
             <th>Respuestas</th>
+            <th>Sortida</th>
             <th>Estado</th>
             <th>Acciones</th>
           </tr>
@@ -38,7 +39,12 @@
               <td>{{ getConvoTypeName(convo.convoTypeId) }}</td>
               <td>{{ convo.ubiSortida }}</td>
               <td>{{ getUserName(convo.responsableId) }}</td>
-              <td>{{ convo._count?.respostas || 0 }}</td>
+              <td>{{ convo.responseCount || 0 }}</td>
+              <td>
+                <span [class]="convo.sortida ? 'badge-sortida-yes' : 'badge-sortida-no'">
+                  {{ getSortidaLabel(convo.sortida) }}
+                </span>
+              </td>
               <td>
                 <span [class]="convo.isActive ? 'badge-active' : 'badge-inactive'">
                   {{ convo.isActive ? 'Activa' : 'Inactiva' }}
@@ -135,12 +141,20 @@
         <div class="modal-body">
           <div class="form-group">
             <label>Fecha *</label>
-            <input
-              type="datetime-local"
-              [value]="formData().date || ''"
-              (change)="updateFormField('date', $any($event.target).value)"
-              [disabled]="formSubmitting()"
-            />
+            @if (isIncendiTypeSelected()) {
+              <input
+                type="date"
+                [value]="todayDate"
+                disabled
+              />
+            } @else {
+              <input
+                type="date"
+                [value]="formData().date || ''"
+                (change)="updateFormField('date', $any($event.target).value)"
+                [disabled]="formSubmitting()"
+              />
+            }
           </div>
 
           <div class="form-group">
@@ -179,6 +193,19 @@
           </div>
 
           <div class="form-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [ngModel]="formData().autoAssignResponsable || false"
+                (ngModelChange)="updateFormField('autoAssignResponsable', $event)"
+                [disabled]="formSubmitting()"
+                name="autoAssignResponsable"
+              />
+              Autoasignar responsable segun respuestas
+            </label>
+          </div>
+
+          <div class="form-group">
             <label>Responsable *</label>
             <select
               [(ngModel)]="formData().responsableId"
@@ -193,33 +220,95 @@
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Hora de Inicio</label>
-            <input
-              type="time"
-              [value]="formData().startTime || ''"
-              (change)="updateFormField('startTime', $any($event.target).value)"
-              [disabled]="formSubmitting()"
-            />
-          </div>
+          @if (isIncendiTypeSelected()) {
+            <div class="form-group">
+              <label>Tiempo de respuesta (Incendi)</label>
+              <div class="incendi-ready-row">
+                @for (minutes of incendiReadyOptions; track minutes) {
+                  <button
+                    type="button"
+                    class="incendi-ready-btn"
+                    [class.active]="(formData().incendiReadyInMinutes || 10) === minutes"
+                    [disabled]="formSubmitting()"
+                    (click)="updateFormField('incendiReadyInMinutes', minutes)"
+                  >
+                    {{ minutes }} mins
+                  </button>
+                }
+              </div>
+              <small>Inicio automatico desde ahora. Hora final automatica a +4 horas.</small>
+            </div>
+          } @else {
+            <div class="form-group">
+              <label>Hora de Inicio</label>
+              <div class="time-field">
+                <input
+                  #convoStartTimeInput
+                  type="time"
+                  step="60"
+                  [value]="formData().startTime || ''"
+                  (change)="updateFormField('startTime', $any($event.target).value)"
+                  [disabled]="formSubmitting()"
+                />
+                <button
+                  type="button"
+                  class="time-picker-btn"
+                  title="Abrir selector de hora"
+                  aria-label="Abrir selector de hora"
+                  [disabled]="formSubmitting()"
+                  (click)="openTimePicker(convoStartTimeInput, 'startTime')"
+                >
+                  <span class="time-picker-icon" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Hora de Fin</label>
+              <div class="time-field">
+                <input
+                  #convoEndTimeInput
+                  type="time"
+                  step="60"
+                  [value]="formData().finalTime || ''"
+                  (change)="updateFormField('finalTime', $any($event.target).value)"
+                  [disabled]="formSubmitting()"
+                />
+                <button
+                  type="button"
+                  class="time-picker-btn"
+                  title="Abrir selector de hora"
+                  aria-label="Abrir selector de hora"
+                  [disabled]="formSubmitting()"
+                  (click)="openTimePicker(convoEndTimeInput, 'finalTime')"
+                >
+                  <span class="time-picker-icon" aria-hidden="true"></span>
+                </button>
+              </div>
+            </div>
+          }
 
           <div class="form-group">
-            <label>Hora de Fin</label>
-            <input
-              type="time"
-              [value]="formData().finalTime || ''"
-              (change)="updateFormField('finalTime', $any($event.target).value)"
-              [disabled]="formSubmitting()"
-            />
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [ngModel]="formData().sortida || false"
+                (ngModelChange)="updateFormField('sortida', $event)"
+                [disabled]="formSubmitting()"
+                name="sortida"
+              />
+              Sortida
+            </label>
           </div>
 
           <div class="form-group">
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [checked]="formData().moreThan2"
-                (change)="updateFormField('moreThan2', $any($event.target).checked)"
+                [ngModel]="formData().moreThan2"
+                (ngModelChange)="updateFormField('moreThan2', $event)"
                 [disabled]="formSubmitting()"
+                name="moreThan2"
               />
               Mas de 2 participantes
             </label>
@@ -229,9 +318,10 @@
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [checked]="formData().isActive"
-                (change)="updateFormField('isActive', $any($event.target).checked)"
+                [ngModel]="formData().isActive"
+                (ngModelChange)="updateFormField('isActive', $event)"
                 [disabled]="formSubmitting()"
+                name="isActive"
               />
               Activa
             </label>
@@ -243,6 +333,46 @@
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
             {{ formSubmitting() ? 'Guardando...' : 'Guardar' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showTimeMenu()) {
+    <div class="modal-overlay" (click)="closeTimeMenu()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Seleccionar hora</h3>
+          <button (click)="closeTimeMenu()" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Hora</label>
+              <select [value]="timeMenuHour()" (change)="updateTimeMenuHour($any($event.target).value)">
+                <option value="">HH</option>
+                @for (hour of hourOptions; track hour) {
+                  <option [value]="hour">{{ hour }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Minuto</label>
+              <select [value]="timeMenuMinute()" (change)="updateTimeMenuMinute($any($event.target).value)">
+                <option value="">MM</option>
+                @for (minute of minuteOptions; track minute) {
+                  <option [value]="minute">{{ minute }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer time-menu-actions">
+          <button (click)="closeTimeMenu()" class="btn btn-secondary">Cancelar</button>
+          <button (click)="applyTimeMenuSelection()" class="btn btn-primary" [disabled]="!timeMenuHour() || !timeMenuMinute()">Usar hora</button>
         </div>
       </div>
     </div>

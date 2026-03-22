@@ -47,3 +47,116 @@
   display: flex;
   gap: 6px;
 }
+
+.time-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.time-field input[type='time'] {
+  flex: 1;
+  min-width: 0;
+}
+
+.time-picker-btn {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  padding: 0;
+  cursor: pointer;
+}
+
+.time-picker-btn:hover {
+  border-color: var(--gold);
+}
+
+.time-picker-icon {
+  width: 16px;
+  height: 16px;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  position: relative;
+}
+
+.time-picker-icon::before,
+.time-picker-icon::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform-origin: bottom center;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.time-picker-icon::before {
+  width: 2px;
+  height: 5px;
+  transform: translate(-50%, -100%) rotate(0deg);
+}
+
+.time-picker-icon::after {
+  width: 2px;
+  height: 4px;
+  transform: translate(-50%, -100%) rotate(45deg);
+}
+
+.incendi-ready-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.incendi-ready-btn {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 10px;
+  cursor: pointer;
+}
+
+.incendi-ready-btn:hover {
+  border-color: var(--gold);
+}
+
+.incendi-ready-btn.active {
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #1a1a1a;
+}
+
+.badge-sortida-yes,
+.badge-sortida-no,
+.badge-active,
+.badge-inactive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-sortida-yes {
+  background: #d9f7e8;
+  color: #17603a;
+}
+
+.badge-sortida-no {
+  background: #f3ead2;
+  color: #7a5a10;
+}

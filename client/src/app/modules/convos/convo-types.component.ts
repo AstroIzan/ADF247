@@ -26,7 +26,10 @@ export class ConvoTypesComponent {
   });
 
   formData = signal<Partial<ConvoType>>({
-    name: ''
+    name: '',
+    minGrocSortida: 0,
+    minVerdSortida: 0,
+    defaultLocation: '',
   });
 
   filteredConvoTypes = computed(() => {
@@ -71,7 +74,12 @@ export class ConvoTypesComponent {
       this.formData.set({ ...type });
     } else {
       this.editingId.set(null);
-      this.formData.set({ name: '' });
+      this.formData.set({
+        name: '',
+        minGrocSortida: 0,
+        minVerdSortida: 0,
+        defaultLocation: '',
+      });
     }
     this.showForm.set(true);
   }
@@ -139,7 +147,13 @@ export class ConvoTypesComponent {
 
   updateFormField(field: string, value: any) {
     const data = this.formData();
-    (data as any)[field] = value;
+
+    if ((field === 'minGrocSortida' || field === 'minVerdSortida') && Number.isNaN(value)) {
+      (data as any)[field] = 0;
+    } else {
+      (data as any)[field] = value;
+    }
+
     this.formData.set({ ...data });
   }
 }
