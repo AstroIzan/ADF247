@@ -162,6 +162,16 @@ export class AuthService {
     return this.getBasicUserCache()?.isAdmin ?? false;
   }
 
+  getCachedNCarnet(): string | null {
+    const user = this.getCurrentUser();
+    return user?.nCarnet ?? null;
+  }
+
+  getCachedName(): string | null {
+    const user = this.getCurrentUser();
+    return user?.name ?? null;
+  }
+
   isAdmin(): boolean {
     return this.getCachedIsAdmin();
   }

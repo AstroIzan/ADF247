@@ -2,6 +2,7 @@
 	@if (authService.isLoggedIn()) {
 		<header class="top-nav">
 			<div class="top-nav-left">
+				<div class="logo">ADF247</div>
 				<button class="nav-btn" routerLink="/home" routerLinkActive="active">Inicio</button>
 				@if (authService.isAdmin()) {
 					<button class="nav-btn" routerLink="/dashboard" routerLinkActive="active">Dashboard</button>
@@ -10,13 +11,11 @@
 
 			<div class="top-nav-right">
 				<span class="mini-user">
-					ID: {{ authService.getCachedUserId() }}
+					{{ authService.getCachedNCarnet() }}
 					@if (authService.getCachedNIndicatiu()) {
 						| {{ authService.getCachedNIndicatiu() }}
 					}
-					@if (authService.getCachedIsAdmin()) {
-						| Admin
-					}
+					| {{ authService.getCachedName() }}
 				</span>
 				<button class="nav-btn logout" (click)="authService.logout()">Salir</button>
 			</div>
