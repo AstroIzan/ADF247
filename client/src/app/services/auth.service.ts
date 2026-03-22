@@ -172,6 +172,11 @@ export class AuthService {
     return user?.name ?? null;
   }
 
+  getCachedLastName(): string | null {
+    const user = this.getCurrentUser();
+    return user?.lastName ?? null;
+  }
+
   isAdmin(): boolean {
     return this.getCachedIsAdmin();
   }

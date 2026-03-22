@@ -15,7 +15,7 @@
 					@if (authService.getCachedNIndicatiu()) {
 						| {{ authService.getCachedNIndicatiu() }}
 					}
-					| {{ authService.getCachedName() }}
+					| {{ authService.getCachedName() }} {{ authService.getCachedLastName() || '' }}
 				</span>
 				<button class="nav-btn logout" (click)="authService.logout()">Salir</button>
 			</div>
