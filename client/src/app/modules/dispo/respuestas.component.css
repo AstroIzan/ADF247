@@ -42,8 +42,302 @@
   clip-path: polygon(0 0, 100% 0, 62% 46%, 62% 100%, 38% 100%, 38% 46%);
 }
 
+.desktop-respuestas-view {
+  display: block;
+}
+
+.mobile-respuestas-view {
+  display: none;
+}
+
+.respuestas-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.respuesta-card {
+  background:
+    linear-gradient(135deg, rgba(240, 176, 0, 0.14) 0%, rgba(240, 176, 0, 0.05) 65%),
+    #fff;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.respuesta-card:hover {
+  border-color: #f0b000;
+  box-shadow: 0 8px 16px rgba(207, 143, 0, 0.15);
+}
+
+.respuesta-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.respuesta-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 17px;
+  color: #222;
+}
+
+.respuesta-info p {
+  margin: 0 0 5px 0;
+  font-size: 13px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.respuesta-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.badge-yes {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(34, 139, 34, 0.15);
+  color: #228b22;
+}
+
+.badge-no {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(220, 20, 20, 0.15);
+  color: #dc1414;
+}
+
+.badge-custom {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(240, 176, 0, 0.2);
+  color: #b8860b;
+}
+
+.respuesta-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .actions {
   white-space: nowrap;
   display: flex;
   gap: 6px;
+  align-items: center;
+  overflow: visible;
+}
+
+.respuesta-text-cell {
+  max-width: 220px;
+  white-space: normal;
+}
+
+.delete-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.delete-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(16, 16, 16, 0.16);
+  z-index: 20;
+}
+
+.delete-popover p {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #444;
+  white-space: normal;
+}
+
+.delete-popover-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.delete-popover-actions button {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .desktop-respuestas-view {
+    display: none;
+  }
+
+  .mobile-respuestas-view {
+    display: block;
+  }
+
+  .respuestas-container {
+    padding: 6px;
+  }
+
+  .respuestas-header {
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .respuestas-header h2 {
+    font-size: clamp(16px, 2.2vw, 22px);
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .icon-filter-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .filter-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .respuestas-list {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+
+  .respuesta-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .respuesta-info h4 {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .respuesta-info p {
+    font-size: 12px;
+  }
+
+  .respuesta-badges {
+    gap: 4px;
+  }
+
+  .respuesta-actions {
+    gap: 4px;
+  }
+
+  .actions {
+    gap: 4px;
+  }
+}
+
+@media (max-width: 600px) {
+  .respuestas-container {
+    padding: 4px;
+  }
+
+  .respuestas-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+
+  .respuestas-header h2 {
+    font-size: clamp(14px, 3vw, 18px);
+    width: 100%;
+  }
+
+  .header-actions {
+    width: 100%;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .icon-filter-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .respuestas-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .respuesta-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    border-radius: 8px;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .respuesta-info {
+    width: 100%;
+  }
+
+  .respuesta-info h4 {
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .respuesta-info p {
+    font-size: 11px;
+    display: block;
+  }
+
+  .respuesta-badges {
+    width: 100%;
+    gap: 4px;
+  }
+
+  .respuesta-actions {
+    width: 100%;
+    gap: 4px;
+  }
+
+  .respuesta-actions button {
+    flex: 1;
+  }
+
+  .actions {
+    gap: 3px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .delete-menu {
+    width: 100%;
+  }
+
+  .delete-popover {
+    left: 0;
+    right: auto;
+    width: 100%;
+  }
 }

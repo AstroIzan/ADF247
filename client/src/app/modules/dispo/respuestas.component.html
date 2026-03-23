@@ -16,16 +16,16 @@
   @if (loading()) {
     <div class="loading">Carregant respostes...</div>
   } @else if (filteredRespuestas().length > 0) {
-    <div class="table-responsive">
+    <div class="desktop-respuestas-view table-responsive">
       <table class="respuestas-table">
         <thead>
           <tr>
             <th>Convocatòria</th>
             <th>Usuari</th>
-            <th>Resposta</th>
-            <th>Horari Complet</th>
+            <th>Disponible</th>
+            <th>Horari complet</th>
             <th>Personalitzat</th>
-            <th>Text Personalitzat</th>
+            <th>Text</th>
             <th>Accions</th>
           </tr>
         </thead>
@@ -45,24 +45,66 @@
                 </span>
               </td>
               <td>
-                <span [class]="respuesta.isCustom ? 'badge-yes' : 'badge-no'">
+                <span [class]="respuesta.isCustom ? 'badge-custom' : 'badge-no'">
                   {{ respuesta.isCustom ? 'Sí' : 'No' }}
                 </span>
               </td>
-              <td>{{ respuesta.customText || '-' }}</td>
+              <td class="respuesta-text-cell">{{ respuesta.customText || '-' }}</td>
               <td class="actions">
                 <button (click)="openForm(respuesta)" class="btn btn-sm btn-edit">Editar</button>
-                @if (deleteConfirming() === respuesta.id) {
-                  <button (click)="deleteRespuesta(respuesta.id)" class="btn btn-sm btn-danger">Confirmar</button>
-                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
-                } @else {
-                  <button (click)="deleteRespuesta(respuesta.id)" class="btn btn-sm btn-danger">Eliminar</button>
-                }
+                <div class="delete-menu">
+                  <button (click)="requestDelete(respuesta.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                  @if (deleteConfirming() === respuesta.id) {
+                    <div class="delete-popover" (click)="$event.stopPropagation()">
+                      <p>Vols eliminar aquesta resposta?</p>
+                      <div class="delete-popover-actions">
+                        <button (click)="deleteRespuesta(respuesta.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                        <button (click)="cancelDelete(); $event.stopPropagation()" class="btn btn-sm btn-secondary">Cancel·lar</button>
+                      </div>
+                    </div>
+                  }
+                </div>
               </td>
             </tr>
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="mobile-respuestas-view">
+      <div class="respuestas-list">
+        @for (respuesta of filteredRespuestas(); track respuesta.id) {
+          <div class="respuesta-card" (click)="selectedRespuesta.set(respuesta)">
+            <div class="respuesta-info">
+              <h4>{{ getConvoTitle(respuesta.convoId) }}</h4>
+              <p class="user-name">{{ getUserName(respuesta.userNCarnet) }}</p>
+              <div class="respuesta-badges">
+                <span [class]="'badge ' + (respuesta.response ? 'badge-yes' : 'badge-no')">
+                  {{ respuesta.response ? 'Disponible' : 'No disponible' }}
+                </span>
+                @if (respuesta.isCustom) {
+                  <span class="badge badge-custom">Personalitzat</span>
+                }
+              </div>
+            </div>
+            <div class="respuesta-actions">
+              <button (click)="openForm(respuesta); $event.stopPropagation()" class="btn btn-sm btn-edit">Editar</button>
+              <div class="delete-menu">
+                <button (click)="requestDelete(respuesta.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                @if (deleteConfirming() === respuesta.id) {
+                  <div class="delete-popover" (click)="$event.stopPropagation()">
+                    <p>Vols eliminar aquesta resposta?</p>
+                    <div class="delete-popover-actions">
+                      <button (click)="deleteRespuesta(respuesta.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                      <button (click)="cancelDelete(); $event.stopPropagation()" class="btn btn-sm btn-secondary">Cancel·lar</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     </div>
   } @else {
     <div class="empty-state">No hi ha respostes amb els filtres aplicats</div>
@@ -226,6 +268,64 @@
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
             {{ formSubmitting() ? 'Guardant...' : 'Desar' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Detail Modal -->
+    @if (selectedRespuesta(); as respuestaDetail) {
+    <div class="modal-overlay" (click)="selectedRespuesta.set(null)">
+      <div class="modal modal-detail" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Detalls de la Resposta</h3>
+          <button (click)="selectedRespuesta.set(null)" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-group">
+            <label>Convocatòria</label>
+            <p>{{ getConvoTitle(respuestaDetail.convoId) }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Usuari</label>
+            <p>{{ getUserName(respuestaDetail.userNCarnet) }}</p>
+          </div>
+
+          <div class="detail-row">
+            <div class="detail-group">
+              <label>Disponible</label>
+              <p><span [class]="'badge ' + (respuestaDetail.response ? 'badge-yes' : 'badge-no')">{{ respuestaDetail.response ? 'Sí' : 'No' }}</span></p>
+            </div>
+
+            <div class="detail-group">
+              <label>Horari Complet</label>
+              <p><span [class]="'badge ' + (respuestaDetail.fullHorari ? 'badge-yes' : 'badge-no')">{{ respuestaDetail.fullHorari ? 'Sí' : 'No' }}</span></p>
+            </div>
+
+            <div class="detail-group">
+              <label>Personalitzat</label>
+              <p><span [class]="'badge ' + (respuestaDetail.isCustom ? 'badge-yes' : 'badge-no')">{{ respuestaDetail.isCustom ? 'Sí' : 'No' }}</span></p>
+            </div>
+          </div>
+
+          @if (respuestaDetail.customText) {
+            <div class="detail-group">
+              <label>Text Personalitzat</label>
+              <p class="custom-text">{{ respuestaDetail.customText }}</p>
+            </div>
+          }
+
+          <div class="detail-group">
+            <label>Data de Creació</label>
+            <p>{{ respuestaDetail.createdAt ? (respuestaDetail.createdAt | date: 'dd/MM/yyyy HH:mm') : '-' }}</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="selectedRespuesta.set(null)" class="btn btn-secondary">Tancar</button>
+          <button (click)="openForm(respuestaDetail); selectedRespuesta.set(null)" class="btn btn-primary">Editar</button>
         </div>
       </div>
     </div>

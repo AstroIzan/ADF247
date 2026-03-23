@@ -42,10 +42,133 @@
   clip-path: polygon(0 0, 100% 0, 62% 46%, 62% 100%, 38% 100%, 38% 46%);
 }
 
+.desktop-users-view {
+  display: block;
+}
+
+.mobile-users-view {
+  display: none;
+}
+
+.users-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.user-card {
+  background:
+    linear-gradient(135deg, rgba(240, 176, 0, 0.14) 0%, rgba(240, 176, 0, 0.05) 65%),
+    #fff;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.user-card:hover {
+  border-color: #f0b000;
+  box-shadow: 0 8px 16px rgba(207, 143, 0, 0.15);
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 17px;
+  color: #222;
+}
+
+.user-info p {
+  margin: 0 0 5px 0;
+  font-size: 13px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-detail-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.badge-active {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(34, 139, 34, 0.15);
+  color: #228b22;
+}
+
+.badge-inactive {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(220, 20, 20, 0.15);
+  color: #dc1414;
+}
+
+.user-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .actions {
   white-space: nowrap;
   display: flex;
   gap: 6px;
+  align-items: center;
+  overflow: visible;
+}
+
+.delete-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.delete-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(16, 16, 16, 0.16);
+  z-index: 20;
+}
+
+.delete-popover p {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #444;
+  white-space: normal;
+}
+
+.delete-popover-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.delete-popover-actions button {
+  flex: 1;
 }
 
 .role-chips {
@@ -65,8 +188,204 @@
   color: #264179;
 }
 
+.chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  background: rgba(48, 80, 144, 0.15);
+  color: #264179;
+}
+
 .roles-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .desktop-users-view {
+    display: none;
+  }
+
+  .mobile-users-view {
+    display: block;
+  }
+
+  .users-container {
+    padding: 6px;
+  }
+
+  .users-header {
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .users-header h2 {
+    font-size: clamp(16px, 2.2vw, 22px);
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .icon-filter-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .filter-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .users-list {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+
+  .user-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .user-info h4 {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .user-info p {
+    font-size: 12px;
+  }
+
+  .user-detail-badges {
+    gap: 4px;
+  }
+
+  .user-actions {
+    gap: 4px;
+  }
+
+  .actions {
+    gap: 4px;
+  }
+
+  .role-chip {
+    padding: 3px 6px;
+    font-size: 10px;
+  }
+
+  .chip {
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+
+  .roles-grid {
+    gap: 6px;
+  }
+}
+
+@media (max-width: 600px) {
+  .users-container {
+    padding: 4px;
+  }
+
+  .users-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+
+  .users-header h2 {
+    font-size: clamp(14px, 3vw, 18px);
+    width: 100%;
+  }
+
+  .header-actions {
+    width: 100%;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .icon-filter-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .users-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .user-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    border-radius: 8px;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .user-info {
+    width: 100%;
+  }
+
+  .user-info h4 {
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .user-info p {
+    font-size: 11px;
+    display: block;
+  }
+
+  .user-detail-badges {
+    width: 100%;
+    gap: 4px;
+  }
+
+  .user-actions {
+    width: 100%;
+    gap: 4px;
+  }
+
+  .user-actions button {
+    flex: 1;
+  }
+
+  .actions {
+    gap: 3px;
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .delete-menu {
+    width: 100%;
+  }
+
+  .delete-popover {
+    left: 0;
+    right: auto;
+    width: 100%;
+  }
+
+  .role-chip {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .chip {
+    padding: 3px 8px;
+    font-size: 10px;
+  }
+
+  .roles-grid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
 }

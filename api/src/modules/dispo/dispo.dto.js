@@ -20,7 +20,7 @@ function ensureObject(payload, entityName) {
 }
 
 function normalizeBoolean(value, fieldName) {
-  if (value === undefined) return undefined
+  if (value === undefined || value === null) return undefined
 
   if (typeof value === 'boolean') return value
 
@@ -93,6 +93,12 @@ function validateCustomState({ isCustom, customText }) {
   }
 }
 
+function validateResponseCoherence({ response, fullHorari }) {
+  if (response === false && fullHorari === true) {
+    throw createDispoDtoError('No puedes estar disponible todo el horario si tu respuesta es "No disponible".')
+  }
+}
+
 function buildRespuestaCreateDto(payload) {
   ensureObject(payload, 'respuesta')
 
@@ -110,6 +116,7 @@ function buildRespuestaCreateDto(payload) {
   }
 
   validateCustomState(dto)
+  validateResponseCoherence(dto)
 
   return dto
 }
@@ -145,6 +152,21 @@ function buildRespuestaUpdateDto(payload) {
 
   if (Object.keys(dto).length === 0) {
     throw createDispoDtoError('Debes enviar al menos un campo para actualizar la respuesta.')
+  }
+
+  // Validar coherencia de campos si se están actualizando
+  if (dto.isCustom !== undefined || dto.customText !== undefined) {
+    validateCustomState({
+      isCustom: dto.isCustom ?? payload.isCustom,
+      customText: dto.customText ?? payload.customText,
+    })
+  }
+
+  if (dto.response !== undefined || dto.fullHorari !== undefined) {
+    validateResponseCoherence({
+      response: dto.response ?? payload.response,
+      fullHorari: dto.fullHorari ?? payload.fullHorari,
+    })
   }
 
   return dto

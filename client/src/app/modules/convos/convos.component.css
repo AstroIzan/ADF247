@@ -160,3 +160,331 @@
   background: #f3ead2;
   color: #7a5a10;
 }
+
+.desktop-convos-view {
+  display: block;
+}
+
+.mobile-convos-view {
+  display: none;
+}
+
+.convos-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+
+.convo-card {
+  background:
+    linear-gradient(135deg, rgba(240, 176, 0, 0.14) 0%, rgba(240, 176, 0, 0.05) 65%),
+    #fff;
+  border: 1px solid #d8d8d8;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  gap: 12px;
+}
+
+.convo-card:hover {
+  border-color: #f0b000;
+  box-shadow: 0 8px 16px rgba(207, 143, 0, 0.15);
+}
+
+.convo-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.convo-info h4 {
+  margin: 0 0 5px 0;
+  font-size: 17px;
+  color: #222;
+}
+
+.convo-info p {
+  margin: 0 0 5px 0;
+  font-size: 13px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.convo-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.convo-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.delete-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+.delete-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 230px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  box-shadow: 0 12px 24px rgba(16, 16, 16, 0.16);
+  z-index: 20;
+}
+
+.delete-popover p {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #444;
+  white-space: normal;
+}
+
+.delete-popover-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.delete-popover-actions button {
+  flex: 1;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .desktop-convos-view {
+    display: none;
+  }
+
+  .mobile-convos-view {
+    display: block;
+  }
+
+  .convos-container {
+    padding: 6px;
+  }
+
+  .convos-header {
+    margin-bottom: 10px;
+    gap: 10px;
+  }
+
+  .convos-header h2 {
+    font-size: clamp(16px, 2.2vw, 22px);
+  }
+
+  .header-actions {
+    gap: 6px;
+  }
+
+  .icon-filter-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .filter-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  .convos-list {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 8px;
+  }
+
+  .convo-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .convo-info h4 {
+    font-size: 15px;
+    margin-bottom: 4px;
+  }
+
+  .convo-info p {
+    font-size: 12px;
+  }
+
+  .convo-badges {
+    gap: 4px;
+  }
+
+  .convo-actions {
+    gap: 4px;
+  }
+
+  .delete-menu {
+    width: 100%;
+  }
+
+  .delete-popover {
+    left: 0;
+    right: auto;
+    width: min(260px, 100%);
+  }
+
+  .actions {
+    gap: 4px;
+  }
+
+  .time-field input[type='time'] {
+    font-size: 12px;
+  }
+
+  .time-picker-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .time-picker-icon {
+    width: 14px;
+    height: 14px;
+  }
+
+  .incendi-ready-btn {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .badge-sortida-yes,
+  .badge-sortida-no,
+  .badge-active,
+  .badge-inactive {
+    min-width: 48px;
+    padding: 4px 8px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .convos-container {
+    padding: 4px;
+  }
+
+  .convos-header {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 8px;
+    gap: 8px;
+  }
+
+  .convos-header h2 {
+    font-size: clamp(14px, 3vw, 18px);
+    width: 100%;
+  }
+
+  .header-actions {
+    width: 100%;
+    gap: 4px;
+    flex-wrap: wrap;
+  }
+
+  .icon-filter-btn {
+    width: 30px;
+    height: 30px;
+  }
+
+  .actions {
+    flex: 1;
+    gap: 3px;
+  }
+
+  .time-field {
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .time-field input[type='time'] {
+    width: 100%;
+    font-size: 13px;
+    padding: 6px;
+  }
+
+  .time-picker-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px;
+    height: auto;
+  }
+
+  .incendi-ready-row {
+    width: 100%;
+    gap: 6px;
+  }
+
+  .incendi-ready-btn {
+    flex: 1;
+    min-width: calc(50% - 3px);
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .badge-sortida-yes,
+  .badge-sortida-no,
+  .badge-active,
+  .badge-inactive {
+    min-width: 40px;
+    padding: 4px 6px;
+    font-size: 9px;
+  }
+
+  .convos-list {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .convo-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+    border-radius: 8px;
+    gap: 8px;
+    justify-content: flex-start;
+  }
+
+  .convo-info {
+    width: 100%;
+  }
+
+  .convo-info h4 {
+    font-size: 14px;
+    margin-bottom: 3px;
+  }
+
+  .convo-info p {
+    font-size: 11px;
+    display: block;
+  }
+
+  .convo-badges {
+    width: 100%;
+    gap: 4px;
+  }
+
+  .convo-actions {
+    width: 100%;
+    gap: 4px;
+  }
+
+  .convo-actions button {
+    flex: 1;
+  }
+
+  .delete-popover {
+    width: 100%;
+  }
+}

@@ -16,7 +16,7 @@
   @if (loading()) {
     <div class="loading">Carregant convocatòries...</div>
   } @else if (filteredConvocatorias().length > 0) {
-    <div class="table-responsive">
+    <div class="desktop-convos-view table-responsive">
       <table class="convos-table">
         <thead>
           <tr>
@@ -37,7 +37,7 @@
               <td>{{ formatDate(convo.date) }}</td>
               <td>{{ convo.title }}</td>
               <td>{{ getConvoTypeName(convo.convoTypeId) }}</td>
-              <td>{{ convo.ubiSortida }}</td>
+              <td>{{ convo.ubiSortida || '-' }}</td>
               <td>{{ getUserName(convo.responsableId) }}</td>
               <td>{{ convo.responseCount || 0 }}</td>
               <td>
@@ -52,17 +52,61 @@
               </td>
               <td class="actions">
                 <button (click)="openForm(convo)" class="btn btn-sm btn-edit">Editar</button>
-                @if (deleteConfirming() === convo.id) {
-                  <button (click)="deleteConvocatoria(convo.id)" class="btn btn-sm btn-danger">Confirmar</button>
-                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
-                } @else {
-                  <button (click)="deleteConvocatoria(convo.id)" class="btn btn-sm btn-danger">Eliminar</button>
-                }
+                <div class="delete-menu">
+                  <button (click)="requestDelete(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                  @if (deleteConfirming() === convo.id) {
+                    <div class="delete-popover" (click)="$event.stopPropagation()">
+                      <p>Vols eliminar aquesta convocatòria?</p>
+                      <div class="delete-popover-actions">
+                        <button (click)="deleteConvocatoria(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                        <button (click)="cancelDelete(); $event.stopPropagation()" class="btn btn-sm btn-secondary">Cancel·lar</button>
+                      </div>
+                    </div>
+                  }
+                </div>
               </td>
             </tr>
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="mobile-convos-view">
+      <div class="convos-list">
+        @for (convo of filteredConvocatorias(); track convo.id) {
+          <div class="convo-card" (click)="selectedConvo.set(convo)">
+            <div class="convo-info">
+              <h4>{{ convo.title }}</h4>
+              <p>{{ formatDate(convo.date) }}</p>
+              <p>{{ getConvoTypeName(convo.convoTypeId) }}</p>
+              <div class="convo-badges">
+                <span [class]="convo.sortida ? 'badge-sortida-yes' : 'badge-sortida-no'">
+                  {{ getSortidaCardLabel(convo.sortida) }}
+                </span>
+                <span [class]="convo.isActive ? 'badge-active' : 'badge-inactive'">
+                  {{ convo.isActive ? 'Activa' : 'Inactiva' }}
+                </span>
+              </div>
+            </div>
+
+            <div class="convo-actions">
+              <button (click)="openForm(convo); $event.stopPropagation();" class="btn btn-sm btn-edit">Editar</button>
+              <div class="delete-menu">
+                <button (click)="requestDelete(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                @if (deleteConfirming() === convo.id) {
+                  <div class="delete-popover" (click)="$event.stopPropagation()">
+                    <p>Vols eliminar aquesta convocatòria?</p>
+                    <div class="delete-popover-actions">
+                      <button (click)="deleteConvocatoria(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                      <button (click)="cancelDelete(); $event.stopPropagation()" class="btn btn-sm btn-secondary">Cancel·lar</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     </div>
   } @else {
     <div class="empty-state">No hi ha convocatòries amb els filtres aplicats</div>
@@ -333,6 +377,78 @@
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
             {{ formSubmitting() ? 'Desant...' : 'Desar' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (selectedConvo()) {
+    <div class="modal-overlay" (click)="selectedConvo.set(null)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Detalls de la Convocatòria</h3>
+          <button (click)="selectedConvo.set(null)" class="btn-close" aria-label="Close">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-group">
+            <label>Títol</label>
+            <p>{{ selectedConvo()?.title || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Data</label>
+            <p>{{ (selectedConvo()?.date | date: 'dd/MM/yyyy') || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Tipus de Convocatòria</label>
+            <p>{{ getConvoTypeName(selectedConvo()?.convoTypeId) || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Ubicació Sortida</label>
+            <p>{{ selectedConvo()?.ubiSortida || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Responsable</label>
+            <p>{{ getUserName(selectedConvo()?.responsableId) || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Respostes</label>
+            <p>{{ selectedConvo()?.responseCount || 0 }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Sortida</label>
+            <p>
+              <span [class]="selectedConvo()?.sortida ? 'badge-sortida-yes' : 'badge-sortida-no'">
+                {{ getSortidaLabel(selectedConvo()?.sortida) }}
+              </span>
+            </p>
+          </div>
+
+          <div class="detail-group">
+            <label>Estat</label>
+            <p>
+              <span [class]="selectedConvo()?.isActive ? 'badge-active' : 'badge-inactive'">
+                {{ selectedConvo()?.isActive ? 'Activa' : 'Inactiva' }}
+              </span>
+            </p>
+          </div>
+
+          @if (selectedConvo()?.moreThan2) {
+            <div class="detail-group">
+              <label>Més de 2 Participants</label>
+              <p>Sí</p>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="selectedConvo.set(null)" class="btn btn-secondary">Tancar</button>
         </div>
       </div>
     </div>

@@ -16,11 +16,11 @@
   @if (loading()) {
     <div class="loading">Carregant usuaris...</div>
   } @else if (filteredUsers().length > 0) {
-    <div class="table-responsive">
+    <div class="desktop-users-view table-responsive">
       <table class="users-table">
         <thead>
           <tr>
-            <th>Nº Carnet</th>
+            <th>Carnet</th>
             <th>Indicatiu</th>
             <th>Nom</th>
             <th>Cognoms</th>
@@ -32,20 +32,16 @@
         <tbody>
           @for (user of filteredUsers(); track user.id) {
             <tr>
-              <td>{{ user.nCarnet }}</td>
+              <td>{{ user.nCarnet || '-' }}</td>
               <td>{{ user.nIndicatiu || '-' }}</td>
-              <td>{{ user.name }}</td>
+              <td>{{ user.name || '-' }}</td>
               <td>{{ user.lastName || '-' }}</td>
               <td>
-                @if (getRoleLabels(user).length === 0) {
-                  <span>-</span>
-                } @else {
-                  <div class="role-chips">
-                    @for (label of getRoleLabels(user); track label) {
-                      <span class="role-chip">{{ label }}</span>
-                    }
-                  </div>
-                }
+                <div class="role-chips">
+                  @for (label of getRoleLabels(user); track label) {
+                    <span class="role-chip">{{ label }}</span>
+                  }
+                </div>
               </td>
               <td>
                 <span [class]="user.isActive ? 'badge-active' : 'badge-inactive'">
@@ -54,17 +50,64 @@
               </td>
               <td class="actions">
                 <button (click)="openForm(user)" class="btn btn-sm btn-edit">Editar</button>
-                @if (deleteConfirming() === user.id) {
-                  <button (click)="deleteUser(user.id)" class="btn btn-sm btn-danger">Confirmar</button>
-                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
-                } @else {
-                  <button (click)="deleteUser(user.id)" class="btn btn-sm btn-danger">Eliminar</button>
-                }
+                <div class="delete-menu">
+                  <button (click)="requestDelete(user.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                  @if (deleteConfirming() === user.id) {
+                    <div class="delete-popover" (click)="$event.stopPropagation()">
+                      <p>Vols eliminar aquest usuari?</p>
+                      <div class="delete-popover-actions">
+                        <button (click)="deleteUser(user.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                        <button (click)="cancelDelete(); $event.stopPropagation()" class="btn btn-sm btn-secondary">Cancel·lar</button>
+                      </div>
+                    </div>
+                  }
+                </div>
               </td>
             </tr>
           }
         </tbody>
       </table>
+    </div>
+
+    <div class="mobile-users-view">
+      <div class="users-list">
+        @for (user of filteredUsers(); track user.id) {
+          <div class="user-card" (click)="selectedUser.set(user)">
+            <div class="user-info">
+              <h4>{{ user.name }} {{ user.lastName }}</h4>
+              <p class="user-carnet">{{ user.nCarnet }}</p>
+              @if (user.nIndicatiu) {
+                <p class="user-indicatiu">{{ user.nIndicatiu }}</p>
+              }
+              <div class="user-detail-badges">
+                <span [class]="'badge ' + (user.isActive ? 'badge-active' : 'badge-inactive')">
+                  {{ user.isActive ? 'Actiu' : 'Inactiu' }}
+                </span>
+                @if (getRoleLabels(user).length > 0) {
+                  @for (label of getRoleLabels(user); track label) {
+                    <span class="role-chip">{{ label }}</span>
+                  }
+                }
+              </div>
+            </div>
+            <div class="user-actions">
+              <button (click)="openForm(user); $event.stopPropagation()" class="btn btn-sm btn-edit">Editar</button>
+              <div class="delete-menu">
+                <button (click)="requestDelete(user.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                @if (deleteConfirming() === user.id) {
+                  <div class="delete-popover" (click)="$event.stopPropagation()">
+                    <p>Vols eliminar aquest usuari?</p>
+                    <div class="delete-popover-actions">
+                      <button (click)="deleteUser(user.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
+                      <button (click)="cancelDelete(); $event.stopPropagation()" class="btn btn-sm btn-secondary">Cancel·lar</button>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
     </div>
   } @else {
     <div class="empty-state">No hi ha usuaris amb els filtres aplicats</div>
@@ -239,6 +282,66 @@
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
             {{ formSubmitting() ? 'Guardant...' : 'Desar' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (selectedUser()) {
+    <div class="modal-overlay" (click)="selectedUser.set(null)">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Detalls de l'Usuari</h3>
+          <button (click)="selectedUser.set(null)" class="btn-close" aria-label="Close">×</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="detail-group">
+            <label>Carnet de Soci</label>
+            <p>{{ selectedUser()?.nCarnet || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Indicatiu</label>
+            <p>{{ selectedUser()?.nIndicatiu || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Nom</label>
+            <p>{{ selectedUser()?.name || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Cognoms</label>
+            <p>{{ selectedUser()?.lastName || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Estat</label>
+            <p>
+              <span [class]="selectedUser()?.isActive ? 'badge-active' : 'badge-inactive'">
+                {{ selectedUser()?.isActive !== false ? 'Actiu' : 'Inactiu' }}
+              </span>
+            </p>
+          </div>
+
+          <div class="detail-group">
+            <label>Rols</label>
+            <div class="role-chips">
+              @for (role of selectedUser()?.roles || []; track role) {
+                <span class="chip">{{ role }}</span>
+              }
+            </div>
+          </div>
+
+          <div class="detail-group">
+            <label>Data de Creació</label>
+            <p>{{ (selectedUser()?.createdAt | date: 'dd/MM/yyyy HH:mm') || '-' }}</p>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="selectedUser.set(null)" class="btn btn-secondary">Tancar</button>
         </div>
       </div>
     </div>

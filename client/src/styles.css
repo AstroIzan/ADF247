@@ -1,3 +1,4 @@
+/* Updated: Card layout responsive redesign - March 23 2026 */
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap');
 
 :root {
@@ -47,6 +48,28 @@ body {
 		radial-gradient(circle at 5% 5%, rgba(240, 176, 0, 0.28), transparent 28%),
 		radial-gradient(circle at 95% 12%, rgba(63, 138, 70, 0.14), transparent 22%),
 		linear-gradient(180deg, #f8f8f8 0%, var(--bg) 60%, #ececec 100%);
+}
+
+body.modal-open {
+	overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track {
+	background: #f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+	background: #d0d0d0;
+	border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: #b0b0b0;
 }
 
 button,

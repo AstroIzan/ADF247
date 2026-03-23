@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Respuesta, Convocatoria, User } from '../../services/data.service';
@@ -10,7 +10,7 @@ import { DataService, Respuesta, Convocatoria, User } from '../../services/data.
   templateUrl: './respuestas.component.html',
   styleUrl: './respuestas.component.css'
 })
-export class RespuestasComponent {
+export class RespuestasComponent implements OnDestroy {
   respuestas = input<Respuesta[]>([]);
   convocatorias = input<Convocatoria[]>([]);
   users = input<User[]>([]);
@@ -23,6 +23,7 @@ export class RespuestasComponent {
   editingId = signal<number | null>(null);
   formSubmitting = signal(false);
   deleteConfirming = signal<number | null>(null);
+  selectedRespuesta = signal<Respuesta | null>(null);
 
   filters = signal({
     response: 'all',
@@ -112,10 +113,12 @@ export class RespuestasComponent {
       });
     }
     this.showForm.set(true);
+    document.body.classList.add('modal-open');
   }
 
   closeForm() {
     this.showForm.set(false);
+    document.body.classList.remove('modal-open');
   }
 
   submitForm() {
@@ -155,20 +158,20 @@ export class RespuestasComponent {
     }
   }
 
+  requestDelete(id: number) {
+    this.deleteConfirming.set(id);
+  }
+
   deleteRespuesta(id: number) {
-    if (this.deleteConfirming() === id) {
-      this.dataService.deleteRespuesta(id).subscribe({
-        next: () => {
-          this.deleteConfirming.set(null);
-          this.onChanged.emit();
-        },
-        error: (err) => {
-          alert('Error en eliminar: ' + err.message);
-        }
-      });
-    } else {
-      this.deleteConfirming.set(id);
-    }
+    this.dataService.deleteRespuesta(id).subscribe({
+      next: () => {
+        this.deleteConfirming.set(null);
+        this.onChanged.emit();
+      },
+      error: (err) => {
+        alert('Error en eliminar: ' + err.message);
+      }
+    });
   }
 
   cancelDelete() {
@@ -191,5 +194,9 @@ export class RespuestasComponent {
     if (!nCarnet) return '-';
     const user = this.users().find((u) => u.nCarnet === nCarnet);
     return user ? `${user.name} ${user.lastName || ''}` : nCarnet;
+  }
+
+  ngOnDestroy() {
+    document.body.classList.remove('modal-open');
   }
 }

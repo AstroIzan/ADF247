@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, User } from '../../services/data.service';
@@ -10,7 +10,7 @@ import { DataService, User } from '../../services/data.service';
   templateUrl: './users.component.html',
   styleUrl: './users.component.css'
 })
-export class UsersComponent {
+export class UsersComponent implements OnDestroy {
   users = input<User[]>([]);
   loading = input(false);
   error = input('');
@@ -21,6 +21,7 @@ export class UsersComponent {
   editingId = signal<number | null>(null);
   formSubmitting = signal(false);
   deleteConfirming = signal<number | null>(null);
+  selectedUser = signal<User | null>(null);
 
   filters = signal({
     name: '',
@@ -124,10 +125,12 @@ export class UsersComponent {
       });
     }
     this.showForm.set(true);
+    document.body.classList.add('modal-open');
   }
 
   closeForm() {
     this.showForm.set(false);
+    document.body.classList.remove('modal-open');
   }
 
   submitForm() {
@@ -167,20 +170,20 @@ export class UsersComponent {
     }
   }
 
+  requestDelete(id: number) {
+    this.deleteConfirming.set(id);
+  }
+
   deleteUser(id: number) {
-    if (this.deleteConfirming() === id) {
-      this.dataService.deleteUser(id).subscribe({
-        next: () => {
-          this.deleteConfirming.set(null);
-          this.onChanged.emit();
-        },
-        error: (err) => {
-          alert('Error en eliminar: ' + err.message);
-        }
-      });
-    } else {
-      this.deleteConfirming.set(id);
-    }
+    this.dataService.deleteUser(id).subscribe({
+      next: () => {
+        this.deleteConfirming.set(null);
+        this.onChanged.emit();
+      },
+      error: (err) => {
+        alert('Error en eliminar: ' + err.message);
+      }
+    });
   }
 
   cancelDelete() {
@@ -220,5 +223,9 @@ export class UsersComponent {
     if (user.roles?.isCapOperatiu) labels.push('Cap Operatiu');
 
     return labels;
+  }
+
+  ngOnDestroy() {
+    document.body.classList.remove('modal-open');
   }
 }

@@ -228,36 +228,38 @@
             </label>
           </div>
 
-          <div class="form-group">
-            <label>Horari personalitzat (opcional)</label>
-            <div class="time-range-row">
-              <div class="time-field">
-                <input
-                  #customStartTimeInput
-                  type="time"
-                  step="60"
-                  [value]="customResponse().customStartTime"
-                  (change)="updateCustomField('customStartTime', $any($event.target).value)"
-                />
-                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customStartTimeInput, 'customStartTime')">
-                  <span class="time-picker-icon" aria-hidden="true"></span>
-                </button>
-              </div>
-              <span>a</span>
-              <div class="time-field">
-                <input
-                  #customEndTimeInput
-                  type="time"
-                  step="60"
-                  [value]="customResponse().customEndTime"
-                  (change)="updateCustomField('customEndTime', $any($event.target).value)"
-                />
-                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customEndTimeInput, 'customEndTime')">
-                  <span class="time-picker-icon" aria-hidden="true"></span>
-                </button>
+          @if (!customResponse().fullHorari) {
+            <div class="form-group">
+              <label>Horari personalitzat (opcional)</label>
+              <div class="time-range-row">
+                <div class="time-field">
+                  <input
+                    #customStartTimeInput
+                    type="time"
+                    step="60"
+                    [value]="customResponse().customStartTime"
+                    (change)="updateCustomField('customStartTime', $any($event.target).value)"
+                  />
+                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customStartTimeInput, 'customStartTime')">
+                    <span class="time-picker-icon" aria-hidden="true"></span>
+                  </button>
+                </div>
+                <span>a</span>
+                <div class="time-field">
+                  <input
+                    #customEndTimeInput
+                    type="time"
+                    step="60"
+                    [value]="customResponse().customEndTime"
+                    (change)="updateCustomField('customEndTime', $any($event.target).value)"
+                  />
+                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customEndTimeInput, 'customEndTime')">
+                    <span class="time-picker-icon" aria-hidden="true"></span>
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
+          }
 
           <div class="form-group">
             <label>Comentari personalitzat (opcional)</label>

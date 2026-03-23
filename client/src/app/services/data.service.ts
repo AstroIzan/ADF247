@@ -57,6 +57,8 @@ export interface Respuesta {
   isCustom: boolean;
   customText?: string | null;
   fullHorari: boolean;
+  createdAt?: string;
+  updatedAt?: string;
   convocatoria?: Convocatoria;
   user?: User;
 }

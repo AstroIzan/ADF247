@@ -213,10 +213,6 @@ async function updateRespuesta(id, payload) {
     ...updateDto,
   }
 
-  if (mergedCustomState.isCustom === false) {
-    finalData.customText = null
-  }
-
   try {
     const respuesta = await database.respuesta.update({
       where: { id },

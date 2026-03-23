@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Convocatoria, ConvoType, User } from '../../services/data.service';
@@ -14,7 +14,7 @@ type ConvocatoriaFormData = Partial<Convocatoria> & {
   templateUrl: './convos.component.html',
   styleUrl: './convos.component.css'
 })
-export class ConvosComponent {
+export class ConvosComponent implements OnDestroy {
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
   readonly todayDate = this.toDateInputValue(new Date());
   convocatorias = input<Convocatoria[]>([]);
@@ -31,6 +31,7 @@ export class ConvosComponent {
   editingId = signal<number | null>(null);
   formSubmitting = signal(false);
   deleteConfirming = signal<number | null>(null);
+  selectedConvo = signal<Convocatoria | null>(null);
   showTimeMenu = signal(false);
   timeMenuHour = signal('');
   timeMenuMinute = signal('');
@@ -132,10 +133,12 @@ export class ConvosComponent {
       });
     }
     this.showForm.set(true);
+    document.body.classList.add('modal-open');
   }
 
   closeForm() {
     this.showForm.set(false);
+    document.body.classList.remove('modal-open');
   }
 
   submitForm() {
@@ -243,21 +246,20 @@ export class ConvosComponent {
     }
   }
 
+  requestDelete(id: number) {
+    this.deleteConfirming.set(id);
+  }
+
   deleteConvocatoria(id: number) {
-    if (this.deleteConfirming() === id) {
-      this.dataService.deleteConvocatoria(id).subscribe({
-        next: () => {
-          this.deleteConfirming.set(null);
-          // Emitir null para indicar que debe hacer reload
-          this.onChanged.emit(null as any);
-        },
-        error: (err) => {
-          alert('Error en eliminar: ' + err.message);
-        }
-      });
-    } else {
-      this.deleteConfirming.set(id);
-    }
+    this.dataService.deleteConvocatoria(id).subscribe({
+      next: () => {
+        this.deleteConfirming.set(null);
+        this.onChanged.emit(null as any);
+      },
+      error: (err) => {
+        alert('Error en eliminar: ' + err.message);
+      }
+    });
   }
 
   cancelDelete() {
@@ -317,6 +319,10 @@ export class ConvosComponent {
     });
   }
 
+  ngOnDestroy() {
+    document.body.classList.remove('modal-open');
+  }
+
   isIncendiTypeSelected(): boolean {
     const convoTypeId = Number(this.formData().convoTypeId);
     return this.isIncendiTypeById(convoTypeId);
@@ -340,6 +346,10 @@ export class ConvosComponent {
 
   getSortidaLabel(sortida?: boolean): string {
     return sortida ? 'Sí' : 'No';
+  }
+
+  getSortidaCardLabel(sortida?: boolean): string {
+    return sortida ? 'Se surt' : 'No se surt';
   }
 
   openTimePicker(input: HTMLInputElement, field: 'startTime' | 'finalTime') {

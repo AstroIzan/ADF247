@@ -152,6 +152,8 @@
 
 .day-number {
   position: relative;
+  font-size: clamp(13px, 1.3vw, 16px);
+  font-weight: 700;
 }
 
 .day-markers {
@@ -578,6 +580,12 @@
   font-size: 14px;
 }
 
+@media (max-width: 1024px) {
+  .home-container {
+    padding: 16px;
+  }
+}
+
 @media (max-width: 980px) {
   .home-grid {
     grid-template-columns: 1fr;
@@ -586,13 +594,138 @@
   .home-header {
     align-items: stretch;
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .home-header-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .home-container {
+    padding: 12px;
+  }
+
+  .home-header {
+    gap: 10px;
+  }
+
+  .home-header-left h1 {
+    font-size: clamp(18px, 5vw, 24px);
+  }
+
+  .calendar-card,
+  .convos-card {
+    padding: 12px;
+    border-radius: 10px;
+  }
+
+  .calendar-toolbar {
+    margin-bottom: 6px;
+  }
+
+  .month-btn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .calendar-toolbar h3 {
+    font-size: 12px;
+  }
+
+  .calendar-legend {
+    font-size: 10px;
+    gap: 8px;
+  }
+
+  .legend-dot {
+    width: 6px;
+    height: 6px;
+  }
+
+  .answer-status {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+
+  .response-counter {
+    min-width: 24px;
+    height: 20px;
+    padding: 0 6px;
+    font-size: 11px;
   }
 }
 
 @media (max-width: 560px) {
-  .day-cell { min-height: 32px; font-size: 11px; align-items: center; justify-content: center; }
-  .day-markers { bottom: 3px; }
-  .marker { width: 8px; height: 8px; min-width: 8px; padding: 0; font-size: 0; }
+  .home-container {
+    padding: 8px;
+  }
+
+  .day-cell { 
+    min-height: 28px; 
+    font-size: 10px; 
+    align-items: center; 
+    justify-content: center;
+    padding: 4px 2px;
+  }
+
+  .day-markers { 
+    bottom: 2px; 
+  }
+
+  .marker { 
+    width: 6px; 
+    height: 6px; 
+    min-width: 6px; 
+    padding: 0; 
+    font-size: 0;
+    border-width: 0.5px;
+  }
+
+  .calendar-toolbar {
+    margin-bottom: 4px;
+  }
+
+  .calendar-toolbar h3 {
+    font-size: 11px;
+  }
+
+  .month-btn {
+    width: 26px;
+    height: 26px;
+    font-size: 11px;
+  }
+
+  .weekdays span {
+    font-size: 9px;
+  }
+
+  .days-grid {
+    gap: 2px;
+  }
+
+  .weekdays {
+    gap: 2px;
+    margin-bottom: 2px;
+  }
+
+  .calendar-legend {
+    font-size: 9px;
+    gap: 6px;
+  }
+
+  .legend-dot {
+    width: 5px;
+    height: 5px;
+  }
+
+  .convo-top {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
 
   .convo-bottom-row,
   .answer-actions {
@@ -616,5 +749,70 @@
   .time-range-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .calendar-card,
+  .convos-card {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .convos-list li {
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .convos-list h3 {
+    font-size: 14px;
+    margin: 0 0 6px;
+  }
+
+  .convos-list p {
+    font-size: 12px;
+    margin: 2px 0;
+  }
+
+  .answer-actions-answered {
+    flex-direction: column;
+  }
+
+  .btn-xs {
+    padding: 4px 8px;
+    font-size: 11px;
+    width: 100%;
+  }
+
+  .custom-choice-row {
+    flex-direction: column;
+  }
+
+  .custom-choice-row .btn {
+    width: 100%;
+  }
+
+  .time-field input[type='time'] {
+    padding: 6px;
+    font-size: 12px;
+  }
+
+  .time-picker-btn {
+    width: 32px;
+    height: 32px;
+  }
+
+  .time-range-row span {
+    font-size: 12px;
+  }
+
+  .response-counter {
+    min-width: 20px;
+    height: 18px;
+    padding: 0 4px;
+    font-size: 10px;
+  }
+
+  .answer-status {
+    font-size: 10px;
+    padding: 3px 6px;
   }
 }

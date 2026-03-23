@@ -238,4 +238,29 @@ export class AuthService {
 
     return Boolean(roles.isAdmin);
   }
+
+  updateCachedUser(updatedUser: any): void {
+    // Actualizar la signal de usuario actual
+    if (this.currentUser()) {
+      const user = this.currentUser()!;
+      const merged = {
+        ...user,
+        name: updatedUser.name || user.name,
+        lastName: updatedUser.lastName || user.lastName,
+        nIndicatiu: updatedUser.nIndicatiu !== undefined ? updatedUser.nIndicatiu : user.nIndicatiu,
+        nCarnet: updatedUser.nCarnet || user.nCarnet,
+        roles: updatedUser.roles || user.roles,
+      };
+      this.currentUser.set(merged);
+
+      // Actualizar localStorage
+      localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+
+      // Actualizar el caché básico
+      if (this.currentUser()) {
+        const basic = this.buildBasicUserCache(this.currentUser()!);
+        localStorage.setItem(this.BASIC_USER_CACHE_KEY, JSON.stringify(basic));
+      }
+    }
+  }
 }

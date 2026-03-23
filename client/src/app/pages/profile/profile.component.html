@@ -1,0 +1,198 @@
+<!-- Modal Overlay -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()"></div>
+
+  <!-- Modal Content -->
+  <div class="modal-dialog profile-modal">
+    <div class="modal-header">
+      <h2>Editar Perfil</h2>
+      <button class="close-btn" (click)="closeModal()" aria-label="Tancar">&times;</button>
+    </div>
+
+    <div class="modal-body">
+      <!-- Error Message -->
+      @if (errorMessage()) {
+        <div class="alert alert-danger">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Success Message -->
+      @if (successMessage()) {
+        <div class="alert alert-success">
+          {{ successMessage() }}
+        </div>
+      }
+
+      <form (ngSubmit)="saveChanges()">
+        <!-- Admin: nCarnet (read-only) -->
+        @if (authService.isAdmin()) {
+          <div class="form-group">
+            <label>Número de Carnet (no editable)</label>
+            <input
+              type="text"
+              class="form-control"
+              [value]="formData().nCarnet"
+              disabled
+              readonly
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Indicatiu (opcional)</label>
+            <input
+              type="text"
+              class="form-control"
+              [(ngModel)]="formData().nIndicatiu"
+              name="nIndicatiu"
+              placeholder="Ex: 123A"
+            />
+          </div>
+        }
+
+        <!-- Name (tous) -->
+        <div class="form-group">
+          <label>Nom *</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData().name"
+            name="name"
+            placeholder="Escriu el teu nom"
+            required
+          />
+        </div>
+
+        <!-- Last Name (tous) -->
+        <div class="form-group">
+          <label>Cognoms</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="formData().lastName"
+            name="lastName"
+            placeholder="Escriu els teus cognoms"
+          />
+        </div>
+
+        <!-- Admin: isActive -->
+        @if (authService.isAdmin()) {
+          <div class="form-group checkbox-group">
+            <label class="checkbox-label">
+              <input
+                type="checkbox"
+                [(ngModel)]="formData().isActive"
+                name="isActive"
+              />
+              Usuari actiu
+            </label>
+          </div>
+        }
+
+        <!-- Admin: Roles (Permisos) -->
+        @if (authService.isAdmin()) {
+          <div class="roles-section">
+            <h4>Permisos (Rols)</h4>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isAdmin"
+                  (change)="toggleRole('isAdmin')"
+                  name="isAdmin"
+                />
+                {{ getRoleLabel('isAdmin') }}
+              </label>
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isGroc"
+                  (change)="toggleRole('isGroc')"
+                  name="isGroc"
+                />
+                {{ getRoleLabel('isGroc') }}
+              </label>
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isCapColla"
+                  (change)="toggleRole('isCapColla')"
+                  name="isCapColla"
+                />
+                {{ getRoleLabel('isCapColla') }}
+              </label>
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isCapOperatiu"
+                  (change)="toggleRole('isCapOperatiu')"
+                  name="isCapOperatiu"
+                />
+                {{ getRoleLabel('isCapOperatiu') }}
+              </label>
+            </div>
+          </div>
+        }
+
+        <!-- Password Section (tous) -->
+        <div class="password-section">
+          <h4>Contrasenya (opcional)</h4>
+          <p class="hint">Deixa en blanc si no vols canviar-la</p>
+
+          <div class="form-group">
+            <label>Nova Contrasenya</label>
+            <input
+              type="password"
+              class="form-control"
+              [(ngModel)]="formData().password"
+              name="password"
+              (input)="onPasswordChange()"
+              placeholder="Escriu una contrasenya nova (mínim 6 caràcters)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Confirmar Contrasenya</label>
+            <input
+              type="password"
+              class="form-control"
+              [class.is-invalid]="
+                passwordError() && (formData().password || formData().passwordConfirm)
+              "
+              [(ngModel)]="formData().passwordConfirm"
+              name="passwordConfirm"
+              (input)="onPasswordChange()"
+              placeholder="Confirma la nova contrasenya"
+            />
+            @if (passwordError() && (formData().password || formData().passwordConfirm)) {
+              <div class="error-text">
+                {{ passwordError() }}
+              </div>
+            }
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        class="btn btn-secondary"
+        (click)="closeModal()"
+        [disabled]="isLoading()"
+      >
+        Cancel·lar
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="saveChanges()"
+        [disabled]="isLoading() || !!passwordError()"
+      >
+        @if (isLoading()) {
+          Guardant...
+        } @else {
+          Desar
+        }
+      </button>
+    </div>
+  </div>
+}

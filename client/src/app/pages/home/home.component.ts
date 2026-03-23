@@ -341,7 +341,7 @@ export class HomeComponent implements OnInit {
     this.respondingConvoId.set(convoId);
 
     if (existing) {
-      this.dataService.updateRespuesta(existing.id, { response: canAttend }).subscribe({
+      this.dataService.updateRespuesta(existing.id, { response: canAttend, fullHorari: canAttend }).subscribe({
         next: () => {
           this.loadRespuestas();
           this.respondingConvoId.set(null);
@@ -360,7 +360,7 @@ export class HomeComponent implements OnInit {
       userNCarnet: user.nCarnet,
       response: canAttend,
       isCustom: false,
-      fullHorari: false,
+      fullHorari: canAttend,
     }).subscribe({
       next: () => {
         this.loadRespuestas();
@@ -406,6 +406,19 @@ export class HomeComponent implements OnInit {
       ...this.customResponse(),
       [field]: value,
     });
+
+    // Validación real-time de rango de horarios
+    if (field === 'customStartTime' || field === 'customEndTime') {
+      const updated = this.customResponse();
+      const startTime = field === 'customStartTime' ? (value as string) : updated.customStartTime;
+      const endTime = field === 'customEndTime' ? (value as string) : updated.customEndTime;
+
+      this.error.set('');
+
+      if (startTime && endTime && startTime >= endTime) {
+        this.error.set('L\'hora de fi ha de ser posterior a la d\'inici.');
+      }
+    }
   }
 
   saveCustomResponse() {
@@ -428,6 +441,11 @@ export class HomeComponent implements OnInit {
 
     if ((customStartTime && !customEndTime) || (!customStartTime && customEndTime)) {
       this.error.set('Si defineixes un horari personalitzat, has d\'indicar hora d\'inici i hora de fi.');
+      return;
+    }
+
+    if (customStartTime && customEndTime && customStartTime >= customEndTime) {
+      this.error.set('L\'hora de fi ha de ser posterior a la d\'inici.');
       return;
     }
 
@@ -1400,17 +1418,27 @@ export class HomeComponent implements OnInit {
 
   private parseCustomText(rawCustomText: string) {
     const text = rawCustomText.trim();
-    const horarioRegex = /Horario custom:\s*([0-2]\d:[0-5]\d)\s*-\s*([0-2]\d:[0-5]\d)/i;
-    const commentRegex = /Comentario:\s*(.*)$/i;
+
+    if (!text) {
+      return {
+        comment: '',
+        customStartTime: '',
+        customEndTime: '',
+      };
+    }
+
+    // Regex mejorada: más tolerante con espacios múltiples y variaciones
+    const horarioRegex = /Horario\s+custom:\s*([0-2]\d:[0-5]\d)\s*-\s*([0-2]\d:[0-5]\d)/i;
+    const commentRegex = /Comentario:\s*(.+?)(?:\s*\||\s*$)/i;
 
     const horarioMatch = text.match(horarioRegex);
     const commentMatch = text.match(commentRegex);
 
     const customStartTime = horarioMatch?.[1] || '';
     const customEndTime = horarioMatch?.[2] || '';
-
     let comment = commentMatch?.[1]?.trim() || '';
 
+    // Si no hay patrón reconocido, tratar todo como comentario
     if (!comment && text && !horarioMatch) {
       comment = text;
     }
