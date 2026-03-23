@@ -11,16 +11,16 @@
 
 .profile-modal {
   position: fixed;
-  top: 50%;
+  top: clamp(64px, 9vh, 104px);
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
   background-color: white;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   z-index: 1000;
   width: 90%;
   max-width: 500px;
-  max-height: 90vh;
+  max-height: calc(100vh - clamp(64px, 9vh, 104px) - 24px);
   overflow-y: auto;
   scrollbar-color: #f0b000 #f0f0f0;
   scrollbar-width: thin;
@@ -283,6 +283,8 @@
 @media (max-width: 900px) {
   .profile-modal {
     max-width: 450px;
+    top: clamp(56px, 8vh, 84px);
+    max-height: calc(100vh - clamp(56px, 8vh, 84px) - 16px);
   }
 
   .modal-header {
@@ -305,7 +307,8 @@
 @media (max-width: 768px) {
   .profile-modal {
     max-width: 95%;
-    max-height: 95vh;
+    top: 46px;
+    max-height: calc(100vh - 56px);
     width: 100%;
   }
 
