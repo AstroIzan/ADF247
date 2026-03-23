@@ -1,10 +1,15 @@
-const { updateSortidaForTomorrow } = require('./convos.service')
+const {
+  ensureConfiguredConvoTypes,
+  runDailyNotificationAutomation,
+} = require('../notifications/notifications.service')
+const { readNotificationSettings } = require('../notifications/notifications.config')
 
 let scheduledTimer = null
 
 function getNextRunDate(referenceDate = new Date()) {
+  const settings = readNotificationSettings()
   const nextRun = new Date(referenceDate)
-  nextRun.setHours(8, 0, 0, 0)
+  nextRun.setHours(settings.schedule.dailyRunHour, settings.schedule.dailyRunMinute, 0, 0)
 
   if (nextRun <= referenceDate) {
     nextRun.setDate(nextRun.getDate() + 1)
@@ -20,10 +25,10 @@ function scheduleNextRun() {
 
   scheduledTimer = setTimeout(async () => {
     try {
-      await updateSortidaForTomorrow(new Date())
-      console.log('[convos.scheduler] Sortida actualizada para las convocatorias de manana.')
+      const summary = await runDailyNotificationAutomation(null, new Date())
+      console.log('[convos.scheduler] Automatizacion diaria completada.', summary)
     } catch (error) {
-      console.error('[convos.scheduler] Error al actualizar sortida:', error)
+      console.error('[convos.scheduler] Error en automatizacion diaria:', error)
     } finally {
       scheduleNextRun()
     }
@@ -36,10 +41,11 @@ async function startConvoScheduler() {
   }
 
   try {
-    await updateSortidaForTomorrow(new Date())
-    console.log('[convos.scheduler] Estado inicial de sortida sincronizado.')
+    await ensureConfiguredConvoTypes()
+    await runDailyNotificationAutomation(null, new Date())
+    console.log('[convos.scheduler] Estado inicial de automatizacion sincronizado.')
   } catch (error) {
-    console.error('[convos.scheduler] Error en sincronizacion inicial de sortida:', error)
+    console.error('[convos.scheduler] Error en sincronizacion inicial de automatizacion:', error)
   }
 
   scheduleNextRun()

@@ -22,6 +22,8 @@ export class UsersComponent implements OnDestroy {
   formSubmitting = signal(false);
   deleteConfirming = signal<number | null>(null);
   selectedUser = signal<User | null>(null);
+  changePassword = signal(false);
+  confirmPassword = signal('');
 
   filters = signal({
     name: '',
@@ -96,10 +98,14 @@ export class UsersComponent implements OnDestroy {
   }
 
   openForm(user?: User) {
+    this.changePassword.set(false);
+    this.confirmPassword.set('');
+
     if (user) {
       this.editingId.set(user.id);
       this.formData.set({
         ...user,
+        password: '',
         roles: {
           isAdmin: Boolean(user.roles?.isAdmin),
           isGroc: Boolean(user.roles?.isGroc),
@@ -141,10 +147,42 @@ export class UsersComponent implements OnDestroy {
       return;
     }
 
+    const isEditing = Boolean(this.editingId());
+    const password = String(data.password || '').trim();
+    const confirmPassword = this.confirmPassword().trim();
+
+    if (!isEditing && !password) {
+      alert('La contrasenya es obligatoria per crear un usuari.');
+      return;
+    }
+
+    if (!isEditing && password !== confirmPassword) {
+      alert('La confirmacio de contrasenya no coincideix.');
+      return;
+    }
+
+    if (isEditing && this.changePassword()) {
+      if (!password) {
+        alert('Has d\'introduir una nova contrasenya.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('La confirmacio de contrasenya no coincideix.');
+        return;
+      }
+    }
+
+    const payload: Partial<User> = { ...data };
+
+    if (isEditing && !this.changePassword()) {
+      delete payload.password;
+    }
+
     this.formSubmitting.set(true);
 
     if (this.editingId()) {
-      this.dataService.updateUser(this.editingId()!, data).subscribe({
+      this.dataService.updateUser(this.editingId()!, payload).subscribe({
         next: () => {
           this.formSubmitting.set(false);
           this.closeForm();
@@ -156,7 +194,7 @@ export class UsersComponent implements OnDestroy {
         }
       });
     } else {
-      this.dataService.createUser(data).subscribe({
+      this.dataService.createUser(payload).subscribe({
         next: () => {
           this.formSubmitting.set(false);
           this.closeForm();

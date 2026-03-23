@@ -36,11 +36,79 @@
 				</button>
 			</div>
 		</header>
+
+		@if (isHomeRoute() && notificationWarning) {
+			<div class="notification-warning-bar">
+				<strong>Avís de notificacions:</strong>
+				<span>{{ notificationWarning }}</span>
+			</div>
+		}
 	}
 
 	<main class="app-content">
 		<router-outlet></router-outlet>
 	</main>
+
+	@if (authService.isLoggedIn() && pushNotificationsService.modalVisible()) {
+		<div class="notification-modal-backdrop" (click)="closeNotificationsSetup()">
+			<section class="notification-modal" (click)="$event.stopPropagation()">
+				<div class="notification-modal-header">
+					<div>
+						<h3>Configurar notificacions</h3>
+						<p>Cal permís del navegador i un token registrat per rebre avisos al dispositiu.</p>
+					</div>
+					<button class="notification-close-btn" type="button" (click)="closeNotificationsSetup()">&times;</button>
+				</div>
+
+				<div class="notification-status-grid">
+					<article>
+						<strong>Notificacions</strong>
+						<span>
+							@if (pushNotificationsService.permission() === 'granted') { permès }
+							@else if (pushNotificationsService.permission() === 'denied') { denegat }
+							@else { pendent }
+						</span>
+					</article>
+					<article>
+						<strong>Token detectat</strong>
+						<span>{{ pushNotificationsService.currentToken() ? 'Sí' : 'No' }}</span>
+					</article>
+					<article>
+						<strong>Registrat a servidor</strong>
+						<span>{{ pushNotificationsService.hasRegisteredCurrentToken() ? 'Sí' : 'No' }}</span>
+					</article>
+				</div>
+
+				@if (pushNotificationsService.errorMessage()) {
+					<div class="notification-alert error">{{ pushNotificationsService.errorMessage() }}</div>
+				}
+
+				@if (pushNotificationsService.infoMessage()) {
+					<div class="notification-alert success">{{ pushNotificationsService.infoMessage() }}</div>
+				}
+
+				<div class="notification-modal-body">
+					<p>
+						@if (pushNotificationsService.permission() !== 'granted') {
+							Cal que acceptis els permisos del navegador. El token del dispositiu es generarà i registrarà automàticament.
+						} @else if (!pushNotificationsService.hasRegisteredCurrentToken()) {
+							El navegador ja té permís. Prem el botó per registrar aquest dispositiu al servidor.
+						} @else {
+							Aquest dispositiu ja està preparat per rebre notificacions.
+						}
+					</p>
+				</div>
+
+				@if (!pushNotificationsService.hasRegisteredCurrentToken()) {
+					<div class="notification-modal-actions">
+						<button class="btn btn-secondary" type="button" (click)="requestNotificationPermissions()" [disabled]="pushNotificationsService.loading()">
+							{{ pushNotificationsService.loading() ? 'Preparant...' : 'Activar notificacions en aquest dispositiu' }}
+						</button>
+					</div>
+				}
+			</section>
+		</div>
+	}
 
 	<app-profile></app-profile>
 </div>

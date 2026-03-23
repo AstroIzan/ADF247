@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, signal, computed, input, OnDest
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Convocatoria, ConvoType, User } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
 
 type ConvocatoriaFormData = Partial<Convocatoria> & {
   incendiReadyInMinutes?: number;
@@ -31,6 +32,8 @@ export class ConvosComponent implements OnDestroy {
   editingId = signal<number | null>(null);
   formSubmitting = signal(false);
   deleteConfirming = signal<number | null>(null);
+  actionFeedback = signal('');
+  sendingNotificationKey = signal<string | null>(null);
   selectedConvo = signal<Convocatoria | null>(null);
   showTimeMenu = signal(false);
   timeMenuHour = signal('');
@@ -83,7 +86,14 @@ export class ConvosComponent implements OnDestroy {
     });
   });
 
-  constructor(private dataService: DataService) {}
+  constructor(
+    private dataService: DataService,
+    private authService: AuthService,
+  ) {}
+
+  isAdmin() {
+    return this.authService.isAdmin();
+  }
 
   openFilters() {
     this.showFilters.set(true);
@@ -264,6 +274,44 @@ export class ConvosComponent implements OnDestroy {
 
   cancelDelete() {
     this.deleteConfirming.set(null);
+  }
+
+  sendResponseRequest(convo: Convocatoria) {
+    const key = `response-${convo.id}`;
+    this.sendingNotificationKey.set(key);
+    this.actionFeedback.set('');
+
+    this.dataService.sendConvocatoriaResponseRequest(convo.id).subscribe({
+      next: () => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`S'ha enviat l'avís de resposta per a ${convo.title}.`);
+      },
+      error: (err) => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`Error enviant avís de resposta: ${err.message}`);
+      }
+    });
+  }
+
+  sendSortidaStatus(convo: Convocatoria) {
+    const key = `sortida-${convo.id}`;
+    this.sendingNotificationKey.set(key);
+    this.actionFeedback.set('');
+
+    this.dataService.sendConvocatoriaSortidaStatus(convo.id).subscribe({
+      next: () => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`S'ha enviat l'estat de sortida per a ${convo.title}.`);
+      },
+      error: (err) => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`Error enviant estat de sortida: ${err.message}`);
+      }
+    });
+  }
+
+  isSendingAction(action: 'response' | 'sortida', convoId: number) {
+    return this.sendingNotificationKey() === `${action}-${convoId}`;
   }
 
   updateFormField(field: string, value: any) {

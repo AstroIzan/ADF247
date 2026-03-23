@@ -217,6 +217,52 @@
                 [disabled]="formSubmitting()"
               />
             </div>
+
+            <div class="form-group">
+              <label>Confirmar contrasenya *</label>
+              <input
+                type="password"
+                [value]="confirmPassword()"
+                (change)="confirmPassword.set($any($event.target).value)"
+                [disabled]="formSubmitting()"
+              />
+            </div>
+          }
+
+          @if (editingId()) {
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="changePassword()"
+                  (change)="changePassword.set($any($event.target).checked)"
+                  [disabled]="formSubmitting()"
+                />
+                Canviar contrasenya
+              </label>
+            </div>
+
+            @if (changePassword()) {
+              <div class="form-group">
+                <label>Nova contrasenya *</label>
+                <input
+                  type="password"
+                  [value]="formData().password || ''"
+                  (change)="updateFormField('password', $any($event.target).value)"
+                  [disabled]="formSubmitting()"
+                />
+              </div>
+
+              <div class="form-group">
+                <label>Confirmar nova contrasenya *</label>
+                <input
+                  type="password"
+                  [value]="confirmPassword()"
+                  (change)="confirmPassword.set($any($event.target).value)"
+                  [disabled]="formSubmitting()"
+                />
+              </div>
+            }
           }
 
           <div class="form-group">

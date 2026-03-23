@@ -13,6 +13,10 @@
     <div class="error-alert">{{ error() }}</div>
   }
 
+  @if (actionFeedback()) {
+    <div class="info-alert">{{ actionFeedback() }}</div>
+  }
+
   @if (loading()) {
     <div class="loading">Carregant convocatòries...</div>
   } @else if (filteredConvocatorias().length > 0) {
@@ -51,6 +55,14 @@
                 </span>
               </td>
               <td class="actions">
+                @if (isAdmin()) {
+                  <button (click)="sendResponseRequest(convo)" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('response', convo.id)">
+                    Avisar resposta
+                  </button>
+                  <button (click)="sendSortidaStatus(convo)" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
+                    Avisar sortida
+                  </button>
+                }
                 <button (click)="openForm(convo)" class="btn btn-sm btn-edit">Editar</button>
                 <div class="delete-menu">
                   <button (click)="requestDelete(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
@@ -90,6 +102,14 @@
             </div>
 
             <div class="convo-actions">
+              @if (isAdmin()) {
+                <button (click)="sendResponseRequest(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('response', convo.id)">
+                  Avisar resposta
+                </button>
+                <button (click)="sendSortidaStatus(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
+                  Avisar sortida
+                </button>
+              }
               <button (click)="openForm(convo); $event.stopPropagation();" class="btn btn-sm btn-edit">Editar</button>
               <div class="delete-menu">
                 <button (click)="requestDelete(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>

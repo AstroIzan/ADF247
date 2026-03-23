@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class HttpService {
-  private baseUrl = 'http://localhost:3001/api';
+  private baseUrl = '/api';
 
   constructor(private http: HttpClient) {}
 
@@ -18,6 +18,12 @@ export class HttpService {
 
   get<T>(endpoint: string): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}${endpoint}`).pipe(
+      catchError(err => this.handleError(err))
+    );
+  }
+
+  getAbsolute<T>(url: string): Observable<T> {
+    return this.http.get<T>(url).pipe(
       catchError(err => this.handleError(err))
     );
   }

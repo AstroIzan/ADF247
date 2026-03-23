@@ -1,0 +1,234 @@
+<div class="notifications-admin">
+  <div class="notifications-header">
+    <div>
+      <h2>Notificacions</h2>
+      <p>Configura quan, a qui i com es notifica cada escenari.</p>
+    </div>
+  </div>
+
+  @if (error) {
+    <div class="error-alert">{{ error }}</div>
+  }
+
+  @if (saveError) {
+    <div class="error-alert">{{ saveError }}</div>
+  }
+
+  @if (actionMessage) {
+    <div class="success-alert">{{ actionMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading">Carregant configuració...</div>
+  } @else {
+    <nav class="tabs-nav">
+      <button
+        [class.active]="activeTab === 'config'"
+        (click)="activeTab = 'config'"
+        class="tab-btn">
+        ⚙️ Configuració
+      </button>
+      <button
+        [class.active]="activeTab === 'logs'"
+        (click)="activeTab = 'logs'"
+        class="tab-btn">
+        📋 Registre
+      </button>
+    </nav>
+
+    <div class="tab-content">
+      @if (activeTab === 'config') {
+        <div class="config-sections">
+          <section class="config-section">
+            <h3>1) Tipus setmanals</h3>
+            <p class="section-help">Selecciona quins tipus es consideren convocatòries setmanals.</p>
+            <div class="checkbox-grid">
+              @for (type of convoTypes; track type.id) {
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="isWeeklyTypeSelected(type.name)"
+                    (change)="toggleWeeklyType(type.name, $any($event.target).checked)"
+                  />
+                  {{ type.name }}
+                </label>
+              }
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>2) Sol·licitud setmanal de disponibilitat</h3>
+            <p class="section-help">Defineix quin dia i hora de la setmana anterior es demana disponibilitat.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Dia setmana anterior</label>
+                <select [(ngModel)]="form.weeklyRequestWeekday">
+                  @for (day of weekdayOptions; track day.value) {
+                    <option [ngValue]="day.value">{{ day.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Hora (HH:MM)</label>
+                <div class="time-grid">
+                  <input type="number" min="0" max="23" [(ngModel)]="form.weeklyRequestHour" />
+                  <span>:</span>
+                  <input type="number" min="0" max="59" [(ngModel)]="form.weeklyRequestMinute" />
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>3) Sol·licitud normal si no has respost</h3>
+            <p class="section-help">Finestra d'antelació respecte al dia de l'activitat.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Dies d'antelació</label>
+                <input type="number" min="0" max="30" [(ngModel)]="form.pendingLeadDays" />
+              </div>
+
+              <div class="form-group">
+                <label>Hores d'antelació</label>
+                <input type="number" min="0" max="720" [(ngModel)]="form.pendingLeadHours" />
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>4) Confirmació de sortida</h3>
+            <p class="section-help">Defineix amb quants dies d'antelació i a quina hora es confirma si finalment se surt.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Dies abans de la convocatòria</label>
+                <input type="number" min="0" max="30" [(ngModel)]="form.sortidaConfirmDaysBefore" />
+              </div>
+
+              <div class="form-group">
+                <label>Hora (HH:MM)</label>
+                <div class="time-grid">
+                  <input type="number" min="0" max="23" [(ngModel)]="form.sortidaConfirmHour" />
+                  <span>:</span>
+                  <input type="number" min="0" max="59" [(ngModel)]="form.sortidaConfirmMinute" />
+                </div>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Tipus amb avís de sortida (coma)</label>
+                <input type="text" [(ngModel)]="form.sortidaTypeNames" placeholder="Deixa-ho buit per a tots" />
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>5) Missatgeria configurable per escenari</h3>
+            <p class="section-help">Títol i cos predefinits per cada tipus de notificació. Es poden ajustar abans d'enviar manualment.</p>
+
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label>Títol - Sol·licitud inicial</label>
+                <input type="text" [(ngModel)]="form.creationTitle" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Missatge - Sol·licitud inicial</label>
+                <textarea rows="2" [(ngModel)]="form.creationBody"></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Títol - Recordatori pendents</label>
+                <input type="text" [(ngModel)]="form.pendingTitle" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Missatge - Recordatori pendents</label>
+                <textarea rows="2" [(ngModel)]="form.pendingBody"></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Títol - Setmanals</label>
+                <input type="text" [(ngModel)]="form.weeklyTitle" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Missatge - Setmanals</label>
+                <textarea rows="2" [(ngModel)]="form.weeklyBody"></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Títol - Confirmació sortida (sí)</label>
+                <input type="text" [(ngModel)]="form.sortidaTitleYes" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Missatge - Confirmació sortida (sí)</label>
+                <textarea rows="2" [(ngModel)]="form.sortidaBodyYes"></textarea>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Títol - Confirmació sortida (no)</label>
+                <input type="text" [(ngModel)]="form.sortidaTitleNo" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Missatge - Confirmació sortida (no)</label>
+                <textarea rows="2" [(ngModel)]="form.sortidaBodyNo"></textarea>
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section footer">
+            <small>Placeholders disponibles: {{ '{' }}title{{ '}' }}, {{ '{' }}type{{ '}' }}, {{ '{' }}date{{ '}' }}, {{ '{' }}count{{ '}' }}</small>
+            <button class="btn btn-primary" (click)="saveConfig()" [disabled]="saving || loading">
+              {{ saving ? 'Desant...' : 'Desar configuració' }}
+            </button>
+          </section>
+        </div>
+      }
+
+      @if (activeTab === 'logs') {
+        <section class="card">
+          <div class="card-header">
+            <h3>Registre d'enviaments</h3>
+            <button class="btn btn-secondary btn-sm" (click)="onLogsRefresh.emit()" [disabled]="loadingLogs">
+              {{ loadingLogs ? 'Actualitzant...' : 'Actualitzar' }}
+            </button>
+          </div>
+
+          @if (logsError) {
+            <div class="error-alert">{{ logsError }}</div>
+          }
+
+          @if (loadingLogs) {
+            <div class="loading">Carregant registre...</div>
+          } @else if (logs.length === 0) {
+            <div class="empty-state">Sense enviaments registrats.</div>
+          } @else {
+            <div class="logs-list">
+              @for (log of logs; track log.id) {
+                <article class="log-item">
+                  <div class="log-header">
+                    <strong>{{ log.title }}</strong>
+                    <span class="status-badge" [class]="'status-' + log.status">
+                      {{ log.status }}
+                    </span>
+                  </div>
+                  <p>{{ log.body }}</p>
+                  <div class="log-stats">
+                    <small>✓ {{ log.successCount }} · ✗ {{ log.failureCount }} · Total {{ log.requestedCount }}</small>
+                  </div>
+                  <small class="scope">{{ log.targetScope }}</small>
+                  <small class="date">{{ log.createdAt | date:'short' }}</small>
+                  @if (log.errorMessage) {
+                    <small class="error">{{ log.errorMessage }}</small>
+                  }
+                </article>
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>

@@ -24,6 +24,39 @@
       </article>
     </section>
 
+    @if (isAdmin()) {
+      <section class="admin-quick-bar">
+        <div>
+          <strong>Accions ràpides d'admin</strong>
+          <p>Llança recordatoris i automatitzacions sense sortir del panell.</p>
+        </div>
+        <div class="admin-quick-actions">
+          <button class="btn btn-secondary" (click)="runAdminAction('pending')" [disabled]="adminActionLoading()">
+            Avisar pendents
+          </button>
+          <button class="btn btn-secondary" (click)="runAdminAction('sortida')" [disabled]="adminActionLoading()">
+            Avisar sortida demà
+          </button>
+          <button class="btn btn-secondary" (click)="runAdminAction('weekly')" [disabled]="adminActionLoading()">
+            Enviar resum setmanal
+          </button>
+          <button class="btn btn-primary" (click)="runAdminAction('automation')" [disabled]="adminActionLoading()">
+            Executar automatització
+          </button>
+        </div>
+        @if (adminActionMessage()) {
+          <small>{{ adminActionMessage() }}</small>
+        }
+
+        @if (!firebaseConfigured()) {
+          <div class="firebase-warning" role="alert">
+            <strong>Notificacions desactivades</strong>
+            <p>{{ firebaseHealthMessage() }}</p>
+          </div>
+        }
+      </section>
+    }
+
     <nav class="tabs-navigation">
       <button 
         (click)="activeTab.set('users')"
@@ -53,6 +86,22 @@
       >
         ✅ Respostes / Disponibilitat
       </button>
+      @if (isAdmin()) {
+        <button 
+          (click)="activeTab.set('devices')"
+          [class.active]="activeTab() === 'devices'"
+          class="tab-btn"
+        >
+          📱 Dispositius
+        </button>
+        <button 
+          (click)="activeTab.set('notifications')"
+          [class.active]="activeTab() === 'notifications'"
+          class="tab-btn"
+        >
+          🔔 Notificacions
+        </button>
+      }
     </nav>
 
     <div class="tab-content">
@@ -92,6 +141,28 @@
           [error]="respuestaError()"
           (onChanged)="onRespuestaChanged()"
         ></app-respuestas>
+      }
+
+      @if (activeTab() === 'devices' && isAdmin()) {
+        <app-devices 
+          [devices]="devices()"
+          [loading]="loadingDevices()"
+          [error]="deviceError()"
+          (onRefresh)="loadDevices()"
+        ></app-devices>
+      }
+
+      @if (activeTab() === 'notifications' && isAdmin()) {
+        <app-notifications-admin
+          [config]="notificationConfig()"
+          [logs]="notificationLogs()"
+          [convoTypes]="convoTypes()"
+          [loading]="loadingNotifConfig()"
+          [loadingLogs]="loadingNotifLogs()"
+          [error]="notifConfigError()"
+          [logsError]="notifLogsError()"
+          (onLogsRefresh)="loadNotificationLogs()"
+        ></app-notifications-admin>
       }
     </div>
   </div>

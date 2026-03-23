@@ -74,6 +74,14 @@ function buildNotificationLogsQueryDto(query = {}) {
   return { limit }
 }
 
+function buildNotificationConfigUpdateDto(payload = {}) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw createNotificationsDtoError('La configuracion de notificaciones debe ser un objeto JSON valido.')
+  }
+
+  return payload
+}
+
 function mapDeviceTokenToDto(deviceToken) {
   return {
     id: deviceToken.id,
@@ -86,10 +94,21 @@ function mapDeviceTokenToDto(deviceToken) {
 }
 
 function mapNotificationLogToDto(log) {
+  let data = null
+
+  if (log.dataJson) {
+    try {
+      data = JSON.parse(log.dataJson)
+    } catch {
+      data = null
+    }
+  }
+
   return {
     id: log.id,
     title: log.title,
     body: log.body,
+    data,
     targetScope: log.targetScope,
     requestedCount: log.requestedCount,
     successCount: log.successCount,
@@ -103,6 +122,7 @@ function mapNotificationLogToDto(log) {
 
 module.exports = {
   buildDeactivateDeviceTokenDto,
+  buildNotificationConfigUpdateDto,
   buildNotificationLogsQueryDto,
   buildRegisterDeviceTokenDto,
   buildSendBroadcastDto,

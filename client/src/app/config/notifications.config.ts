@@ -1,13 +1,13 @@
 export const notificationsConfig = {
   firebase: {
-    apiKey: 'REPLACE_WITH_FIREBASE_API_KEY',
-    authDomain: 'REPLACE_WITH_FIREBASE_AUTH_DOMAIN',
-    projectId: 'REPLACE_WITH_FIREBASE_PROJECT_ID',
-    storageBucket: 'REPLACE_WITH_FIREBASE_STORAGE_BUCKET',
-    messagingSenderId: 'REPLACE_WITH_FIREBASE_MESSAGING_SENDER_ID',
-    appId: 'REPLACE_WITH_FIREBASE_APP_ID',
+    apiKey: "AIzaSyAqvmPgENspdFCwVKz9k0y7aCBMIHZpHvI",
+    authDomain: "adf247-95ce1.firebaseapp.com",
+    projectId: "adf247-95ce1",
+    storageBucket: "adf247-95ce1.firebasestorage.app",
+    messagingSenderId: "24116711500",
+    appId: "1:24116711500:web:0463655ddef3a58d77e4e9",
   },
-  vapidKey: 'REPLACE_WITH_FIREBASE_WEB_PUSH_CERTIFICATE_KEY_PAIR',
+  vapidKey: 'BMs8ElZ6Mp8DWTpAcqUK0L33iEGPYpmC1LfA1ZfPWBzqsI9Z28KwvEHdWuvdmyMr8KQl1sJSX_5bZCKD8otnnv0',
 }
 
 export function isNotificationsConfigReady() {

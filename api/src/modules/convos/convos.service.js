@@ -117,16 +117,48 @@ function shouldMarkSortida(convoType, positiveResponses) {
   const counts = positiveResponses.reduce((acc, respuesta) => {
     const role = Array.isArray(respuesta.user?.roles) ? respuesta.user.roles[0] : null
 
+    acc.total += 1
+
     if (role?.isGroc) {
       acc.groc += 1
-    } else {
-      acc.verd += 1
     }
 
     return acc
-  }, { groc: 0, verd: 0 })
+  }, { groc: 0, total: 0 })
 
-  return counts.groc >= minimumGroc && counts.verd >= minimumVerd
+  return counts.groc >= minimumGroc && counts.total >= minimumVerd
+}
+
+async function recalculateSortidaForConvocatoria(convoId) {
+  const convocatoria = await database.convocatoria.findUnique({
+    where: { id: convoId },
+    include: {
+      convoType: true,
+      respostas: {
+        where: {
+          response: true,
+          user: {
+            isActive: true,
+          },
+        },
+        include: autoAssignCandidateInclude,
+      },
+    },
+  })
+
+  if (!convocatoria) {
+    return null
+  }
+
+  const nextSortida = shouldMarkSortida(convocatoria.convoType, convocatoria.respostas || [])
+
+  return database.convocatoria.update({
+    where: { id: convoId },
+    data: {
+      sortida: nextSortida,
+    },
+    include: convocatoriaInclude,
+  })
 }
 
 function mapPrismaError(error) {
@@ -184,6 +216,13 @@ async function updateConvoType(id, payload) {
       where: { id },
       data: updateDto,
     })
+
+    const relatedConvocatorias = await database.convocatoria.findMany({
+      where: { convoTypeId: id },
+      select: { id: true },
+    })
+
+    await Promise.all(relatedConvocatorias.map((convocatoria) => recalculateSortidaForConvocatoria(convocatoria.id)))
 
     return mapConvoTypeToDto(convoType)
   } catch (error) {
@@ -245,6 +284,13 @@ async function createConvocatoria(payload) {
       data,
       include: convocatoriaInclude,
     })
+
+    try {
+      const notificationsService = require('../notifications/notifications.service')
+      await notificationsService.handleConvocatoriaCreated(convocatoria.id)
+    } catch (error) {
+      console.error('[convos.service] Error al enviar aviso de nueva convocatoria:', error.message)
+    }
 
     return mapConvocatoriaToDto(convocatoria)
   } catch (error) {
@@ -401,7 +447,7 @@ async function updateSortidaForTomorrow(referenceDate = new Date()) {
     return database.convocatoria.update({
       where: { id: convocatoria.id },
       data: {
-        sortida: convocatoria.sortida || nextSortida,
+        sortida: nextSortida,
       },
     })
   }))
@@ -418,6 +464,7 @@ module.exports = {
   getConvocatoriaById,
   getConvoTypeById,
   mapPrismaError,
+  recalculateSortidaForConvocatoria,
   recalculateAutoAssignedResponsable,
   updateSortidaForTomorrow,
   updateConvocatoria,

@@ -1,0 +1,47 @@
+{
+  "schedule": {
+    "dailyRunHour": 8,
+    "dailyRunMinute": 0,
+    "weeklyRequestWeekday": 5
+  },
+  "typeGroups": {
+    "weeklyTypeNames": [
+      "Guardia",
+      "Guardia PVI",
+      "Semanal"
+    ],
+    "sortidaTypeNames": [],
+    "guardiaSourceTypeName": "Guardia",
+    "guardiaPviTypeName": "Guardia PVI"
+  },
+  "responseRequest": {
+    "sendOnCreationForNonWeekly": true,
+    "pendingLeadDays": 0,
+    "pendingLeadHours": 24,
+    "link": "/dashboard",
+    "creationTitle": "Nova convocatòria per respondre",
+    "creationBody": "{title} ({type}) per al dia {date}. Revisa i respon la teva disponibilitat.",
+    "pendingTitle": "Tens convocatòries pendents",
+    "pendingBody": "Encara tens {count} convocatòries pendents per respondre."
+  },
+  "weeklyRequest": {
+    "enabled": true,
+    "requestWeekday": 5,
+    "requestHour": 8,
+    "requestMinute": 0,
+    "link": "/dashboard",
+    "title": "Convocatòria: Guardia setmana vinent",
+    "body": "Hi ha convocatòries setmanals per a la setmana vinent pendents de resposta."
+  },
+  "sortidaStatus": {
+    "enabled": true,
+    "confirmDaysBefore": 1,
+    "confirmHour": 19,
+    "confirmMinute": 0,
+    "link": "/dashboard",
+    "titleYes": "Demà sí que se surt",
+    "bodyYes": "{title} ({type}) està confirmada per demà {date}.",
+    "titleNo": "Demà no se surt",
+    "bodyNo": "{title} ({type}) finalment no surt demà {date}."
+  }
+}
