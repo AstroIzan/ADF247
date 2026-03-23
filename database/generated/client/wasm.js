@@ -173,6 +173,33 @@ exports.Prisma.RespuestaScalarFieldEnum = {
   response: 'response'
 };
 
+exports.Prisma.DeviceTokenScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  token: 'token',
+  platform: 'platform',
+  userAgent: 'userAgent',
+  isActive: 'isActive',
+  lastSeenAt: 'lastSeenAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.NotificationLogScalarFieldEnum = {
+  id: 'id',
+  senderUserId: 'senderUserId',
+  title: 'title',
+  body: 'body',
+  dataJson: 'dataJson',
+  requestedCount: 'requestedCount',
+  successCount: 'successCount',
+  failureCount: 'failureCount',
+  targetScope: 'targetScope',
+  status: 'status',
+  errorMessage: 'errorMessage',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -189,7 +216,9 @@ exports.Prisma.ModelName = {
   Role: 'Role',
   ConvoType: 'ConvoType',
   Convocatoria: 'Convocatoria',
-  Respuesta: 'Respuesta'
+  Respuesta: 'Respuesta',
+  DeviceToken: 'DeviceToken',
+  NotificationLog: 'NotificationLog'
 };
 
 /**

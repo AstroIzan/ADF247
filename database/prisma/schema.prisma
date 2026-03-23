@@ -19,9 +19,11 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  roles         Role[]
-  convocatories Convocatoria[] @relation("ConvocatoriaResponsable")
-  respostas     Respuesta[]
+  roles            Role[]
+  convocatories    Convocatoria[] @relation("ConvocatoriaResponsable")
+  respostas        Respuesta[]
+  deviceTokens     DeviceToken[]
+  notificationLogs NotificationLog[] @relation("NotificationLogSender")
 }
 
 model Role {
@@ -73,4 +75,37 @@ model Respuesta {
   customText   String?
   fullHorari   Boolean      @default(false)
   response     Boolean
+}
+
+model DeviceToken {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  platform   String?
+  userAgent  String?
+  isActive   Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, isActive])
+}
+
+model NotificationLog {
+  id             Int      @id @default(autoincrement())
+  senderUserId   Int?
+  senderUser     User?    @relation("NotificationLogSender", fields: [senderUserId], references: [id], onDelete: SetNull)
+  title          String
+  body           String
+  dataJson       String?
+  requestedCount Int      @default(0)
+  successCount   Int      @default(0)
+  failureCount   Int      @default(0)
+  targetScope    String   @default("all-active-devices")
+  status         String   @default("queued")
+  errorMessage   String?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
 }

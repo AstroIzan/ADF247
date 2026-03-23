@@ -1,7 +1,8 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthService } from './services/auth.service';
+import { PushNotificationsService } from './services/push-notifications.service';
 import { ProfileComponent } from './pages/profile/profile.component';
 
 @Component({
@@ -16,8 +17,15 @@ export class App {
 
   constructor(
     public authService: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private pushNotificationsService: PushNotificationsService,
+  ) {
+    effect(() => {
+      if (this.authService.isAuthenticated()) {
+        void this.pushNotificationsService.initAndSyncToken()
+      }
+    })
+  }
 
   goTo(path: string) {
     this.router.navigate([path]);
