@@ -187,7 +187,7 @@ export class AuthService {
   }
 
   private handleError(error: any) {
-    const errorMessage = error.error?.message || error.message || 'Error en la autenticación';
+    const errorMessage = error.error?.message || error.message || 'Error en l\'autenticació';
     return throwError(() => new Error(errorMessage));
   }
 

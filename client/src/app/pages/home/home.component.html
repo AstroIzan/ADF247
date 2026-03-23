@@ -1,14 +1,14 @@
 <div class="home-container">
   <header class="home-header">
     <div class="home-header-left">
-      <h1>Inicio</h1>
-      <p>Selecciona una fecha y revisa las convocatorias del dia.</p>
+      <h1>Inici</h1>
+      <p>Selecciona una data i revisa les convocatòries del dia.</p>
     </div>
 
     @if (authService.isAdmin()) {
       <div class="home-header-actions">
         <button type="button" class="btn btn-primary" (click)="openCreateConvoModal()">
-          + Crear Convocatoria
+          + Crear Convocatòria
         </button>
       </div>
     }
@@ -16,7 +16,7 @@
 
   <section class="home-grid">
     <article class="calendar-card">
-      <h2>Calendario</h2>
+      <h2>Calendari</h2>
       <div class="calendar-widget">
         <div class="calendar-toolbar">
           <button type="button" class="month-btn" (click)="previousMonth()">&lt;</button>
@@ -46,15 +46,15 @@
               <span class="day-number">{{ cell.date.getDate() }}</span>
 
               @if (dayAvailability.total > 0) {
-                <span class="day-markers" title="{{ daySummary.pending }} pendientes / {{ daySummary.responded }} respondidas / {{ dayAvailability.closed }} cerradas">
+                <span class="day-markers" title="{{ daySummary.pending }} pendents / {{ daySummary.responded }} respostes / {{ dayAvailability.closed }} tancades">
                   @if (dayAvailability.open === 0) {
-                    <span class="marker marker-closed">{{ dayAvailability.closed }}</span>
+                    <span class="marker marker-closed" aria-label="Tancada">{{ dayAvailability.closed }}</span>
                   } @else {
                     @if (daySummary.pending > 0) {
-                      <span class="marker marker-pending">{{ daySummary.pending }}</span>
+                      <span class="marker marker-pending" aria-label="Pendent">{{ daySummary.pending }}</span>
                     }
                     @if (daySummary.responded > 0) {
-                      <span class="marker marker-responded">{{ daySummary.responded }}</span>
+                      <span class="marker marker-responded" aria-label="Resposta rebuda">{{ daySummary.responded }}</span>
                     }
                   }
                 </span>
@@ -64,22 +64,22 @@
         </div>
 
         <div class="calendar-legend">
-          <span class="legend-item legend-pending"><span class="legend-dot"></span>Pendientes</span>
-          <span class="legend-item legend-responded"><span class="legend-dot"></span>Respondidas</span>
-          <span class="legend-item legend-closed"><span class="legend-dot"></span>Cerradas</span>
+          <span class="legend-item legend-pending"><span class="legend-dot"></span>Pendents</span>
+          <span class="legend-item legend-responded"><span class="legend-dot"></span>Respostes rebudes</span>
+          <span class="legend-item legend-closed"><span class="legend-dot"></span>Tancades</span>
         </div>
       </div>
     </article>
 
     <article class="convos-card">
-      <h2>Convocatorias del dia</h2>
+      <h2>Convocatòries del dia</h2>
 
       @if (loading()) {
-        <div class="loading">Cargando convocatorias...</div>
+        <div class="loading">Carregant convocatòries...</div>
       } @else if (error()) {
         <div class="error-alert">{{ error() }}</div>
       } @else if (dayConvos().length === 0) {
-        <div class="empty-state">No hay convocatorias para este dia.</div>
+        <div class="empty-state">No hi ha convocatòries per a aquest dia.</div>
       } @else {
         <div class="convos-list-scroll" [class.scroll-active]="dayConvos().length > 3">
           <ul class="convos-list">
@@ -94,7 +94,7 @@
                         type="button"
                         class="admin-convo-btn"
                         (click)="openAdminConvoModal(convo)"
-                        title="Gestionar convocatoria"
+                        title="Gestionar convocatòria"
                       >
                         ✎
                       </button>
@@ -113,12 +113,12 @@
                     }
                   </div>
                 </div>
-                <p><strong>Tipo:</strong> {{ convo.convoType?.name || convo.convoTypeId }}</p>
+                <p><strong>Tipus:</strong> {{ convo.convoType?.name || convo.convoTypeId }}</p>
                 <p><strong>Responsable:</strong> {{ getResponsableName(convo.responsableId) }}</p>
-                <p><strong>Ubicacion:</strong> {{ convo.ubiSortida }}</p>
-                <p><strong>Inicio:</strong> {{ convo.startTime | date:'shortTime' }}</p>
+                <p><strong>Ubicació:</strong> {{ convo.ubiSortida }}</p>
+                <p><strong>Inici:</strong> {{ convo.startTime | date:'shortTime' }}</p>
                 @if (convo.finalTime) {
-                  <p><strong>Fin:</strong> {{ convo.finalTime | date:'shortTime' }}</p>
+                  <p><strong>Fi:</strong> {{ convo.finalTime | date:'shortTime' }}</p>
                 }
 
                 <div class="convo-bottom-row">
@@ -141,7 +141,7 @@
                         [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
                         (click)="respondToConvocatoria(convo.id, true)"
                       >
-                        ACEPTAR
+                        ACCEPTAR
                       </button>
                       <button
                         type="button"
@@ -149,7 +149,7 @@
                         [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
                         (click)="respondToConvocatoria(convo.id, false)"
                       >
-                        DENEGAR
+                        REBUTJAR
                       </button>
                       <button
                         type="button"
@@ -157,7 +157,7 @@
                         [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
                         (click)="openCustomModal(convo)"
                       >
-                        PERSONALIZAR
+                        PERSONALITZAR
                       </button>
                     </div>
                   }
@@ -185,18 +185,18 @@
     <div class="modal-overlay" (click)="closeCustomModal()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Respuesta personalizada</h3>
+          <h3>Resposta personalitzada</h3>
           <button class="close-btn" (click)="closeCustomModal()">&times;</button>
         </div>
 
         <div class="modal-body">
-          <p><strong>Convocatoria:</strong> {{ customConvo()!.title }}</p>
-          <p><strong>Ubicacion:</strong> {{ customConvo()!.ubiSortida }}</p>
-          <p><strong>Fecha:</strong> {{ customConvo()!.date | date:'fullDate' }}</p>
-          <p><strong>Opciones custom:</strong> disponibilidad, horario completo y nota personalizada.</p>
+          <p><strong>Convocatòria:</strong> {{ customConvo()!.title }}</p>
+          <p><strong>Ubicació:</strong> {{ customConvo()!.ubiSortida }}</p>
+          <p><strong>Data:</strong> {{ customConvo()!.date | date:'fullDate' }}</p>
+          <p><strong>Opcions personalitzades:</strong> disponibilitat, horari complet i nota personalitzada.</p>
 
           <div class="form-group">
-            <label>Disponibilidad</label>
+            <label>Disponibilitat</label>
             <div class="custom-choice-row">
               <button
                 type="button"
@@ -204,7 +204,7 @@
                 [class.choice-active]="customResponse().response"
                 (click)="updateCustomField('response', true)"
               >
-                Si puedo
+                Sí puc
               </button>
               <button
                 type="button"
@@ -212,7 +212,7 @@
                 [class.choice-active]="!customResponse().response"
                 (click)="updateCustomField('response', false)"
               >
-                No puedo
+                No puc
               </button>
             </div>
           </div>
@@ -224,12 +224,12 @@
                 [checked]="customResponse().fullHorari"
                 (change)="updateCustomField('fullHorari', $any($event.target).checked)"
               />
-              Disponible todo el horario
+              Disponible tot l'horari
             </label>
           </div>
 
           <div class="form-group">
-            <label>Horario custom (opcional)</label>
+            <label>Horari personalitzat (opcional)</label>
             <div class="time-range-row">
               <div class="time-field">
                 <input
@@ -239,7 +239,7 @@
                   [value]="customResponse().customStartTime"
                   (change)="updateCustomField('customStartTime', $any($event.target).value)"
                 />
-                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(customStartTimeInput, 'customStartTime')">
+                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customStartTimeInput, 'customStartTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
                 </button>
               </div>
@@ -252,7 +252,7 @@
                   [value]="customResponse().customEndTime"
                   (change)="updateCustomField('customEndTime', $any($event.target).value)"
                 />
-                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(customEndTimeInput, 'customEndTime')">
+                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customEndTimeInput, 'customEndTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
                 </button>
               </div>
@@ -260,12 +260,12 @@
           </div>
 
           <div class="form-group">
-            <label>Comentario personalizado (opcional)</label>
+            <label>Comentari personalitzat (opcional)</label>
             <textarea
               rows="4"
               [value]="customResponse().customText"
               (input)="updateCustomField('customText', $any($event.target).value)"
-              placeholder="Escribe un comentario breve..."
+              placeholder="Escriu un comentari breu..."
             ></textarea>
           </div>
         </div>
@@ -277,11 +277,11 @@
               [disabled]="respondingConvoId() === customConvo()!.id"
               (click)="deleteCustomResponse()"
             >
-              Eliminar respuesta
+              Eliminar resposta
             </button>
           }
-          <button class="btn btn-secondary" (click)="closeCustomModal()">Cancelar</button>
-          <button class="btn btn-primary" (click)="saveCustomResponse()">Guardar</button>
+          <button class="btn btn-secondary" (click)="closeCustomModal()">Cancel·lar</button>
+          <button class="btn btn-primary" (click)="saveCustomResponse()">Desar</button>
         </div>
       </div>
     </div>
@@ -291,14 +291,14 @@
     <div class="modal-overlay" (click)="closeAdminConvoModal()">
       <div class="modal modal-wide" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Gestion de Convocatoria</h3>
+          <h3>Gestió de Convocatòria</h3>
           <button class="close-btn" (click)="closeAdminConvoModal()">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-grid-2">
             <div class="form-group">
-              <label>Titulo</label>
+              <label>Títol</label>
               <input
                 type="text"
                 [value]="adminConvoForm().title"
@@ -307,7 +307,7 @@
             </div>
 
             <div class="form-group">
-              <label>Fecha</label>
+              <label>Data</label>
               <input
                 type="date"
                 [value]="adminConvoForm().date"
@@ -316,7 +316,7 @@
             </div>
 
             <div class="form-group">
-              <label>Hora inicio</label>
+              <label>Hora d'inici</label>
               <div class="time-field">
                 <input
                   #adminStartTimeInput
@@ -325,14 +325,14 @@
                   [value]="adminConvoForm().startTime"
                   (change)="updateAdminConvoField('startTime', $any($event.target).value)"
                 />
-                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(adminStartTimeInput, 'adminStartTime')">
+                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminStartTimeInput, 'adminStartTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
                 </button>
               </div>
             </div>
 
             <div class="form-group">
-              <label>Hora fin</label>
+              <label>Hora de fi</label>
               <div class="time-field">
                 <input
                   #adminEndTimeInput
@@ -341,14 +341,14 @@
                   [value]="adminConvoForm().finalTime"
                   (change)="updateAdminConvoField('finalTime', $any($event.target).value)"
                 />
-                <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(adminEndTimeInput, 'adminEndTime')">
+                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminEndTimeInput, 'adminEndTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
                 </button>
               </div>
             </div>
 
             <div class="form-group">
-              <label>Ubicacion</label>
+              <label>Ubicació</label>
               <input
                 type="text"
                 [value]="adminConvoForm().ubiSortida"
@@ -357,12 +357,12 @@
             </div>
 
             <div class="form-group">
-              <label>Tipo</label>
+              <label>Tipus</label>
               <select
                 [value]="adminConvoForm().convoTypeId || ''"
                 (change)="updateAdminConvoField('convoTypeId', $any($event.target).value)"
               >
-                <option value="">Selecciona tipo</option>
+                <option value="">Selecciona tipus</option>
                 @for (type of convoTypes(); track type.id) {
                   <option [value]="type.id">{{ type.name }}</option>
                 }
@@ -389,7 +389,7 @@
                   [checked]="adminConvoForm().autoAssignResponsable"
                   (change)="updateAdminConvoField('autoAssignResponsable', $any($event.target).checked)"
                 />
-                Autoasignar responsable segun respuestas
+                Autoassignar responsable segons respostes
               </label>
             </div>
 
@@ -400,7 +400,7 @@
                   [checked]="adminConvoForm().isActive"
                   (change)="updateAdminConvoField('isActive', $any($event.target).checked)"
                 />
-                Convocatoria activa
+                Convocatòria activa
               </label>
             </div>
 
@@ -423,21 +423,21 @@
                 [checked]="adminConvoForm().moreThan2"
                 (change)="updateAdminConvoField('moreThan2', $any($event.target).checked)"
               />
-              Mas de 2 participantes
+              Més de 2 participants
             </label>
           </div>
 
-          <h4 class="responses-title">Respuestas de usuarios</h4>
+          <h4 class="responses-title">Respostes d'usuaris</h4>
           @if (getRespuestasForConvocatoria(adminConvo()!.id).length === 0) {
-            <p class="empty-state">No hay respuestas registradas.</p>
+            <p class="empty-state">No hi ha respostes registrades.</p>
           } @else {
             <div class="table-responsive">
               <table class="respuestas-table">
                 <thead>
                   <tr>
-                    <th>Usuario</th>
+                    <th>Usuari</th>
                     <th>Disponible</th>
-                    <th>Custom</th>
+                    <th>Personalitzat</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -446,7 +446,7 @@
                       <td>{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</td>
                       <td>
                         <span [class]="respuesta.response ? 'badge-yes' : 'badge-no'">
-                          {{ respuesta.response ? 'Si' : 'No' }}
+                          {{ respuesta.response ? 'Sí' : 'No' }}
                         </span>
                       </td>
                       <td>
@@ -456,7 +456,7 @@
                             class="btn btn-sm btn-edit"
                             (click)="openCustomTextModal(respuesta.customText)"
                           >
-                            Ver custom
+                            Veure text
                           </button>
                         } @else {
                           <span>-</span>
@@ -471,9 +471,9 @@
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="closeAdminConvoModal()">Cerrar</button>
+          <button class="btn btn-secondary" (click)="closeAdminConvoModal()">Tancar</button>
           <button class="btn btn-primary" [disabled]="adminConvoSaving()" (click)="saveAdminConvoChanges()">
-            {{ adminConvoSaving() ? 'Guardando...' : 'Guardar cambios' }}
+            {{ adminConvoSaving() ? 'Desant...' : 'Desar canvis' }}
           </button>
         </div>
       </div>
@@ -484,14 +484,14 @@
     <div class="modal-overlay" (click)="closeCustomTextModal()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Texto custom</h3>
+          <h3>Text personalitzat</h3>
           <button class="close-btn" (click)="closeCustomTextModal()">&times;</button>
         </div>
         <div class="modal-body">
           <p>{{ customTextPreview() }}</p>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-primary" (click)="closeCustomTextModal()">Cerrar</button>
+          <button class="btn btn-primary" (click)="closeCustomTextModal()">Tancar</button>
         </div>
       </div>
     </div>
@@ -501,20 +501,20 @@
     <div class="modal-overlay" (click)="closeCreateConvoModal()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Nueva convocatoria</h3>
+          <h3>Nova convocatòria</h3>
           <button class="close-btn" (click)="closeCreateConvoModal()">&times;</button>
         </div>
 
         <div class="modal-body">
           @if (createConvoError()) {
             <div class="error-alert create-convo-error-banner">
-              <strong>Revisa los campos</strong>
+              <strong>Revisa els camps</strong>
               <p>{{ createConvoError() }}</p>
             </div>
           }
 
           <div class="form-group">
-            <label>Titulo</label>
+            <label>Títol</label>
             <input
               type="text"
               [value]="createConvoForm().title"
@@ -524,7 +524,7 @@
 
           @if (!isGuardiaTypeSelected() && !isSemanalTypeSelected() && !isIncendiTypeSelected()) {
             <div class="form-group">
-              <label>Fecha (dia seleccionado)</label>
+              <label>Data (dia seleccionat)</label>
               <input
                 type="date"
                 [value]="createConvoForm().date"
@@ -534,7 +534,7 @@
           }
 
           <div class="form-group">
-            <label>Ubicacion</label>
+            <label>Ubicació</label>
             <input
               type="text"
               [value]="createConvoForm().ubiSortida"
@@ -543,12 +543,12 @@
           </div>
 
           <div class="form-group">
-            <label>Tipo</label>
+            <label>Tipus</label>
             <select
               [value]="createConvoForm().convoTypeId || ''"
               (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
             >
-              <option value="">Selecciona tipo</option>
+              <option value="">Selecciona tipus</option>
               @for (type of convoTypes(); track type.id) {
                 <option [value]="type.id">{{ type.name }}</option>
               }
@@ -558,7 +558,7 @@
           @if (isGuardiaTypeSelected()) {
             <div class="form-grid-2">
               <div class="form-group">
-                <label>Rango desde</label>
+                <label>Rang des de</label>
                 <input
                   type="date"
                   [value]="createConvoForm().guardiaRangeStart"
@@ -566,7 +566,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>Rango hasta</label>
+                <label>Rang fins a</label>
                 <input
                   type="date"
                   [value]="createConvoForm().guardiaRangeEnd"
@@ -576,7 +576,7 @@
             </div>
 
             <div class="form-group">
-              <label>Turnos de guardia</label>
+              <label>Torns de guàrdia</label>
               <div class="guardia-turns-grid">
                 <label class="checkbox-label">
                   <input
@@ -584,7 +584,7 @@
                     [checked]="createConvoForm().guardiaMorning"
                     (change)="updateCreateConvoField('guardiaMorning', $any($event.target).checked)"
                   />
-                  Manana (12:00 - 16:00)
+                  Matí (12:00 - 16:00)
                 </label>
 
                 <label class="checkbox-label">
@@ -593,18 +593,18 @@
                     [checked]="createConvoForm().guardiaAfternoon"
                     (change)="updateCreateConvoField('guardiaAfternoon', $any($event.target).checked)"
                   />
-                  Tarde (16:00 - 20:00)
+                  Tarda (16:00 - 20:00)
                 </label>
               </div>
             </div>
 
             <p class="guardia-help-text">
-              Se generara una convocatoria por turno y por cada dia laborable (lunes a viernes) dentro del rango.
+              Es generarà una convocatòria per torn i per cada dia laborable (de dilluns a divendres) dins del rang.
             </p>
           } @else if (isSemanalTypeSelected()) {
             <div class="form-grid-2">
               <div class="form-group">
-                <label>Dia inicio</label>
+                <label>Dia d'inici</label>
                 <input
                   type="date"
                   [value]="createConvoForm().semanalRangeStart"
@@ -612,7 +612,7 @@
                 />
               </div>
               <div class="form-group">
-                <label>Dia final</label>
+                <label>Dia de fi</label>
                 <input
                   type="date"
                   [value]="createConvoForm().semanalRangeEnd"
@@ -623,8 +623,8 @@
 
             <div class="form-group">
               <div class="weekly-slots-header">
-                <label>Franjas horarias</label>
-                <button type="button" class="btn btn-sm btn-edit" (click)="addSemanalSlot()">+ Row</button>
+                <label>Franges horàries</label>
+                <button type="button" class="btn btn-sm btn-edit" (click)="addSemanalSlot()">+ Fila</button>
               </div>
 
               <div class="weekly-slots-list">
@@ -638,7 +638,7 @@
                         [value]="slot.start"
                         (change)="updateSemanalSlot($index, 'start', $any($event.target).value)"
                       />
-                      <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(semanalStartInput, 'semanalStartTime', $index)">
+                      <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(semanalStartInput, 'semanalStartTime', $index)">
                         <span class="time-picker-icon" aria-hidden="true"></span>
                       </button>
                     </div>
@@ -651,7 +651,7 @@
                         [value]="slot.end"
                         (change)="updateSemanalSlot($index, 'end', $any($event.target).value)"
                       />
-                      <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(semanalEndInput, 'semanalEndTime', $index)">
+                      <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(semanalEndInput, 'semanalEndTime', $index)">
                         <span class="time-picker-icon" aria-hidden="true"></span>
                       </button>
                     </div>
@@ -669,11 +669,11 @@
             </div>
 
             <p class="guardia-help-text">
-              Se generara una convocatoria por cada franja y por cada dia del rango seleccionado.
+              Es generarà una convocatòria per cada franja i per cada dia del rang seleccionat.
             </p>
           } @else if (isIncendiTypeSelected()) {
             <div class="form-group">
-              <label>Fecha (dia en curso)</label>
+              <label>Data (dia en curs)</label>
               <input
                 type="date"
                 [value]="createConvoForm().date"
@@ -682,7 +682,7 @@
             </div>
 
             <div class="form-group">
-              <label>Tiempo de respuesta (Incendi)</label>
+              <label>Temps de resposta (Incendi)</label>
               <div class="custom-choice-row">
                 @for (minutes of incendiReadyOptions; track minutes) {
                   <button
@@ -698,12 +698,12 @@
             </div>
 
             <p class="guardia-help-text">
-              Inicio automatico en el margen seleccionado desde ahora. Hora final automatica a +4 horas.
+              Inici automàtic en el marge seleccionat des d'ara. Hora final automàtica a +4 hores.
             </p>
           } @else {
             <div class="form-grid-2">
               <div class="form-group">
-                <label>Hora inicio</label>
+                <label>Hora d'inici</label>
                 <div class="time-field">
                   <input
                     #createStartTimeInput
@@ -712,13 +712,13 @@
                     [value]="createConvoForm().startTime"
                     (change)="updateCreateConvoField('startTime', $any($event.target).value)"
                   />
-                  <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(createStartTimeInput, 'createStartTime')">
+                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(createStartTimeInput, 'createStartTime')">
                     <span class="time-picker-icon" aria-hidden="true"></span>
                   </button>
                 </div>
               </div>
               <div class="form-group">
-                <label>Hora fin</label>
+                <label>Hora de fi</label>
                 <div class="time-field">
                   <input
                     #createEndTimeInput
@@ -727,7 +727,7 @@
                     [value]="createConvoForm().finalTime"
                     (change)="updateCreateConvoField('finalTime', $any($event.target).value)"
                   />
-                  <button type="button" class="time-picker-btn" title="Abrir selector de hora" aria-label="Abrir selector de hora" (click)="openTimePicker(createEndTimeInput, 'createEndTime')">
+                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(createEndTimeInput, 'createEndTime')">
                     <span class="time-picker-icon" aria-hidden="true"></span>
                   </button>
                 </div>
@@ -755,7 +755,7 @@
                 [checked]="createConvoForm().autoAssignResponsable"
                 (change)="updateCreateConvoField('autoAssignResponsable', $any($event.target).checked)"
               />
-              Autoasignar responsable segun respuestas
+              Autoassignar responsable segons respostes
             </label>
           </div>
 
@@ -766,7 +766,7 @@
                 [checked]="createConvoForm().isActive"
                 (change)="updateCreateConvoField('isActive', $any($event.target).checked)"
               />
-              Convocatoria activa
+              Convocatòria activa
             </label>
           </div>
 
@@ -783,9 +783,9 @@
         </div>
 
         <div class="modal-footer">
-          <button class="btn btn-secondary" (click)="closeCreateConvoModal()">Cancelar</button>
+          <button class="btn btn-secondary" (click)="closeCreateConvoModal()">Cancel·lar</button>
           <button class="btn btn-primary" [disabled]="creatingConvo()" (click)="createConvocatoriaFromHome()">
-            {{ creatingConvo() ? 'Creando...' : 'Crear convocatoria' }}
+            {{ creatingConvo() ? 'Creant...' : 'Crear convocatòria' }}
           </button>
         </div>
       </div>
@@ -812,7 +812,7 @@
             </div>
 
             <div class="form-group">
-              <label>Minuto</label>
+              <label>Minut</label>
               <select [value]="timeMenuMinute()" (change)="updateTimeMenuMinute($any($event.target).value)">
                 <option value="">MM</option>
                 @for (minute of minuteOptions; track minute) {
@@ -823,8 +823,8 @@
           </div>
         </div>
         <div class="modal-footer time-menu-actions">
-          <button class="btn btn-secondary" (click)="closeTimeMenu()">Cancelar</button>
-          <button class="btn btn-primary" [disabled]="!timeMenuHour() || !timeMenuMinute()" (click)="applyTimeMenuSelection()">Usar hora</button>
+          <button class="btn btn-secondary" (click)="closeTimeMenu()">Cancel·lar</button>
+          <button class="btn btn-primary" [disabled]="!timeMenuHour() || !timeMenuMinute()" (click)="applyTimeMenuSelection()">Fer servir hora</button>
         </div>
       </div>
     </div>

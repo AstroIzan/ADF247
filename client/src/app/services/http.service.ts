@@ -12,7 +12,7 @@ export class HttpService {
   constructor(private http: HttpClient) {}
 
   private handleError(error: HttpErrorResponse) {
-    const errorMessage = error.error?.message || error.message || 'Error desconocido';
+    const errorMessage = error.error?.message || error.message || 'Error desconegut';
     return throwError(() => new Error(errorMessage));
   }
 

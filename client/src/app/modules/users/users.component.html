@@ -2,7 +2,7 @@
   <div class="users-header">
     <h2>Gestió d'Usuaris</h2>
     <div class="header-actions">
-      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de usuaris">
+      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Obrir filtres d'usuaris">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
       <button (click)="openForm()" class="btn btn-primary">+ Nou Usuari</button>
@@ -135,7 +135,7 @@
           </div>
 
           <div class="form-group">
-            <label>Indicativo</label>
+            <label>Indicatiu</label>
             <input
               type="text"
               [value]="formData().nIndicatiu || ''"
@@ -145,7 +145,7 @@
           </div>
 
           <div class="form-group">
-            <label>Nombre *</label>
+            <label>Nom *</label>
             <input
               type="text"
               [value]="formData().name || ''"
@@ -155,7 +155,7 @@
           </div>
 
           <div class="form-group">
-            <label>Apellido</label>
+            <label>Cognom</label>
             <input
               type="text"
               [value]="formData().lastName || ''"
@@ -166,7 +166,7 @@
 
           @if (!editingId()) {
             <div class="form-group">
-              <label>Contrasena *</label>
+              <label>Contrasenya *</label>
               <input
                 type="password"
                 [value]="formData().password || ''"
@@ -184,12 +184,12 @@
                 (change)="updateFormField('isActive', $any($event.target).checked)"
                 [disabled]="formSubmitting()"
               />
-              Activo
+              Actiu
             </label>
           </div>
 
           <div class="form-group">
-            <label>Roles</label>
+            <label>Rols</label>
             <div class="roles-grid">
               <label class="checkbox-label">
                 <input
@@ -235,9 +235,9 @@
         </div>
 
         <div class="modal-footer">
-          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancelar</button>
+          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancel·lar</button>
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
-            {{ formSubmitting() ? 'Guardando...' : 'Guardar' }}
+            {{ formSubmitting() ? 'Guardant...' : 'Desar' }}
           </button>
         </div>
       </div>

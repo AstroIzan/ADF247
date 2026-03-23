@@ -144,24 +144,24 @@ export class ConvosComponent {
     const isGuardiaType = this.isGuardiaTypeById(Number(data.convoTypeId));
 
     if (!data.title || !data.responsableId || !data.convoTypeId) {
-      alert('El titulo, responsable y tipo de convocatoria son obligatorios');
+      alert('El titol, el responsable i el tipus de convocatòria son obligatoris.');
       return;
     }
 
     if (!isIncendiType && !data.date) {
-      alert('La fecha es obligatoria');
+      alert('La data es obligatòria.');
       return;
     }
 
     if (!isIncendiType && !data.startTime) {
-      alert('La hora de inicio es obligatoria');
+      alert('L\'hora d\'inici es obligatòria.');
       return;
     }
 
     if (isIncendiType) {
       const readyIn = Number(data.incendiReadyInMinutes) || 0;
       if (!this.incendiReadyOptions.includes(readyIn)) {
-        alert('Selecciona un margen valido para Incendi (10, 15, 20, 25 o 30 minutos).');
+        alert('Selecciona un marge valid per a Incendi (10, 15, 20, 25 o 30 minuts).');
         return;
       }
 
@@ -224,7 +224,7 @@ export class ConvosComponent {
           this.onChanged.emit(updatedConvo);
         },
         error: (err) => {
-          alert('Error al actualizar: ' + err.message);
+          alert('Error en actualitzar: ' + err.message);
           this.formSubmitting.set(false);
         }
       });
@@ -236,7 +236,7 @@ export class ConvosComponent {
           this.onChanged.emit(newConvo);
         },
         error: (err) => {
-          alert('Error al crear: ' + err.message);
+          alert('Error en crear: ' + err.message);
           this.formSubmitting.set(false);
         }
       });
@@ -252,7 +252,7 @@ export class ConvosComponent {
           this.onChanged.emit(null as any);
         },
         error: (err) => {
-          alert('Error al eliminar: ' + err.message);
+          alert('Error en eliminar: ' + err.message);
         }
       });
     } else {
@@ -335,11 +335,11 @@ export class ConvosComponent {
   }
 
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('es-ES');
+    return new Date(dateString).toLocaleDateString('ca-ES');
   }
 
   getSortidaLabel(sortida?: boolean): string {
-    return sortida ? 'Si' : 'No';
+    return sortida ? 'Sí' : 'No';
   }
 
   openTimePicker(input: HTMLInputElement, field: 'startTime' | 'finalTime') {

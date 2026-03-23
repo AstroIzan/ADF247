@@ -1,11 +1,11 @@
 <div class="respuestas-container">
   <div class="respuestas-header">
-    <h2>Gestion de Respuestas / Disponibilidad</h2>
+    <h2>Gestió de Respostes / Disponibilitat</h2>
     <div class="header-actions">
-      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de respuestas">
+      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Obrir filtres de respostes">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
-      <button (click)="openForm()" class="btn btn-primary">+ Nueva Respuesta</button>
+      <button (click)="openForm()" class="btn btn-primary">+ Nova Resposta</button>
     </div>
   </div>
 
@@ -14,19 +14,19 @@
   }
 
   @if (loading()) {
-    <div class="loading">Cargando respuestas...</div>
+    <div class="loading">Carregant respostes...</div>
   } @else if (filteredRespuestas().length > 0) {
     <div class="table-responsive">
       <table class="respuestas-table">
         <thead>
           <tr>
-            <th>Convocatoria</th>
-            <th>Usuario</th>
-            <th>Respuesta</th>
-            <th>Horario Completo</th>
-            <th>Custom</th>
-            <th>Texto Custom</th>
-            <th>Acciones</th>
+            <th>Convocatòria</th>
+            <th>Usuari</th>
+            <th>Resposta</th>
+            <th>Horari Complet</th>
+            <th>Personalitzat</th>
+            <th>Text Personalitzat</th>
+            <th>Accions</th>
           </tr>
         </thead>
         <tbody>
@@ -36,17 +36,17 @@
               <td>{{ getUserName(respuesta.userNCarnet) }}</td>
               <td>
                 <span [class]="respuesta.response ? 'badge-yes' : 'badge-no'">
-                  {{ respuesta.response ? 'Si' : 'No' }}
+                  {{ respuesta.response ? 'Sí' : 'No' }}
                 </span>
               </td>
               <td>
                 <span [class]="respuesta.fullHorari ? 'badge-yes' : 'badge-no'">
-                  {{ respuesta.fullHorari ? 'Si' : 'No' }}
+                  {{ respuesta.fullHorari ? 'Sí' : 'No' }}
                 </span>
               </td>
               <td>
                 <span [class]="respuesta.isCustom ? 'badge-yes' : 'badge-no'">
-                  {{ respuesta.isCustom ? 'Si' : 'No' }}
+                  {{ respuesta.isCustom ? 'Sí' : 'No' }}
                 </span>
               </td>
               <td>{{ respuesta.customText || '-' }}</td>
@@ -54,7 +54,7 @@
                 <button (click)="openForm(respuesta)" class="btn btn-sm btn-edit">Editar</button>
                 @if (deleteConfirming() === respuesta.id) {
                   <button (click)="deleteRespuesta(respuesta.id)" class="btn btn-sm btn-danger">Confirmar</button>
-                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancelar</button>
+                  <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
                 } @else {
                   <button (click)="deleteRespuesta(respuesta.id)" class="btn btn-sm btn-danger">Eliminar</button>
                 }
@@ -65,14 +65,14 @@
       </table>
     </div>
   } @else {
-    <div class="empty-state">No hay respuestas con los filtros aplicados</div>
+    <div class="empty-state">No hi ha respostes amb els filtres aplicats</div>
   }
 
   @if (showFilters()) {
     <div class="modal-overlay" (click)="closeFilters()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Filtros de Respuestas</h3>
+          <h3>Filtres de Respostes</h3>
           <button (click)="closeFilters()" class="close-btn">&times;</button>
         </div>
 
@@ -80,34 +80,34 @@
           <div class="form-group">
             <label>Disponible</label>
             <select [value]="filters().response" (change)="updateFilterField('response', $any($event.target).value)">
-              <option value="all">Todas</option>
-              <option value="yes">Si</option>
+              <option value="all">Totes</option>
+              <option value="yes">Sí</option>
               <option value="no">No</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Respuesta personalizada</label>
+            <label>Resposta personalitzada</label>
             <select [value]="filters().isCustom" (change)="updateFilterField('isCustom', $any($event.target).value)">
-              <option value="all">Todas</option>
-              <option value="yes">Si</option>
+              <option value="all">Totes</option>
+              <option value="yes">Sí</option>
               <option value="no">No</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Horario completo</label>
+            <label>Horari complet</label>
             <select [value]="filters().fullHorari" (change)="updateFilterField('fullHorari', $any($event.target).value)">
-              <option value="all">Todas</option>
-              <option value="yes">Si</option>
+              <option value="all">Totes</option>
+              <option value="yes">Sí</option>
               <option value="no">No</option>
             </select>
           </div>
 
           <div class="form-group">
-            <label>Usuario</label>
+            <label>Usuari</label>
             <select [value]="filters().userNCarnet" (change)="updateFilterField('userNCarnet', $any($event.target).value)">
-              <option value="all">Todos</option>
+              <option value="all">Tots</option>
               @for (user of users(); track user.nCarnet) {
                 <option [value]="user.nCarnet">{{ user.name }} {{ user.lastName }} ({{ user.nCarnet }})</option>
               }
@@ -115,9 +115,9 @@
           </div>
 
           <div class="form-group">
-            <label>Convocatoria</label>
+            <label>Convocatòria</label>
             <select [value]="filters().convoId" (change)="updateFilterField('convoId', $any($event.target).value)">
-              <option value="all">Todas</option>
+              <option value="all">Totes</option>
               @for (convo of convocatorias(); track convo.id) {
                 <option [value]="convo.id">{{ convo.title }}</option>
               }
@@ -126,7 +126,7 @@
         </div>
 
         <div class="modal-footer">
-          <button (click)="resetFilters()" class="btn btn-secondary">Limpiar</button>
+          <button (click)="resetFilters()" class="btn btn-secondary">Netejar</button>
           <button (click)="closeFilters()" class="btn btn-primary">Aplicar</button>
         </div>
       </div>
@@ -137,20 +137,20 @@
     <div class="modal-overlay" (click)="closeForm()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>{{ editingId() ? 'Editar Respuesta' : 'Nueva Respuesta' }}</h3>
+          <h3>{{ editingId() ? 'Editar Resposta' : 'Nova Resposta' }}</h3>
           <button (click)="closeForm()" class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>Convocatoria *</label>
+            <label>Convocatòria *</label>
             <select
               [(ngModel)]="formData().convoId"
               (change)="updateFormField('convoId', $any($event.target).value)"
               [disabled]="formSubmitting()"
               name="convo"
             >
-              <option [value]="undefined">Selecciona una convocatoria</option>
+              <option [value]="undefined">Selecciona una convocatòria</option>
               @for (convo of convocatorias(); track convo.id) {
                 <option [value]="convo.id">{{ convo.title }}</option>
               }
@@ -158,14 +158,14 @@
           </div>
 
           <div class="form-group">
-            <label>Usuario (N Carnet) *</label>
+            <label>Usuari (N Carnet) *</label>
             <select
               [(ngModel)]="formData().userNCarnet"
               (change)="updateFormField('userNCarnet', $any($event.target).value)"
               [disabled]="formSubmitting()"
               name="user"
             >
-              <option [value]="''">Selecciona un usuario</option>
+              <option [value]="''">Selecciona un usuari</option>
               @for (user of users(); track user.nCarnet) {
                 <option [value]="user.nCarnet">{{ user.name }} {{ user.lastName }} ({{ user.nCarnet }})</option>
               }
@@ -180,7 +180,7 @@
                 (change)="updateFormField('response', $any($event.target).checked)"
                 [disabled]="formSubmitting()"
               />
-              Disponible (Si/No)
+              Disponible (Sí/No)
             </label>
           </div>
 
@@ -192,7 +192,7 @@
                 (change)="updateFormField('fullHorari', $any($event.target).checked)"
                 [disabled]="formSubmitting()"
               />
-              Horario Completo
+              Horari Complet
             </label>
           </div>
 
@@ -204,13 +204,13 @@
                 (change)="updateFormField('isCustom', $any($event.target).checked)"
                 [disabled]="formSubmitting()"
               />
-              Respuesta Personalizada
+              Resposta Personalitzada
             </label>
           </div>
 
           @if (formData().isCustom) {
             <div class="form-group">
-              <label>Texto de Respuesta Personalizada</label>
+              <label>Text de Resposta Personalitzada</label>
               <textarea
                 [value]="formData().customText || ''"
                 (change)="updateFormField('customText', $any($event.target).value)"
@@ -222,9 +222,9 @@
         </div>
 
         <div class="modal-footer">
-          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancelar</button>
+          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancel·lar</button>
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
-            {{ formSubmitting() ? 'Guardando...' : 'Guardar' }}
+            {{ formSubmitting() ? 'Guardant...' : 'Desar' }}
           </button>
         </div>
       </div>

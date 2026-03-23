@@ -10,10 +10,7 @@
   width: min(480px, 100%);
   display: grid;
   place-items: center;
-  background: linear-gradient(125deg, rgba(240, 176, 0, 0.96) 0%, rgba(207, 143, 0, 0.95) 62%, rgba(176, 121, 4, 0.95) 100%);
-  border-radius: 20px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(207, 143, 0, 0.25);
+  background: transparent;
   padding: 48px 40px;
 }
 
@@ -145,9 +142,5 @@ input:disabled {
 
   .login-box h2 {
     font-size: 28px;
-  }
-
-  .logo-header {
-    font-size: 24px;
   }
 }

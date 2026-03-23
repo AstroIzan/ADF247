@@ -92,7 +92,7 @@ export class ConvoTypesComponent {
     const data = this.formData();
 
     if (!data.name) {
-      alert('El nombre es obligatorio');
+      alert('El nom es obligatori');
       return;
     }
 
@@ -106,7 +106,7 @@ export class ConvoTypesComponent {
           this.onChanged.emit();
         },
         error: (err) => {
-          alert('Error al actualizar: ' + err.message);
+          alert('Error en actualitzar: ' + err.message);
           this.formSubmitting.set(false);
         }
       });
@@ -118,7 +118,7 @@ export class ConvoTypesComponent {
           this.onChanged.emit();
         },
         error: (err) => {
-          alert('Error al crear: ' + err.message);
+          alert('Error en crear: ' + err.message);
           this.formSubmitting.set(false);
         }
       });
@@ -133,7 +133,7 @@ export class ConvoTypesComponent {
           this.onChanged.emit();
         },
         error: (err) => {
-          alert('Error al eliminar: ' + err.message);
+          alert('Error en eliminar: ' + err.message);
         }
       });
     } else {

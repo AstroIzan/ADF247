@@ -1,11 +1,11 @@
 <div class="types-container">
   <div class="types-header">
-    <h2>Gestion de Tipos de Convocatoria</h2>
+    <h2>Gestió de Tipus de Convocatòria</h2>
     <div class="header-actions">
-      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Abrir filtros de tipos">
+      <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Obrir filtres de tipus">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
-      <button (click)="openForm()" class="btn btn-primary">+ Nuevo Tipo</button>
+      <button (click)="openForm()" class="btn btn-primary">+ Nou Tipus</button>
     </div>
   </div>
 
@@ -16,14 +16,14 @@
           <div class="type-info">
             <h4>{{ type.name }}</h4>
             <small>ID: {{ type.id }}</small>
-            <small>Min. groc: {{ type.minGrocSortida || 0 }} | Min. verd: {{ type.minVerdSortida || 0 }}</small>
-            <small>Ubicacion por defecto: {{ type.defaultLocation || '-' }}</small>
+            <small>Mín. groc: {{ type.minGrocSortida || 0 }} | Mín. verd: {{ type.minVerdSortida || 0 }}</small>
+            <small>Ubicació per defecte: {{ type.defaultLocation || '-' }}</small>
           </div>
           <div class="type-actions">
             <button (click)="openForm(type)" class="btn btn-sm btn-edit">Editar</button>
             @if (deleteConfirming() === type.id) {
               <button (click)="deleteType(type.id)" class="btn btn-sm btn-danger">Confirmar</button>
-              <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancelar</button>
+              <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
             } @else {
               <button (click)="deleteType(type.id)" class="btn btn-sm btn-danger">Eliminar</button>
             }
@@ -32,31 +32,31 @@
       }
     </div>
   } @else {
-    <div class="empty-state">No hay tipos de convocatoria con los filtros aplicados</div>
+    <div class="empty-state">No hi ha tipus de convocatòria amb els filtres aplicats</div>
   }
 
   @if (showFilters()) {
     <div class="modal-overlay" (click)="closeFilters()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>Filtros de Tipos</h3>
+          <h3>Filtres de Tipus</h3>
           <button (click)="closeFilters()" class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>Nombre</label>
-            <input type="text" [value]="filters().name" (input)="updateFilterField('name', $any($event.target).value)" placeholder="Nombre del tipo" />
+            <label>Nom</label>
+            <input type="text" [value]="filters().name" (input)="updateFilterField('name', $any($event.target).value)" placeholder="Nom del tipus" />
           </div>
 
           <div class="form-group">
             <label>ID</label>
-            <input type="text" [value]="filters().id" (input)="updateFilterField('id', $any($event.target).value)" placeholder="Ej: 1" />
+            <input type="text" [value]="filters().id" (input)="updateFilterField('id', $any($event.target).value)" placeholder="Ex: 1" />
           </div>
         </div>
 
         <div class="modal-footer">
-          <button (click)="resetFilters()" class="btn btn-secondary">Limpiar</button>
+          <button (click)="resetFilters()" class="btn btn-secondary">Netejar</button>
           <button (click)="closeFilters()" class="btn btn-primary">Aplicar</button>
         </div>
       </div>
@@ -67,25 +67,25 @@
     <div class="modal-overlay" (click)="closeForm()">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
-          <h3>{{ editingId() ? 'Editar Tipo de Convocatoria' : 'Nuevo Tipo de Convocatoria' }}</h3>
+          <h3>{{ editingId() ? 'Editar Tipus de Convocatòria' : 'Nou Tipus de Convocatòria' }}</h3>
           <button (click)="closeForm()" class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label>Nombre *</label>
+            <label>Nom *</label>
             <input
               type="text"
               [value]="formData().name || ''"
               (change)="updateFormField('name', $any($event.target).value)"
               [disabled]="formSubmitting()"
-              placeholder="Ej: Intervencion, Despliegue, Formacion..."
+              placeholder="Ex: Intervenció, Desplegament, Formació..."
             />
           </div>
 
           <div class="form-grid-2">
             <div class="form-group">
-              <label>Minimo groc para sortida</label>
+              <label>Mínim groc per a sortida</label>
               <input
                 type="number"
                 min="0"
@@ -96,7 +96,7 @@
             </div>
 
             <div class="form-group">
-              <label>Minimo verd para sortida</label>
+              <label>Mínim verd per a sortida</label>
               <input
                 type="number"
                 min="0"
@@ -108,21 +108,21 @@
           </div>
 
           <div class="form-group">
-            <label>Ubicacion por defecto</label>
+            <label>Ubicació per defecte</label>
             <input
               type="text"
               [value]="formData().defaultLocation || ''"
               (change)="updateFormField('defaultLocation', $any($event.target).value)"
               [disabled]="formSubmitting()"
-              placeholder="Ej: Brigadas"
+              placeholder="Ex: Brigades"
             />
           </div>
         </div>
 
         <div class="modal-footer">
-          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancelar</button>
+          <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancel·lar</button>
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
-            {{ formSubmitting() ? 'Guardando...' : 'Guardar' }}
+            {{ formSubmitting() ? 'Desant...' : 'Desar' }}
           </button>
         </div>
       </div>

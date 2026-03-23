@@ -17,8 +17,8 @@
 }
 
 .home-header-left p {
-  margin: 6px 0 0;
-  color: var(--ink-soft);
+  margin:6px 0 0;
+  color: var(--ink-soft)
 }
 
 .home-header-actions {
@@ -152,7 +152,6 @@
 
 .day-number {
   position: relative;
-  z-index: 1;
 }
 
 .day-markers {
@@ -162,7 +161,6 @@
   transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
 }
 
 .marker {
@@ -173,7 +171,6 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 2px;
   padding: 0 4px;
   font-size: 9px;
   font-weight: 700;
@@ -187,7 +184,6 @@
 
 .marker-responded {
   background: var(--gold);
-  color: #1b1b1b;
 }
 
 .marker-closed {
@@ -594,11 +590,9 @@
 }
 
 @media (max-width: 560px) {
-  .day-cell {
-    min-height: 32px;
-    max-height: 36px;
-    font-size: 11px;
-  }
+  .day-cell { min-height: 32px; font-size: 11px; align-items: center; justify-content: center; }
+  .day-markers { bottom: 3px; }
+  .marker { width: 8px; height: 8px; min-width: 8px; padding: 0; font-size: 0; }
 
   .convo-bottom-row,
   .answer-actions {

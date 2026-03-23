@@ -12,10 +12,12 @@
 			<div class="top-nav-right">
 				<span class="mini-user">
 					{{ authService.getCachedNCarnet() }}
-					@if (authService.getCachedNIndicatiu()) {
-						| {{ authService.getCachedNIndicatiu() }}
-					}
-					| {{ authService.getCachedName() }} {{ authService.getCachedLastName() || '' }}
+					<span class="mini-user-detail">
+						@if (authService.getCachedNIndicatiu()) {
+							| {{ authService.getCachedNIndicatiu() }}
+						}
+						| {{ authService.getCachedName() }} {{ authService.getCachedLastName() || '' }}
+					</span>
 				</span>
 				<button class="nav-btn logout" (click)="authService.logout()">Sortir</button>
 			</div>

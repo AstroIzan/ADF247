@@ -134,7 +134,7 @@ export class UsersComponent {
     const data = this.formData();
 
     if (!data.nCarnet || !data.name) {
-      alert('El numero de carnet y el nombre son obligatorios');
+      alert('El numero de carnet i el nom son obligatoris.');
       return;
     }
 
@@ -148,7 +148,7 @@ export class UsersComponent {
           this.onChanged.emit();
         },
         error: (err) => {
-          alert('Error al actualizar: ' + err.message);
+          alert('Error en actualitzar: ' + err.message);
           this.formSubmitting.set(false);
         }
       });
@@ -160,7 +160,7 @@ export class UsersComponent {
           this.onChanged.emit();
         },
         error: (err) => {
-          alert('Error al crear: ' + err.message);
+          alert('Error en crear: ' + err.message);
           this.formSubmitting.set(false);
         }
       });
@@ -175,7 +175,7 @@ export class UsersComponent {
           this.onChanged.emit();
         },
         error: (err) => {
-          alert('Error al eliminar: ' + err.message);
+          alert('Error en eliminar: ' + err.message);
         }
       });
     } else {

@@ -25,19 +25,19 @@ export class LoginComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Si ya está autenticado, redirigir segun rol
+    // Si ja esta autenticat, redirigir segons el rol
     if (this.authService.isLoggedIn()) {
       this.router.navigate([this.authService.isAdmin() ? '/dashboard' : '/home']);
       return;
     }
 
-    // Obtener la URL de retorno si existe
+    // Obtenir la URL de retorn si existeix
     this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/home';
   }
 
   onSubmit() {
     if (!this.nCarnet || !this.password) {
-      this.errorMessage.set('Por favor, completa todos los campos');
+      this.errorMessage.set('Si us plau, omple tots els camps');
       return;
     }
 
@@ -50,7 +50,7 @@ export class LoginComponent implements OnInit {
           this.router.navigate([this.returnUrl]);
         },
         error: (err) => {
-          this.errorMessage.set(err.message || 'Error en la autenticación');
+          this.errorMessage.set(err.message || 'Error en l\'autenticació');
           this.loading.set(false);
         }
       });

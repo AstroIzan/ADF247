@@ -83,7 +83,7 @@ export class HomeComponent implements OnInit {
   });
 
   monthLabel = computed(() => {
-    return new Intl.DateTimeFormat('es-ES', {
+    return new Intl.DateTimeFormat('ca-ES', {
       month: 'long',
       year: 'numeric',
     }).format(this.currentMonth());
@@ -236,7 +236,7 @@ export class HomeComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err.message || 'Error al cargar convocatorias');
+        this.error.set(err.message || 'Error en carregar convocatories');
         this.loading.set(false);
       },
     });
@@ -312,7 +312,7 @@ export class HomeComponent implements OnInit {
   getMyRespuestaLabel(convoId: number): string {
     const respuesta = this.getMyRespuesta(convoId);
     if (!respuesta) {
-      return 'Sin responder';
+      return 'Sense respondre';
     }
 
     return respuesta.response ? 'Disponible' : 'No disponible';
@@ -323,17 +323,17 @@ export class HomeComponent implements OnInit {
     const convo = this.convocatorias().find((item) => item.id === convoId);
 
     if (!convo) {
-      this.error.set('No se encontro la convocatoria para responder.');
+      this.error.set('No s\'ha trobat la convocatòria per respondre.');
       return;
     }
 
     if (this.isConvocatoriaClosed(convo)) {
-      this.error.set('Esta convocatoria ya no esta disponible para responder.');
+      this.error.set('Aquesta convocatòria ja no està disponible per respondre.');
       return;
     }
 
     if (!user?.nCarnet) {
-      this.error.set('No se pudo identificar el usuario para responder.');
+      this.error.set('No s\'ha pogut identificar l\'usuari per respondre.');
       return;
     }
 
@@ -347,7 +347,7 @@ export class HomeComponent implements OnInit {
           this.respondingConvoId.set(null);
         },
         error: (err) => {
-          this.error.set(err.message || 'No se pudo guardar la respuesta.');
+          this.error.set(err.message || 'No s\'ha pogut desar la resposta.');
           this.respondingConvoId.set(null);
         },
       });
@@ -367,7 +367,7 @@ export class HomeComponent implements OnInit {
         this.respondingConvoId.set(null);
       },
       error: (err) => {
-        this.error.set(err.message || 'No se pudo guardar la respuesta.');
+        this.error.set(err.message || 'No s\'ha pogut desar la resposta.');
         this.respondingConvoId.set(null);
       },
     });
@@ -375,7 +375,7 @@ export class HomeComponent implements OnInit {
 
   openCustomModal(convo: Convocatoria) {
     if (this.isConvocatoriaClosed(convo)) {
-      this.error.set('Esta convocatoria ya no esta disponible para modificar respuestas.');
+      this.error.set('Aquesta convocatòria ja no està disponible per modificar respostes.');
       return;
     }
 
@@ -413,12 +413,12 @@ export class HomeComponent implements OnInit {
     const user = this.authService.getCurrentUser();
 
     if (!convo || !user?.nCarnet) {
-      this.error.set('No se pudo guardar la respuesta personalizada.');
+      this.error.set('No s\'ha pogut desar la resposta personalitzada.');
       return;
     }
 
     if (this.isConvocatoriaClosed(convo)) {
-      this.error.set('Esta convocatoria ya no esta disponible para responder.');
+      this.error.set('Aquesta convocatòria ja no està disponible per respondre.');
       return;
     }
 
@@ -427,7 +427,7 @@ export class HomeComponent implements OnInit {
     const customEndTime = this.customResponse().customEndTime.trim();
 
     if ((customStartTime && !customEndTime) || (!customStartTime && customEndTime)) {
-      this.error.set('Si defines un horario custom, debes indicar hora de inicio y hora de fin.');
+      this.error.set('Si defineixes un horari personalitzat, has d\'indicar hora d\'inici i hora de fi.');
       return;
     }
 
@@ -460,7 +460,7 @@ export class HomeComponent implements OnInit {
     };
 
     const onError = (err: any) => {
-      this.error.set(err.message || 'No se pudo guardar la respuesta personalizada.');
+      this.error.set(err.message || 'No s\'ha pogut desar la resposta personalitzada.');
       this.respondingConvoId.set(null);
     };
 
@@ -486,7 +486,7 @@ export class HomeComponent implements OnInit {
     }
 
     if (this.isConvocatoriaClosed(convo)) {
-      this.error.set('Esta convocatoria ya no permite cambios.');
+      this.error.set('Aquesta convocatòria ja no permet canvis.');
       return;
     }
 
@@ -504,7 +504,7 @@ export class HomeComponent implements OnInit {
         this.closeCustomModal();
       },
       error: (err) => {
-        this.error.set(err.message || 'No se pudo eliminar la respuesta.');
+        this.error.set(err.message || 'No s\'ha pogut eliminar la resposta.');
         this.respondingConvoId.set(null);
       },
     });
@@ -676,7 +676,7 @@ export class HomeComponent implements OnInit {
     }
 
     if (!form.title || !form.date || !form.responsableId || !form.convoTypeId || !form.startTime) {
-      this.error.set('Completa titulo, fecha, hora inicio, responsable y tipo.');
+      this.error.set('Completa titol, data, hora d\'inici, responsable i tipus.');
       return;
     }
 
@@ -703,7 +703,7 @@ export class HomeComponent implements OnInit {
         this.loadConvocatorias();
       },
       error: (err) => {
-        this.error.set(err.message || 'No se pudo actualizar la convocatoria.');
+        this.error.set(err.message || 'No s\'ha pogut actualitzar la convocatòria.');
         this.adminConvoSaving.set(false);
       },
     });
@@ -849,7 +849,7 @@ export class HomeComponent implements OnInit {
     this.createConvoError.set('');
 
     if (!form.title || !form.responsableId || !form.convoTypeId) {
-      this.createConvoError.set('Completa titulo, responsable y tipo para crear.');
+      this.createConvoError.set('Completa titol, responsable i tipus per crear.');
       return;
     }
 
@@ -860,50 +860,50 @@ export class HomeComponent implements OnInit {
 
     if (isGuardiaType) {
       if (!form.guardiaRangeStart || !form.guardiaRangeEnd) {
-        this.createConvoError.set('Para guardia debes indicar rango de fechas.');
+        this.createConvoError.set('Per a guardia has d\'indicar un rang de dates.');
         return;
       }
 
       if (!form.guardiaMorning && !form.guardiaAfternoon) {
-        this.createConvoError.set('Selecciona al menos un turno de guardia (manana o tarde).');
+        this.createConvoError.set('Selecciona almenys un torn de guardia (mati o tarda).');
         return;
       }
 
       payloads = this.buildGuardiaPayloads(form);
 
       if (payloads.length === 0) {
-        this.createConvoError.set('No hay dias laborables en el rango seleccionado para crear guardias.');
+        this.createConvoError.set('No hi ha dies laborables al rang seleccionat per crear guardies.');
         return;
       }
     } else if (this.isSemanalTypeById(form.convoTypeId)) {
       if (!form.semanalRangeStart || !form.semanalRangeEnd) {
-        this.createConvoError.set('Para semanal debes indicar fecha de inicio y fin.');
+        this.createConvoError.set('Per a setmanal has d\'indicar data d\'inici i de fi.');
         return;
       }
 
       const validSlots = (form.semanalSlots || []).filter((slot) => slot.start && slot.end);
 
       if (validSlots.length === 0) {
-        this.createConvoError.set('Debes anadir al menos una franja horaria semanal.');
+        this.createConvoError.set('Has d\'afegir almenys una franja horaria setmanal.');
         return;
       }
 
       const hasInvalidSlot = validSlots.some((slot) => slot.start >= slot.end);
       if (hasInvalidSlot) {
-        this.createConvoError.set('Cada franja semanal debe tener una hora de inicio menor que la hora final.');
+        this.createConvoError.set('Cada franja setmanal ha de tenir una hora d\'inici menor que l\'hora final.');
         return;
       }
 
       payloads = this.buildSemanalPayloads(form, validSlots);
 
       if (payloads.length === 0) {
-        this.createConvoError.set('No se pudieron generar convocatorias semanales con ese rango.');
+        this.createConvoError.set('No s\'han pogut generar convocatories setmanals amb aquest rang.');
         return;
       }
     } else if (isIncendiType) {
       const readyIn = Number(form.incendiReadyInMinutes) || 0;
       if (!this.incendiReadyOptions.includes(readyIn)) {
-        this.createConvoError.set('Selecciona un margen valido para Incendi (10, 15, 20, 25 o 30 minutos).');
+        this.createConvoError.set('Selecciona un marge valid per a Incendi (10, 15, 20, 25 o 30 minuts).');
         return;
       }
 
@@ -930,7 +930,7 @@ export class HomeComponent implements OnInit {
       ];
     } else {
       if (!form.date || !form.startTime) {
-        this.createConvoError.set('Completa fecha y hora inicio para crear la convocatoria.');
+        this.createConvoError.set('Completa data i hora d\'inici per crear la convocatòria.');
         return;
       }
 
@@ -961,7 +961,7 @@ export class HomeComponent implements OnInit {
         this.loadConvocatorias();
       },
       error: (err) => {
-        this.createConvoError.set(err.message || 'No se pudo crear la convocatoria.');
+        this.createConvoError.set(err.message || 'No s\'ha pogut crear la convocatòria.');
         this.creatingConvo.set(false);
       },
     });
