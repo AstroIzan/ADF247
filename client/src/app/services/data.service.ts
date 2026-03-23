@@ -63,6 +63,86 @@ export interface Respuesta {
   user?: User;
 }
 
+export interface NotificationSettings {
+  schedule: {
+    dailyRunHour: number;
+    dailyRunMinute: number;
+    weeklyRequestWeekday: number;
+  };
+  typeGroups: {
+    weeklyTypeNames: string[];
+    sortidaTypeNames: string[];
+    guardiaSourceTypeName: string;
+    guardiaPviTypeName: string;
+  };
+  responseRequest: {
+    sendOnCreationForNonWeekly: boolean;
+    pendingLeadDays: number;
+    pendingLeadHours: number;
+    link: string;
+    creationTitle: string;
+    creationBody: string;
+    pendingTitle: string;
+    pendingBody: string;
+  };
+  weeklyRequest: {
+    enabled: boolean;
+    requestWeekday: number;
+    requestHour: number;
+    requestMinute: number;
+    link: string;
+    title: string;
+    body: string;
+  };
+  sortidaStatus: {
+    enabled: boolean;
+    confirmDaysBefore: number;
+    confirmHour: number;
+    confirmMinute: number;
+    link: string;
+    titleYes: string;
+    bodyYes: string;
+    titleNo: string;
+    bodyNo: string;
+  };
+}
+
+export interface NotificationLog {
+  id: number;
+  title: string;
+  body: string;
+  data?: Record<string, unknown> | null;
+  targetScope: string;
+  requestedCount: number;
+  successCount: number;
+  failureCount: number;
+  status: string;
+  errorMessage?: string | null;
+  createdAt: string;
+  senderUserId?: number | null;
+}
+
+export interface DeviceTokenAdmin {
+  id: number;
+  token: string;
+  platform?: string | null;
+  isActive: boolean;
+  lastSeenAt?: string | null;
+  createdAt?: string | null;
+  user?: { id: number; nCarnet: string; name: string; lastName?: string | null } | null;
+}
+
+export interface ApiHealthStatus {
+  ok: boolean;
+  service: string;
+  dependencies?: {
+    firebase?: {
+      configured: boolean;
+      message?: string;
+    };
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -152,5 +232,50 @@ export class DataService {
 
   deleteRespuesta(id: number): Observable<any> {
     return this.http.delete<any>(`/dispo/${id}`);
+  }
+
+  // === NOTIFICATIONS ===
+  getNotificationConfig(): Observable<NotificationSettings> {
+    return this.http.get<NotificationSettings>('/notifications/config');
+  }
+
+  updateNotificationConfig(data: Partial<NotificationSettings>): Observable<NotificationSettings> {
+    return this.http.put<NotificationSettings>('/notifications/config', data);
+  }
+
+  getNotificationLogs(limit = 30): Observable<NotificationLog[]> {
+    return this.http.get<NotificationLog[]>(`/notifications/logs?limit=${limit}`);
+  }
+
+  getAllDeviceTokens(): Observable<DeviceTokenAdmin[]> {
+    return this.http.get<DeviceTokenAdmin[]>('/notifications/device-tokens/all');
+  }
+
+  sendConvocatoriaResponseRequest(convoId: number): Observable<any> {
+    return this.http.post<any>(`/notifications/dispatch/convocatoria/${convoId}/response-request`, {});
+  }
+
+  sendConvocatoriaSortidaStatus(convoId: number): Observable<any> {
+    return this.http.post<any>(`/notifications/dispatch/convocatoria/${convoId}/sortida-status`, {});
+  }
+
+  sendPendingResponsesReminder(): Observable<any> {
+    return this.http.post<any>('/notifications/dispatch/pending-responses', {});
+  }
+
+  sendWeeklyResponseDigest(): Observable<any> {
+    return this.http.post<any>('/notifications/dispatch/weekly-response-digest', {});
+  }
+
+  sendTomorrowSortidaNotifications(): Observable<any> {
+    return this.http.post<any>('/notifications/dispatch/tomorrow-sortida', {});
+  }
+
+  runNotificationAutomation(): Observable<any> {
+    return this.http.post<any>('/notifications/automation/run', {});
+  }
+
+  getHealthStatus(): Observable<ApiHealthStatus> {
+    return this.http.get<ApiHealthStatus>('/health');
   }
 }

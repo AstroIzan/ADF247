@@ -3,8 +3,9 @@ require('./config/env')
 const cors = require('cors')
 const express = require('express')
 const routes = require('./routes')
+const { getFirebaseHealthStatus } = require('./modules/notifications/notifications.firebase')
 
-const DEFAULT_CORS_ORIGINS = ['http://localhost:4200']
+const DEFAULT_CORS_ORIGINS = ['http://localhost:4200', 'https://localhost:4200']
 
 function getCorsOrigins() {
 	const rawOrigins = process.env.CORS_ORIGIN
@@ -26,8 +27,23 @@ app.use(cors({
 }))
 app.use(express.json())
 
+function getHealthPayload() {
+	const firebase = getFirebaseHealthStatus()
+	return {
+		ok: true,
+		service: 'api',
+		dependencies: {
+			firebase,
+		},
+ 	}
+}
+
 app.get('/health', (_req, res) => {
-	res.json({ ok: true, service: 'api' })
+	res.json(getHealthPayload())
+})
+
+app.get('/api/health', (_req, res) => {
+	res.json(getHealthPayload())
 })
 
 app.use('/api', routes)

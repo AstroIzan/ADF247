@@ -5,7 +5,10 @@ const {
   createDispoDtoError,
   mapRespuestaToDto,
 } = require('./dispo.dto')
-const { recalculateAutoAssignedResponsable } = require('../convos/convos.service')
+const {
+  recalculateAutoAssignedResponsable,
+  recalculateSortidaForConvocatoria,
+} = require('../convos/convos.service')
 
 const respuestaInclude = {
   convocatoria: true,
@@ -175,6 +178,7 @@ async function createRespuesta(payload) {
     })
 
     await recalculateAutoAssignedResponsable(respuesta.convoId)
+    await recalculateSortidaForConvocatoria(respuesta.convoId)
 
     return mapRespuestaToDto(respuesta)
   } catch (error) {
@@ -221,6 +225,7 @@ async function updateRespuesta(id, payload) {
     })
 
     await recalculateAutoAssignedResponsable(respuesta.convoId)
+    await recalculateSortidaForConvocatoria(respuesta.convoId)
 
     return mapRespuestaToDto(respuesta)
   } catch (error) {
@@ -238,6 +243,7 @@ async function deleteRespuesta(id) {
     })
 
     await recalculateAutoAssignedResponsable(existing.convoId)
+    await recalculateSortidaForConvocatoria(existing.convoId)
 
     return mapRespuestaToDto(respuesta)
   } catch (error) {

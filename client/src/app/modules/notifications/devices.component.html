@@ -1,0 +1,49 @@
+<div class="devices-panel">
+  <div class="devices-header">
+    <div>
+      <h2>Dispositius registrats</h2>
+      <p>Llista de tots els dispositius que han autoritzat rebre notificacions push.</p>
+    </div>
+    <button class="btn btn-secondary" (click)="onRefresh.emit()" [disabled]="loading">
+      {{ loading ? 'Actualitzant...' : 'Actualitzar' }}
+    </button>
+  </div>
+
+  @if (error) {
+    <div class="error-alert">{{ error }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading-indicator">Carregant dispositius...</div>
+  } @else if (devices.length === 0) {
+    <div class="empty-state">Cap dispositiu registrat.</div>
+  } @else {
+    <div class="devices-count">
+      <small>{{ devices.length }} dispositiu{{ devices.length !== 1 ? 's' : '' }} trobat{{ devices.length !== 1 ? 's' : '' }}</small>
+    </div>
+    <div class="devices-list">
+      @for (device of devices; track device.id) {
+        <article class="device-item" [class.inactive]="!device.isActive">
+          <div class="device-item-header">
+            <strong class="device-item-user">{{ device.user?.nCarnet || '—' }}</strong>
+            <span class="status-badge" [class.status-inactive]="!device.isActive">
+              {{ device.isActive ? 'Actiu' : 'Inactiu' }}
+            </span>
+          </div>
+          <div class="device-item-info">
+            <span>{{ device.user?.name || '' }} {{ device.user?.lastName || '' }}</span>
+            <span class="separator">·</span>
+            <span>{{ device.platform || 'web' }}</span>
+            @if (device.lastSeenAt) {
+              <span class="separator">·</span>
+              <span>Últim ús: {{ device.lastSeenAt | date:'short' }}</span>
+            }
+            <span class="separator">·</span>
+            <span>Alta: {{ device.createdAt | date:'short' }}</span>
+          </div>
+          <code class="device-item-token">{{ device.token.slice(0, 40) }}…</code>
+        </article>
+      }
+    </div>
+  }
+</div>

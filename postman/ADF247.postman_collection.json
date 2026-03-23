@@ -10,6 +10,26 @@
       "item": [
         {
           "name": "GET /health",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Health responde 200', function () {",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test('Health incluye estado de Firebase', function () {",
+                  "  var json = pm.response.json();",
+                  "  pm.expect(json).to.have.property('dependencies');",
+                  "  pm.expect(json.dependencies).to.have.property('firebase');",
+                  "  pm.expect(json.dependencies.firebase).to.have.property('configured');",
+                  "});"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],
@@ -22,9 +42,36 @@
                 "health"
               ]
             },
-            "description": "Verifica que l'API està funcionant correctament."
+            "description": "Verifica que l'API està funcionant correctament i informa si Firebase està configurat per a notificacions push."
           },
-          "response": []
+          "response": [
+            {
+              "name": "200 OK",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/health",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "health"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"ok\": true,\n  \"service\": \"api\",\n  \"dependencies\": {\n    \"firebase\": {\n      \"configured\": false,\n      \"message\": \"Faltan credenciales Firebase. Configura FIREBASE_SERVICE_ACCOUNT_JSON o FIREBASE_SERVICE_ACCOUNT_PATH.\"\n    }\n  }\n}"
+            }
+          ]
         }
       ]
     },

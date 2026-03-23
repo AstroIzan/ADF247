@@ -55,7 +55,7 @@ async function main() {
   }
 
   console.log(`\n\uD83D\uDCCB Creando tipos de convocatoria...`)
-  const tipos = ['Guardia', 'Formacion', 'Salida']
+  const tipos = ['Guardia', 'Guardia PVI', 'Semanal', 'Formacion', 'Salida']
   const convoTypeMap = {}
 
   for (let t of tipos) {

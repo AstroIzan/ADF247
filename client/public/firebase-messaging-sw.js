@@ -1,14 +1,14 @@
 /* eslint-disable no-undef */
-importScripts('https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js')
-importScripts('https://www.gstatic.com/firebasejs/10.12.5/firebase-messaging-compat.js')
+importScripts('https://www.gstatic.com/firebasejs/12.11.0/firebase-app-compat.js')
+importScripts('https://www.gstatic.com/firebasejs/12.11.0/firebase-messaging-compat.js')
 
 firebase.initializeApp({
-  apiKey: 'REPLACE_WITH_FIREBASE_API_KEY',
-  authDomain: 'REPLACE_WITH_FIREBASE_AUTH_DOMAIN',
-  projectId: 'REPLACE_WITH_FIREBASE_PROJECT_ID',
-  storageBucket: 'REPLACE_WITH_FIREBASE_STORAGE_BUCKET',
-  messagingSenderId: 'REPLACE_WITH_FIREBASE_MESSAGING_SENDER_ID',
-  appId: 'REPLACE_WITH_FIREBASE_APP_ID',
+    apiKey: "AIzaSyAqvmPgENspdFCwVKz9k0y7aCBMIHZpHvI",
+    authDomain: "adf247-95ce1.firebaseapp.com",
+    projectId: "adf247-95ce1",
+    storageBucket: "adf247-95ce1.firebasestorage.app",
+    messagingSenderId: "24116711500",
+    appId: "1:24116711500:web:0463655ddef3a58d77e4e9",
 })
 
 const messaging = firebase.messaging()

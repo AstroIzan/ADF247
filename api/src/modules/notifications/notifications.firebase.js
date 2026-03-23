@@ -1,4 +1,5 @@
 const fs = require('fs')
+const path = require('path')
 const admin = require('firebase-admin')
 
 function createFirebaseConfigError(message) {
@@ -17,8 +18,22 @@ function resolveServiceAccountFromEnv() {
   }
 
   if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+    const configuredPath = process.env.FIREBASE_SERVICE_ACCOUNT_PATH.trim()
+    const apiRoot = path.resolve(__dirname, '../../..')
+    const candidatePaths = [
+      configuredPath,
+      path.resolve(process.cwd(), configuredPath),
+      path.resolve(apiRoot, configuredPath),
+    ]
+
+    const serviceAccountPath = candidatePaths.find((candidate) => fs.existsSync(candidate))
+
     try {
-      const raw = fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH, 'utf8')
+      if (!serviceAccountPath) {
+        throw new Error('missing-file')
+      }
+
+      const raw = fs.readFileSync(serviceAccountPath, 'utf8')
       return JSON.parse(raw)
     } catch {
       throw createFirebaseConfigError('No se ha podido leer FIREBASE_SERVICE_ACCOUNT_PATH.')
@@ -55,6 +70,31 @@ function getFirebaseMessaging() {
   return admin.messaging()
 }
 
+function getFirebaseHealthStatus() {
+  try {
+    const serviceAccount = resolveServiceAccountFromEnv()
+    const hasRequiredFields = Boolean(
+      serviceAccount
+      && serviceAccount.project_id
+      && serviceAccount.client_email
+      && serviceAccount.private_key
+    )
+
+    return {
+      configured: hasRequiredFields,
+      message: hasRequiredFields
+        ? 'Firebase configurado correctamente.'
+        : 'Credenciales Firebase incompletas.',
+    }
+  } catch (error) {
+    return {
+      configured: false,
+      message: error.message || 'Firebase no configurado.',
+    }
+  }
+}
+
 module.exports = {
+  getFirebaseHealthStatus,
   getFirebaseMessaging,
 }
