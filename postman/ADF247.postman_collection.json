@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "ADF247 API",
-    "description": "Coleccion Postman para el estado actual del backend ADF247.",
+    "description": "Col·lecció Postman per a l'API del backend ADF247. Autenticació JWT requerida per a la majoria d'endpoints. Usar variables: baseUrl (http://localhost:3001), userNCarnet/userPassword per login, token/refreshToken s'estableixen automàticament.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -22,7 +22,7 @@
                 "health"
               ]
             },
-            "description": "Comprueba que la API esta levantada."
+            "description": "Verifica que l'API està funcionant correctament."
           },
           "response": []
         }
@@ -87,7 +87,7 @@
                 "login"
               ]
             },
-            "description": "Inicia sesion y guarda token/userId/userNCarnet en variables de coleccion."
+            "description": "Inicia sessió i guarda token/userId/userNCarnet en variables de col·lecció. No requereix autenticació prèvia."
           },
           "response": []
         },
@@ -135,7 +135,7 @@
                 "refresh"
               ]
             },
-            "description": "Renueva access token y refresh token sin cerrar sesion."
+            "description": "Renova el access token i refresh token sense tancar la sessió. Requereix refreshToken vàlid."
           },
           "response": []
         },
@@ -160,7 +160,7 @@
                 "me"
               ]
             },
-            "description": "Devuelve el perfil autenticado usando el Bearer token guardado."
+            "description": "Retorna el perfil de l'usuari autenticat. Requereix Bearer token vàlid."
           },
           "response": []
         }
@@ -173,7 +173,12 @@
           "name": "GET /api/users",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/users",
               "host": [
@@ -191,7 +196,12 @@
           "name": "GET /api/users/:id",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/users/{{userId}}",
               "host": [
@@ -229,6 +239,10 @@
             "method": "POST",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -256,6 +270,10 @@
             "method": "PUT",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -282,7 +300,12 @@
           "name": "DELETE /api/users/:id",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/users/{{newUserId}}",
               "host": [
@@ -294,7 +317,7 @@
                 "{{newUserId}}"
               ]
             },
-            "description": "Usa newUserId generado por el POST de usuarios para evitar borrar usuarios del seed."
+            "description": "Utilitza newUserId generat pel POST d'usuaris per evitar borrar usuaris del seed."
           },
           "response": []
         }
@@ -307,7 +330,12 @@
           "name": "GET /api/convos/types",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/convos/types",
               "host": [
@@ -326,7 +354,12 @@
           "name": "GET /api/convos/types/:id",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/convos/types/{{convoTypeId}}",
               "host": [
@@ -364,6 +397,10 @@
             "method": "POST",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -392,6 +429,10 @@
             "method": "PUT",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -419,7 +460,12 @@
           "name": "GET /api/convos",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/convos",
               "host": [
@@ -437,7 +483,12 @@
           "name": "GET /api/convos/:id",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/convos/{{convoId}}",
               "host": [
@@ -474,6 +525,10 @@
             "method": "POST",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -501,6 +556,10 @@
             "method": "PUT",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -527,7 +586,12 @@
           "name": "DELETE /api/convos/:id",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/convos/{{newConvoId}}",
               "host": [
@@ -546,7 +610,12 @@
           "name": "DELETE /api/convos/types/:id",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/convos/types/{{newConvoTypeId}}",
               "host": [
@@ -571,7 +640,12 @@
           "name": "GET /api/dispo",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/dispo",
               "host": [
@@ -589,7 +663,12 @@
           "name": "GET /api/dispo?convoId=:convoId",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/dispo?convoId={{convoId}}",
               "host": [
@@ -613,7 +692,12 @@
           "name": "GET /api/dispo/:id",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/dispo/{{responseId}}",
               "host": [
@@ -650,6 +734,10 @@
             "method": "POST",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -677,6 +765,10 @@
             "method": "PUT",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
                 "key": "Content-Type",
                 "value": "application/json"
               }
@@ -703,7 +795,12 @@
           "name": "DELETE /api/dispo/:id",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/api/dispo/{{newResponseId}}",
               "host": [
@@ -721,59 +818,85 @@
       ]
     }
   ],
-  "event": [],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Validar que les variables requeridas estiguin configurades",
+          "if (!pm.collectionVariables.get('userNCarnet') || !pm.collectionVariables.get('userPassword')) {",
+          "  console.warn('Avís: userNCarnet i/o userPassword no estan configurades. Usar les credencials del seed: 247/GI/215 / Airline2'):",
+          "}"
+        ]
+      }
+    }
+  ],
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:3001"
+      "value": "http://localhost:3001",
+      "type": "string"
     },
     {
       "key": "token",
-      "value": ""
+      "value": "",
+      "type": "string"
     },
     {
       "key": "refreshToken",
-      "value": ""
+      "value": "",
+      "type": "string"
     },
     {
       "key": "userId",
-      "value": "2"
+      "value": "2",
+      "type": "string"
     },
     {
       "key": "newUserId",
-      "value": ""
+      "value": "",
+      "type": "string"
     },
     {
       "key": "userNCarnet",
-      "value": "247/GI/215"
+      "value": "247/GI/215",
+      "type": "string"
     },
     {
       "key": "userPassword",
-      "value": "Airline2"
+      "value": "Airline2",
+      "type": "string"
     },
     {
       "key": "convoTypeId",
-      "value": "1"
+      "value": "1",
+      "type": "string"
     },
     {
       "key": "newConvoTypeId",
-      "value": ""
+      "value": "",
+      "type": "string"
     },
     {
       "key": "convoId",
-      "value": "1"
+      "value": "1",
+      "type": "string"
     },
     {
       "key": "newConvoId",
-      "value": ""
+      "value": "",
+      "type": "string"
     },
     {
       "key": "responseId",
-      "value": "1"
+      "value": "1",
+      "type": "string"
     },
     {
       "key": "newResponseId",
-      "value": ""
+      "value": "",
+      "type": "string"
     }
   ]
 }
