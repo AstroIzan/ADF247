@@ -1,60 +1,103 @@
 # ADF247
 
-Monorepo con tres partes:
-- `database` (Prisma + SQLite)
-- `api` (Express)
-- `client` (Angular)
+Monorepo con 3 partes:
 
-## Requisitos
+- `database`: Prisma + SQLite
+- `api`: Express
+- `client`: Angular
 
-- Node.js 20+
-- npm 10+
+Este README esta pensado para que cualquier persona pueda clonar el repo y levantar el proyecto desde cero.
 
-## Instalacion rapida
+## 1) Requisitos
 
-1. Clonar el repositorio.
-2. En la raiz, instalar todo:
+- Node.js 20 o superior
+- npm 10 o superior
+
+Comprobacion rapida:
+
+```bash
+node -v
+npm -v
+```
+
+## 2) Estructura del repositorio
+
+```
+ADF247/
+	api/
+	client/
+	database/
+	postman/
+	package.json (scripts raiz)
+```
+
+## 3) Instalacion completa
+
+Desde la raiz del repo:
 
 ```bash
 npm install
 npm run install:all
 ```
 
-## Preparar base de datos
+Que hace esto:
 
-Desde la carpeta `database`:
+- Instala dependencias de la raiz (incluye `concurrently`)
+- Instala dependencias de `database`, `api` y `client`
+
+## 4) Configuracion de entorno
+
+### Base de datos (Prisma)
+
+Archivo ya presente:
+
+- `database/.env`
+
+Variable usada:
+
+- `DATABASE_URL="file:./dev.db"`
+
+### API
+
+Archivos ya presentes:
+
+- `api/.env.development`
+- `api/.env.pro`
+
+Variables principales:
+
+- `NODE_ENV`
+- `PORT`
+- `CORS_ORIGIN`
+- `JWT_SECRET`
+- `JWT_EXPIRES_IN`
+- `JWT_REFRESH_SECRET`
+- `JWT_REFRESH_EXPIRES_IN`
+- `PASSWORD_SALT_ROUNDS`
+
+Notas importantes:
+
+- En desarrollo, la API carga `api/.env.development`.
+- En produccion (`NODE_ENV=pro` o `production`), carga `api/.env.pro`.
+- Si faltan secretos JWT en produccion, la API falla al iniciar auth (esperado).
+
+## 5) Preparar la base de datos
+
+Desde `database`:
 
 ```bash
 npm run prisma:generate
 npx prisma migrate dev --name adf_schema
-node prisma/seed.js
+npm run prisma:seed
 ```
 
-Opcional, abrir Prisma Studio:
+Opcional para inspeccionar datos:
 
 ```bash
 npm run prisma:studio
 ```
 
-## Estructura BBDD actual (resumen)
-
-- Users: voluntarios ADF con `nCarnet` unico y `nIndicatiu` opcional.
-- Roles: permisos y rol operativo por usuario (`isCapOperatiu`, `isCapColla`, `isAdmin`, `isGroc`).
-- ConvoTypes: tipos de convocatoria (`Guardia`, `Formacion`, `Salida`).
-- Convocatories: convocatorias de guardias/formaciones/salidas.
-- Respostes: respuestas de disponibilidad por usuario y convocatoria.
-
-## Seed de desarrollo
-
-- El seed activo esta en `database/prisma/seed.js`.
-- Carga 8 usuarios de ejemplo ADF, tipos de convocatoria y varias convocatorias.
-- Si quieres volver a cargarlo desde cero, ejecuta de nuevo:
-
-```bash
-node prisma/seed.js
-```
-
-## Ejecutar proyecto
+## 6) Arranque en desarrollo
 
 Desde la raiz:
 
@@ -63,52 +106,98 @@ npm run dev
 ```
 
 Esto levanta:
+
 - API en `http://localhost:3001`
-- Cliente Angular en `http://localhost:4200`
+- Cliente en `http://localhost:4200`
 
-## Comprobacion basica
+Comprobacion API:
 
-- Estado API: `http://localhost:3001/health`
+- `http://localhost:3001/health`
 
-## Auth JWT
+## 7) Credenciales de prueba (seed)
 
-- `POST /api/auth/login` recibe `nCarnet` y `password`.
-- `POST /api/auth/refresh` recibe `refreshToken` y devuelve un nuevo `accessToken` y `refreshToken`.
-- `GET /api/auth/me` requiere header `Authorization: Bearer <token>`.
-- El login devuelve `accessToken`, `refreshToken`, `tokenType`, `expiresIn`, `refreshExpiresIn` y `user`.
-- El objeto `user` ya incluye `nCarnet`, `isActive` y `roles`, pensado para que el cliente lo cachee y no tenga que pedirlo a la API en cada vista.
+El seed crea usuarios de ejemplo con password en claro definida en `database/prisma/seed.js`.
 
-## Variables de entorno utiles
+Ejemplos:
 
-- `PORT`: puerto del API.
-- `JWT_SECRET`: secreto de firma para access tokens.
-- `JWT_EXPIRES_IN`: expiracion del token, por ejemplo `12h`.
-- `JWT_REFRESH_SECRET`: secreto de firma para refresh tokens.
-- `JWT_REFRESH_EXPIRES_IN`: expiracion del refresh token, por ejemplo `30d`.
-- `CORS_ORIGIN`: lista separada por comas de origenes permitidos. Por defecto `http://localhost:4200`.
-- `PASSWORD_SALT_ROUNDS`: coste bcrypt para contrasenas nuevas.
+- `nCarnet: 247/GI/239` / `password: Airline7`
+- `nCarnet: 247/GI/200` / `password: Airline1`
 
-## Entornos API
+## 8) Scripts disponibles
 
-- Desarrollo: `api/.env.development`
-- Produccion: `api/.env.pro`
+### Raiz
 
-La API carga primero el archivo de entorno segun `NODE_ENV` y despues `api/.env` como fallback.
+- `npm run install:all`: instala dependencias en `database`, `api` y `client`
+- `npm run dev`: arranca API + cliente en paralelo
+- `npm run pro`: arranca API en modo pro y ejecuta build del cliente
 
-Ejemplo de refresh desde cliente:
+### API (`api/package.json`)
 
-```http
-POST /api/auth/refresh
-Content-Type: application/json
+- `npm run dev`: nodemon con `NODE_ENV=development`
+- `npm run start`: inicio simple
+- `npm run start:pro`: inicio con `NODE_ENV=pro`
 
-{
-	"refreshToken": "<token>"
-}
-```
+### Cliente (`client/package.json`)
 
-## Coleccion Postman
+- `npm run start`: servidor Angular
+- `npm run build`: build produccion
+- `npm run build:dev`: build desarrollo
 
-- Archivo: `postman/ADF247.postman_collection.json`.
-- Incluye health, auth y users con variables reutilizables (`baseUrl`, `token`, `userId`, `newUserId`).
-- El request de login guarda automaticamente el token y el userId en variables de coleccion.
+### Database (`database/package.json`)
+
+- `npm run prisma:generate`
+- `npm run prisma:migrate`
+- `npm run prisma:seed`
+- `npm run prisma:studio`
+
+## 9) API Auth (resumen)
+
+- `POST /api/auth/login` con `nCarnet` y `password`
+- `POST /api/auth/refresh` con `refreshToken`
+- `GET /api/auth/me` con `Authorization: Bearer <token>`
+
+Respuesta de login/refresh incluye:
+
+- `accessToken`
+- `refreshToken`
+- `tokenType`
+- `expiresIn`
+- `refreshExpiresIn`
+- `user`
+
+## 10) Levantar en otra maquina (checklist rapido)
+
+1. Clonar repo
+2. `npm install`
+3. `npm run install:all`
+4. Preparar DB (`prisma:generate`, `migrate`, `seed`)
+5. `npm run dev`
+6. Abrir `http://localhost:4200`
+
+## 11) Problemas frecuentes
+
+### Puerto 3001 ocupado
+
+- Cambia `PORT` en `api/.env.development` o libera el puerto.
+
+### Error de Prisma Client no generado
+
+- Ejecuta en `database`: `npm run prisma:generate`
+
+### CORS bloqueando peticiones
+
+- Verifica `CORS_ORIGIN` en `api/.env.development`.
+- Para local, debe incluir `http://localhost:4200`.
+
+### Login falla por JWT en produccion
+
+- Revisa `JWT_SECRET` y `JWT_REFRESH_SECRET` en `api/.env.pro`.
+
+## 12) Postman
+
+Coleccion incluida:
+
+- `postman/ADF247.postman_collection.json`
+
+Incluye requests de health, auth y users con variables de coleccion.
 
