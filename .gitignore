@@ -42,3 +42,6 @@ generated/prisma/
 
 # Firebase service account config (should be set via env vars in production)
 api/config/firebase-service-account.json
+
+# Local technical backlog (private)
+.pending-tasks.md
