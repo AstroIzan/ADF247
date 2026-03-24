@@ -11,6 +11,7 @@ import { DataService, User } from '../../services/data.service';
   styleUrl: './users.component.css'
 })
 export class UsersComponent implements OnDestroy {
+  readonly pageSizeOptions = [10, 25, 50];
   users = input<User[]>([]);
   loading = input(false);
   error = input('');
@@ -71,6 +72,21 @@ export class UsersComponent implements OnDestroy {
     });
   });
 
+  pageSize = signal(10);
+  pageIndex = signal(1);
+
+  totalPages = computed(() => {
+    const total = this.filteredUsers().length;
+    return Math.max(1, Math.ceil(total / this.pageSize()));
+  });
+
+  currentPage = computed(() => Math.min(this.pageIndex(), this.totalPages()));
+
+  paginatedUsers = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredUsers().slice(start, start + this.pageSize());
+  });
+
   constructor(private dataService: DataService) {}
 
   openFilters() {
@@ -86,6 +102,7 @@ export class UsersComponent implements OnDestroy {
       ...this.filters(),
       [field]: value,
     });
+    this.pageIndex.set(1);
   }
 
   resetFilters() {
@@ -95,6 +112,21 @@ export class UsersComponent implements OnDestroy {
       nCarnet: '',
       role: 'all',
     });
+    this.pageIndex.set(1);
+  }
+
+  setPageSize(value: string) {
+    const nextSize = Number(value);
+    this.pageSize.set(this.pageSizeOptions.includes(nextSize) ? nextSize : 10);
+    this.pageIndex.set(1);
+  }
+
+  goToPreviousPage() {
+    this.pageIndex.set(Math.max(1, this.currentPage() - 1));
+  }
+
+  goToNextPage() {
+    this.pageIndex.set(Math.min(this.totalPages(), this.currentPage() + 1));
   }
 
   openForm(user?: User) {

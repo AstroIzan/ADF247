@@ -22,7 +22,7 @@
       <small>{{ devices.length }} dispositiu{{ devices.length !== 1 ? 's' : '' }} trobat{{ devices.length !== 1 ? 's' : '' }}</small>
     </div>
     <div class="devices-list">
-      @for (device of devices; track device.id) {
+      @for (device of paginatedDevices; track device.id) {
         <article class="device-item" [class.inactive]="!device.isActive">
           <div class="device-item-header">
             <strong class="device-item-user">{{ device.user?.nCarnet || '—' }}</strong>
@@ -44,6 +44,23 @@
           <code class="device-item-token">{{ device.token.slice(0, 40) }}…</code>
         </article>
       }
+    </div>
+
+    <div class="pagination-controls">
+      <div class="pagination-size">
+        <label for="devices-page-size">Per pàgina</label>
+        <select id="devices-page-size" [value]="pageSize" (change)="setPageSize($any($event.target).value)">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="pagination-nav">
+        <button class="btn btn-sm btn-secondary" (click)="goToPreviousPage()" [disabled]="currentPage <= 1">Anterior</button>
+        <span>Pàgina {{ currentPage }} de {{ totalPages }}</span>
+        <button class="btn btn-sm btn-secondary" (click)="goToNextPage()" [disabled]="currentPage >= totalPages">Següent</button>
+      </div>
     </div>
   }
 </div>

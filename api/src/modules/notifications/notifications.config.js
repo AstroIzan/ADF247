@@ -12,6 +12,7 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
   typeGroups: {
     weeklyTypeNames: ['Guardia', 'Guardia PVI', 'Semanal'],
     sortidaTypeNames: [],
+    availabilityManagerNCarnets: [],
     guardiaSourceTypeName: 'Guardia',
     guardiaPviTypeName: 'Guardia PVI',
   },
@@ -106,6 +107,9 @@ function normalizeNotificationSettings(input = {}) {
       sortidaTypeNames: Array.isArray(input.typeGroups?.sortidaTypeNames)
         ? normalizeStringList(input.typeGroups?.sortidaTypeNames, [])
         : defaults.typeGroups.sortidaTypeNames,
+      availabilityManagerNCarnets: Array.isArray(input.typeGroups?.availabilityManagerNCarnets)
+        ? normalizeStringList(input.typeGroups?.availabilityManagerNCarnets, [])
+        : defaults.typeGroups.availabilityManagerNCarnets,
       guardiaSourceTypeName: normalizeText(input.typeGroups?.guardiaSourceTypeName, defaults.typeGroups.guardiaSourceTypeName),
       guardiaPviTypeName: normalizeText(input.typeGroups?.guardiaPviTypeName, defaults.typeGroups.guardiaPviTypeName),
     },

@@ -11,6 +11,7 @@ import { DataService, ConvoType } from '../../services/data.service';
   styleUrl: './convo-types.component.css'
 })
 export class ConvoTypesComponent {
+  readonly pageSizeOptions = [10, 25, 50];
   @Input() convoTypes: ConvoType[] = [];
   @Output() onChanged = new EventEmitter<void>();
 
@@ -44,6 +45,21 @@ export class ConvoTypesComponent {
     });
   });
 
+  pageSize = signal(10);
+  pageIndex = signal(1);
+
+  totalPages = computed(() => {
+    const total = this.filteredConvoTypes().length;
+    return Math.max(1, Math.ceil(total / this.pageSize()));
+  });
+
+  currentPage = computed(() => Math.min(this.pageIndex(), this.totalPages()));
+
+  paginatedConvoTypes = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredConvoTypes().slice(start, start + this.pageSize());
+  });
+
   constructor(private dataService: DataService) {}
 
   openFilters() {
@@ -59,6 +75,7 @@ export class ConvoTypesComponent {
       ...this.filters(),
       [field]: value,
     });
+    this.pageIndex.set(1);
   }
 
   resetFilters() {
@@ -66,6 +83,21 @@ export class ConvoTypesComponent {
       name: '',
       id: '',
     });
+    this.pageIndex.set(1);
+  }
+
+  setPageSize(value: string) {
+    const nextSize = Number(value);
+    this.pageSize.set(this.pageSizeOptions.includes(nextSize) ? nextSize : 10);
+    this.pageIndex.set(1);
+  }
+
+  goToPreviousPage() {
+    this.pageIndex.set(Math.max(1, this.currentPage() - 1));
+  }
+
+  goToNextPage() {
+    this.pageIndex.set(Math.min(this.totalPages(), this.currentPage() + 1));
   }
 
   openForm(type?: ConvoType) {

@@ -130,6 +130,15 @@ async function runDailyNotificationAutomation(req, res) {
   }
 }
 
+async function runConvocatoriaNotificationAutomation(req, res) {
+  try {
+    const result = await notificationsService.runConvocatoriaNotificationAutomation(req.auth, req.params.convoId)
+    res.status(201).json(result)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
 async function getNotificationLogs(req, res) {
   try {
     const result = await notificationsService.getNotificationLogs(req.auth, req.query)
@@ -145,6 +154,7 @@ module.exports = {
   getCurrentUserDeviceTokens,
   getNotificationConfig,
   getNotificationLogs,
+  runConvocatoriaNotificationAutomation,
   registerDeviceToken,
   runDailyNotificationAutomation,
   sendConvocatoriaResponseRequest,

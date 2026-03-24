@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ConvoType, DataService, NotificationLog, NotificationSettings } from '../../services/data.service';
+import { ConvoType, DataService, NotificationLog, NotificationSettings, User } from '../../services/data.service';
 
 type NotificationSettingsForm = {
   dailyRunHour: number;
@@ -10,6 +10,7 @@ type NotificationSettingsForm = {
   weeklyRequestHour: number;
   weeklyRequestMinute: number;
   weeklyTypeNames: string[];
+  availabilityManagerNCarnets: string[];
   pendingLeadDays: number;
   pendingLeadHours: number;
   sortidaTypeNames: string;
@@ -41,6 +42,7 @@ type NotificationSettingsForm = {
   styleUrl: './notifications-admin.component.css'
 })
 export class NotificationsAdminComponent {
+  readonly pageSizeOptions = [10, 25, 50];
   private _config: NotificationSettings | null = null;
 
   @Input()
@@ -61,12 +63,15 @@ export class NotificationsAdminComponent {
   @Input() error = '';
   @Input() logsError = '';
   @Input() convoTypes: ConvoType[] = [];
+  @Input() users: User[] = [];
   @Output() onLogsRefresh = new EventEmitter<void>();
 
   activeTab = 'config';
   saving = false;
   actionMessage = '';
   saveError = '';
+  logsPageSize = 10;
+  logsPageIndex = 1;
   form: NotificationSettingsForm = this.createEmptyForm();
 
   readonly weekdayOptions = [
@@ -81,6 +86,33 @@ export class NotificationsAdminComponent {
 
   constructor(private dataService: DataService) {}
 
+  get logsTotalPages() {
+    return Math.max(1, Math.ceil(this.logs.length / this.logsPageSize));
+  }
+
+  get logsCurrentPage() {
+    return Math.min(this.logsPageIndex, this.logsTotalPages);
+  }
+
+  get paginatedLogs() {
+    const start = (this.logsCurrentPage - 1) * this.logsPageSize;
+    return this.logs.slice(start, start + this.logsPageSize);
+  }
+
+  setLogsPageSize(value: string) {
+    const nextSize = Number(value);
+    this.logsPageSize = this.pageSizeOptions.includes(nextSize) ? nextSize : 10;
+    this.logsPageIndex = 1;
+  }
+
+  goToPreviousLogsPage() {
+    this.logsPageIndex = Math.max(1, this.logsCurrentPage - 1);
+  }
+
+  goToNextLogsPage() {
+    this.logsPageIndex = Math.min(this.logsTotalPages, this.logsCurrentPage + 1);
+  }
+
   toggleWeeklyType(typeName: string, enabled: boolean) {
     const current = new Set(this.form.weeklyTypeNames);
     if (enabled) {
@@ -93,6 +125,57 @@ export class NotificationsAdminComponent {
       ...this.form,
       weeklyTypeNames: Array.from(current),
     };
+  }
+
+  toggleAvailabilityManager(nCarnet: string, enabled: boolean) {
+    const current = new Set(this.form.availabilityManagerNCarnets);
+    if (enabled) {
+      current.add(nCarnet);
+    } else {
+      current.delete(nCarnet);
+    }
+
+    this.form = {
+      ...this.form,
+      availabilityManagerNCarnets: Array.from(current),
+    };
+  }
+
+  isAvailabilityManagerSelected(nCarnet: string): boolean {
+    return this.form.availabilityManagerNCarnets.includes(nCarnet);
+  }
+
+  getAdminUsers(): User[] {
+    return this.users.filter((user) => Boolean(user.roles?.isAdmin));
+  }
+
+  getAvailabilityManagersSummary(): string {
+    const selected = this.form.availabilityManagerNCarnets;
+    if (selected.length === 0) {
+      return 'Selecciona responsables';
+    }
+
+    const adminUsersByCarnet = new Map(this.getAdminUsers().map((user) => [user.nCarnet, user]));
+    const labels = selected
+      .map((nCarnet) => {
+        const user = adminUsersByCarnet.get(nCarnet);
+        if (!user) {
+          return null;
+        }
+
+        return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+      })
+      .filter((label): label is string => Boolean(label));
+
+    if (labels.length === 0) {
+      return 'Selecciona responsables';
+    }
+
+    if (labels.length <= 2) {
+      return labels.join(' · ');
+    }
+
+    return `${labels[0]} · +${labels.length - 1} més`;
   }
 
   isWeeklyTypeSelected(typeName: string): boolean {
@@ -125,6 +208,7 @@ export class NotificationsAdminComponent {
       weeklyRequestHour: 19,
       weeklyRequestMinute: 0,
       weeklyTypeNames: ['Guardia', 'Guardia PVI', 'Semanal'],
+      availabilityManagerNCarnets: [],
       pendingLeadDays: 0,
       pendingLeadHours: 24,
       sortidaTypeNames: '',
@@ -157,6 +241,7 @@ export class NotificationsAdminComponent {
       weeklyRequestHour: config.weeklyRequest.requestHour,
       weeklyRequestMinute: config.weeklyRequest.requestMinute,
       weeklyTypeNames: [...config.typeGroups.weeklyTypeNames],
+      availabilityManagerNCarnets: [...(config.typeGroups.availabilityManagerNCarnets || [])],
       pendingLeadDays: config.responseRequest.pendingLeadDays,
       pendingLeadHours: config.responseRequest.pendingLeadHours,
       sortidaTypeNames: config.typeGroups.sortidaTypeNames.join(', '),
@@ -186,6 +271,9 @@ export class NotificationsAdminComponent {
     const guardiaPviTypeName = this.config?.typeGroups.guardiaPviTypeName || 'Guardia PVI';
     const sendOnCreationForNonWeekly = this.config?.responseRequest.sendOnCreationForNonWeekly ?? true;
 
+    const adminCarnets = new Set(this.getAdminUsers().map((user) => user.nCarnet));
+    const selectedManagerCarnets = this.form.availabilityManagerNCarnets.filter((nCarnet) => adminCarnets.has(nCarnet));
+
     return {
       schedule: {
         dailyRunHour: Number(this.form.dailyRunHour),
@@ -195,6 +283,7 @@ export class NotificationsAdminComponent {
       typeGroups: {
         weeklyTypeNames: this.form.weeklyTypeNames,
         sortidaTypeNames: this.parseCommaSeparated(this.form.sortidaTypeNames),
+        availabilityManagerNCarnets: selectedManagerCarnets,
         guardiaSourceTypeName,
         guardiaPviTypeName,
       },

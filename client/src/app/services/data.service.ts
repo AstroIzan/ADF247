@@ -72,6 +72,7 @@ export interface NotificationSettings {
   typeGroups: {
     weeklyTypeNames: string[];
     sortidaTypeNames: string[];
+    availabilityManagerNCarnets: string[];
     guardiaSourceTypeName: string;
     guardiaPviTypeName: string;
   };
@@ -273,6 +274,10 @@ export class DataService {
 
   runNotificationAutomation(): Observable<any> {
     return this.http.post<any>('/notifications/automation/run', {});
+  }
+
+  runConvocatoriaNotificationAutomation(convoId: number): Observable<any> {
+    return this.http.post<any>(`/notifications/automation/convocatoria/${convoId}/run`, {});
   }
 
   getHealthStatus(): Observable<ApiHealthStatus> {

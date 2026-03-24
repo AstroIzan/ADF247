@@ -120,6 +120,35 @@ function getDateKey(referenceDate = new Date()) {
   return startOfDay(referenceDate).toISOString().slice(0, 10)
 }
 
+function getSortidaTriggerAt(convocatoriaDate, settings) {
+  const triggerAt = startOfDay(convocatoriaDate)
+  triggerAt.setDate(triggerAt.getDate() - Number(settings.sortidaStatus.confirmDaysBefore || 0))
+  triggerAt.setHours(
+    Number(settings.sortidaStatus.confirmHour || 0),
+    Number(settings.sortidaStatus.confirmMinute || 0),
+    0,
+    0
+  )
+  return triggerAt
+}
+
+function shouldSendSortidaStatusForConvocatoria(convocatoria, settings, referenceDate = new Date()) {
+  if (!settings.sortidaStatus.enabled) {
+    return { shouldSend: false, reason: 'sortida-disabled' }
+  }
+
+  if (!isTypeListed(convocatoria.convoType?.name, settings.typeGroups.sortidaTypeNames)) {
+    return { shouldSend: false, reason: 'type-not-configured' }
+  }
+
+  const triggerAt = getSortidaTriggerAt(convocatoria.date, settings)
+  if (referenceDate < triggerAt) {
+    return { shouldSend: false, reason: 'before-sortida-trigger', triggerAt }
+  }
+
+  return { shouldSend: true, triggerAt }
+}
+
 async function pruneInactiveDeviceTokensForUser(userId) {
   if (!userId) {
     return
@@ -652,6 +681,58 @@ async function sendConvocatoriaSortidaStatus(authUser, convoId) {
   )
 }
 
+async function runConvocatoriaNotificationAutomation(authUser, convoId, referenceDate = new Date()) {
+  await ensureAdmin(authUser)
+
+  const settings = readNotificationSettings()
+  const convocatoria = await getConvocatoriaWithContext(convoId)
+
+  const responseSummary = await sendConvocatoriaResponseRequestInternal(
+    convocatoria,
+    authUser.userId,
+    `manual-convo-automation-response:${convocatoria.id}:${Date.now()}`
+  )
+
+  const sortidaDecision = shouldSendSortidaStatusForConvocatoria(convocatoria, settings, referenceDate)
+
+  let sortidaSummary = {
+    skipped: true,
+    reason: sortidaDecision.reason || 'not-applicable',
+    triggerAt: sortidaDecision.triggerAt || null,
+  }
+
+  if (sortidaDecision.shouldSend) {
+    convocatoria.sortida = shouldMarkSortida(
+      convocatoria.convoType,
+      (convocatoria.respostas || []).filter((respuesta) => respuesta.response && respuesta.user?.isActive)
+    )
+
+    await database.convocatoria.update({
+      where: { id: convocatoria.id },
+      data: { sortida: convocatoria.sortida },
+    })
+
+    const notification = await sendConvocatoriaSortidaStatusInternal(
+      convocatoria,
+      authUser.userId,
+      `manual-convo-automation-sortida:${convocatoria.id}:${Date.now()}`
+    )
+
+    sortidaSummary = {
+      skipped: false,
+      triggerAt: sortidaDecision.triggerAt || null,
+      notification,
+    }
+  }
+
+  return {
+    convoId: convocatoria.id,
+    ranAt: new Date(referenceDate),
+    responseSummary,
+    sortidaSummary,
+  }
+}
+
 async function sendPendingResponsesReminder(authUser, options = {}) {
   if (authUser) {
     await ensureAdmin(authUser)
@@ -948,6 +1029,7 @@ module.exports = {
   getNotificationLogs,
   handleConvocatoriaCreated,
   registerDeviceToken,
+  runConvocatoriaNotificationAutomation,
   runDailyNotificationAutomation,
   sendBroadcastNotification,
   sendConvocatoriaResponseRequest,

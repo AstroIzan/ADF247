@@ -25,6 +25,8 @@ export class HomeComponent implements OnInit {
   users = signal<User[]>([]);
   loading = signal(false);
   error = signal('');
+  adminActionFeedback = signal('');
+  runningConvoAdminActionKey = signal<string | null>(null);
   respondingConvoId = signal<number | null>(null);
   showCustomModal = signal(false);
   customConvo = signal<Convocatoria | null>(null);
@@ -53,6 +55,16 @@ export class HomeComponent implements OnInit {
   });
   showCustomTextModal = signal(false);
   customTextPreview = signal('');
+  showGuardiaResponsesModal = signal(false);
+  guardiaResponsesConvo = signal<Convocatoria | null>(null);
+  showRespuestaInfoModal = signal(false);
+  respuestaInfo = signal<{
+    userName: string;
+    customStartTime: string;
+    customEndTime: string;
+    comment: string;
+    fullHorari: boolean;
+  } | null>(null);
   showCreateConvoModal = signal(false);
   creatingConvo = signal(false);
   createConvoError = signal('');
@@ -307,6 +319,70 @@ export class HomeComponent implements OnInit {
 
   getMyRespuesta(convoId: number): Respuesta | null {
     return this.myRespuestas().find((r) => r.convoId === convoId) || null;
+  }
+
+  getSortidaBadgeLabel(sortida?: boolean) {
+    return sortida ? 'Se surt' : 'No se surt';
+  }
+
+  isRunningConvoAdminAction(action: 'sortida' | 'automation', convoId: number) {
+    return this.runningConvoAdminActionKey() === `${action}-${convoId}`;
+  }
+
+  toggleConvoSortida(convo: Convocatoria) {
+    if (!this.authService.isAdmin()) {
+      return;
+    }
+
+    if (this.isConvocatoriaClosed(convo)) {
+      this.error.set('La convocatòria està tancada i no permet canviar la sortida manualment.');
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.runningConvoAdminActionKey.set(`sortida-${convo.id}`);
+
+    this.dataService.updateConvocatoria(convo.id, { sortida: !convo.sortida }).subscribe({
+      next: (updatedConvo) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.replaceConvocatoriaInState(updatedConvo);
+        this.adminActionFeedback.set(`Sortida actualitzada per a ${updatedConvo.title}.`);
+      },
+      error: (err) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut actualitzar la sortida.');
+      },
+    });
+  }
+
+  runConvoAutomation(convo: Convocatoria) {
+    if (!this.authService.isAdmin()) {
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.runningConvoAdminActionKey.set(`automation-${convo.id}`);
+
+    this.dataService.runConvocatoriaNotificationAutomation(convo.id).subscribe({
+      next: (result) => {
+        this.runningConvoAdminActionKey.set(null);
+        const sortidaSummary = result?.sortidaSummary;
+        const sortidaSent = sortidaSummary && !sortidaSummary.skipped;
+
+        this.loadConvocatorias();
+        this.adminActionFeedback.set(
+          sortidaSent
+            ? `Automatitzacio enviada per a ${convo.title}: pendents + estat de sortida.`
+            : `Automatitzacio enviada per a ${convo.title}: avís de pendents (sense estat de sortida encara).`
+        );
+      },
+      error: (err) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut executar l\'automatitzacio de notificacions.');
+      },
+    });
   }
 
   getMyRespuestaLabel(convoId: number): string {
@@ -581,17 +657,94 @@ export class HomeComponent implements OnInit {
     return this.allRespuestas().filter((respuesta) => respuesta.convoId === convoId);
   }
 
-  canViewConvocatoriaSummary(convo: Convocatoria) {
+  canOpenGuardiaResponses(convo: Convocatoria) {
+    if (!this.isGuardiaConvocatoria(convo)) {
+      return false;
+    }
+
     if (this.authService.isAdmin()) {
       return true;
     }
 
     const currentUserId = this.authService.getCurrentUser()?.id;
-    if (!currentUserId) {
+    return Boolean(currentUserId && convo.responsableId === currentUserId);
+  }
+
+  openGuardiaResponsesModal(convo: Convocatoria) {
+    if (!this.canOpenGuardiaResponses(convo)) {
+      return;
+    }
+
+    this.guardiaResponsesConvo.set(convo);
+    this.showGuardiaResponsesModal.set(true);
+  }
+
+  closeGuardiaResponsesModal() {
+    this.showGuardiaResponsesModal.set(false);
+    this.guardiaResponsesConvo.set(null);
+  }
+
+  getPositiveRespuestasForConvocatoria(convoId: number) {
+    const usersByNCarnet = this.userByNCarnet();
+
+    return this.allRespuestas()
+      .filter((respuesta) => respuesta.convoId === convoId && respuesta.response)
+      .sort((left, right) => {
+        const leftCreatedAt = usersByNCarnet.get(left.userNCarnet)?.createdAt;
+        const rightCreatedAt = usersByNCarnet.get(right.userNCarnet)?.createdAt;
+        const leftTime = leftCreatedAt ? new Date(leftCreatedAt).getTime() : Number.MAX_SAFE_INTEGER;
+        const rightTime = rightCreatedAt ? new Date(rightCreatedAt).getTime() : Number.MAX_SAFE_INTEGER;
+
+        if (leftTime !== rightTime) {
+          return leftTime - rightTime;
+        }
+
+        return this.getUserNameByNCarnet(left.userNCarnet).localeCompare(this.getUserNameByNCarnet(right.userNCarnet));
+      });
+  }
+
+  hasRespuestaInfo(respuesta: Respuesta) {
+    const parsed = this.parseCustomText(respuesta.customText || '');
+    return Boolean(parsed.comment || (parsed.customStartTime && parsed.customEndTime));
+  }
+
+  openRespuestaInfoModal(respuesta: Respuesta) {
+    const parsed = this.parseCustomText(respuesta.customText || '');
+    this.respuestaInfo.set({
+      userName: this.getUserNameByNCarnet(respuesta.userNCarnet),
+      customStartTime: parsed.customStartTime,
+      customEndTime: parsed.customEndTime,
+      comment: parsed.comment,
+      fullHorari: Boolean(respuesta.fullHorari),
+    });
+    this.showRespuestaInfoModal.set(true);
+  }
+
+  closeRespuestaInfoModal() {
+    this.showRespuestaInfoModal.set(false);
+    this.respuestaInfo.set(null);
+  }
+
+  canViewConvocatoriaSummary(convo: Convocatoria) {
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
       return false;
     }
 
-    return convo.responsableId === currentUserId;
+    if (Number(convo.responsableId) === Number(currentUser.id)) {
+      return true;
+    }
+
+    const responsableUser = this.userById().get(convo.responsableId);
+    if (!responsableUser?.nCarnet || !currentUser.nCarnet) {
+      return false;
+    }
+
+    return responsableUser.nCarnet === currentUser.nCarnet;
   }
 
   getResponsableName(responsableId?: number) {
@@ -604,7 +757,7 @@ export class HomeComponent implements OnInit {
       return '-';
     }
 
-    return `${user.name} ${user.lastName || ''}`.trim();
+    return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
   }
 
   getConvoTypeName(convoTypeId?: number) {
@@ -627,6 +780,15 @@ export class HomeComponent implements OnInit {
     }
 
     return `${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  isUserGrocByNCarnet(nCarnet?: string) {
+    if (!nCarnet) {
+      return false;
+    }
+
+    const user = this.userByNCarnet().get(nCarnet);
+    return Boolean(user?.roles?.isGroc);
   }
 
   openAdminConvoModal(convo: Convocatoria) {
@@ -1040,6 +1202,20 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  private replaceConvocatoriaInState(updatedConvo: Convocatoria) {
+    this.convocatorias.set(
+      this.convocatorias().map((item) => (item.id === updatedConvo.id ? updatedConvo : item))
+    );
+
+    if (this.adminConvo()?.id === updatedConvo.id) {
+      this.adminConvo.set(updatedConvo);
+      this.adminConvoForm.set({
+        ...this.adminConvoForm(),
+        sortida: Boolean(updatedConvo.sortida),
+      });
+    }
+  }
+
   private isGuardiaTypeById(convoTypeId: number | null) {
     if (!convoTypeId) {
       return false;
@@ -1047,6 +1223,11 @@ export class HomeComponent implements OnInit {
 
     const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /guardia/i.test(type.name));
+  }
+
+  private isGuardiaConvocatoria(convo: Convocatoria) {
+    const typeName = convo.convoType?.name || this.getConvoTypeName(convo.convoTypeId);
+    return /guardia/i.test(typeName || '');
   }
 
   private isSemanalTypeById(convoTypeId: number | null) {

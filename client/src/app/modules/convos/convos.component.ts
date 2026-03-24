@@ -17,6 +17,7 @@ type ConvocatoriaFormData = Partial<Convocatoria> & {
 })
 export class ConvosComponent implements OnDestroy {
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
+  readonly pageSizeOptions = [10, 25, 50];
   readonly todayDate = this.toDateInputValue(new Date());
   convocatorias = input<Convocatoria[]>([]);
   convoTypes = input<ConvoType[]>([]);
@@ -86,6 +87,21 @@ export class ConvosComponent implements OnDestroy {
     });
   });
 
+  pageSize = signal(10);
+  pageIndex = signal(1);
+
+  totalPages = computed(() => {
+    const total = this.filteredConvocatorias().length;
+    return Math.max(1, Math.ceil(total / this.pageSize()));
+  });
+
+  currentPage = computed(() => Math.min(this.pageIndex(), this.totalPages()));
+
+  paginatedConvocatorias = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredConvocatorias().slice(start, start + this.pageSize());
+  });
+
   constructor(
     private dataService: DataService,
     private authService: AuthService,
@@ -108,6 +124,7 @@ export class ConvosComponent implements OnDestroy {
       ...this.filters(),
       [field]: value,
     });
+    this.pageIndex.set(1);
   }
 
   resetFilters() {
@@ -119,6 +136,21 @@ export class ConvosComponent implements OnDestroy {
       dateFrom: '',
       dateTo: '',
     });
+    this.pageIndex.set(1);
+  }
+
+  setPageSize(value: string) {
+    const nextSize = Number(value);
+    this.pageSize.set(this.pageSizeOptions.includes(nextSize) ? nextSize : 10);
+    this.pageIndex.set(1);
+  }
+
+  goToPreviousPage() {
+    this.pageIndex.set(Math.max(1, this.currentPage() - 1));
+  }
+
+  goToNextPage() {
+    this.pageIndex.set(Math.min(this.totalPages(), this.currentPage() + 1));
   }
 
   openForm(convo?: Convocatoria) {

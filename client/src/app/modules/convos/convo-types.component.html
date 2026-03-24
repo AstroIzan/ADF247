@@ -11,7 +11,7 @@
 
   @if (filteredConvoTypes().length > 0) {
     <div class="types-list">
-      @for (type of filteredConvoTypes(); track type.id) {
+      @for (type of paginatedConvoTypes(); track type.id) {
         <div class="type-card">
           <div class="type-info">
             <h4>{{ type.name }}</h4>
@@ -30,6 +30,23 @@
           </div>
         </div>
       }
+    </div>
+
+    <div class="pagination-controls">
+      <div class="pagination-size">
+        <label for="types-page-size">Per pàgina</label>
+        <select id="types-page-size" [value]="pageSize()" (change)="setPageSize($any($event.target).value)">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="pagination-nav">
+        <button class="btn btn-sm btn-secondary" (click)="goToPreviousPage()" [disabled]="currentPage() <= 1">Anterior</button>
+        <span>Pàgina {{ currentPage() }} de {{ totalPages() }}</span>
+        <button class="btn btn-sm btn-secondary" (click)="goToNextPage()" [disabled]="currentPage() >= totalPages()">Següent</button>
+      </div>
     </div>
   } @else {
     <div class="empty-state">No hi ha tipus de convocatòria amb els filtres aplicats</div>

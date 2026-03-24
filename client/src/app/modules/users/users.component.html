@@ -30,7 +30,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (user of filteredUsers(); track user.id) {
+          @for (user of paginatedUsers(); track user.id) {
             <tr>
               <td>{{ user.nCarnet || '-' }}</td>
               <td>{{ user.nIndicatiu || '-' }}</td>
@@ -71,7 +71,7 @@
 
     <div class="mobile-users-view">
       <div class="users-list">
-        @for (user of filteredUsers(); track user.id) {
+        @for (user of paginatedUsers(); track user.id) {
           <div class="user-card" (click)="selectedUser.set(user)">
             <div class="user-info">
               <h4>{{ user.name }} {{ user.lastName }}</h4>
@@ -107,6 +107,23 @@
             </div>
           </div>
         }
+      </div>
+    </div>
+
+    <div class="pagination-controls">
+      <div class="pagination-size">
+        <label for="users-page-size">Per pàgina</label>
+        <select id="users-page-size" [value]="pageSize()" (change)="setPageSize($any($event.target).value)">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="pagination-nav">
+        <button class="btn btn-sm btn-secondary" (click)="goToPreviousPage()" [disabled]="currentPage() <= 1">Anterior</button>
+        <span>Pàgina {{ currentPage() }} de {{ totalPages() }}</span>
+        <button class="btn btn-sm btn-secondary" (click)="goToNextPage()" [disabled]="currentPage() >= totalPages()">Següent</button>
       </div>
     </div>
   } @else {

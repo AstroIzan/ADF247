@@ -39,13 +39,18 @@
 }
 
 .admin-convo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 28px;
   height: 28px;
+  padding: 0;
   border-radius: 8px;
   border: 1px solid var(--line);
   background: #fff;
   color: #3d3d3d;
   font-size: 14px;
+  line-height: 1;
   font-weight: 700;
   cursor: pointer;
 }
@@ -53,6 +58,58 @@
 .admin-convo-btn:hover {
   border-color: var(--gold);
   color: #1f1f1f;
+}
+
+.admin-convo-bell {
+  font-size: 13px;
+}
+
+.admin-convo-responses {
+  font-size: 13px;
+}
+
+.admin-convo-sortida-toggle {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 700;
+}
+
+.admin-convo-sortida-toggle.sortida-action-enable {
+  border-color: #afd9bf;
+  background: #eef9f2;
+  color: #17603a;
+}
+
+.admin-convo-sortida-toggle.sortida-action-enable:hover {
+  border-color: #7ec297;
+  background: #e3f4ea;
+}
+
+.admin-convo-sortida-toggle.sortida-action-disable {
+  border-color: #e3d1a8;
+  background: #fbf4e4;
+  color: #7a5a10;
+}
+
+.admin-convo-sortida-toggle.sortida-action-disable:hover {
+  border-color: #d8bc83;
+  background: #f8eed8;
+}
+
+.admin-convo-bell:disabled,
+.admin-convo-sortida-toggle:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.success-alert {
+  margin-bottom: 10px;
+  border: 1px solid #b9e2c6;
+  background: #e9f8ee;
+  color: #195933;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 13px;
 }
 
 .home-grid {
@@ -313,6 +370,8 @@
   border-radius: 12px;
   padding: 12px;
   background: var(--panel-soft);
+  display: grid;
+  gap: 4px;
 }
 
 .convos-list li.convo-locked {
@@ -323,6 +382,26 @@
 .convos-list li.convo-locked p,
 .convos-list li.convo-locked h3 {
   color: #666;
+}
+
+.sortida-pill {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.sortida-pill-on {
+  background: #d9f7e8;
+  color: #17603a;
+}
+
+.sortida-pill-off {
+  background: #f3ead2;
+  color: #7a5a10;
 }
 
 .convo-top {
@@ -356,11 +435,19 @@
 }
 
 .convo-bottom-row {
-  margin-top: 10px;
+  margin-top: 4px;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 10px;
+}
+
+.convo-bottom-row .answer-actions {
+  order: 1;
+}
+
+.convo-bottom-row .convo-response-counters-desktop {
+  order: 2;
 }
 
 .answer-actions {
@@ -378,7 +465,133 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  min-height: 0;
+}
+
+.convo-response-counters-desktop {
   margin-left: auto;
+}
+
+.convo-response-counters-mobile {
+  display: none;
+}
+
+.convo-meta-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.convo-meta-row p {
+  margin: 0;
+}
+
+.convo-time-text {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0;
+  line-height: 1.2;
+}
+
+.convo-time-value {
+  margin-left: 4px;
+}
+
+.convo-time-separator {
+  margin-left: 3px;
+}
+
+.convo-sortida-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.convo-sortida-label-group {
+  display: inline-flex;
+  align-items: center;
+}
+
+.convo-response-counters.disabled {
+  opacity: 0.45;
+}
+
+.convo-response-counters.disabled .response-counter {
+  box-shadow: none;
+}
+
+.guardia-response-cards {
+  display: grid;
+  gap: 10px;
+}
+
+.guardia-response-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--panel-soft);
+}
+
+.guardia-response-card-verd {
+  background: #eef8f0;
+  border-color: #b8dbc0;
+}
+
+.guardia-response-card-groc {
+  background: #fbf3d9;
+  border-color: #e4cf82;
+}
+
+.guardia-response-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.guardia-response-card p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.guardia-response-card-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.info-icon-btn {
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: #2d2d2d;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.info-icon-btn:hover {
+  border-color: var(--gold);
+}
+
+.info-circle-icon {
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid currentColor;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
 }
 
 .modal-wide {
@@ -394,6 +607,46 @@
 .responses-title {
   margin: 14px 0 10px;
   font-size: 15px;
+}
+
+.admin-responses-cards {
+  display: none;
+  gap: 10px;
+}
+
+.admin-response-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px;
+  background: var(--panel-soft);
+}
+
+.admin-response-card-verd {
+  background: #eef8f0;
+  border-color: #b8dbc0;
+}
+
+.admin-response-card-groc {
+  background: #fbf3d9;
+  border-color: #e4cf82;
+}
+
+.admin-response-card-no {
+  background: #ececec;
+  border-color: #cfcfcf;
+}
+
+.admin-response-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.admin-response-card-name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .guardia-help-text {
@@ -578,11 +831,11 @@
 }
 
 .convos-list h3 {
-  margin: 0 0 8px;
+  margin: 0;
 }
 
 .convos-list p {
-  margin: 4px 0;
+  margin: 0;
   font-size: 14px;
 }
 
@@ -728,9 +981,15 @@
   }
 
   .convo-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .convo-top-right {
+    margin-left: auto;
+    flex-shrink: 0;
   }
 
   .convo-bottom-row,
@@ -739,9 +998,12 @@
     align-items: stretch;
   }
 
-  .convo-response-counters {
-    margin-left: 0;
-    justify-content: flex-end;
+  .convo-meta-row {
+    align-items: center;
+  }
+
+  .convo-meta-row p {
+    margin: 0;
   }
 
   .form-grid-2 {
@@ -770,12 +1032,12 @@
 
   .convos-list h3 {
     font-size: 14px;
-    margin: 0 0 6px;
+    margin: 0;
   }
 
   .convos-list p {
     font-size: 12px;
-    margin: 2px 0;
+    margin: 0;
   }
 
   .answer-actions-answered {
@@ -801,6 +1063,34 @@
     font-size: 12px;
   }
 
+  .admin-responses-table-wrap {
+    display: none;
+  }
+
+  .admin-responses-cards {
+    display: grid;
+  }
+
+  .convo-response-counters-desktop {
+    display: none;
+  }
+
+  .convo-response-counters-mobile {
+    display: inline-flex;
+    margin-left: auto;
+    justify-content: flex-end;
+  }
+
+
+@media (max-aspect-ratio: 3/4) {
+  .admin-responses-table-wrap {
+    display: none;
+  }
+
+  .admin-responses-cards {
+    display: grid;
+  }
+}
   .time-picker-btn {
     width: 32px;
     height: 32px;

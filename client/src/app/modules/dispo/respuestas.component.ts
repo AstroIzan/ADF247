@@ -11,6 +11,7 @@ import { DataService, Respuesta, Convocatoria, User } from '../../services/data.
   styleUrl: './respuestas.component.css'
 })
 export class RespuestasComponent implements OnDestroy {
+  readonly pageSizeOptions = [10, 25, 50];
   respuestas = input<Respuesta[]>([]);
   convocatorias = input<Convocatoria[]>([]);
   users = input<User[]>([]);
@@ -70,6 +71,21 @@ export class RespuestasComponent implements OnDestroy {
     });
   });
 
+  pageSize = signal(10);
+  pageIndex = signal(1);
+
+  totalPages = computed(() => {
+    const total = this.filteredRespuestas().length;
+    return Math.max(1, Math.ceil(total / this.pageSize()));
+  });
+
+  currentPage = computed(() => Math.min(this.pageIndex(), this.totalPages()));
+
+  paginatedRespuestas = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredRespuestas().slice(start, start + this.pageSize());
+  });
+
   constructor(private dataService: DataService) {}
 
   openFilters() {
@@ -85,6 +101,7 @@ export class RespuestasComponent implements OnDestroy {
       ...this.filters(),
       [field]: value,
     });
+    this.pageIndex.set(1);
   }
 
   resetFilters() {
@@ -95,6 +112,21 @@ export class RespuestasComponent implements OnDestroy {
       userNCarnet: 'all',
       convoId: 'all',
     });
+    this.pageIndex.set(1);
+  }
+
+  setPageSize(value: string) {
+    const nextSize = Number(value);
+    this.pageSize.set(this.pageSizeOptions.includes(nextSize) ? nextSize : 10);
+    this.pageIndex.set(1);
+  }
+
+  goToPreviousPage() {
+    this.pageIndex.set(Math.max(1, this.currentPage() - 1));
+  }
+
+  goToNextPage() {
+    this.pageIndex.set(Math.min(this.totalPages(), this.currentPage() + 1));
   }
 
   openForm(respuesta?: Respuesta) {

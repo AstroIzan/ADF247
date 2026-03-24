@@ -81,7 +81,35 @@
           </section>
 
           <section class="config-section">
-            <h3>3) Sol·licitud normal si no has respost</h3>
+            <h3>3) Responsables de disponibilitat</h3>
+            <p class="section-help">Selecciona un o més admins responsables de disponibilitat.</p>
+
+            @if (getAdminUsers().length === 0) {
+              <div class="empty-state">No hi ha usuaris admin disponibles.</div>
+            } @else {
+              <details class="multi-select-dropdown">
+                <summary class="multi-select-summary">
+                  {{ getAvailabilityManagersSummary() }}
+                </summary>
+
+                <div class="multi-select-options">
+                  @for (user of getAdminUsers(); track user.id) {
+                    <label class="checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="isAvailabilityManagerSelected(user.nCarnet)"
+                        (change)="toggleAvailabilityManager(user.nCarnet, $any($event.target).checked)"
+                      />
+                      {{ user.nCarnet }} - {{ user.name }} {{ user.lastName || '' }}
+                    </label>
+                  }
+                </div>
+              </details>
+            }
+          </section>
+
+          <section class="config-section">
+            <h3>4) Sol·licitud normal si no has respost</h3>
             <p class="section-help">Finestra d'antelació respecte al dia de l'activitat.</p>
             <div class="form-grid">
               <div class="form-group">
@@ -97,7 +125,7 @@
           </section>
 
           <section class="config-section">
-            <h3>4) Confirmació de sortida</h3>
+            <h3>5) Confirmació de sortida</h3>
             <p class="section-help">Defineix amb quants dies d'antelació i a quina hora es confirma si finalment se surt.</p>
             <div class="form-grid">
               <div class="form-group">
@@ -122,7 +150,7 @@
           </section>
 
           <section class="config-section">
-            <h3>5) Missatgeria configurable per escenari</h3>
+            <h3>6) Missatgeria configurable per escenari</h3>
             <p class="section-help">Títol i cos predefinits per cada tipus de notificació. Es poden ajustar abans d'enviar manualment.</p>
 
             <div class="form-grid">
@@ -206,7 +234,7 @@
             <div class="empty-state">Sense enviaments registrats.</div>
           } @else {
             <div class="logs-list">
-              @for (log of logs; track log.id) {
+              @for (log of paginatedLogs; track log.id) {
                 <article class="log-item">
                   <div class="log-header">
                     <strong>{{ log.title }}</strong>
@@ -225,6 +253,23 @@
                   }
                 </article>
               }
+            </div>
+
+            <div class="pagination-controls">
+              <div class="pagination-size">
+                <label for="logs-page-size">Per pàgina</label>
+                <select id="logs-page-size" [value]="logsPageSize" (change)="setLogsPageSize($any($event.target).value)">
+                  @for (size of pageSizeOptions; track size) {
+                    <option [value]="size">{{ size }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="pagination-nav">
+                <button class="btn btn-sm btn-secondary" (click)="goToPreviousLogsPage()" [disabled]="logsCurrentPage <= 1">Anterior</button>
+                <span>Pàgina {{ logsCurrentPage }} de {{ logsTotalPages }}</span>
+                <button class="btn btn-sm btn-secondary" (click)="goToNextLogsPage()" [disabled]="logsCurrentPage >= logsTotalPages">Següent</button>
+              </div>
             </div>
           }
         </section>

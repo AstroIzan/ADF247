@@ -36,7 +36,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (convo of filteredConvocatorias(); track convo.id) {
+          @for (convo of paginatedConvocatorias(); track convo.id) {
             <tr>
               <td>{{ formatDate(convo.date) }}</td>
               <td>{{ convo.title }}</td>
@@ -85,7 +85,7 @@
 
     <div class="mobile-convos-view">
       <div class="convos-list">
-        @for (convo of filteredConvocatorias(); track convo.id) {
+        @for (convo of paginatedConvocatorias(); track convo.id) {
           <div class="convo-card" (click)="selectedConvo.set(convo)">
             <div class="convo-info">
               <h4>{{ convo.title }}</h4>
@@ -126,6 +126,23 @@
             </div>
           </div>
         }
+      </div>
+    </div>
+
+    <div class="pagination-controls">
+      <div class="pagination-size">
+        <label for="convos-page-size">Per pàgina</label>
+        <select id="convos-page-size" [value]="pageSize()" (change)="setPageSize($any($event.target).value)">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="pagination-nav">
+        <button class="btn btn-sm btn-secondary" (click)="goToPreviousPage()" [disabled]="currentPage() <= 1">Anterior</button>
+        <span>Pàgina {{ currentPage() }} de {{ totalPages() }}</span>
+        <button class="btn btn-sm btn-secondary" (click)="goToNextPage()" [disabled]="currentPage() >= totalPages()">Següent</button>
       </div>
     </div>
   } @else {

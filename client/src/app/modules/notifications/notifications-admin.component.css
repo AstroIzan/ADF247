@@ -137,6 +137,44 @@
   gap: 10px;
 }
 
+.multi-select-dropdown {
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.multi-select-summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #303030;
+  display: block;
+}
+
+.multi-select-summary::-webkit-details-marker {
+  display: none;
+}
+
+.multi-select-summary::after {
+  content: '▾';
+  float: right;
+  color: #6a6a6a;
+}
+
+.multi-select-dropdown[open] .multi-select-summary::after {
+  content: '▴';
+}
+
+.multi-select-options {
+  border-top: 1px solid #ececec;
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
 .time-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -301,6 +339,38 @@
   padding: 20px;
   color: #999;
   font-size: 13px;
+}
+
+.pagination-controls {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.pagination-size select {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: #fff;
+}
+
+.pagination-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
 }
 
 @media (max-width: 1024px) {

@@ -15,6 +15,7 @@ router.put('/config', requireAuth, notificationsController.updateNotificationCon
 router.post('/broadcast', requireAuth, notificationsController.sendBroadcastNotification)
 router.post('/dispatch/convocatoria/:convoId/response-request', requireAuth, notificationsController.sendConvocatoriaResponseRequest)
 router.post('/dispatch/convocatoria/:convoId/sortida-status', requireAuth, notificationsController.sendConvocatoriaSortidaStatus)
+router.post('/automation/convocatoria/:convoId/run', requireAuth, notificationsController.runConvocatoriaNotificationAutomation)
 router.post('/dispatch/pending-responses', requireAuth, notificationsController.sendPendingResponsesReminder)
 router.post('/dispatch/weekly-response-digest', requireAuth, notificationsController.sendWeeklyResponseDigest)
 router.post('/dispatch/tomorrow-sortida', requireAuth, notificationsController.sendTomorrowSortidaNotifications)
