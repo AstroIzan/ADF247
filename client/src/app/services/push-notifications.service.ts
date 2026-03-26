@@ -21,6 +21,7 @@ type DeviceTokenRecord = {
 export class PushNotificationsService {
   private messaging: Messaging | null = null
   private foregroundListenerBound = false
+  private readonly syncTimeoutMs = 5000
 
   readonly isSupported = signal(false)
   readonly permission = signal<NotificationPermission | 'unsupported'>('default')
@@ -31,6 +32,10 @@ export class PushNotificationsService {
   readonly registeredTokens = signal<DeviceTokenRecord[]>([])
   readonly modalVisible = signal(false)
 
+  readonly hasAnyRegisteredToken = computed(() => {
+    return this.registeredTokens().some((device) => device.isActive)
+  })
+
   readonly hasRegisteredCurrentToken = computed(() => {
     const token = this.currentToken()
     if (!token) {
@@ -38,6 +43,18 @@ export class PushNotificationsService {
     }
 
     return this.registeredTokens().some((device) => device.isActive && device.token === token)
+  })
+
+  readonly isDeviceReady = computed(() => {
+    if (this.permission() !== 'granted') {
+      return false
+    }
+
+    if (!this.isSupported()) {
+      return true
+    }
+
+    return this.hasRegisteredCurrentToken() || this.hasAnyRegisteredToken()
   })
 
   readonly needsSetup = computed(() => {
@@ -98,39 +115,38 @@ export class PushNotificationsService {
 
     // --- Step 3: load registered tokens (wrapped — must not block step 2) ---
     try {
-      await this.refreshRegisteredTokens()
+      await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
     } catch {
       this.registeredTokens.set([])
     }
 
     // --- Step 4: check Firebase FCM support (only needed for token) ---
-    let fcmSupported = false
-    try {
-      fcmSupported = await isSupported()
-    } catch {
-      fcmSupported = false
-    }
+    const fcmSupported = await this.detectMessagingSupport()
     this.isSupported.set(fcmSupported)
 
     // --- Step 5: get + register FCM token if everything is ready ---
     if (this.permission() === 'granted' && fcmSupported) {
       try {
-        const token = this.currentToken() || await this.resolveCurrentToken()
+        const token = this.currentToken() || await this.withTimeout(this.resolveCurrentToken(), this.syncTimeoutMs)
         if (token) {
           this.currentToken.set(token)
           if (!this.hasRegisteredCurrentToken()) {
-            await this.registerToken(token)
-            await this.refreshRegisteredTokens()
+            await this.withTimeout(this.registerToken(token), this.syncTimeoutMs)
+            await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
             this.infoMessage.set('Dispositiu registrat correctament per rebre notificacions.')
           }
         }
       } catch (error) {
         this.errorMessage.set(error instanceof Error ? error.message : 'No s\'ha pogut completar el registre automàtic del dispositiu.')
       }
-    } else if (this.permission() === 'granted' && !fcmSupported) {
+    } else if (this.permission() === 'granted' && !fcmSupported && !this.hasAnyRegisteredToken()) {
       this.errorMessage.set('Aquest navegador no és compatible amb el servei de missatges push (FCM). Les notificacions en segon pla no estaran disponibles.')
     } else if (this.permission() === 'denied') {
       this.errorMessage.set('Notificacions bloquejades al navegador. Cal activar-les manualment a la configuració del lloc.')
+    }
+
+    if (this.isDeviceReady()) {
+      this.errorMessage.set('')
     }
 
     this.modalVisible.set(this.needsSetup())
@@ -159,31 +175,36 @@ export class PushNotificationsService {
       return
     }
 
-    const supported = await isSupported()
+    this.permission.set(Notification.permission)
+
+    await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
+
+    const supported = await this.detectMessagingSupport()
     this.isSupported.set(supported)
 
     if (!supported) {
-      this.permission.set('unsupported')
+      if (this.permission() !== 'granted') {
+        this.permission.set('unsupported')
+      }
+      if (this.isDeviceReady()) {
+        this.errorMessage.set('')
+      }
       this.modalVisible.set(false)
       return
     }
 
-    this.permission.set(Notification.permission)
-    await this.refreshRegisteredTokens()
-
     if (this.permission() === 'granted') {
       try {
-        const token = await this.resolveCurrentToken()
+        const token = await this.withTimeout(this.resolveCurrentToken(), this.syncTimeoutMs)
         this.currentToken.set(token || '')
 
         // If the browser has permission and token, ensure this session/device is linked in backend.
         if (token && !this.hasRegisteredCurrentToken()) {
-          await this.registerToken(token)
-          await this.refreshRegisteredTokens()
+          await this.withTimeout(this.registerToken(token), this.syncTimeoutMs)
+          await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
         }
       } catch (error) {
         this.errorMessage.set(error instanceof Error ? error.message : 'No s\'ha pogut obtenir el token del dispositiu.')
-        this.currentToken.set('')
       }
     } else {
       this.currentToken.set('')
@@ -335,5 +356,31 @@ export class PushNotificationsService {
     this.currentToken.set('')
     this.registeredTokens.set([])
     this.modalVisible.set(false)
+  }
+
+  private async detectMessagingSupport(): Promise<boolean> {
+    try {
+      return await this.withTimeout(isSupported(), this.syncTimeoutMs)
+    } catch {
+      return this.hasAnyRegisteredToken() || Boolean(this.currentToken()) || this.isSupported()
+    }
+  }
+
+  private withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error('Temps d\'espera esgotat comprovant l\'estat de notificacions.'))
+      }, timeoutMs)
+
+      promise
+        .then((value) => {
+          clearTimeout(timer)
+          resolve(value)
+        })
+        .catch((error) => {
+          clearTimeout(timer)
+          reject(error)
+        })
+    })
   }
 }

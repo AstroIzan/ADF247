@@ -170,7 +170,9 @@ exports.Prisma.RespuestaScalarFieldEnum = {
   isCustom: 'isCustom',
   customText: 'customText',
   fullHorari: 'fullHorari',
-  response: 'response'
+  response: 'response',
+  source: 'source',
+  autoAssignReason: 'autoAssignReason'
 };
 
 exports.Prisma.DeviceTokenScalarFieldEnum = {
@@ -200,6 +202,45 @@ exports.Prisma.NotificationLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.AvailabilityWindowScalarFieldEnum = {
+  id: 'id',
+  userNCarnet: 'userNCarnet',
+  fromDateTime: 'fromDateTime',
+  toDateTime: 'toDateTime',
+  availabilityType: 'availabilityType',
+  source: 'source',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.NotificationAutomationRunScalarFieldEnum = {
+  id: 'id',
+  trigger: 'trigger',
+  source: 'source',
+  status: 'status',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  durationMs: 'durationMs',
+  actorUserId: 'actorUserId',
+  errorMessage: 'errorMessage',
+  correlationId: 'correlationId',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.NotificationAutomationTaskRunScalarFieldEnum = {
+  id: 'id',
+  runId: 'runId',
+  taskKey: 'taskKey',
+  status: 'status',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt',
+  durationMs: 'durationMs',
+  errorMessage: 'errorMessage',
+  detailsJson: 'detailsJson',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -218,7 +259,10 @@ exports.Prisma.ModelName = {
   Convocatoria: 'Convocatoria',
   Respuesta: 'Respuesta',
   DeviceToken: 'DeviceToken',
-  NotificationLog: 'NotificationLog'
+  NotificationLog: 'NotificationLog',
+  AvailabilityWindow: 'AvailabilityWindow',
+  NotificationAutomationRun: 'NotificationAutomationRun',
+  NotificationAutomationTaskRun: 'NotificationAutomationTaskRun'
 };
 
 /**

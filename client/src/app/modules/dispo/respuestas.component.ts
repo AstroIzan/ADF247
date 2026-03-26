@@ -228,6 +228,20 @@ export class RespuestasComponent implements OnDestroy {
     return user ? `${user.name} ${user.lastName || ''}` : nCarnet;
   }
 
+  getSourceLabel(source?: string): string {
+    const map: Record<string, string> = {
+      'manual': 'Manual',
+      'auto-window': 'Auto (calendari)',
+      'auto-no-window': 'Auto (sense calendari)',
+    };
+    return map[source || 'manual'] || source || 'Manual';
+  }
+
+  getSourceBadgeClass(source?: string): string {
+    if (!source || source === 'manual') return 'badge-neutral';
+    return 'badge-auto-source';
+  }
+
   ngOnDestroy() {
     document.body.classList.remove('modal-open');
   }

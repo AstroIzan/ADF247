@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "install:all": "npm install --prefix database && npm install --prefix api && npm install --prefix client",
-    "dev": "concurrently -n api,client \"npm run dev --prefix api\" \"npm run start --prefix client\"",
+    "db:migrate:deploy": "npm run prisma:migrate:deploy --prefix database",
+    "db:prepare": "npm run prisma:generate --prefix database && npm run db:migrate:deploy",
+    "dev": "npm run db:migrate:deploy && concurrently -n api,client \"npm run dev --prefix api\" \"npm run start --prefix client\"",
     "pro": "concurrently -n api,client \"npm run start:pro --prefix api\" \"npm run build --prefix client\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test --prefix api && npm run test:ci --prefix client"
   },
   "repository": {
     "type": "git",

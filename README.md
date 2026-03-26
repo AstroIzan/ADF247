@@ -91,6 +91,12 @@ npx prisma migrate dev --name adf_schema
 npm run prisma:seed
 ```
 
+Alternativa recomendada desde raiz (entorno ya existente):
+
+```bash
+npm run db:prepare
+```
+
 Opcional para inspeccionar datos:
 
 ```bash
@@ -104,6 +110,8 @@ Desde la raiz:
 ```bash
 npm run dev
 ```
+
+`npm run dev` aplica automaticamente migraciones pendientes antes de iniciar API + cliente.
 
 Esto levanta:
 
@@ -128,25 +136,32 @@ Ejemplos:
 ### Raiz
 
 - `npm run install:all`: instala dependencias en `database`, `api` y `client`
+- `npm run db:migrate:deploy`: aplica migraciones pendientes sobre la DB actual
+- `npm run db:prepare`: genera cliente Prisma y aplica migraciones
 - `npm run dev`: arranca API + cliente en paralelo
 - `npm run pro`: arranca API en modo pro y ejecuta build del cliente
+- `npm run test`: ejecuta tests API + cliente en modo no interactivo
 
 ### API (`api/package.json`)
 
 - `npm run dev`: nodemon con `NODE_ENV=development`
 - `npm run start`: inicio simple
 - `npm run start:pro`: inicio con `NODE_ENV=pro`
+- `npm run test`: ejecuta runner de tests de Node
 
 ### Cliente (`client/package.json`)
 
 - `npm run start`: servidor Angular
 - `npm run build`: build produccion
 - `npm run build:dev`: build desarrollo
+- `npm run test`: tests en modo interactivo
+- `npm run test:ci`: tests en modo no-watch
 
 ### Database (`database/package.json`)
 
 - `npm run prisma:generate`
 - `npm run prisma:migrate`
+- `npm run prisma:migrate:deploy`
 - `npm run prisma:seed`
 - `npm run prisma:studio`
 
@@ -165,7 +180,84 @@ Respuesta de login/refresh incluye:
 - `refreshExpiresIn`
 - `user`
 
-## 10) Levantar en otra maquina (checklist rapido)
+## 10) Nuevas acciones admin
+
+### Ventanas de disponibilidad (API)
+
+Endpoints disponibles:
+
+- `GET /api/availability/windows`
+- `POST /api/availability/windows`
+- `PUT /api/availability/windows/:id`
+- `DELETE /api/availability/windows/:id`
+
+Campos de ventana:
+
+- `userNCarnet`
+- `fromDateTime`
+- `toDateTime`
+- `availabilityType` (`available` o `unavailable`)
+- `source` (`manual`, `import`, `system`)
+- `notes`
+
+Comportamiento implementado:
+
+- validacion de rangos (`toDateTime` debe ser posterior a `fromDateTime`)
+- solape permitido solo si es del mismo tipo (fusion automatica de ventanas)
+- solape con tipo distinto rechazado
+- matching automatico al crear convocatoria para generar respuestas iniciales
+
+### Importacion masiva de usuarios por CSV
+
+Disponible en modulo de usuarios del cliente:
+
+- boton `Importar CSV`
+- descarga de plantilla v1
+- modal de subida y preview de cabeceras
+- reporte por fila (insertada/rechazada)
+
+Endpoint backend:
+
+- `POST /api/users/import`
+
+Contrato de cabecera CSV v1:
+
+`nCarnet,nIndicatiu,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla`
+
+Reglas clave:
+
+- insercion por fila (sin rollback global)
+- `nCarnet`, `name` y `password` obligatorios
+- password minima de 6 caracteres
+- limite de 2MB y maximo 1500 filas
+
+### Semilla de ejemplo
+
+El seed incluye ventanas iniciales de disponibilidad para pruebas funcionales.
+
+### Orquestador de automatismos de notificaciones (API)
+
+Endpoints disponibles:
+
+- `POST /api/notifications/automation/run`
+- `POST /api/notifications/automation/tasks/:taskKey/run`
+- `GET /api/notifications/automation/runs`
+- `GET /api/notifications/automation/runs/:id`
+- `PUT /api/notifications/automation/config`
+
+Persistencia de trazabilidad:
+
+- `NotificationAutomationRun` (corrida global)
+- `NotificationAutomationTaskRun` (detalle por tarea)
+
+Configuracion versionada (json):
+
+- `automation.retentionDays`
+- `automation.viewerNCarnets[]`
+- `automation.monitoring.*`
+- `automation.tasks[]`
+
+## 11) Levantar en otra maquina (checklist rapido)
 
 1. Clonar repo
 2. `npm install`
@@ -174,7 +266,7 @@ Respuesta de login/refresh incluye:
 5. `npm run dev`
 6. Abrir `http://localhost:4200`
 
-## 11) Problemas frecuentes
+## 12) Problemas frecuentes
 
 ### Puerto 3001 ocupado
 
@@ -193,7 +285,18 @@ Respuesta de login/refresh incluye:
 
 - Revisa `JWT_SECRET` y `JWT_REFRESH_SECRET` en `api/.env.pro`.
 
-## 12) Postman
+### Error al abrir disponibilidad: tabla `AvailabilityWindow` no existe
+
+Si aparece un error tipo `The table main.AvailabilityWindow does not exist`:
+
+- Ejecuta `npm run db:migrate:deploy` desde la raiz.
+- Si es primera instalacion, usa `npm run db:prepare`.
+
+Importante:
+
+- No uses `npx prisma ...` desde la raiz del repo, porque puede tomar una version global distinta y mostrar errores de schema incompatibles.
+
+## 13) Postman
 
 Coleccion incluida:
 

@@ -148,13 +148,43 @@ async function getNotificationLogs(req, res) {
   }
 }
 
+async function getAutomationRuns(req, res) {
+  try {
+    const result = await notificationsService.getAutomationRuns(req.auth, req.query)
+    res.json(result)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function getAutomationRunById(req, res) {
+  try {
+    const result = await notificationsService.getAutomationRunById(req.auth, req.params.id)
+    res.json(result)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function runNotificationAutomationTask(req, res) {
+  try {
+    const result = await notificationsService.runNotificationAutomationTask(req.auth, req.params.taskKey)
+    res.status(201).json(result)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
 module.exports = {
   deactivateDeviceToken,
   getAllDeviceTokens,
   getCurrentUserDeviceTokens,
   getNotificationConfig,
   getNotificationLogs,
+  getAutomationRunById,
+  getAutomationRuns,
   runConvocatoriaNotificationAutomation,
+  runNotificationAutomationTask,
   registerDeviceToken,
   runDailyNotificationAutomation,
   sendConvocatoriaResponseRequest,

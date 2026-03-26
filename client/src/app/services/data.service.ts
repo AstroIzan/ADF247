@@ -54,6 +54,8 @@ export interface Respuesta {
   convoId: number;
   userNCarnet: string;
   response: boolean;
+  source: 'manual' | 'auto-window' | 'auto-no-window';
+  autoAssignReason?: string | null;
   isCustom: boolean;
   customText?: string | null;
   fullHorari: boolean;
@@ -83,6 +85,10 @@ export interface NotificationSettings {
     link: string;
     creationTitle: string;
     creationBody: string;
+    fireTitle?: string;
+    fireBody?: string;
+    weeklyCreatedTitle?: string;
+    weeklyCreatedBody?: string;
     pendingTitle: string;
     pendingBody: string;
   };
@@ -105,7 +111,113 @@ export interface NotificationSettings {
     bodyYes: string;
     titleNo: string;
     bodyNo: string;
+    titleCancelled?: string;
+    bodyCancelled?: string;
+    titleReten?: string;
+    bodyReten?: string;
+    perTypeTemplates?: Record<string, {
+      title: string;
+      body: string;
+    }>;
   };
+  availabilityMatching?: {
+    conflictPolicy: 'unavailable-wins' | 'available-wins' | 'skip-on-conflict';
+    createAvailableResponses: boolean;
+    createUnavailableResponses: boolean;
+    autoCreateUnavailableForUsersWithoutWindow: boolean;
+    notifyOnAutoAvailableResponse: boolean;
+  };
+  automation?: NotificationAutomationConfig;
+}
+
+export interface NotificationAutomationTaskConfig {
+  taskKey: string;
+  notifyKind: 'pending-responses' | 'sortida-status' | 'weekly-digest' | 'sortida-confirmed' | 'sortida-cancelled' | 'sortida-reten' | 'weekly-pending';
+  enabled: boolean;
+  schedule: {
+    kind: 'daily' | 'weekly' | 'manual';
+  };
+  convoTypeFilter: string[];
+  timeoutMs: number;
+  retryPolicy: {
+    maxRetries: number;
+  };
+  dependsOn: string[];
+}
+
+export interface NotificationAutomationConfig {
+  retentionDays: number;
+  viewerNCarnets: string[];
+  monitoring: {
+    enabled: boolean;
+    alertRecipientNCarnets: string[];
+    alertOnMissedRun: boolean;
+    alertOnTaskFailure: boolean;
+  };
+  tasks: NotificationAutomationTaskConfig[];
+}
+
+export interface NotificationAutomationTaskRun {
+  id: number;
+  taskKey: string;
+  status: 'running' | 'success' | 'failed' | 'skipped';
+  startedAt: string;
+  finishedAt?: string | null;
+  durationMs?: number | null;
+  errorMessage?: string | null;
+  details?: {
+    skipped?: boolean;
+    reason?: string | null;
+    notificationCount?: number | null;
+    targetedUsers?: number | null;
+  } | null;
+}
+
+export interface NotificationAutomationRun {
+  id: number;
+  correlationId?: string;
+  trigger: string;
+  source: string;
+  status: 'running' | 'success' | 'partial' | 'failed' | 'skipped';
+  startedAt: string;
+  finishedAt?: string | null;
+  durationMs?: number | null;
+  errorMessage?: string | null;
+  actor?: {
+    id: number;
+    nCarnet: string;
+    name: string;
+    lastName?: string | null;
+  } | null;
+  tasks: NotificationAutomationTaskRun[];
+}
+
+export interface NotificationAutomationTaskExecutionResult {
+  runId: number;
+  taskKey: string;
+  status: 'success' | 'failed';
+  result?: Record<string, unknown> | null;
+}
+
+export interface AvailabilityWindow {
+  id: number;
+  userNCarnet: string;
+  fromDateTime: string;
+  toDateTime: string;
+  availabilityType: 'available' | 'unavailable';
+  source: 'manual' | 'import' | 'system';
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AvailabilityWindowUpsertPayload {
+  userNCarnet: string;
+  fromDateTime: string;
+  toDateTime: string;
+  availabilityType: 'available' | 'unavailable';
+  source?: 'manual' | 'import' | 'system';
+  notes?: string | null;
 }
 
 export interface NotificationLog {
@@ -144,6 +256,25 @@ export interface ApiHealthStatus {
   };
 }
 
+export interface UsersCsvImportPayload {
+  csvContent: string;
+  fileName?: string;
+}
+
+export interface UsersCsvImportRowResult {
+  rowNumber: number;
+  nCarnet?: string | null;
+  status: 'inserted' | 'rejected';
+  reason?: string;
+}
+
+export interface UsersCsvImportResult {
+  totalRows: number;
+  inserted: number;
+  rejected: number;
+  rows: UsersCsvImportRowResult[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -170,6 +301,10 @@ export class DataService {
 
   deleteUser(id: number): Observable<any> {
     return this.http.delete<any>(`/users/${id}`);
+  }
+
+  importUsersFromCsv(payload: UsersCsvImportPayload): Observable<UsersCsvImportResult> {
+    return this.http.post<UsersCsvImportResult>('/users/import', payload);
   }
 
   // === CONVOCATION TYPES ===
@@ -278,6 +413,59 @@ export class DataService {
 
   runConvocatoriaNotificationAutomation(convoId: number): Observable<any> {
     return this.http.post<any>(`/notifications/automation/convocatoria/${convoId}/run`, {});
+  }
+
+  runNotificationAutomationTask(taskKey: string): Observable<NotificationAutomationTaskExecutionResult> {
+    return this.http.post<NotificationAutomationTaskExecutionResult>(`/notifications/automation/tasks/${taskKey}/run`, {});
+  }
+
+  getNotificationAutomationRuns(limit = 50): Observable<NotificationAutomationRun[]> {
+    return this.http.get<NotificationAutomationRun[]>(`/notifications/automation/runs?limit=${limit}`);
+  }
+
+  getNotificationAutomationRunById(id: number): Observable<NotificationAutomationRun> {
+    return this.http.get<NotificationAutomationRun>(`/notifications/automation/runs/${id}`);
+  }
+
+  // === AVAILABILITY WINDOWS ===
+  getAvailabilityWindows(filters?: {
+    userNCarnet?: string;
+    availabilityType?: 'available' | 'unavailable';
+    fromDateTime?: string;
+    toDateTime?: string;
+  }): Observable<AvailabilityWindow[]> {
+    const search = new URLSearchParams();
+
+    if (filters?.userNCarnet) {
+      search.set('userNCarnet', filters.userNCarnet);
+    }
+
+    if (filters?.availabilityType) {
+      search.set('availabilityType', filters.availabilityType);
+    }
+
+    if (filters?.fromDateTime) {
+      search.set('fromDateTime', filters.fromDateTime);
+    }
+
+    if (filters?.toDateTime) {
+      search.set('toDateTime', filters.toDateTime);
+    }
+
+    const query = search.toString();
+    return this.http.get<AvailabilityWindow[]>(`/availability/windows${query ? `?${query}` : ''}`);
+  }
+
+  createAvailabilityWindow(payload: AvailabilityWindowUpsertPayload): Observable<AvailabilityWindow> {
+    return this.http.post<AvailabilityWindow>('/availability/windows', payload);
+  }
+
+  updateAvailabilityWindow(id: number, payload: Partial<AvailabilityWindowUpsertPayload>): Observable<AvailabilityWindow> {
+    return this.http.put<AvailabilityWindow>(`/availability/windows/${id}`, payload);
+  }
+
+  deleteAvailabilityWindow(id: number): Observable<AvailabilityWindow> {
+    return this.http.delete<AvailabilityWindow>(`/availability/windows/${id}`);
   }
 
   getHealthStatus(): Observable<ApiHealthStatus> {

@@ -1,0 +1,124 @@
+@if (showModal()) {
+  <div class="settings-overlay" (click)="closeModal()"></div>
+
+  <section class="settings-dialog" (click)="$event.stopPropagation()">
+    <div class="settings-header">
+      <div>
+        <h2>Configuració</h2>
+        <p>Centralitza les preferències del dispositiu i les automatitzacions del sistema.</p>
+      </div>
+      <button class="close-btn" type="button" (click)="closeModal()" aria-label="Tancar">&times;</button>
+    </div>
+
+    <nav class="settings-tabs">
+      <button type="button" class="settings-tab" [class.active]="activeTab() === 'device'" (click)="setActiveTab('device')">
+        Notificacions
+      </button>
+      @if (authService.isAdmin()) {
+        <button type="button" class="settings-tab" [class.active]="activeTab() === 'system'" (click)="setActiveTab('system')">
+          Sistema
+        </button>
+        <button type="button" class="settings-tab" [class.active]="activeTab() === 'orchestrator'" (click)="setActiveTab('orchestrator')">
+          Orquestrador
+        </button>
+      }
+    </nav>
+
+    <div class="settings-body">
+      @if (activeTab() === 'device') {
+        <section class="settings-section">
+          <h3>Notificacions en aquest dispositiu</h3>
+          <p class="section-help">Permisos del navegador i registre del token push per rebre avisos.</p>
+
+          @if (deviceLoading()) {
+            <div class="loading-state">Sincronitzant estat del dispositiu...</div>
+          } @else {
+            <div class="status-grid">
+              <article>
+                <strong>Notificacions</strong>
+                <span>
+                  @if (pushNotificationsService.permission() === 'granted') { permès }
+                  @else if (pushNotificationsService.permission() === 'denied') { denegat }
+                  @else if (pushNotificationsService.permission() === 'unsupported') { no compatible }
+                  @else { pendent }
+                </span>
+              </article>
+              <article>
+                <strong>Token detectat</strong>
+                <span>{{ pushNotificationsService.currentToken() || pushNotificationsService.hasAnyRegisteredToken() ? 'Sí' : 'No' }}</span>
+              </article>
+              <article>
+                <strong>Registrat a servidor</strong>
+                <span>{{ pushNotificationsService.hasAnyRegisteredToken() ? 'Sí' : 'No' }}</span>
+              </article>
+            </div>
+          }
+
+          @if (pushNotificationsService.errorMessage()) {
+            <div class="alert alert-danger">{{ pushNotificationsService.errorMessage() }}</div>
+          }
+
+          @if (pushNotificationsService.infoMessage()) {
+            <div class="alert alert-success">{{ pushNotificationsService.infoMessage() }}</div>
+          }
+
+          <p class="device-copy">
+            @if (deviceLoading()) {
+              Comprovant permisos, token i registre del dispositiu.
+            } @else if (pushNotificationsService.permission() !== 'granted') {
+              Cal acceptar els permisos del navegador. El token del dispositiu es generarà i registrarà automàticament.
+            } @else if (!pushNotificationsService.isDeviceReady()) {
+              El navegador ja té permís. Prem el botó per registrar aquest dispositiu al servidor.
+            } @else {
+              Aquest dispositiu ja està preparat per rebre notificacions.
+            }
+          </p>
+
+          @if (!deviceLoading() && !pushNotificationsService.isDeviceReady()) {
+            <div class="settings-actions">
+              <button class="btn btn-primary" type="button" (click)="activateNotifications()" [disabled]="pushNotificationsService.loading()">
+                {{ pushNotificationsService.loading() ? 'Preparant...' : 'Activar notificacions en aquest dispositiu' }}
+              </button>
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab() === 'system' && authService.isAdmin()) {
+        <section class="settings-section admin-section">
+          <app-notifications-admin
+            [config]="adminConfig()"
+            [logs]="adminLogs()"
+            [convoTypes]="adminConvoTypes()"
+            [users]="adminUsers()"
+             [loading]="!adminConvoTypes().length && !adminUsers().length"
+            [loadingLogs]="false"
+            [error]="adminConfigError()"
+            [logsError]="adminLogsError()"
+            [visibleTabs]="['config']"
+            (onLogsRefresh)="loadNotificationLogs()"
+          ></app-notifications-admin>
+        </section>
+      }
+
+      @if (activeTab() === 'orchestrator' && authService.isAdmin()) {
+        <section class="settings-section admin-section">
+          <app-notifications-admin
+            [config]="adminConfig()"
+            [logs]="adminLogs()"
+            [convoTypes]="adminConvoTypes()"
+            [users]="adminUsers()"
+             [loading]="!adminConvoTypes().length && !adminUsers().length"
+            [loadingLogs]="false"
+            [error]="adminConfigError()"
+            [logsError]="adminLogsError()"
+            [visibleTabs]="['orchestrator-config']"
+            title="Configuració de l'Orquestrador"
+            description="Paràmetres de retencio, delegació de visibilitat i monitorització del pipeline automàtic."
+            (onLogsRefresh)="loadNotificationLogs()"
+          ></app-notifications-admin>
+        </section>
+      }
+    </div>
+  </section>
+}

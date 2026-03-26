@@ -5,13 +5,13 @@
       <p>Selecciona una data i revisa les convocatòries del dia.</p>
     </div>
 
-    @if (authService.isAdmin()) {
-      <div class="home-header-actions">
+    <div class="home-header-actions">
+      @if (authService.isAdmin()) {
         <button type="button" class="btn btn-primary" (click)="openCreateConvoModal()">
           + Crear Convocatòria
         </button>
-      </div>
-    }
+      }
+    </div>
   </header>
 
   <section class="home-grid">

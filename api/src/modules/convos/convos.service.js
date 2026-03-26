@@ -129,6 +129,210 @@ function shouldMarkSortida(convoType, positiveResponses) {
   return counts.groc >= minimumGroc && counts.total >= minimumVerd
 }
 
+function resolveAvailabilityDecision(windows, rules) {
+  if (!Array.isArray(windows) || windows.length === 0) {
+    return null
+  }
+
+  const hasUnavailable = windows.some((window) => window.availabilityType === 'unavailable')
+  const hasAvailable = windows.some((window) => window.availabilityType === 'available')
+
+  if (hasUnavailable && hasAvailable) {
+    if (rules.conflictPolicy === 'available-wins') {
+      return rules.createAvailableResponses ? true : null
+    }
+
+    if (rules.conflictPolicy === 'skip-on-conflict') {
+      return null
+    }
+
+    return rules.createUnavailableResponses ? false : null
+  }
+
+  if (hasUnavailable) {
+    return rules.createUnavailableResponses ? false : null
+  }
+
+  if (hasAvailable) {
+    return rules.createAvailableResponses ? true : null
+  }
+
+  return null
+}
+
+function getAvailabilityMatchingRules() {
+  try {
+    const { readNotificationSettings } = require('../notifications/notifications.config')
+    const settings = readNotificationSettings()
+    return settings.availabilityMatching || {
+      conflictPolicy: 'unavailable-wins',
+      createAvailableResponses: true,
+      createUnavailableResponses: true,
+    }
+  } catch {
+    return {
+      conflictPolicy: 'unavailable-wins',
+      createAvailableResponses: true,
+      createUnavailableResponses: true,
+    }
+  }
+}
+
+async function applyAvailabilityWindowsToConvocatoria(convocatoria) {
+  const matchingRules = getAvailabilityMatchingRules()
+  const rangeStart = convocatoria.startTime
+  const rangeEnd = convocatoria.finalTime
+    ? convocatoria.finalTime
+    : new Date(new Date(convocatoria.startTime).getTime() + 60 * 1000)
+
+  const overlappedWindows = await database.availabilityWindow.findMany({
+    where: {
+      fromDateTime: {
+        lt: rangeEnd,
+      },
+      toDateTime: {
+        gt: rangeStart,
+      },
+      user: {
+        isActive: true,
+      },
+    },
+    select: {
+      userNCarnet: true,
+      availabilityType: true,
+    },
+  })
+
+  if (overlappedWindows.length === 0) {
+    return 0
+  }
+
+  const windowsByUser = overlappedWindows.reduce((acc, window) => {
+    if (!acc.has(window.userNCarnet)) {
+      acc.set(window.userNCarnet, [])
+    }
+
+    acc.get(window.userNCarnet).push(window)
+    return acc
+  }, new Map())
+
+  const existingResponses = await database.respuesta.findMany({
+    where: {
+      convoId: convocatoria.id,
+      userNCarnet: {
+        in: Array.from(windowsByUser.keys()),
+      },
+    },
+    select: {
+      userNCarnet: true,
+    },
+  })
+
+  const existingNCarnets = new Set(existingResponses.map((item) => item.userNCarnet))
+  const candidateUserNCarnets = Array.from(windowsByUser.keys())
+  const candidateUsers = candidateUserNCarnets.length > 0
+    ? await database.user.findMany({
+      where: {
+        nCarnet: {
+          in: candidateUserNCarnets,
+        },
+      },
+      select: {
+        id: true,
+        nCarnet: true,
+      },
+    })
+    : []
+  const candidateUserIdsByCarnet = new Map(candidateUsers.map((user) => [user.nCarnet, user.id]))
+
+  const rowsToInsert = []
+  const autoAvailableUserIds = []
+
+  for (const [userNCarnet, userWindows] of windowsByUser.entries()) {
+    if (existingNCarnets.has(userNCarnet)) {
+      continue
+    }
+
+    const canAttend = resolveAvailabilityDecision(userWindows, matchingRules)
+
+    if (canAttend === null) {
+      continue
+    }
+
+    rowsToInsert.push({
+      convoId: convocatoria.id,
+      userNCarnet,
+      response: canAttend,
+      isCustom: false,
+      customText: null,
+      fullHorari: canAttend,
+      source: 'auto-window',
+      autoAssignReason: canAttend ? 'available-window-match' : 'unavailable-window-match',
+    })
+
+    if (canAttend) {
+      const userId = candidateUserIdsByCarnet.get(userNCarnet)
+
+      if (userId) {
+        autoAvailableUserIds.push(userId)
+      }
+    }
+  }
+
+  if (matchingRules.autoCreateUnavailableForUsersWithoutWindow) {
+    const usersWithoutWindows = await database.user.findMany({
+      where: {
+        isActive: true,
+        nCarnet: {
+          notIn: Array.from(windowsByUser.keys()),
+        },
+      },
+      select: {
+        nCarnet: true,
+      },
+    })
+
+    for (const user of usersWithoutWindows) {
+      if (existingNCarnets.has(user.nCarnet)) {
+        continue
+      }
+
+      rowsToInsert.push({
+        convoId: convocatoria.id,
+        userNCarnet: user.nCarnet,
+        response: false,
+        isCustom: false,
+        customText: null,
+        fullHorari: false,
+        source: 'auto-no-window',
+        autoAssignReason: 'no-availability-window-registered',
+      })
+    }
+  }
+
+  if (rowsToInsert.length === 0) {
+    return 0
+  }
+
+  const created = await database.respuesta.createMany({
+    data: rowsToInsert,
+  })
+
+  if (matchingRules.notifyOnAutoAvailableResponse && autoAvailableUserIds.length > 0) {
+    try {
+      const notificationsService = require('../notifications/notifications.service')
+      await notificationsService.sendAutoAvailableNotifications({
+        convocatoria,
+        userIds: autoAvailableUserIds,
+      })
+    } catch (error) {
+      console.error('[convos.service] Error al enviar avisos automáticos de disponibilidad:', error.message)
+    }
+  }
+
+  return created.count || 0
+}
+
 async function recalculateSortidaForConvocatoria(convoId) {
   const convocatoria = await database.convocatoria.findUnique({
     where: { id: convoId },
@@ -284,6 +488,12 @@ async function createConvocatoria(payload) {
       data,
       include: convocatoriaInclude,
     })
+
+    try {
+      await applyAvailabilityWindowsToConvocatoria(convocatoria)
+    } catch (error) {
+      console.error('[convos.service] Error al aplicar ventanas de disponibilidad:', error.message)
+    }
 
     try {
       const notificationsService = require('../notifications/notifications.service')
@@ -469,4 +679,9 @@ module.exports = {
   updateSortidaForTomorrow,
   updateConvocatoria,
   updateConvoType,
+  __matchingInternals: {
+    resolveAvailabilityDecision,
+    shouldMarkSortida,
+    getUserPriority,
+  },
 }

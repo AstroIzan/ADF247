@@ -48,6 +48,21 @@ export type DeviceToken = $Result.DefaultSelection<Prisma.$DeviceTokenPayload>
  * 
  */
 export type NotificationLog = $Result.DefaultSelection<Prisma.$NotificationLogPayload>
+/**
+ * Model AvailabilityWindow
+ * 
+ */
+export type AvailabilityWindow = $Result.DefaultSelection<Prisma.$AvailabilityWindowPayload>
+/**
+ * Model NotificationAutomationRun
+ * 
+ */
+export type NotificationAutomationRun = $Result.DefaultSelection<Prisma.$NotificationAutomationRunPayload>
+/**
+ * Model NotificationAutomationTaskRun
+ * 
+ */
+export type NotificationAutomationTaskRun = $Result.DefaultSelection<Prisma.$NotificationAutomationTaskRunPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -241,6 +256,36 @@ export class PrismaClient<
     * ```
     */
   get notificationLog(): Prisma.NotificationLogDelegate<ExtArgs>;
+
+  /**
+   * `prisma.availabilityWindow`: Exposes CRUD operations for the **AvailabilityWindow** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more AvailabilityWindows
+    * const availabilityWindows = await prisma.availabilityWindow.findMany()
+    * ```
+    */
+  get availabilityWindow(): Prisma.AvailabilityWindowDelegate<ExtArgs>;
+
+  /**
+   * `prisma.notificationAutomationRun`: Exposes CRUD operations for the **NotificationAutomationRun** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NotificationAutomationRuns
+    * const notificationAutomationRuns = await prisma.notificationAutomationRun.findMany()
+    * ```
+    */
+  get notificationAutomationRun(): Prisma.NotificationAutomationRunDelegate<ExtArgs>;
+
+  /**
+   * `prisma.notificationAutomationTaskRun`: Exposes CRUD operations for the **NotificationAutomationTaskRun** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more NotificationAutomationTaskRuns
+    * const notificationAutomationTaskRuns = await prisma.notificationAutomationTaskRun.findMany()
+    * ```
+    */
+  get notificationAutomationTaskRun(): Prisma.NotificationAutomationTaskRunDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -688,7 +733,10 @@ export namespace Prisma {
     Convocatoria: 'Convocatoria',
     Respuesta: 'Respuesta',
     DeviceToken: 'DeviceToken',
-    NotificationLog: 'NotificationLog'
+    NotificationLog: 'NotificationLog',
+    AvailabilityWindow: 'AvailabilityWindow',
+    NotificationAutomationRun: 'NotificationAutomationRun',
+    NotificationAutomationTaskRun: 'NotificationAutomationTaskRun'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -704,7 +752,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "role" | "convoType" | "convocatoria" | "respuesta" | "deviceToken" | "notificationLog"
+      modelProps: "user" | "role" | "convoType" | "convocatoria" | "respuesta" | "deviceToken" | "notificationLog" | "availabilityWindow" | "notificationAutomationRun" | "notificationAutomationTaskRun"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1198,6 +1246,216 @@ export namespace Prisma {
           }
         }
       }
+      AvailabilityWindow: {
+        payload: Prisma.$AvailabilityWindowPayload<ExtArgs>
+        fields: Prisma.AvailabilityWindowFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.AvailabilityWindowFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.AvailabilityWindowFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>
+          }
+          findFirst: {
+            args: Prisma.AvailabilityWindowFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.AvailabilityWindowFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>
+          }
+          findMany: {
+            args: Prisma.AvailabilityWindowFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>[]
+          }
+          create: {
+            args: Prisma.AvailabilityWindowCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>
+          }
+          createMany: {
+            args: Prisma.AvailabilityWindowCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.AvailabilityWindowCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>[]
+          }
+          delete: {
+            args: Prisma.AvailabilityWindowDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>
+          }
+          update: {
+            args: Prisma.AvailabilityWindowUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>
+          }
+          deleteMany: {
+            args: Prisma.AvailabilityWindowDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.AvailabilityWindowUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.AvailabilityWindowUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$AvailabilityWindowPayload>
+          }
+          aggregate: {
+            args: Prisma.AvailabilityWindowAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateAvailabilityWindow>
+          }
+          groupBy: {
+            args: Prisma.AvailabilityWindowGroupByArgs<ExtArgs>
+            result: $Utils.Optional<AvailabilityWindowGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.AvailabilityWindowCountArgs<ExtArgs>
+            result: $Utils.Optional<AvailabilityWindowCountAggregateOutputType> | number
+          }
+        }
+      }
+      NotificationAutomationRun: {
+        payload: Prisma.$NotificationAutomationRunPayload<ExtArgs>
+        fields: Prisma.NotificationAutomationRunFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NotificationAutomationRunFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NotificationAutomationRunFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>
+          }
+          findFirst: {
+            args: Prisma.NotificationAutomationRunFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NotificationAutomationRunFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>
+          }
+          findMany: {
+            args: Prisma.NotificationAutomationRunFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>[]
+          }
+          create: {
+            args: Prisma.NotificationAutomationRunCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>
+          }
+          createMany: {
+            args: Prisma.NotificationAutomationRunCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NotificationAutomationRunCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>[]
+          }
+          delete: {
+            args: Prisma.NotificationAutomationRunDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>
+          }
+          update: {
+            args: Prisma.NotificationAutomationRunUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>
+          }
+          deleteMany: {
+            args: Prisma.NotificationAutomationRunDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NotificationAutomationRunUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.NotificationAutomationRunUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationRunPayload>
+          }
+          aggregate: {
+            args: Prisma.NotificationAutomationRunAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNotificationAutomationRun>
+          }
+          groupBy: {
+            args: Prisma.NotificationAutomationRunGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NotificationAutomationRunGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NotificationAutomationRunCountArgs<ExtArgs>
+            result: $Utils.Optional<NotificationAutomationRunCountAggregateOutputType> | number
+          }
+        }
+      }
+      NotificationAutomationTaskRun: {
+        payload: Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>
+        fields: Prisma.NotificationAutomationTaskRunFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.NotificationAutomationTaskRunFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.NotificationAutomationTaskRunFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>
+          }
+          findFirst: {
+            args: Prisma.NotificationAutomationTaskRunFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.NotificationAutomationTaskRunFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>
+          }
+          findMany: {
+            args: Prisma.NotificationAutomationTaskRunFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>[]
+          }
+          create: {
+            args: Prisma.NotificationAutomationTaskRunCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>
+          }
+          createMany: {
+            args: Prisma.NotificationAutomationTaskRunCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.NotificationAutomationTaskRunCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>[]
+          }
+          delete: {
+            args: Prisma.NotificationAutomationTaskRunDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>
+          }
+          update: {
+            args: Prisma.NotificationAutomationTaskRunUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>
+          }
+          deleteMany: {
+            args: Prisma.NotificationAutomationTaskRunDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.NotificationAutomationTaskRunUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.NotificationAutomationTaskRunUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$NotificationAutomationTaskRunPayload>
+          }
+          aggregate: {
+            args: Prisma.NotificationAutomationTaskRunAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateNotificationAutomationTaskRun>
+          }
+          groupBy: {
+            args: Prisma.NotificationAutomationTaskRunGroupByArgs<ExtArgs>
+            result: $Utils.Optional<NotificationAutomationTaskRunGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.NotificationAutomationTaskRunCountArgs<ExtArgs>
+            result: $Utils.Optional<NotificationAutomationTaskRunCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1362,16 +1620,20 @@ export namespace Prisma {
     roles: number
     convocatories: number
     respostas: number
+    availabilityWindows: number
     deviceTokens: number
     notificationLogs: number
+    notificationAutomationRuns: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     roles?: boolean | UserCountOutputTypeCountRolesArgs
     convocatories?: boolean | UserCountOutputTypeCountConvocatoriesArgs
     respostas?: boolean | UserCountOutputTypeCountRespostasArgs
+    availabilityWindows?: boolean | UserCountOutputTypeCountAvailabilityWindowsArgs
     deviceTokens?: boolean | UserCountOutputTypeCountDeviceTokensArgs
     notificationLogs?: boolean | UserCountOutputTypeCountNotificationLogsArgs
+    notificationAutomationRuns?: boolean | UserCountOutputTypeCountNotificationAutomationRunsArgs
   }
 
   // Custom InputTypes
@@ -1409,6 +1671,13 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
+  export type UserCountOutputTypeCountAvailabilityWindowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AvailabilityWindowWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
   export type UserCountOutputTypeCountDeviceTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: DeviceTokenWhereInput
   }
@@ -1418,6 +1687,13 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountNotificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: NotificationLogWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountNotificationAutomationRunsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationAutomationRunWhereInput
   }
 
 
@@ -1480,6 +1756,37 @@ export namespace Prisma {
    */
   export type ConvocatoriaCountOutputTypeCountRespostasArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RespuestaWhereInput
+  }
+
+
+  /**
+   * Count Type NotificationAutomationRunCountOutputType
+   */
+
+  export type NotificationAutomationRunCountOutputType = {
+    tasks: number
+  }
+
+  export type NotificationAutomationRunCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    tasks?: boolean | NotificationAutomationRunCountOutputTypeCountTasksArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * NotificationAutomationRunCountOutputType without action
+   */
+  export type NotificationAutomationRunCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRunCountOutputType
+     */
+    select?: NotificationAutomationRunCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * NotificationAutomationRunCountOutputType without action
+   */
+  export type NotificationAutomationRunCountOutputTypeCountTasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationAutomationTaskRunWhereInput
   }
 
 
@@ -1720,8 +2027,10 @@ export namespace Prisma {
     roles?: boolean | User$rolesArgs<ExtArgs>
     convocatories?: boolean | User$convocatoriesArgs<ExtArgs>
     respostas?: boolean | User$respostasArgs<ExtArgs>
+    availabilityWindows?: boolean | User$availabilityWindowsArgs<ExtArgs>
     deviceTokens?: boolean | User$deviceTokensArgs<ExtArgs>
     notificationLogs?: boolean | User$notificationLogsArgs<ExtArgs>
+    notificationAutomationRuns?: boolean | User$notificationAutomationRunsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1753,8 +2062,10 @@ export namespace Prisma {
     roles?: boolean | User$rolesArgs<ExtArgs>
     convocatories?: boolean | User$convocatoriesArgs<ExtArgs>
     respostas?: boolean | User$respostasArgs<ExtArgs>
+    availabilityWindows?: boolean | User$availabilityWindowsArgs<ExtArgs>
     deviceTokens?: boolean | User$deviceTokensArgs<ExtArgs>
     notificationLogs?: boolean | User$notificationLogsArgs<ExtArgs>
+    notificationAutomationRuns?: boolean | User$notificationAutomationRunsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1765,8 +2076,10 @@ export namespace Prisma {
       roles: Prisma.$RolePayload<ExtArgs>[]
       convocatories: Prisma.$ConvocatoriaPayload<ExtArgs>[]
       respostas: Prisma.$RespuestaPayload<ExtArgs>[]
+      availabilityWindows: Prisma.$AvailabilityWindowPayload<ExtArgs>[]
       deviceTokens: Prisma.$DeviceTokenPayload<ExtArgs>[]
       notificationLogs: Prisma.$NotificationLogPayload<ExtArgs>[]
+      notificationAutomationRuns: Prisma.$NotificationAutomationRunPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -2145,8 +2458,10 @@ export namespace Prisma {
     roles<T extends User$rolesArgs<ExtArgs> = {}>(args?: Subset<T, User$rolesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RolePayload<ExtArgs>, T, "findMany"> | Null>
     convocatories<T extends User$convocatoriesArgs<ExtArgs> = {}>(args?: Subset<T, User$convocatoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConvocatoriaPayload<ExtArgs>, T, "findMany"> | Null>
     respostas<T extends User$respostasArgs<ExtArgs> = {}>(args?: Subset<T, User$respostasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RespuestaPayload<ExtArgs>, T, "findMany"> | Null>
+    availabilityWindows<T extends User$availabilityWindowsArgs<ExtArgs> = {}>(args?: Subset<T, User$availabilityWindowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "findMany"> | Null>
     deviceTokens<T extends User$deviceTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$deviceTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findMany"> | Null>
     notificationLogs<T extends User$notificationLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findMany"> | Null>
+    notificationAutomationRuns<T extends User$notificationAutomationRunsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationAutomationRunsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2557,6 +2872,26 @@ export namespace Prisma {
   }
 
   /**
+   * User.availabilityWindows
+   */
+  export type User$availabilityWindowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    where?: AvailabilityWindowWhereInput
+    orderBy?: AvailabilityWindowOrderByWithRelationInput | AvailabilityWindowOrderByWithRelationInput[]
+    cursor?: AvailabilityWindowWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: AvailabilityWindowScalarFieldEnum | AvailabilityWindowScalarFieldEnum[]
+  }
+
+  /**
    * User.deviceTokens
    */
   export type User$deviceTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2594,6 +2929,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: NotificationLogScalarFieldEnum | NotificationLogScalarFieldEnum[]
+  }
+
+  /**
+   * User.notificationAutomationRuns
+   */
+  export type User$notificationAutomationRunsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    where?: NotificationAutomationRunWhereInput
+    orderBy?: NotificationAutomationRunOrderByWithRelationInput | NotificationAutomationRunOrderByWithRelationInput[]
+    cursor?: NotificationAutomationRunWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NotificationAutomationRunScalarFieldEnum | NotificationAutomationRunScalarFieldEnum[]
   }
 
   /**
@@ -5695,6 +6050,8 @@ export namespace Prisma {
     customText: string | null
     fullHorari: boolean | null
     response: boolean | null
+    source: string | null
+    autoAssignReason: string | null
   }
 
   export type RespuestaMaxAggregateOutputType = {
@@ -5705,6 +6062,8 @@ export namespace Prisma {
     customText: string | null
     fullHorari: boolean | null
     response: boolean | null
+    source: string | null
+    autoAssignReason: string | null
   }
 
   export type RespuestaCountAggregateOutputType = {
@@ -5715,6 +6074,8 @@ export namespace Prisma {
     customText: number
     fullHorari: number
     response: number
+    source: number
+    autoAssignReason: number
     _all: number
   }
 
@@ -5737,6 +6098,8 @@ export namespace Prisma {
     customText?: true
     fullHorari?: true
     response?: true
+    source?: true
+    autoAssignReason?: true
   }
 
   export type RespuestaMaxAggregateInputType = {
@@ -5747,6 +6110,8 @@ export namespace Prisma {
     customText?: true
     fullHorari?: true
     response?: true
+    source?: true
+    autoAssignReason?: true
   }
 
   export type RespuestaCountAggregateInputType = {
@@ -5757,6 +6122,8 @@ export namespace Prisma {
     customText?: true
     fullHorari?: true
     response?: true
+    source?: true
+    autoAssignReason?: true
     _all?: true
   }
 
@@ -5854,6 +6221,8 @@ export namespace Prisma {
     customText: string | null
     fullHorari: boolean
     response: boolean
+    source: string
+    autoAssignReason: string | null
     _count: RespuestaCountAggregateOutputType | null
     _avg: RespuestaAvgAggregateOutputType | null
     _sum: RespuestaSumAggregateOutputType | null
@@ -5883,6 +6252,8 @@ export namespace Prisma {
     customText?: boolean
     fullHorari?: boolean
     response?: boolean
+    source?: boolean
+    autoAssignReason?: boolean
     convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["respuesta"]>
@@ -5895,6 +6266,8 @@ export namespace Prisma {
     customText?: boolean
     fullHorari?: boolean
     response?: boolean
+    source?: boolean
+    autoAssignReason?: boolean
     convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["respuesta"]>
@@ -5907,6 +6280,8 @@ export namespace Prisma {
     customText?: boolean
     fullHorari?: boolean
     response?: boolean
+    source?: boolean
+    autoAssignReason?: boolean
   }
 
   export type RespuestaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5932,6 +6307,8 @@ export namespace Prisma {
       customText: string | null
       fullHorari: boolean
       response: boolean
+      source: string
+      autoAssignReason: string | null
     }, ExtArgs["result"]["respuesta"]>
     composites: {}
   }
@@ -6334,6 +6711,8 @@ export namespace Prisma {
     readonly customText: FieldRef<"Respuesta", 'String'>
     readonly fullHorari: FieldRef<"Respuesta", 'Boolean'>
     readonly response: FieldRef<"Respuesta", 'Boolean'>
+    readonly source: FieldRef<"Respuesta", 'String'>
+    readonly autoAssignReason: FieldRef<"Respuesta", 'String'>
   }
     
 
@@ -8762,6 +9141,3138 @@ export namespace Prisma {
 
 
   /**
+   * Model AvailabilityWindow
+   */
+
+  export type AggregateAvailabilityWindow = {
+    _count: AvailabilityWindowCountAggregateOutputType | null
+    _avg: AvailabilityWindowAvgAggregateOutputType | null
+    _sum: AvailabilityWindowSumAggregateOutputType | null
+    _min: AvailabilityWindowMinAggregateOutputType | null
+    _max: AvailabilityWindowMaxAggregateOutputType | null
+  }
+
+  export type AvailabilityWindowAvgAggregateOutputType = {
+    id: number | null
+  }
+
+  export type AvailabilityWindowSumAggregateOutputType = {
+    id: number | null
+  }
+
+  export type AvailabilityWindowMinAggregateOutputType = {
+    id: number | null
+    userNCarnet: string | null
+    fromDateTime: Date | null
+    toDateTime: Date | null
+    availabilityType: string | null
+    source: string | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AvailabilityWindowMaxAggregateOutputType = {
+    id: number | null
+    userNCarnet: string | null
+    fromDateTime: Date | null
+    toDateTime: Date | null
+    availabilityType: string | null
+    source: string | null
+    notes: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type AvailabilityWindowCountAggregateOutputType = {
+    id: number
+    userNCarnet: number
+    fromDateTime: number
+    toDateTime: number
+    availabilityType: number
+    source: number
+    notes: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type AvailabilityWindowAvgAggregateInputType = {
+    id?: true
+  }
+
+  export type AvailabilityWindowSumAggregateInputType = {
+    id?: true
+  }
+
+  export type AvailabilityWindowMinAggregateInputType = {
+    id?: true
+    userNCarnet?: true
+    fromDateTime?: true
+    toDateTime?: true
+    availabilityType?: true
+    source?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AvailabilityWindowMaxAggregateInputType = {
+    id?: true
+    userNCarnet?: true
+    fromDateTime?: true
+    toDateTime?: true
+    availabilityType?: true
+    source?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type AvailabilityWindowCountAggregateInputType = {
+    id?: true
+    userNCarnet?: true
+    fromDateTime?: true
+    toDateTime?: true
+    availabilityType?: true
+    source?: true
+    notes?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type AvailabilityWindowAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AvailabilityWindow to aggregate.
+     */
+    where?: AvailabilityWindowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AvailabilityWindows to fetch.
+     */
+    orderBy?: AvailabilityWindowOrderByWithRelationInput | AvailabilityWindowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: AvailabilityWindowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AvailabilityWindows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AvailabilityWindows.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned AvailabilityWindows
+    **/
+    _count?: true | AvailabilityWindowCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: AvailabilityWindowAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: AvailabilityWindowSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: AvailabilityWindowMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: AvailabilityWindowMaxAggregateInputType
+  }
+
+  export type GetAvailabilityWindowAggregateType<T extends AvailabilityWindowAggregateArgs> = {
+        [P in keyof T & keyof AggregateAvailabilityWindow]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateAvailabilityWindow[P]>
+      : GetScalarType<T[P], AggregateAvailabilityWindow[P]>
+  }
+
+
+
+
+  export type AvailabilityWindowGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: AvailabilityWindowWhereInput
+    orderBy?: AvailabilityWindowOrderByWithAggregationInput | AvailabilityWindowOrderByWithAggregationInput[]
+    by: AvailabilityWindowScalarFieldEnum[] | AvailabilityWindowScalarFieldEnum
+    having?: AvailabilityWindowScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: AvailabilityWindowCountAggregateInputType | true
+    _avg?: AvailabilityWindowAvgAggregateInputType
+    _sum?: AvailabilityWindowSumAggregateInputType
+    _min?: AvailabilityWindowMinAggregateInputType
+    _max?: AvailabilityWindowMaxAggregateInputType
+  }
+
+  export type AvailabilityWindowGroupByOutputType = {
+    id: number
+    userNCarnet: string
+    fromDateTime: Date
+    toDateTime: Date
+    availabilityType: string
+    source: string
+    notes: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: AvailabilityWindowCountAggregateOutputType | null
+    _avg: AvailabilityWindowAvgAggregateOutputType | null
+    _sum: AvailabilityWindowSumAggregateOutputType | null
+    _min: AvailabilityWindowMinAggregateOutputType | null
+    _max: AvailabilityWindowMaxAggregateOutputType | null
+  }
+
+  type GetAvailabilityWindowGroupByPayload<T extends AvailabilityWindowGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<AvailabilityWindowGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof AvailabilityWindowGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], AvailabilityWindowGroupByOutputType[P]>
+            : GetScalarType<T[P], AvailabilityWindowGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type AvailabilityWindowSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userNCarnet?: boolean
+    fromDateTime?: boolean
+    toDateTime?: boolean
+    availabilityType?: boolean
+    source?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["availabilityWindow"]>
+
+  export type AvailabilityWindowSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userNCarnet?: boolean
+    fromDateTime?: boolean
+    toDateTime?: boolean
+    availabilityType?: boolean
+    source?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["availabilityWindow"]>
+
+  export type AvailabilityWindowSelectScalar = {
+    id?: boolean
+    userNCarnet?: boolean
+    fromDateTime?: boolean
+    toDateTime?: boolean
+    availabilityType?: boolean
+    source?: boolean
+    notes?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type AvailabilityWindowInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type AvailabilityWindowIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $AvailabilityWindowPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "AvailabilityWindow"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userNCarnet: string
+      fromDateTime: Date
+      toDateTime: Date
+      availabilityType: string
+      source: string
+      notes: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["availabilityWindow"]>
+    composites: {}
+  }
+
+  type AvailabilityWindowGetPayload<S extends boolean | null | undefined | AvailabilityWindowDefaultArgs> = $Result.GetResult<Prisma.$AvailabilityWindowPayload, S>
+
+  type AvailabilityWindowCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<AvailabilityWindowFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: AvailabilityWindowCountAggregateInputType | true
+    }
+
+  export interface AvailabilityWindowDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['AvailabilityWindow'], meta: { name: 'AvailabilityWindow' } }
+    /**
+     * Find zero or one AvailabilityWindow that matches the filter.
+     * @param {AvailabilityWindowFindUniqueArgs} args - Arguments to find a AvailabilityWindow
+     * @example
+     * // Get one AvailabilityWindow
+     * const availabilityWindow = await prisma.availabilityWindow.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends AvailabilityWindowFindUniqueArgs>(args: SelectSubset<T, AvailabilityWindowFindUniqueArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one AvailabilityWindow that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {AvailabilityWindowFindUniqueOrThrowArgs} args - Arguments to find a AvailabilityWindow
+     * @example
+     * // Get one AvailabilityWindow
+     * const availabilityWindow = await prisma.availabilityWindow.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends AvailabilityWindowFindUniqueOrThrowArgs>(args: SelectSubset<T, AvailabilityWindowFindUniqueOrThrowArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first AvailabilityWindow that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AvailabilityWindowFindFirstArgs} args - Arguments to find a AvailabilityWindow
+     * @example
+     * // Get one AvailabilityWindow
+     * const availabilityWindow = await prisma.availabilityWindow.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends AvailabilityWindowFindFirstArgs>(args?: SelectSubset<T, AvailabilityWindowFindFirstArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first AvailabilityWindow that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AvailabilityWindowFindFirstOrThrowArgs} args - Arguments to find a AvailabilityWindow
+     * @example
+     * // Get one AvailabilityWindow
+     * const availabilityWindow = await prisma.availabilityWindow.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends AvailabilityWindowFindFirstOrThrowArgs>(args?: SelectSubset<T, AvailabilityWindowFindFirstOrThrowArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more AvailabilityWindows that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AvailabilityWindowFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all AvailabilityWindows
+     * const availabilityWindows = await prisma.availabilityWindow.findMany()
+     * 
+     * // Get first 10 AvailabilityWindows
+     * const availabilityWindows = await prisma.availabilityWindow.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const availabilityWindowWithIdOnly = await prisma.availabilityWindow.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends AvailabilityWindowFindManyArgs>(args?: SelectSubset<T, AvailabilityWindowFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a AvailabilityWindow.
+     * @param {AvailabilityWindowCreateArgs} args - Arguments to create a AvailabilityWindow.
+     * @example
+     * // Create one AvailabilityWindow
+     * const AvailabilityWindow = await prisma.availabilityWindow.create({
+     *   data: {
+     *     // ... data to create a AvailabilityWindow
+     *   }
+     * })
+     * 
+     */
+    create<T extends AvailabilityWindowCreateArgs>(args: SelectSubset<T, AvailabilityWindowCreateArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many AvailabilityWindows.
+     * @param {AvailabilityWindowCreateManyArgs} args - Arguments to create many AvailabilityWindows.
+     * @example
+     * // Create many AvailabilityWindows
+     * const availabilityWindow = await prisma.availabilityWindow.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends AvailabilityWindowCreateManyArgs>(args?: SelectSubset<T, AvailabilityWindowCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many AvailabilityWindows and returns the data saved in the database.
+     * @param {AvailabilityWindowCreateManyAndReturnArgs} args - Arguments to create many AvailabilityWindows.
+     * @example
+     * // Create many AvailabilityWindows
+     * const availabilityWindow = await prisma.availabilityWindow.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many AvailabilityWindows and only return the `id`
+     * const availabilityWindowWithIdOnly = await prisma.availabilityWindow.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends AvailabilityWindowCreateManyAndReturnArgs>(args?: SelectSubset<T, AvailabilityWindowCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a AvailabilityWindow.
+     * @param {AvailabilityWindowDeleteArgs} args - Arguments to delete one AvailabilityWindow.
+     * @example
+     * // Delete one AvailabilityWindow
+     * const AvailabilityWindow = await prisma.availabilityWindow.delete({
+     *   where: {
+     *     // ... filter to delete one AvailabilityWindow
+     *   }
+     * })
+     * 
+     */
+    delete<T extends AvailabilityWindowDeleteArgs>(args: SelectSubset<T, AvailabilityWindowDeleteArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one AvailabilityWindow.
+     * @param {AvailabilityWindowUpdateArgs} args - Arguments to update one AvailabilityWindow.
+     * @example
+     * // Update one AvailabilityWindow
+     * const availabilityWindow = await prisma.availabilityWindow.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends AvailabilityWindowUpdateArgs>(args: SelectSubset<T, AvailabilityWindowUpdateArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more AvailabilityWindows.
+     * @param {AvailabilityWindowDeleteManyArgs} args - Arguments to filter AvailabilityWindows to delete.
+     * @example
+     * // Delete a few AvailabilityWindows
+     * const { count } = await prisma.availabilityWindow.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends AvailabilityWindowDeleteManyArgs>(args?: SelectSubset<T, AvailabilityWindowDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more AvailabilityWindows.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AvailabilityWindowUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many AvailabilityWindows
+     * const availabilityWindow = await prisma.availabilityWindow.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends AvailabilityWindowUpdateManyArgs>(args: SelectSubset<T, AvailabilityWindowUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one AvailabilityWindow.
+     * @param {AvailabilityWindowUpsertArgs} args - Arguments to update or create a AvailabilityWindow.
+     * @example
+     * // Update or create a AvailabilityWindow
+     * const availabilityWindow = await prisma.availabilityWindow.upsert({
+     *   create: {
+     *     // ... data to create a AvailabilityWindow
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the AvailabilityWindow we want to update
+     *   }
+     * })
+     */
+    upsert<T extends AvailabilityWindowUpsertArgs>(args: SelectSubset<T, AvailabilityWindowUpsertArgs<ExtArgs>>): Prisma__AvailabilityWindowClient<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of AvailabilityWindows.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AvailabilityWindowCountArgs} args - Arguments to filter AvailabilityWindows to count.
+     * @example
+     * // Count the number of AvailabilityWindows
+     * const count = await prisma.availabilityWindow.count({
+     *   where: {
+     *     // ... the filter for the AvailabilityWindows we want to count
+     *   }
+     * })
+    **/
+    count<T extends AvailabilityWindowCountArgs>(
+      args?: Subset<T, AvailabilityWindowCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], AvailabilityWindowCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a AvailabilityWindow.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AvailabilityWindowAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends AvailabilityWindowAggregateArgs>(args: Subset<T, AvailabilityWindowAggregateArgs>): Prisma.PrismaPromise<GetAvailabilityWindowAggregateType<T>>
+
+    /**
+     * Group by AvailabilityWindow.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {AvailabilityWindowGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends AvailabilityWindowGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: AvailabilityWindowGroupByArgs['orderBy'] }
+        : { orderBy?: AvailabilityWindowGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, AvailabilityWindowGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetAvailabilityWindowGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the AvailabilityWindow model
+   */
+  readonly fields: AvailabilityWindowFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for AvailabilityWindow.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__AvailabilityWindowClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the AvailabilityWindow model
+   */ 
+  interface AvailabilityWindowFieldRefs {
+    readonly id: FieldRef<"AvailabilityWindow", 'Int'>
+    readonly userNCarnet: FieldRef<"AvailabilityWindow", 'String'>
+    readonly fromDateTime: FieldRef<"AvailabilityWindow", 'DateTime'>
+    readonly toDateTime: FieldRef<"AvailabilityWindow", 'DateTime'>
+    readonly availabilityType: FieldRef<"AvailabilityWindow", 'String'>
+    readonly source: FieldRef<"AvailabilityWindow", 'String'>
+    readonly notes: FieldRef<"AvailabilityWindow", 'String'>
+    readonly createdAt: FieldRef<"AvailabilityWindow", 'DateTime'>
+    readonly updatedAt: FieldRef<"AvailabilityWindow", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * AvailabilityWindow findUnique
+   */
+  export type AvailabilityWindowFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * Filter, which AvailabilityWindow to fetch.
+     */
+    where: AvailabilityWindowWhereUniqueInput
+  }
+
+  /**
+   * AvailabilityWindow findUniqueOrThrow
+   */
+  export type AvailabilityWindowFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * Filter, which AvailabilityWindow to fetch.
+     */
+    where: AvailabilityWindowWhereUniqueInput
+  }
+
+  /**
+   * AvailabilityWindow findFirst
+   */
+  export type AvailabilityWindowFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * Filter, which AvailabilityWindow to fetch.
+     */
+    where?: AvailabilityWindowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AvailabilityWindows to fetch.
+     */
+    orderBy?: AvailabilityWindowOrderByWithRelationInput | AvailabilityWindowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AvailabilityWindows.
+     */
+    cursor?: AvailabilityWindowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AvailabilityWindows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AvailabilityWindows.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AvailabilityWindows.
+     */
+    distinct?: AvailabilityWindowScalarFieldEnum | AvailabilityWindowScalarFieldEnum[]
+  }
+
+  /**
+   * AvailabilityWindow findFirstOrThrow
+   */
+  export type AvailabilityWindowFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * Filter, which AvailabilityWindow to fetch.
+     */
+    where?: AvailabilityWindowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AvailabilityWindows to fetch.
+     */
+    orderBy?: AvailabilityWindowOrderByWithRelationInput | AvailabilityWindowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for AvailabilityWindows.
+     */
+    cursor?: AvailabilityWindowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AvailabilityWindows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AvailabilityWindows.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of AvailabilityWindows.
+     */
+    distinct?: AvailabilityWindowScalarFieldEnum | AvailabilityWindowScalarFieldEnum[]
+  }
+
+  /**
+   * AvailabilityWindow findMany
+   */
+  export type AvailabilityWindowFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * Filter, which AvailabilityWindows to fetch.
+     */
+    where?: AvailabilityWindowWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of AvailabilityWindows to fetch.
+     */
+    orderBy?: AvailabilityWindowOrderByWithRelationInput | AvailabilityWindowOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing AvailabilityWindows.
+     */
+    cursor?: AvailabilityWindowWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` AvailabilityWindows from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` AvailabilityWindows.
+     */
+    skip?: number
+    distinct?: AvailabilityWindowScalarFieldEnum | AvailabilityWindowScalarFieldEnum[]
+  }
+
+  /**
+   * AvailabilityWindow create
+   */
+  export type AvailabilityWindowCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * The data needed to create a AvailabilityWindow.
+     */
+    data: XOR<AvailabilityWindowCreateInput, AvailabilityWindowUncheckedCreateInput>
+  }
+
+  /**
+   * AvailabilityWindow createMany
+   */
+  export type AvailabilityWindowCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many AvailabilityWindows.
+     */
+    data: AvailabilityWindowCreateManyInput | AvailabilityWindowCreateManyInput[]
+  }
+
+  /**
+   * AvailabilityWindow createManyAndReturn
+   */
+  export type AvailabilityWindowCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many AvailabilityWindows.
+     */
+    data: AvailabilityWindowCreateManyInput | AvailabilityWindowCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * AvailabilityWindow update
+   */
+  export type AvailabilityWindowUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * The data needed to update a AvailabilityWindow.
+     */
+    data: XOR<AvailabilityWindowUpdateInput, AvailabilityWindowUncheckedUpdateInput>
+    /**
+     * Choose, which AvailabilityWindow to update.
+     */
+    where: AvailabilityWindowWhereUniqueInput
+  }
+
+  /**
+   * AvailabilityWindow updateMany
+   */
+  export type AvailabilityWindowUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update AvailabilityWindows.
+     */
+    data: XOR<AvailabilityWindowUpdateManyMutationInput, AvailabilityWindowUncheckedUpdateManyInput>
+    /**
+     * Filter which AvailabilityWindows to update
+     */
+    where?: AvailabilityWindowWhereInput
+  }
+
+  /**
+   * AvailabilityWindow upsert
+   */
+  export type AvailabilityWindowUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * The filter to search for the AvailabilityWindow to update in case it exists.
+     */
+    where: AvailabilityWindowWhereUniqueInput
+    /**
+     * In case the AvailabilityWindow found by the `where` argument doesn't exist, create a new AvailabilityWindow with this data.
+     */
+    create: XOR<AvailabilityWindowCreateInput, AvailabilityWindowUncheckedCreateInput>
+    /**
+     * In case the AvailabilityWindow was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<AvailabilityWindowUpdateInput, AvailabilityWindowUncheckedUpdateInput>
+  }
+
+  /**
+   * AvailabilityWindow delete
+   */
+  export type AvailabilityWindowDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+    /**
+     * Filter which AvailabilityWindow to delete.
+     */
+    where: AvailabilityWindowWhereUniqueInput
+  }
+
+  /**
+   * AvailabilityWindow deleteMany
+   */
+  export type AvailabilityWindowDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which AvailabilityWindows to delete
+     */
+    where?: AvailabilityWindowWhereInput
+  }
+
+  /**
+   * AvailabilityWindow without action
+   */
+  export type AvailabilityWindowDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the AvailabilityWindow
+     */
+    select?: AvailabilityWindowSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: AvailabilityWindowInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model NotificationAutomationRun
+   */
+
+  export type AggregateNotificationAutomationRun = {
+    _count: NotificationAutomationRunCountAggregateOutputType | null
+    _avg: NotificationAutomationRunAvgAggregateOutputType | null
+    _sum: NotificationAutomationRunSumAggregateOutputType | null
+    _min: NotificationAutomationRunMinAggregateOutputType | null
+    _max: NotificationAutomationRunMaxAggregateOutputType | null
+  }
+
+  export type NotificationAutomationRunAvgAggregateOutputType = {
+    id: number | null
+    durationMs: number | null
+    actorUserId: number | null
+  }
+
+  export type NotificationAutomationRunSumAggregateOutputType = {
+    id: number | null
+    durationMs: number | null
+    actorUserId: number | null
+  }
+
+  export type NotificationAutomationRunMinAggregateOutputType = {
+    id: number | null
+    trigger: string | null
+    source: string | null
+    status: string | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    durationMs: number | null
+    actorUserId: number | null
+    errorMessage: string | null
+    correlationId: string | null
+    createdAt: Date | null
+  }
+
+  export type NotificationAutomationRunMaxAggregateOutputType = {
+    id: number | null
+    trigger: string | null
+    source: string | null
+    status: string | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    durationMs: number | null
+    actorUserId: number | null
+    errorMessage: string | null
+    correlationId: string | null
+    createdAt: Date | null
+  }
+
+  export type NotificationAutomationRunCountAggregateOutputType = {
+    id: number
+    trigger: number
+    source: number
+    status: number
+    startedAt: number
+    finishedAt: number
+    durationMs: number
+    actorUserId: number
+    errorMessage: number
+    correlationId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type NotificationAutomationRunAvgAggregateInputType = {
+    id?: true
+    durationMs?: true
+    actorUserId?: true
+  }
+
+  export type NotificationAutomationRunSumAggregateInputType = {
+    id?: true
+    durationMs?: true
+    actorUserId?: true
+  }
+
+  export type NotificationAutomationRunMinAggregateInputType = {
+    id?: true
+    trigger?: true
+    source?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    actorUserId?: true
+    errorMessage?: true
+    correlationId?: true
+    createdAt?: true
+  }
+
+  export type NotificationAutomationRunMaxAggregateInputType = {
+    id?: true
+    trigger?: true
+    source?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    actorUserId?: true
+    errorMessage?: true
+    correlationId?: true
+    createdAt?: true
+  }
+
+  export type NotificationAutomationRunCountAggregateInputType = {
+    id?: true
+    trigger?: true
+    source?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    actorUserId?: true
+    errorMessage?: true
+    correlationId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type NotificationAutomationRunAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationAutomationRun to aggregate.
+     */
+    where?: NotificationAutomationRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationRuns to fetch.
+     */
+    orderBy?: NotificationAutomationRunOrderByWithRelationInput | NotificationAutomationRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NotificationAutomationRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationRuns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NotificationAutomationRuns
+    **/
+    _count?: true | NotificationAutomationRunCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: NotificationAutomationRunAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: NotificationAutomationRunSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NotificationAutomationRunMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NotificationAutomationRunMaxAggregateInputType
+  }
+
+  export type GetNotificationAutomationRunAggregateType<T extends NotificationAutomationRunAggregateArgs> = {
+        [P in keyof T & keyof AggregateNotificationAutomationRun]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNotificationAutomationRun[P]>
+      : GetScalarType<T[P], AggregateNotificationAutomationRun[P]>
+  }
+
+
+
+
+  export type NotificationAutomationRunGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationAutomationRunWhereInput
+    orderBy?: NotificationAutomationRunOrderByWithAggregationInput | NotificationAutomationRunOrderByWithAggregationInput[]
+    by: NotificationAutomationRunScalarFieldEnum[] | NotificationAutomationRunScalarFieldEnum
+    having?: NotificationAutomationRunScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NotificationAutomationRunCountAggregateInputType | true
+    _avg?: NotificationAutomationRunAvgAggregateInputType
+    _sum?: NotificationAutomationRunSumAggregateInputType
+    _min?: NotificationAutomationRunMinAggregateInputType
+    _max?: NotificationAutomationRunMaxAggregateInputType
+  }
+
+  export type NotificationAutomationRunGroupByOutputType = {
+    id: number
+    trigger: string
+    source: string
+    status: string
+    startedAt: Date
+    finishedAt: Date | null
+    durationMs: number | null
+    actorUserId: number | null
+    errorMessage: string | null
+    correlationId: string
+    createdAt: Date
+    _count: NotificationAutomationRunCountAggregateOutputType | null
+    _avg: NotificationAutomationRunAvgAggregateOutputType | null
+    _sum: NotificationAutomationRunSumAggregateOutputType | null
+    _min: NotificationAutomationRunMinAggregateOutputType | null
+    _max: NotificationAutomationRunMaxAggregateOutputType | null
+  }
+
+  type GetNotificationAutomationRunGroupByPayload<T extends NotificationAutomationRunGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NotificationAutomationRunGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NotificationAutomationRunGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NotificationAutomationRunGroupByOutputType[P]>
+            : GetScalarType<T[P], NotificationAutomationRunGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NotificationAutomationRunSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    trigger?: boolean
+    source?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    actorUserId?: boolean
+    errorMessage?: boolean
+    correlationId?: boolean
+    createdAt?: boolean
+    actorUser?: boolean | NotificationAutomationRun$actorUserArgs<ExtArgs>
+    tasks?: boolean | NotificationAutomationRun$tasksArgs<ExtArgs>
+    _count?: boolean | NotificationAutomationRunCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationAutomationRun"]>
+
+  export type NotificationAutomationRunSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    trigger?: boolean
+    source?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    actorUserId?: boolean
+    errorMessage?: boolean
+    correlationId?: boolean
+    createdAt?: boolean
+    actorUser?: boolean | NotificationAutomationRun$actorUserArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationAutomationRun"]>
+
+  export type NotificationAutomationRunSelectScalar = {
+    id?: boolean
+    trigger?: boolean
+    source?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    actorUserId?: boolean
+    errorMessage?: boolean
+    correlationId?: boolean
+    createdAt?: boolean
+  }
+
+  export type NotificationAutomationRunInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    actorUser?: boolean | NotificationAutomationRun$actorUserArgs<ExtArgs>
+    tasks?: boolean | NotificationAutomationRun$tasksArgs<ExtArgs>
+    _count?: boolean | NotificationAutomationRunCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type NotificationAutomationRunIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    actorUser?: boolean | NotificationAutomationRun$actorUserArgs<ExtArgs>
+  }
+
+  export type $NotificationAutomationRunPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NotificationAutomationRun"
+    objects: {
+      actorUser: Prisma.$UserPayload<ExtArgs> | null
+      tasks: Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      trigger: string
+      source: string
+      status: string
+      startedAt: Date
+      finishedAt: Date | null
+      durationMs: number | null
+      actorUserId: number | null
+      errorMessage: string | null
+      correlationId: string
+      createdAt: Date
+    }, ExtArgs["result"]["notificationAutomationRun"]>
+    composites: {}
+  }
+
+  type NotificationAutomationRunGetPayload<S extends boolean | null | undefined | NotificationAutomationRunDefaultArgs> = $Result.GetResult<Prisma.$NotificationAutomationRunPayload, S>
+
+  type NotificationAutomationRunCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<NotificationAutomationRunFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: NotificationAutomationRunCountAggregateInputType | true
+    }
+
+  export interface NotificationAutomationRunDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NotificationAutomationRun'], meta: { name: 'NotificationAutomationRun' } }
+    /**
+     * Find zero or one NotificationAutomationRun that matches the filter.
+     * @param {NotificationAutomationRunFindUniqueArgs} args - Arguments to find a NotificationAutomationRun
+     * @example
+     * // Get one NotificationAutomationRun
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NotificationAutomationRunFindUniqueArgs>(args: SelectSubset<T, NotificationAutomationRunFindUniqueArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one NotificationAutomationRun that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {NotificationAutomationRunFindUniqueOrThrowArgs} args - Arguments to find a NotificationAutomationRun
+     * @example
+     * // Get one NotificationAutomationRun
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NotificationAutomationRunFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationAutomationRunFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first NotificationAutomationRun that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationRunFindFirstArgs} args - Arguments to find a NotificationAutomationRun
+     * @example
+     * // Get one NotificationAutomationRun
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NotificationAutomationRunFindFirstArgs>(args?: SelectSubset<T, NotificationAutomationRunFindFirstArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first NotificationAutomationRun that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationRunFindFirstOrThrowArgs} args - Arguments to find a NotificationAutomationRun
+     * @example
+     * // Get one NotificationAutomationRun
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NotificationAutomationRunFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationAutomationRunFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more NotificationAutomationRuns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationRunFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NotificationAutomationRuns
+     * const notificationAutomationRuns = await prisma.notificationAutomationRun.findMany()
+     * 
+     * // Get first 10 NotificationAutomationRuns
+     * const notificationAutomationRuns = await prisma.notificationAutomationRun.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const notificationAutomationRunWithIdOnly = await prisma.notificationAutomationRun.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NotificationAutomationRunFindManyArgs>(args?: SelectSubset<T, NotificationAutomationRunFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a NotificationAutomationRun.
+     * @param {NotificationAutomationRunCreateArgs} args - Arguments to create a NotificationAutomationRun.
+     * @example
+     * // Create one NotificationAutomationRun
+     * const NotificationAutomationRun = await prisma.notificationAutomationRun.create({
+     *   data: {
+     *     // ... data to create a NotificationAutomationRun
+     *   }
+     * })
+     * 
+     */
+    create<T extends NotificationAutomationRunCreateArgs>(args: SelectSubset<T, NotificationAutomationRunCreateArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many NotificationAutomationRuns.
+     * @param {NotificationAutomationRunCreateManyArgs} args - Arguments to create many NotificationAutomationRuns.
+     * @example
+     * // Create many NotificationAutomationRuns
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NotificationAutomationRunCreateManyArgs>(args?: SelectSubset<T, NotificationAutomationRunCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NotificationAutomationRuns and returns the data saved in the database.
+     * @param {NotificationAutomationRunCreateManyAndReturnArgs} args - Arguments to create many NotificationAutomationRuns.
+     * @example
+     * // Create many NotificationAutomationRuns
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NotificationAutomationRuns and only return the `id`
+     * const notificationAutomationRunWithIdOnly = await prisma.notificationAutomationRun.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NotificationAutomationRunCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationAutomationRunCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a NotificationAutomationRun.
+     * @param {NotificationAutomationRunDeleteArgs} args - Arguments to delete one NotificationAutomationRun.
+     * @example
+     * // Delete one NotificationAutomationRun
+     * const NotificationAutomationRun = await prisma.notificationAutomationRun.delete({
+     *   where: {
+     *     // ... filter to delete one NotificationAutomationRun
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NotificationAutomationRunDeleteArgs>(args: SelectSubset<T, NotificationAutomationRunDeleteArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one NotificationAutomationRun.
+     * @param {NotificationAutomationRunUpdateArgs} args - Arguments to update one NotificationAutomationRun.
+     * @example
+     * // Update one NotificationAutomationRun
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NotificationAutomationRunUpdateArgs>(args: SelectSubset<T, NotificationAutomationRunUpdateArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more NotificationAutomationRuns.
+     * @param {NotificationAutomationRunDeleteManyArgs} args - Arguments to filter NotificationAutomationRuns to delete.
+     * @example
+     * // Delete a few NotificationAutomationRuns
+     * const { count } = await prisma.notificationAutomationRun.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NotificationAutomationRunDeleteManyArgs>(args?: SelectSubset<T, NotificationAutomationRunDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NotificationAutomationRuns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationRunUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NotificationAutomationRuns
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NotificationAutomationRunUpdateManyArgs>(args: SelectSubset<T, NotificationAutomationRunUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one NotificationAutomationRun.
+     * @param {NotificationAutomationRunUpsertArgs} args - Arguments to update or create a NotificationAutomationRun.
+     * @example
+     * // Update or create a NotificationAutomationRun
+     * const notificationAutomationRun = await prisma.notificationAutomationRun.upsert({
+     *   create: {
+     *     // ... data to create a NotificationAutomationRun
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NotificationAutomationRun we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NotificationAutomationRunUpsertArgs>(args: SelectSubset<T, NotificationAutomationRunUpsertArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of NotificationAutomationRuns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationRunCountArgs} args - Arguments to filter NotificationAutomationRuns to count.
+     * @example
+     * // Count the number of NotificationAutomationRuns
+     * const count = await prisma.notificationAutomationRun.count({
+     *   where: {
+     *     // ... the filter for the NotificationAutomationRuns we want to count
+     *   }
+     * })
+    **/
+    count<T extends NotificationAutomationRunCountArgs>(
+      args?: Subset<T, NotificationAutomationRunCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NotificationAutomationRunCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NotificationAutomationRun.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationRunAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NotificationAutomationRunAggregateArgs>(args: Subset<T, NotificationAutomationRunAggregateArgs>): Prisma.PrismaPromise<GetNotificationAutomationRunAggregateType<T>>
+
+    /**
+     * Group by NotificationAutomationRun.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationRunGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NotificationAutomationRunGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NotificationAutomationRunGroupByArgs['orderBy'] }
+        : { orderBy?: NotificationAutomationRunGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NotificationAutomationRunGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNotificationAutomationRunGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NotificationAutomationRun model
+   */
+  readonly fields: NotificationAutomationRunFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NotificationAutomationRun.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NotificationAutomationRunClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    actorUser<T extends NotificationAutomationRun$actorUserArgs<ExtArgs> = {}>(args?: Subset<T, NotificationAutomationRun$actorUserArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
+    tasks<T extends NotificationAutomationRun$tasksArgs<ExtArgs> = {}>(args?: Subset<T, NotificationAutomationRun$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "findMany"> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NotificationAutomationRun model
+   */ 
+  interface NotificationAutomationRunFieldRefs {
+    readonly id: FieldRef<"NotificationAutomationRun", 'Int'>
+    readonly trigger: FieldRef<"NotificationAutomationRun", 'String'>
+    readonly source: FieldRef<"NotificationAutomationRun", 'String'>
+    readonly status: FieldRef<"NotificationAutomationRun", 'String'>
+    readonly startedAt: FieldRef<"NotificationAutomationRun", 'DateTime'>
+    readonly finishedAt: FieldRef<"NotificationAutomationRun", 'DateTime'>
+    readonly durationMs: FieldRef<"NotificationAutomationRun", 'Int'>
+    readonly actorUserId: FieldRef<"NotificationAutomationRun", 'Int'>
+    readonly errorMessage: FieldRef<"NotificationAutomationRun", 'String'>
+    readonly correlationId: FieldRef<"NotificationAutomationRun", 'String'>
+    readonly createdAt: FieldRef<"NotificationAutomationRun", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NotificationAutomationRun findUnique
+   */
+  export type NotificationAutomationRunFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationRun to fetch.
+     */
+    where: NotificationAutomationRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationRun findUniqueOrThrow
+   */
+  export type NotificationAutomationRunFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationRun to fetch.
+     */
+    where: NotificationAutomationRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationRun findFirst
+   */
+  export type NotificationAutomationRunFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationRun to fetch.
+     */
+    where?: NotificationAutomationRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationRuns to fetch.
+     */
+    orderBy?: NotificationAutomationRunOrderByWithRelationInput | NotificationAutomationRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationAutomationRuns.
+     */
+    cursor?: NotificationAutomationRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationRuns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationAutomationRuns.
+     */
+    distinct?: NotificationAutomationRunScalarFieldEnum | NotificationAutomationRunScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationAutomationRun findFirstOrThrow
+   */
+  export type NotificationAutomationRunFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationRun to fetch.
+     */
+    where?: NotificationAutomationRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationRuns to fetch.
+     */
+    orderBy?: NotificationAutomationRunOrderByWithRelationInput | NotificationAutomationRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationAutomationRuns.
+     */
+    cursor?: NotificationAutomationRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationRuns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationAutomationRuns.
+     */
+    distinct?: NotificationAutomationRunScalarFieldEnum | NotificationAutomationRunScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationAutomationRun findMany
+   */
+  export type NotificationAutomationRunFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationRuns to fetch.
+     */
+    where?: NotificationAutomationRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationRuns to fetch.
+     */
+    orderBy?: NotificationAutomationRunOrderByWithRelationInput | NotificationAutomationRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NotificationAutomationRuns.
+     */
+    cursor?: NotificationAutomationRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationRuns.
+     */
+    skip?: number
+    distinct?: NotificationAutomationRunScalarFieldEnum | NotificationAutomationRunScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationAutomationRun create
+   */
+  export type NotificationAutomationRunCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * The data needed to create a NotificationAutomationRun.
+     */
+    data: XOR<NotificationAutomationRunCreateInput, NotificationAutomationRunUncheckedCreateInput>
+  }
+
+  /**
+   * NotificationAutomationRun createMany
+   */
+  export type NotificationAutomationRunCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NotificationAutomationRuns.
+     */
+    data: NotificationAutomationRunCreateManyInput | NotificationAutomationRunCreateManyInput[]
+  }
+
+  /**
+   * NotificationAutomationRun createManyAndReturn
+   */
+  export type NotificationAutomationRunCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many NotificationAutomationRuns.
+     */
+    data: NotificationAutomationRunCreateManyInput | NotificationAutomationRunCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * NotificationAutomationRun update
+   */
+  export type NotificationAutomationRunUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * The data needed to update a NotificationAutomationRun.
+     */
+    data: XOR<NotificationAutomationRunUpdateInput, NotificationAutomationRunUncheckedUpdateInput>
+    /**
+     * Choose, which NotificationAutomationRun to update.
+     */
+    where: NotificationAutomationRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationRun updateMany
+   */
+  export type NotificationAutomationRunUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NotificationAutomationRuns.
+     */
+    data: XOR<NotificationAutomationRunUpdateManyMutationInput, NotificationAutomationRunUncheckedUpdateManyInput>
+    /**
+     * Filter which NotificationAutomationRuns to update
+     */
+    where?: NotificationAutomationRunWhereInput
+  }
+
+  /**
+   * NotificationAutomationRun upsert
+   */
+  export type NotificationAutomationRunUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * The filter to search for the NotificationAutomationRun to update in case it exists.
+     */
+    where: NotificationAutomationRunWhereUniqueInput
+    /**
+     * In case the NotificationAutomationRun found by the `where` argument doesn't exist, create a new NotificationAutomationRun with this data.
+     */
+    create: XOR<NotificationAutomationRunCreateInput, NotificationAutomationRunUncheckedCreateInput>
+    /**
+     * In case the NotificationAutomationRun was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NotificationAutomationRunUpdateInput, NotificationAutomationRunUncheckedUpdateInput>
+  }
+
+  /**
+   * NotificationAutomationRun delete
+   */
+  export type NotificationAutomationRunDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+    /**
+     * Filter which NotificationAutomationRun to delete.
+     */
+    where: NotificationAutomationRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationRun deleteMany
+   */
+  export type NotificationAutomationRunDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationAutomationRuns to delete
+     */
+    where?: NotificationAutomationRunWhereInput
+  }
+
+  /**
+   * NotificationAutomationRun.actorUser
+   */
+  export type NotificationAutomationRun$actorUserArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * NotificationAutomationRun.tasks
+   */
+  export type NotificationAutomationRun$tasksArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    where?: NotificationAutomationTaskRunWhereInput
+    orderBy?: NotificationAutomationTaskRunOrderByWithRelationInput | NotificationAutomationTaskRunOrderByWithRelationInput[]
+    cursor?: NotificationAutomationTaskRunWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: NotificationAutomationTaskRunScalarFieldEnum | NotificationAutomationTaskRunScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationAutomationRun without action
+   */
+  export type NotificationAutomationRunDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationRun
+     */
+    select?: NotificationAutomationRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationRunInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model NotificationAutomationTaskRun
+   */
+
+  export type AggregateNotificationAutomationTaskRun = {
+    _count: NotificationAutomationTaskRunCountAggregateOutputType | null
+    _avg: NotificationAutomationTaskRunAvgAggregateOutputType | null
+    _sum: NotificationAutomationTaskRunSumAggregateOutputType | null
+    _min: NotificationAutomationTaskRunMinAggregateOutputType | null
+    _max: NotificationAutomationTaskRunMaxAggregateOutputType | null
+  }
+
+  export type NotificationAutomationTaskRunAvgAggregateOutputType = {
+    id: number | null
+    runId: number | null
+    durationMs: number | null
+  }
+
+  export type NotificationAutomationTaskRunSumAggregateOutputType = {
+    id: number | null
+    runId: number | null
+    durationMs: number | null
+  }
+
+  export type NotificationAutomationTaskRunMinAggregateOutputType = {
+    id: number | null
+    runId: number | null
+    taskKey: string | null
+    status: string | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    durationMs: number | null
+    errorMessage: string | null
+    detailsJson: string | null
+    createdAt: Date | null
+  }
+
+  export type NotificationAutomationTaskRunMaxAggregateOutputType = {
+    id: number | null
+    runId: number | null
+    taskKey: string | null
+    status: string | null
+    startedAt: Date | null
+    finishedAt: Date | null
+    durationMs: number | null
+    errorMessage: string | null
+    detailsJson: string | null
+    createdAt: Date | null
+  }
+
+  export type NotificationAutomationTaskRunCountAggregateOutputType = {
+    id: number
+    runId: number
+    taskKey: number
+    status: number
+    startedAt: number
+    finishedAt: number
+    durationMs: number
+    errorMessage: number
+    detailsJson: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type NotificationAutomationTaskRunAvgAggregateInputType = {
+    id?: true
+    runId?: true
+    durationMs?: true
+  }
+
+  export type NotificationAutomationTaskRunSumAggregateInputType = {
+    id?: true
+    runId?: true
+    durationMs?: true
+  }
+
+  export type NotificationAutomationTaskRunMinAggregateInputType = {
+    id?: true
+    runId?: true
+    taskKey?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    errorMessage?: true
+    detailsJson?: true
+    createdAt?: true
+  }
+
+  export type NotificationAutomationTaskRunMaxAggregateInputType = {
+    id?: true
+    runId?: true
+    taskKey?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    errorMessage?: true
+    detailsJson?: true
+    createdAt?: true
+  }
+
+  export type NotificationAutomationTaskRunCountAggregateInputType = {
+    id?: true
+    runId?: true
+    taskKey?: true
+    status?: true
+    startedAt?: true
+    finishedAt?: true
+    durationMs?: true
+    errorMessage?: true
+    detailsJson?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type NotificationAutomationTaskRunAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationAutomationTaskRun to aggregate.
+     */
+    where?: NotificationAutomationTaskRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationTaskRuns to fetch.
+     */
+    orderBy?: NotificationAutomationTaskRunOrderByWithRelationInput | NotificationAutomationTaskRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: NotificationAutomationTaskRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationTaskRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationTaskRuns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned NotificationAutomationTaskRuns
+    **/
+    _count?: true | NotificationAutomationTaskRunCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: NotificationAutomationTaskRunAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: NotificationAutomationTaskRunSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: NotificationAutomationTaskRunMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: NotificationAutomationTaskRunMaxAggregateInputType
+  }
+
+  export type GetNotificationAutomationTaskRunAggregateType<T extends NotificationAutomationTaskRunAggregateArgs> = {
+        [P in keyof T & keyof AggregateNotificationAutomationTaskRun]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateNotificationAutomationTaskRun[P]>
+      : GetScalarType<T[P], AggregateNotificationAutomationTaskRun[P]>
+  }
+
+
+
+
+  export type NotificationAutomationTaskRunGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: NotificationAutomationTaskRunWhereInput
+    orderBy?: NotificationAutomationTaskRunOrderByWithAggregationInput | NotificationAutomationTaskRunOrderByWithAggregationInput[]
+    by: NotificationAutomationTaskRunScalarFieldEnum[] | NotificationAutomationTaskRunScalarFieldEnum
+    having?: NotificationAutomationTaskRunScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: NotificationAutomationTaskRunCountAggregateInputType | true
+    _avg?: NotificationAutomationTaskRunAvgAggregateInputType
+    _sum?: NotificationAutomationTaskRunSumAggregateInputType
+    _min?: NotificationAutomationTaskRunMinAggregateInputType
+    _max?: NotificationAutomationTaskRunMaxAggregateInputType
+  }
+
+  export type NotificationAutomationTaskRunGroupByOutputType = {
+    id: number
+    runId: number
+    taskKey: string
+    status: string
+    startedAt: Date
+    finishedAt: Date | null
+    durationMs: number | null
+    errorMessage: string | null
+    detailsJson: string | null
+    createdAt: Date
+    _count: NotificationAutomationTaskRunCountAggregateOutputType | null
+    _avg: NotificationAutomationTaskRunAvgAggregateOutputType | null
+    _sum: NotificationAutomationTaskRunSumAggregateOutputType | null
+    _min: NotificationAutomationTaskRunMinAggregateOutputType | null
+    _max: NotificationAutomationTaskRunMaxAggregateOutputType | null
+  }
+
+  type GetNotificationAutomationTaskRunGroupByPayload<T extends NotificationAutomationTaskRunGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<NotificationAutomationTaskRunGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof NotificationAutomationTaskRunGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], NotificationAutomationTaskRunGroupByOutputType[P]>
+            : GetScalarType<T[P], NotificationAutomationTaskRunGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type NotificationAutomationTaskRunSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    runId?: boolean
+    taskKey?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    errorMessage?: boolean
+    detailsJson?: boolean
+    createdAt?: boolean
+    run?: boolean | NotificationAutomationRunDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationAutomationTaskRun"]>
+
+  export type NotificationAutomationTaskRunSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    runId?: boolean
+    taskKey?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    errorMessage?: boolean
+    detailsJson?: boolean
+    createdAt?: boolean
+    run?: boolean | NotificationAutomationRunDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["notificationAutomationTaskRun"]>
+
+  export type NotificationAutomationTaskRunSelectScalar = {
+    id?: boolean
+    runId?: boolean
+    taskKey?: boolean
+    status?: boolean
+    startedAt?: boolean
+    finishedAt?: boolean
+    durationMs?: boolean
+    errorMessage?: boolean
+    detailsJson?: boolean
+    createdAt?: boolean
+  }
+
+  export type NotificationAutomationTaskRunInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    run?: boolean | NotificationAutomationRunDefaultArgs<ExtArgs>
+  }
+  export type NotificationAutomationTaskRunIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    run?: boolean | NotificationAutomationRunDefaultArgs<ExtArgs>
+  }
+
+  export type $NotificationAutomationTaskRunPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "NotificationAutomationTaskRun"
+    objects: {
+      run: Prisma.$NotificationAutomationRunPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      runId: number
+      taskKey: string
+      status: string
+      startedAt: Date
+      finishedAt: Date | null
+      durationMs: number | null
+      errorMessage: string | null
+      detailsJson: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["notificationAutomationTaskRun"]>
+    composites: {}
+  }
+
+  type NotificationAutomationTaskRunGetPayload<S extends boolean | null | undefined | NotificationAutomationTaskRunDefaultArgs> = $Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload, S>
+
+  type NotificationAutomationTaskRunCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<NotificationAutomationTaskRunFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: NotificationAutomationTaskRunCountAggregateInputType | true
+    }
+
+  export interface NotificationAutomationTaskRunDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['NotificationAutomationTaskRun'], meta: { name: 'NotificationAutomationTaskRun' } }
+    /**
+     * Find zero or one NotificationAutomationTaskRun that matches the filter.
+     * @param {NotificationAutomationTaskRunFindUniqueArgs} args - Arguments to find a NotificationAutomationTaskRun
+     * @example
+     * // Get one NotificationAutomationTaskRun
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends NotificationAutomationTaskRunFindUniqueArgs>(args: SelectSubset<T, NotificationAutomationTaskRunFindUniqueArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one NotificationAutomationTaskRun that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {NotificationAutomationTaskRunFindUniqueOrThrowArgs} args - Arguments to find a NotificationAutomationTaskRun
+     * @example
+     * // Get one NotificationAutomationTaskRun
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends NotificationAutomationTaskRunFindUniqueOrThrowArgs>(args: SelectSubset<T, NotificationAutomationTaskRunFindUniqueOrThrowArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first NotificationAutomationTaskRun that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationTaskRunFindFirstArgs} args - Arguments to find a NotificationAutomationTaskRun
+     * @example
+     * // Get one NotificationAutomationTaskRun
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends NotificationAutomationTaskRunFindFirstArgs>(args?: SelectSubset<T, NotificationAutomationTaskRunFindFirstArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first NotificationAutomationTaskRun that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationTaskRunFindFirstOrThrowArgs} args - Arguments to find a NotificationAutomationTaskRun
+     * @example
+     * // Get one NotificationAutomationTaskRun
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends NotificationAutomationTaskRunFindFirstOrThrowArgs>(args?: SelectSubset<T, NotificationAutomationTaskRunFindFirstOrThrowArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more NotificationAutomationTaskRuns that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationTaskRunFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all NotificationAutomationTaskRuns
+     * const notificationAutomationTaskRuns = await prisma.notificationAutomationTaskRun.findMany()
+     * 
+     * // Get first 10 NotificationAutomationTaskRuns
+     * const notificationAutomationTaskRuns = await prisma.notificationAutomationTaskRun.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const notificationAutomationTaskRunWithIdOnly = await prisma.notificationAutomationTaskRun.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends NotificationAutomationTaskRunFindManyArgs>(args?: SelectSubset<T, NotificationAutomationTaskRunFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a NotificationAutomationTaskRun.
+     * @param {NotificationAutomationTaskRunCreateArgs} args - Arguments to create a NotificationAutomationTaskRun.
+     * @example
+     * // Create one NotificationAutomationTaskRun
+     * const NotificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.create({
+     *   data: {
+     *     // ... data to create a NotificationAutomationTaskRun
+     *   }
+     * })
+     * 
+     */
+    create<T extends NotificationAutomationTaskRunCreateArgs>(args: SelectSubset<T, NotificationAutomationTaskRunCreateArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many NotificationAutomationTaskRuns.
+     * @param {NotificationAutomationTaskRunCreateManyArgs} args - Arguments to create many NotificationAutomationTaskRuns.
+     * @example
+     * // Create many NotificationAutomationTaskRuns
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends NotificationAutomationTaskRunCreateManyArgs>(args?: SelectSubset<T, NotificationAutomationTaskRunCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many NotificationAutomationTaskRuns and returns the data saved in the database.
+     * @param {NotificationAutomationTaskRunCreateManyAndReturnArgs} args - Arguments to create many NotificationAutomationTaskRuns.
+     * @example
+     * // Create many NotificationAutomationTaskRuns
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many NotificationAutomationTaskRuns and only return the `id`
+     * const notificationAutomationTaskRunWithIdOnly = await prisma.notificationAutomationTaskRun.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends NotificationAutomationTaskRunCreateManyAndReturnArgs>(args?: SelectSubset<T, NotificationAutomationTaskRunCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a NotificationAutomationTaskRun.
+     * @param {NotificationAutomationTaskRunDeleteArgs} args - Arguments to delete one NotificationAutomationTaskRun.
+     * @example
+     * // Delete one NotificationAutomationTaskRun
+     * const NotificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.delete({
+     *   where: {
+     *     // ... filter to delete one NotificationAutomationTaskRun
+     *   }
+     * })
+     * 
+     */
+    delete<T extends NotificationAutomationTaskRunDeleteArgs>(args: SelectSubset<T, NotificationAutomationTaskRunDeleteArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one NotificationAutomationTaskRun.
+     * @param {NotificationAutomationTaskRunUpdateArgs} args - Arguments to update one NotificationAutomationTaskRun.
+     * @example
+     * // Update one NotificationAutomationTaskRun
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends NotificationAutomationTaskRunUpdateArgs>(args: SelectSubset<T, NotificationAutomationTaskRunUpdateArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more NotificationAutomationTaskRuns.
+     * @param {NotificationAutomationTaskRunDeleteManyArgs} args - Arguments to filter NotificationAutomationTaskRuns to delete.
+     * @example
+     * // Delete a few NotificationAutomationTaskRuns
+     * const { count } = await prisma.notificationAutomationTaskRun.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends NotificationAutomationTaskRunDeleteManyArgs>(args?: SelectSubset<T, NotificationAutomationTaskRunDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more NotificationAutomationTaskRuns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationTaskRunUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many NotificationAutomationTaskRuns
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends NotificationAutomationTaskRunUpdateManyArgs>(args: SelectSubset<T, NotificationAutomationTaskRunUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one NotificationAutomationTaskRun.
+     * @param {NotificationAutomationTaskRunUpsertArgs} args - Arguments to update or create a NotificationAutomationTaskRun.
+     * @example
+     * // Update or create a NotificationAutomationTaskRun
+     * const notificationAutomationTaskRun = await prisma.notificationAutomationTaskRun.upsert({
+     *   create: {
+     *     // ... data to create a NotificationAutomationTaskRun
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the NotificationAutomationTaskRun we want to update
+     *   }
+     * })
+     */
+    upsert<T extends NotificationAutomationTaskRunUpsertArgs>(args: SelectSubset<T, NotificationAutomationTaskRunUpsertArgs<ExtArgs>>): Prisma__NotificationAutomationTaskRunClient<$Result.GetResult<Prisma.$NotificationAutomationTaskRunPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of NotificationAutomationTaskRuns.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationTaskRunCountArgs} args - Arguments to filter NotificationAutomationTaskRuns to count.
+     * @example
+     * // Count the number of NotificationAutomationTaskRuns
+     * const count = await prisma.notificationAutomationTaskRun.count({
+     *   where: {
+     *     // ... the filter for the NotificationAutomationTaskRuns we want to count
+     *   }
+     * })
+    **/
+    count<T extends NotificationAutomationTaskRunCountArgs>(
+      args?: Subset<T, NotificationAutomationTaskRunCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], NotificationAutomationTaskRunCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a NotificationAutomationTaskRun.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationTaskRunAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends NotificationAutomationTaskRunAggregateArgs>(args: Subset<T, NotificationAutomationTaskRunAggregateArgs>): Prisma.PrismaPromise<GetNotificationAutomationTaskRunAggregateType<T>>
+
+    /**
+     * Group by NotificationAutomationTaskRun.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {NotificationAutomationTaskRunGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends NotificationAutomationTaskRunGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: NotificationAutomationTaskRunGroupByArgs['orderBy'] }
+        : { orderBy?: NotificationAutomationTaskRunGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, NotificationAutomationTaskRunGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetNotificationAutomationTaskRunGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the NotificationAutomationTaskRun model
+   */
+  readonly fields: NotificationAutomationTaskRunFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for NotificationAutomationTaskRun.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__NotificationAutomationTaskRunClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    run<T extends NotificationAutomationRunDefaultArgs<ExtArgs> = {}>(args?: Subset<T, NotificationAutomationRunDefaultArgs<ExtArgs>>): Prisma__NotificationAutomationRunClient<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the NotificationAutomationTaskRun model
+   */ 
+  interface NotificationAutomationTaskRunFieldRefs {
+    readonly id: FieldRef<"NotificationAutomationTaskRun", 'Int'>
+    readonly runId: FieldRef<"NotificationAutomationTaskRun", 'Int'>
+    readonly taskKey: FieldRef<"NotificationAutomationTaskRun", 'String'>
+    readonly status: FieldRef<"NotificationAutomationTaskRun", 'String'>
+    readonly startedAt: FieldRef<"NotificationAutomationTaskRun", 'DateTime'>
+    readonly finishedAt: FieldRef<"NotificationAutomationTaskRun", 'DateTime'>
+    readonly durationMs: FieldRef<"NotificationAutomationTaskRun", 'Int'>
+    readonly errorMessage: FieldRef<"NotificationAutomationTaskRun", 'String'>
+    readonly detailsJson: FieldRef<"NotificationAutomationTaskRun", 'String'>
+    readonly createdAt: FieldRef<"NotificationAutomationTaskRun", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * NotificationAutomationTaskRun findUnique
+   */
+  export type NotificationAutomationTaskRunFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationTaskRun to fetch.
+     */
+    where: NotificationAutomationTaskRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationTaskRun findUniqueOrThrow
+   */
+  export type NotificationAutomationTaskRunFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationTaskRun to fetch.
+     */
+    where: NotificationAutomationTaskRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationTaskRun findFirst
+   */
+  export type NotificationAutomationTaskRunFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationTaskRun to fetch.
+     */
+    where?: NotificationAutomationTaskRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationTaskRuns to fetch.
+     */
+    orderBy?: NotificationAutomationTaskRunOrderByWithRelationInput | NotificationAutomationTaskRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationAutomationTaskRuns.
+     */
+    cursor?: NotificationAutomationTaskRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationTaskRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationTaskRuns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationAutomationTaskRuns.
+     */
+    distinct?: NotificationAutomationTaskRunScalarFieldEnum | NotificationAutomationTaskRunScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationAutomationTaskRun findFirstOrThrow
+   */
+  export type NotificationAutomationTaskRunFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationTaskRun to fetch.
+     */
+    where?: NotificationAutomationTaskRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationTaskRuns to fetch.
+     */
+    orderBy?: NotificationAutomationTaskRunOrderByWithRelationInput | NotificationAutomationTaskRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for NotificationAutomationTaskRuns.
+     */
+    cursor?: NotificationAutomationTaskRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationTaskRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationTaskRuns.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of NotificationAutomationTaskRuns.
+     */
+    distinct?: NotificationAutomationTaskRunScalarFieldEnum | NotificationAutomationTaskRunScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationAutomationTaskRun findMany
+   */
+  export type NotificationAutomationTaskRunFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * Filter, which NotificationAutomationTaskRuns to fetch.
+     */
+    where?: NotificationAutomationTaskRunWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of NotificationAutomationTaskRuns to fetch.
+     */
+    orderBy?: NotificationAutomationTaskRunOrderByWithRelationInput | NotificationAutomationTaskRunOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing NotificationAutomationTaskRuns.
+     */
+    cursor?: NotificationAutomationTaskRunWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` NotificationAutomationTaskRuns from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` NotificationAutomationTaskRuns.
+     */
+    skip?: number
+    distinct?: NotificationAutomationTaskRunScalarFieldEnum | NotificationAutomationTaskRunScalarFieldEnum[]
+  }
+
+  /**
+   * NotificationAutomationTaskRun create
+   */
+  export type NotificationAutomationTaskRunCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * The data needed to create a NotificationAutomationTaskRun.
+     */
+    data: XOR<NotificationAutomationTaskRunCreateInput, NotificationAutomationTaskRunUncheckedCreateInput>
+  }
+
+  /**
+   * NotificationAutomationTaskRun createMany
+   */
+  export type NotificationAutomationTaskRunCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many NotificationAutomationTaskRuns.
+     */
+    data: NotificationAutomationTaskRunCreateManyInput | NotificationAutomationTaskRunCreateManyInput[]
+  }
+
+  /**
+   * NotificationAutomationTaskRun createManyAndReturn
+   */
+  export type NotificationAutomationTaskRunCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many NotificationAutomationTaskRuns.
+     */
+    data: NotificationAutomationTaskRunCreateManyInput | NotificationAutomationTaskRunCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * NotificationAutomationTaskRun update
+   */
+  export type NotificationAutomationTaskRunUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * The data needed to update a NotificationAutomationTaskRun.
+     */
+    data: XOR<NotificationAutomationTaskRunUpdateInput, NotificationAutomationTaskRunUncheckedUpdateInput>
+    /**
+     * Choose, which NotificationAutomationTaskRun to update.
+     */
+    where: NotificationAutomationTaskRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationTaskRun updateMany
+   */
+  export type NotificationAutomationTaskRunUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update NotificationAutomationTaskRuns.
+     */
+    data: XOR<NotificationAutomationTaskRunUpdateManyMutationInput, NotificationAutomationTaskRunUncheckedUpdateManyInput>
+    /**
+     * Filter which NotificationAutomationTaskRuns to update
+     */
+    where?: NotificationAutomationTaskRunWhereInput
+  }
+
+  /**
+   * NotificationAutomationTaskRun upsert
+   */
+  export type NotificationAutomationTaskRunUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * The filter to search for the NotificationAutomationTaskRun to update in case it exists.
+     */
+    where: NotificationAutomationTaskRunWhereUniqueInput
+    /**
+     * In case the NotificationAutomationTaskRun found by the `where` argument doesn't exist, create a new NotificationAutomationTaskRun with this data.
+     */
+    create: XOR<NotificationAutomationTaskRunCreateInput, NotificationAutomationTaskRunUncheckedCreateInput>
+    /**
+     * In case the NotificationAutomationTaskRun was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<NotificationAutomationTaskRunUpdateInput, NotificationAutomationTaskRunUncheckedUpdateInput>
+  }
+
+  /**
+   * NotificationAutomationTaskRun delete
+   */
+  export type NotificationAutomationTaskRunDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+    /**
+     * Filter which NotificationAutomationTaskRun to delete.
+     */
+    where: NotificationAutomationTaskRunWhereUniqueInput
+  }
+
+  /**
+   * NotificationAutomationTaskRun deleteMany
+   */
+  export type NotificationAutomationTaskRunDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which NotificationAutomationTaskRuns to delete
+     */
+    where?: NotificationAutomationTaskRunWhereInput
+  }
+
+  /**
+   * NotificationAutomationTaskRun without action
+   */
+  export type NotificationAutomationTaskRunDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the NotificationAutomationTaskRun
+     */
+    select?: NotificationAutomationTaskRunSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: NotificationAutomationTaskRunInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -8835,7 +12346,9 @@ export namespace Prisma {
     isCustom: 'isCustom',
     customText: 'customText',
     fullHorari: 'fullHorari',
-    response: 'response'
+    response: 'response',
+    source: 'source',
+    autoAssignReason: 'autoAssignReason'
   };
 
   export type RespuestaScalarFieldEnum = (typeof RespuestaScalarFieldEnum)[keyof typeof RespuestaScalarFieldEnum]
@@ -8872,6 +12385,54 @@ export namespace Prisma {
   };
 
   export type NotificationLogScalarFieldEnum = (typeof NotificationLogScalarFieldEnum)[keyof typeof NotificationLogScalarFieldEnum]
+
+
+  export const AvailabilityWindowScalarFieldEnum: {
+    id: 'id',
+    userNCarnet: 'userNCarnet',
+    fromDateTime: 'fromDateTime',
+    toDateTime: 'toDateTime',
+    availabilityType: 'availabilityType',
+    source: 'source',
+    notes: 'notes',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type AvailabilityWindowScalarFieldEnum = (typeof AvailabilityWindowScalarFieldEnum)[keyof typeof AvailabilityWindowScalarFieldEnum]
+
+
+  export const NotificationAutomationRunScalarFieldEnum: {
+    id: 'id',
+    trigger: 'trigger',
+    source: 'source',
+    status: 'status',
+    startedAt: 'startedAt',
+    finishedAt: 'finishedAt',
+    durationMs: 'durationMs',
+    actorUserId: 'actorUserId',
+    errorMessage: 'errorMessage',
+    correlationId: 'correlationId',
+    createdAt: 'createdAt'
+  };
+
+  export type NotificationAutomationRunScalarFieldEnum = (typeof NotificationAutomationRunScalarFieldEnum)[keyof typeof NotificationAutomationRunScalarFieldEnum]
+
+
+  export const NotificationAutomationTaskRunScalarFieldEnum: {
+    id: 'id',
+    runId: 'runId',
+    taskKey: 'taskKey',
+    status: 'status',
+    startedAt: 'startedAt',
+    finishedAt: 'finishedAt',
+    durationMs: 'durationMs',
+    errorMessage: 'errorMessage',
+    detailsJson: 'detailsJson',
+    createdAt: 'createdAt'
+  };
+
+  export type NotificationAutomationTaskRunScalarFieldEnum = (typeof NotificationAutomationTaskRunScalarFieldEnum)[keyof typeof NotificationAutomationTaskRunScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -8949,8 +12510,10 @@ export namespace Prisma {
     roles?: RoleListRelationFilter
     convocatories?: ConvocatoriaListRelationFilter
     respostas?: RespuestaListRelationFilter
+    availabilityWindows?: AvailabilityWindowListRelationFilter
     deviceTokens?: DeviceTokenListRelationFilter
     notificationLogs?: NotificationLogListRelationFilter
+    notificationAutomationRuns?: NotificationAutomationRunListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -8966,8 +12529,10 @@ export namespace Prisma {
     roles?: RoleOrderByRelationAggregateInput
     convocatories?: ConvocatoriaOrderByRelationAggregateInput
     respostas?: RespuestaOrderByRelationAggregateInput
+    availabilityWindows?: AvailabilityWindowOrderByRelationAggregateInput
     deviceTokens?: DeviceTokenOrderByRelationAggregateInput
     notificationLogs?: NotificationLogOrderByRelationAggregateInput
+    notificationAutomationRuns?: NotificationAutomationRunOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -8986,8 +12551,10 @@ export namespace Prisma {
     roles?: RoleListRelationFilter
     convocatories?: ConvocatoriaListRelationFilter
     respostas?: RespuestaListRelationFilter
+    availabilityWindows?: AvailabilityWindowListRelationFilter
     deviceTokens?: DeviceTokenListRelationFilter
     notificationLogs?: NotificationLogListRelationFilter
+    notificationAutomationRuns?: NotificationAutomationRunListRelationFilter
   }, "id" | "nCarnet">
 
   export type UserOrderByWithAggregationInput = {
@@ -9250,6 +12817,8 @@ export namespace Prisma {
     customText?: StringNullableFilter<"Respuesta"> | string | null
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
+    source?: StringFilter<"Respuesta"> | string
+    autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
     convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
     user?: XOR<UserRelationFilter, UserWhereInput>
   }
@@ -9262,6 +12831,8 @@ export namespace Prisma {
     customText?: SortOrderInput | SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    source?: SortOrder
+    autoAssignReason?: SortOrderInput | SortOrder
     convocatoria?: ConvocatoriaOrderByWithRelationInput
     user?: UserOrderByWithRelationInput
   }
@@ -9277,6 +12848,8 @@ export namespace Prisma {
     customText?: StringNullableFilter<"Respuesta"> | string | null
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
+    source?: StringFilter<"Respuesta"> | string
+    autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
     convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
     user?: XOR<UserRelationFilter, UserWhereInput>
   }, "id">
@@ -9289,6 +12862,8 @@ export namespace Prisma {
     customText?: SortOrderInput | SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    source?: SortOrder
+    autoAssignReason?: SortOrderInput | SortOrder
     _count?: RespuestaCountOrderByAggregateInput
     _avg?: RespuestaAvgOrderByAggregateInput
     _max?: RespuestaMaxOrderByAggregateInput
@@ -9307,6 +12882,8 @@ export namespace Prisma {
     customText?: StringNullableWithAggregatesFilter<"Respuesta"> | string | null
     fullHorari?: BoolWithAggregatesFilter<"Respuesta"> | boolean
     response?: BoolWithAggregatesFilter<"Respuesta"> | boolean
+    source?: StringWithAggregatesFilter<"Respuesta"> | string
+    autoAssignReason?: StringNullableWithAggregatesFilter<"Respuesta"> | string | null
   }
 
   export type DeviceTokenWhereInput = {
@@ -9478,6 +13055,255 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"NotificationLog"> | Date | string
   }
 
+  export type AvailabilityWindowWhereInput = {
+    AND?: AvailabilityWindowWhereInput | AvailabilityWindowWhereInput[]
+    OR?: AvailabilityWindowWhereInput[]
+    NOT?: AvailabilityWindowWhereInput | AvailabilityWindowWhereInput[]
+    id?: IntFilter<"AvailabilityWindow"> | number
+    userNCarnet?: StringFilter<"AvailabilityWindow"> | string
+    fromDateTime?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    toDateTime?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    availabilityType?: StringFilter<"AvailabilityWindow"> | string
+    source?: StringFilter<"AvailabilityWindow"> | string
+    notes?: StringNullableFilter<"AvailabilityWindow"> | string | null
+    createdAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    updatedAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type AvailabilityWindowOrderByWithRelationInput = {
+    id?: SortOrder
+    userNCarnet?: SortOrder
+    fromDateTime?: SortOrder
+    toDateTime?: SortOrder
+    availabilityType?: SortOrder
+    source?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type AvailabilityWindowWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: AvailabilityWindowWhereInput | AvailabilityWindowWhereInput[]
+    OR?: AvailabilityWindowWhereInput[]
+    NOT?: AvailabilityWindowWhereInput | AvailabilityWindowWhereInput[]
+    userNCarnet?: StringFilter<"AvailabilityWindow"> | string
+    fromDateTime?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    toDateTime?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    availabilityType?: StringFilter<"AvailabilityWindow"> | string
+    source?: StringFilter<"AvailabilityWindow"> | string
+    notes?: StringNullableFilter<"AvailabilityWindow"> | string | null
+    createdAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    updatedAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id">
+
+  export type AvailabilityWindowOrderByWithAggregationInput = {
+    id?: SortOrder
+    userNCarnet?: SortOrder
+    fromDateTime?: SortOrder
+    toDateTime?: SortOrder
+    availabilityType?: SortOrder
+    source?: SortOrder
+    notes?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: AvailabilityWindowCountOrderByAggregateInput
+    _avg?: AvailabilityWindowAvgOrderByAggregateInput
+    _max?: AvailabilityWindowMaxOrderByAggregateInput
+    _min?: AvailabilityWindowMinOrderByAggregateInput
+    _sum?: AvailabilityWindowSumOrderByAggregateInput
+  }
+
+  export type AvailabilityWindowScalarWhereWithAggregatesInput = {
+    AND?: AvailabilityWindowScalarWhereWithAggregatesInput | AvailabilityWindowScalarWhereWithAggregatesInput[]
+    OR?: AvailabilityWindowScalarWhereWithAggregatesInput[]
+    NOT?: AvailabilityWindowScalarWhereWithAggregatesInput | AvailabilityWindowScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"AvailabilityWindow"> | number
+    userNCarnet?: StringWithAggregatesFilter<"AvailabilityWindow"> | string
+    fromDateTime?: DateTimeWithAggregatesFilter<"AvailabilityWindow"> | Date | string
+    toDateTime?: DateTimeWithAggregatesFilter<"AvailabilityWindow"> | Date | string
+    availabilityType?: StringWithAggregatesFilter<"AvailabilityWindow"> | string
+    source?: StringWithAggregatesFilter<"AvailabilityWindow"> | string
+    notes?: StringNullableWithAggregatesFilter<"AvailabilityWindow"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"AvailabilityWindow"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"AvailabilityWindow"> | Date | string
+  }
+
+  export type NotificationAutomationRunWhereInput = {
+    AND?: NotificationAutomationRunWhereInput | NotificationAutomationRunWhereInput[]
+    OR?: NotificationAutomationRunWhereInput[]
+    NOT?: NotificationAutomationRunWhereInput | NotificationAutomationRunWhereInput[]
+    id?: IntFilter<"NotificationAutomationRun"> | number
+    trigger?: StringFilter<"NotificationAutomationRun"> | string
+    source?: StringFilter<"NotificationAutomationRun"> | string
+    status?: StringFilter<"NotificationAutomationRun"> | string
+    startedAt?: DateTimeFilter<"NotificationAutomationRun"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"NotificationAutomationRun"> | Date | string | null
+    durationMs?: IntNullableFilter<"NotificationAutomationRun"> | number | null
+    actorUserId?: IntNullableFilter<"NotificationAutomationRun"> | number | null
+    errorMessage?: StringNullableFilter<"NotificationAutomationRun"> | string | null
+    correlationId?: StringFilter<"NotificationAutomationRun"> | string
+    createdAt?: DateTimeFilter<"NotificationAutomationRun"> | Date | string
+    actorUser?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    tasks?: NotificationAutomationTaskRunListRelationFilter
+  }
+
+  export type NotificationAutomationRunOrderByWithRelationInput = {
+    id?: SortOrder
+    trigger?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    durationMs?: SortOrderInput | SortOrder
+    actorUserId?: SortOrderInput | SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    correlationId?: SortOrder
+    createdAt?: SortOrder
+    actorUser?: UserOrderByWithRelationInput
+    tasks?: NotificationAutomationTaskRunOrderByRelationAggregateInput
+  }
+
+  export type NotificationAutomationRunWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: NotificationAutomationRunWhereInput | NotificationAutomationRunWhereInput[]
+    OR?: NotificationAutomationRunWhereInput[]
+    NOT?: NotificationAutomationRunWhereInput | NotificationAutomationRunWhereInput[]
+    trigger?: StringFilter<"NotificationAutomationRun"> | string
+    source?: StringFilter<"NotificationAutomationRun"> | string
+    status?: StringFilter<"NotificationAutomationRun"> | string
+    startedAt?: DateTimeFilter<"NotificationAutomationRun"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"NotificationAutomationRun"> | Date | string | null
+    durationMs?: IntNullableFilter<"NotificationAutomationRun"> | number | null
+    actorUserId?: IntNullableFilter<"NotificationAutomationRun"> | number | null
+    errorMessage?: StringNullableFilter<"NotificationAutomationRun"> | string | null
+    correlationId?: StringFilter<"NotificationAutomationRun"> | string
+    createdAt?: DateTimeFilter<"NotificationAutomationRun"> | Date | string
+    actorUser?: XOR<UserNullableRelationFilter, UserWhereInput> | null
+    tasks?: NotificationAutomationTaskRunListRelationFilter
+  }, "id">
+
+  export type NotificationAutomationRunOrderByWithAggregationInput = {
+    id?: SortOrder
+    trigger?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    durationMs?: SortOrderInput | SortOrder
+    actorUserId?: SortOrderInput | SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    correlationId?: SortOrder
+    createdAt?: SortOrder
+    _count?: NotificationAutomationRunCountOrderByAggregateInput
+    _avg?: NotificationAutomationRunAvgOrderByAggregateInput
+    _max?: NotificationAutomationRunMaxOrderByAggregateInput
+    _min?: NotificationAutomationRunMinOrderByAggregateInput
+    _sum?: NotificationAutomationRunSumOrderByAggregateInput
+  }
+
+  export type NotificationAutomationRunScalarWhereWithAggregatesInput = {
+    AND?: NotificationAutomationRunScalarWhereWithAggregatesInput | NotificationAutomationRunScalarWhereWithAggregatesInput[]
+    OR?: NotificationAutomationRunScalarWhereWithAggregatesInput[]
+    NOT?: NotificationAutomationRunScalarWhereWithAggregatesInput | NotificationAutomationRunScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"NotificationAutomationRun"> | number
+    trigger?: StringWithAggregatesFilter<"NotificationAutomationRun"> | string
+    source?: StringWithAggregatesFilter<"NotificationAutomationRun"> | string
+    status?: StringWithAggregatesFilter<"NotificationAutomationRun"> | string
+    startedAt?: DateTimeWithAggregatesFilter<"NotificationAutomationRun"> | Date | string
+    finishedAt?: DateTimeNullableWithAggregatesFilter<"NotificationAutomationRun"> | Date | string | null
+    durationMs?: IntNullableWithAggregatesFilter<"NotificationAutomationRun"> | number | null
+    actorUserId?: IntNullableWithAggregatesFilter<"NotificationAutomationRun"> | number | null
+    errorMessage?: StringNullableWithAggregatesFilter<"NotificationAutomationRun"> | string | null
+    correlationId?: StringWithAggregatesFilter<"NotificationAutomationRun"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"NotificationAutomationRun"> | Date | string
+  }
+
+  export type NotificationAutomationTaskRunWhereInput = {
+    AND?: NotificationAutomationTaskRunWhereInput | NotificationAutomationTaskRunWhereInput[]
+    OR?: NotificationAutomationTaskRunWhereInput[]
+    NOT?: NotificationAutomationTaskRunWhereInput | NotificationAutomationTaskRunWhereInput[]
+    id?: IntFilter<"NotificationAutomationTaskRun"> | number
+    runId?: IntFilter<"NotificationAutomationTaskRun"> | number
+    taskKey?: StringFilter<"NotificationAutomationTaskRun"> | string
+    status?: StringFilter<"NotificationAutomationTaskRun"> | string
+    startedAt?: DateTimeFilter<"NotificationAutomationTaskRun"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"NotificationAutomationTaskRun"> | Date | string | null
+    durationMs?: IntNullableFilter<"NotificationAutomationTaskRun"> | number | null
+    errorMessage?: StringNullableFilter<"NotificationAutomationTaskRun"> | string | null
+    detailsJson?: StringNullableFilter<"NotificationAutomationTaskRun"> | string | null
+    createdAt?: DateTimeFilter<"NotificationAutomationTaskRun"> | Date | string
+    run?: XOR<NotificationAutomationRunRelationFilter, NotificationAutomationRunWhereInput>
+  }
+
+  export type NotificationAutomationTaskRunOrderByWithRelationInput = {
+    id?: SortOrder
+    runId?: SortOrder
+    taskKey?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    durationMs?: SortOrderInput | SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    detailsJson?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    run?: NotificationAutomationRunOrderByWithRelationInput
+  }
+
+  export type NotificationAutomationTaskRunWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: NotificationAutomationTaskRunWhereInput | NotificationAutomationTaskRunWhereInput[]
+    OR?: NotificationAutomationTaskRunWhereInput[]
+    NOT?: NotificationAutomationTaskRunWhereInput | NotificationAutomationTaskRunWhereInput[]
+    runId?: IntFilter<"NotificationAutomationTaskRun"> | number
+    taskKey?: StringFilter<"NotificationAutomationTaskRun"> | string
+    status?: StringFilter<"NotificationAutomationTaskRun"> | string
+    startedAt?: DateTimeFilter<"NotificationAutomationTaskRun"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"NotificationAutomationTaskRun"> | Date | string | null
+    durationMs?: IntNullableFilter<"NotificationAutomationTaskRun"> | number | null
+    errorMessage?: StringNullableFilter<"NotificationAutomationTaskRun"> | string | null
+    detailsJson?: StringNullableFilter<"NotificationAutomationTaskRun"> | string | null
+    createdAt?: DateTimeFilter<"NotificationAutomationTaskRun"> | Date | string
+    run?: XOR<NotificationAutomationRunRelationFilter, NotificationAutomationRunWhereInput>
+  }, "id">
+
+  export type NotificationAutomationTaskRunOrderByWithAggregationInput = {
+    id?: SortOrder
+    runId?: SortOrder
+    taskKey?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrderInput | SortOrder
+    durationMs?: SortOrderInput | SortOrder
+    errorMessage?: SortOrderInput | SortOrder
+    detailsJson?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: NotificationAutomationTaskRunCountOrderByAggregateInput
+    _avg?: NotificationAutomationTaskRunAvgOrderByAggregateInput
+    _max?: NotificationAutomationTaskRunMaxOrderByAggregateInput
+    _min?: NotificationAutomationTaskRunMinOrderByAggregateInput
+    _sum?: NotificationAutomationTaskRunSumOrderByAggregateInput
+  }
+
+  export type NotificationAutomationTaskRunScalarWhereWithAggregatesInput = {
+    AND?: NotificationAutomationTaskRunScalarWhereWithAggregatesInput | NotificationAutomationTaskRunScalarWhereWithAggregatesInput[]
+    OR?: NotificationAutomationTaskRunScalarWhereWithAggregatesInput[]
+    NOT?: NotificationAutomationTaskRunScalarWhereWithAggregatesInput | NotificationAutomationTaskRunScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"NotificationAutomationTaskRun"> | number
+    runId?: IntWithAggregatesFilter<"NotificationAutomationTaskRun"> | number
+    taskKey?: StringWithAggregatesFilter<"NotificationAutomationTaskRun"> | string
+    status?: StringWithAggregatesFilter<"NotificationAutomationTaskRun"> | string
+    startedAt?: DateTimeWithAggregatesFilter<"NotificationAutomationTaskRun"> | Date | string
+    finishedAt?: DateTimeNullableWithAggregatesFilter<"NotificationAutomationTaskRun"> | Date | string | null
+    durationMs?: IntNullableWithAggregatesFilter<"NotificationAutomationTaskRun"> | number | null
+    errorMessage?: StringNullableWithAggregatesFilter<"NotificationAutomationTaskRun"> | string | null
+    detailsJson?: StringNullableWithAggregatesFilter<"NotificationAutomationTaskRun"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"NotificationAutomationTaskRun"> | Date | string
+  }
+
   export type UserCreateInput = {
     nCarnet: string
     nIndicatiu?: string | null
@@ -9490,8 +13316,10 @@ export namespace Prisma {
     roles?: RoleCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -9507,8 +13335,10 @@ export namespace Prisma {
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
   }
 
   export type UserUpdateInput = {
@@ -9523,8 +13353,10 @@ export namespace Prisma {
     roles?: RoleUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -9540,8 +13372,10 @@ export namespace Prisma {
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -9804,6 +13638,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
     convocatoria: ConvocatoriaCreateNestedOneWithoutRespostasInput
     user: UserCreateNestedOneWithoutRespostasInput
   }
@@ -9816,6 +13652,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
   }
 
   export type RespuestaUpdateInput = {
@@ -9823,6 +13661,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     convocatoria?: ConvocatoriaUpdateOneRequiredWithoutRespostasNestedInput
     user?: UserUpdateOneRequiredWithoutRespostasNestedInput
   }
@@ -9835,6 +13675,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RespuestaCreateManyInput = {
@@ -9845,6 +13687,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
   }
 
   export type RespuestaUpdateManyMutationInput = {
@@ -9852,6 +13696,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RespuestaUncheckedUpdateManyInput = {
@@ -9862,6 +13708,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type DeviceTokenCreateInput = {
@@ -10045,6 +13893,271 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type AvailabilityWindowCreateInput = {
+    fromDateTime: Date | string
+    toDateTime: Date | string
+    availabilityType: string
+    source?: string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutAvailabilityWindowsInput
+  }
+
+  export type AvailabilityWindowUncheckedCreateInput = {
+    id?: number
+    userNCarnet: string
+    fromDateTime: Date | string
+    toDateTime: Date | string
+    availabilityType: string
+    source?: string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AvailabilityWindowUpdateInput = {
+    fromDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    toDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    availabilityType?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutAvailabilityWindowsNestedInput
+  }
+
+  export type AvailabilityWindowUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userNCarnet?: StringFieldUpdateOperationsInput | string
+    fromDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    toDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    availabilityType?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AvailabilityWindowCreateManyInput = {
+    id?: number
+    userNCarnet: string
+    fromDateTime: Date | string
+    toDateTime: Date | string
+    availabilityType: string
+    source?: string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AvailabilityWindowUpdateManyMutationInput = {
+    fromDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    toDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    availabilityType?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AvailabilityWindowUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userNCarnet?: StringFieldUpdateOperationsInput | string
+    fromDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    toDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    availabilityType?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationAutomationRunCreateInput = {
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    correlationId: string
+    createdAt?: Date | string
+    actorUser?: UserCreateNestedOneWithoutNotificationAutomationRunsInput
+    tasks?: NotificationAutomationTaskRunCreateNestedManyWithoutRunInput
+  }
+
+  export type NotificationAutomationRunUncheckedCreateInput = {
+    id?: number
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    actorUserId?: number | null
+    errorMessage?: string | null
+    correlationId: string
+    createdAt?: Date | string
+    tasks?: NotificationAutomationTaskRunUncheckedCreateNestedManyWithoutRunInput
+  }
+
+  export type NotificationAutomationRunUpdateInput = {
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actorUser?: UserUpdateOneWithoutNotificationAutomationRunsNestedInput
+    tasks?: NotificationAutomationTaskRunUpdateManyWithoutRunNestedInput
+  }
+
+  export type NotificationAutomationRunUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    actorUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tasks?: NotificationAutomationTaskRunUncheckedUpdateManyWithoutRunNestedInput
+  }
+
+  export type NotificationAutomationRunCreateManyInput = {
+    id?: number
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    actorUserId?: number | null
+    errorMessage?: string | null
+    correlationId: string
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationRunUpdateManyMutationInput = {
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationAutomationRunUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    actorUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationAutomationTaskRunCreateInput = {
+    taskKey: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    detailsJson?: string | null
+    createdAt?: Date | string
+    run: NotificationAutomationRunCreateNestedOneWithoutTasksInput
+  }
+
+  export type NotificationAutomationTaskRunUncheckedCreateInput = {
+    id?: number
+    runId: number
+    taskKey: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    detailsJson?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationTaskRunUpdateInput = {
+    taskKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    detailsJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    run?: NotificationAutomationRunUpdateOneRequiredWithoutTasksNestedInput
+  }
+
+  export type NotificationAutomationTaskRunUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    runId?: IntFieldUpdateOperationsInput | number
+    taskKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    detailsJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationAutomationTaskRunCreateManyInput = {
+    id?: number
+    runId: number
+    taskKey: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    detailsJson?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationTaskRunUpdateManyMutationInput = {
+    taskKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    detailsJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationAutomationTaskRunUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    runId?: IntFieldUpdateOperationsInput | number
+    taskKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    detailsJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[]
@@ -10118,6 +14231,12 @@ export namespace Prisma {
     none?: RespuestaWhereInput
   }
 
+  export type AvailabilityWindowListRelationFilter = {
+    every?: AvailabilityWindowWhereInput
+    some?: AvailabilityWindowWhereInput
+    none?: AvailabilityWindowWhereInput
+  }
+
   export type DeviceTokenListRelationFilter = {
     every?: DeviceTokenWhereInput
     some?: DeviceTokenWhereInput
@@ -10128,6 +14247,12 @@ export namespace Prisma {
     every?: NotificationLogWhereInput
     some?: NotificationLogWhereInput
     none?: NotificationLogWhereInput
+  }
+
+  export type NotificationAutomationRunListRelationFilter = {
+    every?: NotificationAutomationRunWhereInput
+    some?: NotificationAutomationRunWhereInput
+    none?: NotificationAutomationRunWhereInput
   }
 
   export type SortOrderInput = {
@@ -10147,11 +14272,19 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
+  export type AvailabilityWindowOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type DeviceTokenOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
   export type NotificationLogOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type NotificationAutomationRunOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -10447,6 +14580,8 @@ export namespace Prisma {
     customText?: SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    source?: SortOrder
+    autoAssignReason?: SortOrder
   }
 
   export type RespuestaAvgOrderByAggregateInput = {
@@ -10462,6 +14597,8 @@ export namespace Prisma {
     customText?: SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    source?: SortOrder
+    autoAssignReason?: SortOrder
   }
 
   export type RespuestaMinOrderByAggregateInput = {
@@ -10472,6 +14609,8 @@ export namespace Prisma {
     customText?: SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    source?: SortOrder
+    autoAssignReason?: SortOrder
   }
 
   export type RespuestaSumOrderByAggregateInput = {
@@ -10618,6 +14757,170 @@ export namespace Prisma {
     _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
+  export type AvailabilityWindowCountOrderByAggregateInput = {
+    id?: SortOrder
+    userNCarnet?: SortOrder
+    fromDateTime?: SortOrder
+    toDateTime?: SortOrder
+    availabilityType?: SortOrder
+    source?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AvailabilityWindowAvgOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type AvailabilityWindowMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userNCarnet?: SortOrder
+    fromDateTime?: SortOrder
+    toDateTime?: SortOrder
+    availabilityType?: SortOrder
+    source?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AvailabilityWindowMinOrderByAggregateInput = {
+    id?: SortOrder
+    userNCarnet?: SortOrder
+    fromDateTime?: SortOrder
+    toDateTime?: SortOrder
+    availabilityType?: SortOrder
+    source?: SortOrder
+    notes?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type AvailabilityWindowSumOrderByAggregateInput = {
+    id?: SortOrder
+  }
+
+  export type NotificationAutomationTaskRunListRelationFilter = {
+    every?: NotificationAutomationTaskRunWhereInput
+    some?: NotificationAutomationTaskRunWhereInput
+    none?: NotificationAutomationTaskRunWhereInput
+  }
+
+  export type NotificationAutomationTaskRunOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type NotificationAutomationRunCountOrderByAggregateInput = {
+    id?: SortOrder
+    trigger?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    actorUserId?: SortOrder
+    errorMessage?: SortOrder
+    correlationId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationAutomationRunAvgOrderByAggregateInput = {
+    id?: SortOrder
+    durationMs?: SortOrder
+    actorUserId?: SortOrder
+  }
+
+  export type NotificationAutomationRunMaxOrderByAggregateInput = {
+    id?: SortOrder
+    trigger?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    actorUserId?: SortOrder
+    errorMessage?: SortOrder
+    correlationId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationAutomationRunMinOrderByAggregateInput = {
+    id?: SortOrder
+    trigger?: SortOrder
+    source?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    actorUserId?: SortOrder
+    errorMessage?: SortOrder
+    correlationId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationAutomationRunSumOrderByAggregateInput = {
+    id?: SortOrder
+    durationMs?: SortOrder
+    actorUserId?: SortOrder
+  }
+
+  export type NotificationAutomationRunRelationFilter = {
+    is?: NotificationAutomationRunWhereInput
+    isNot?: NotificationAutomationRunWhereInput
+  }
+
+  export type NotificationAutomationTaskRunCountOrderByAggregateInput = {
+    id?: SortOrder
+    runId?: SortOrder
+    taskKey?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    errorMessage?: SortOrder
+    detailsJson?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationAutomationTaskRunAvgOrderByAggregateInput = {
+    id?: SortOrder
+    runId?: SortOrder
+    durationMs?: SortOrder
+  }
+
+  export type NotificationAutomationTaskRunMaxOrderByAggregateInput = {
+    id?: SortOrder
+    runId?: SortOrder
+    taskKey?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    errorMessage?: SortOrder
+    detailsJson?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationAutomationTaskRunMinOrderByAggregateInput = {
+    id?: SortOrder
+    runId?: SortOrder
+    taskKey?: SortOrder
+    status?: SortOrder
+    startedAt?: SortOrder
+    finishedAt?: SortOrder
+    durationMs?: SortOrder
+    errorMessage?: SortOrder
+    detailsJson?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type NotificationAutomationTaskRunSumOrderByAggregateInput = {
+    id?: SortOrder
+    runId?: SortOrder
+    durationMs?: SortOrder
+  }
+
   export type RoleCreateNestedManyWithoutUserInput = {
     create?: XOR<RoleCreateWithoutUserInput, RoleUncheckedCreateWithoutUserInput> | RoleCreateWithoutUserInput[] | RoleUncheckedCreateWithoutUserInput[]
     connectOrCreate?: RoleCreateOrConnectWithoutUserInput | RoleCreateOrConnectWithoutUserInput[]
@@ -10639,6 +14942,13 @@ export namespace Prisma {
     connect?: RespuestaWhereUniqueInput | RespuestaWhereUniqueInput[]
   }
 
+  export type AvailabilityWindowCreateNestedManyWithoutUserInput = {
+    create?: XOR<AvailabilityWindowCreateWithoutUserInput, AvailabilityWindowUncheckedCreateWithoutUserInput> | AvailabilityWindowCreateWithoutUserInput[] | AvailabilityWindowUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AvailabilityWindowCreateOrConnectWithoutUserInput | AvailabilityWindowCreateOrConnectWithoutUserInput[]
+    createMany?: AvailabilityWindowCreateManyUserInputEnvelope
+    connect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+  }
+
   export type DeviceTokenCreateNestedManyWithoutUserInput = {
     create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
@@ -10651,6 +14961,13 @@ export namespace Prisma {
     connectOrCreate?: NotificationLogCreateOrConnectWithoutSenderUserInput | NotificationLogCreateOrConnectWithoutSenderUserInput[]
     createMany?: NotificationLogCreateManySenderUserInputEnvelope
     connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+  }
+
+  export type NotificationAutomationRunCreateNestedManyWithoutActorUserInput = {
+    create?: XOR<NotificationAutomationRunCreateWithoutActorUserInput, NotificationAutomationRunUncheckedCreateWithoutActorUserInput> | NotificationAutomationRunCreateWithoutActorUserInput[] | NotificationAutomationRunUncheckedCreateWithoutActorUserInput[]
+    connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutActorUserInput | NotificationAutomationRunCreateOrConnectWithoutActorUserInput[]
+    createMany?: NotificationAutomationRunCreateManyActorUserInputEnvelope
+    connect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
   }
 
   export type RoleUncheckedCreateNestedManyWithoutUserInput = {
@@ -10674,6 +14991,13 @@ export namespace Prisma {
     connect?: RespuestaWhereUniqueInput | RespuestaWhereUniqueInput[]
   }
 
+  export type AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<AvailabilityWindowCreateWithoutUserInput, AvailabilityWindowUncheckedCreateWithoutUserInput> | AvailabilityWindowCreateWithoutUserInput[] | AvailabilityWindowUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AvailabilityWindowCreateOrConnectWithoutUserInput | AvailabilityWindowCreateOrConnectWithoutUserInput[]
+    createMany?: AvailabilityWindowCreateManyUserInputEnvelope
+    connect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+  }
+
   export type DeviceTokenUncheckedCreateNestedManyWithoutUserInput = {
     create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
@@ -10686,6 +15010,13 @@ export namespace Prisma {
     connectOrCreate?: NotificationLogCreateOrConnectWithoutSenderUserInput | NotificationLogCreateOrConnectWithoutSenderUserInput[]
     createMany?: NotificationLogCreateManySenderUserInputEnvelope
     connect?: NotificationLogWhereUniqueInput | NotificationLogWhereUniqueInput[]
+  }
+
+  export type NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput = {
+    create?: XOR<NotificationAutomationRunCreateWithoutActorUserInput, NotificationAutomationRunUncheckedCreateWithoutActorUserInput> | NotificationAutomationRunCreateWithoutActorUserInput[] | NotificationAutomationRunUncheckedCreateWithoutActorUserInput[]
+    connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutActorUserInput | NotificationAutomationRunCreateOrConnectWithoutActorUserInput[]
+    createMany?: NotificationAutomationRunCreateManyActorUserInputEnvelope
+    connect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -10746,6 +15077,20 @@ export namespace Prisma {
     deleteMany?: RespuestaScalarWhereInput | RespuestaScalarWhereInput[]
   }
 
+  export type AvailabilityWindowUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AvailabilityWindowCreateWithoutUserInput, AvailabilityWindowUncheckedCreateWithoutUserInput> | AvailabilityWindowCreateWithoutUserInput[] | AvailabilityWindowUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AvailabilityWindowCreateOrConnectWithoutUserInput | AvailabilityWindowCreateOrConnectWithoutUserInput[]
+    upsert?: AvailabilityWindowUpsertWithWhereUniqueWithoutUserInput | AvailabilityWindowUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AvailabilityWindowCreateManyUserInputEnvelope
+    set?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    disconnect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    delete?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    connect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    update?: AvailabilityWindowUpdateWithWhereUniqueWithoutUserInput | AvailabilityWindowUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AvailabilityWindowUpdateManyWithWhereWithoutUserInput | AvailabilityWindowUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AvailabilityWindowScalarWhereInput | AvailabilityWindowScalarWhereInput[]
+  }
+
   export type DeviceTokenUpdateManyWithoutUserNestedInput = {
     create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
@@ -10772,6 +15117,20 @@ export namespace Prisma {
     update?: NotificationLogUpdateWithWhereUniqueWithoutSenderUserInput | NotificationLogUpdateWithWhereUniqueWithoutSenderUserInput[]
     updateMany?: NotificationLogUpdateManyWithWhereWithoutSenderUserInput | NotificationLogUpdateManyWithWhereWithoutSenderUserInput[]
     deleteMany?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
+  }
+
+  export type NotificationAutomationRunUpdateManyWithoutActorUserNestedInput = {
+    create?: XOR<NotificationAutomationRunCreateWithoutActorUserInput, NotificationAutomationRunUncheckedCreateWithoutActorUserInput> | NotificationAutomationRunCreateWithoutActorUserInput[] | NotificationAutomationRunUncheckedCreateWithoutActorUserInput[]
+    connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutActorUserInput | NotificationAutomationRunCreateOrConnectWithoutActorUserInput[]
+    upsert?: NotificationAutomationRunUpsertWithWhereUniqueWithoutActorUserInput | NotificationAutomationRunUpsertWithWhereUniqueWithoutActorUserInput[]
+    createMany?: NotificationAutomationRunCreateManyActorUserInputEnvelope
+    set?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    disconnect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    delete?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    connect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    update?: NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput | NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput[]
+    updateMany?: NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput | NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput[]
+    deleteMany?: NotificationAutomationRunScalarWhereInput | NotificationAutomationRunScalarWhereInput[]
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -10824,6 +15183,20 @@ export namespace Prisma {
     deleteMany?: RespuestaScalarWhereInput | RespuestaScalarWhereInput[]
   }
 
+  export type AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<AvailabilityWindowCreateWithoutUserInput, AvailabilityWindowUncheckedCreateWithoutUserInput> | AvailabilityWindowCreateWithoutUserInput[] | AvailabilityWindowUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: AvailabilityWindowCreateOrConnectWithoutUserInput | AvailabilityWindowCreateOrConnectWithoutUserInput[]
+    upsert?: AvailabilityWindowUpsertWithWhereUniqueWithoutUserInput | AvailabilityWindowUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: AvailabilityWindowCreateManyUserInputEnvelope
+    set?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    disconnect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    delete?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    connect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
+    update?: AvailabilityWindowUpdateWithWhereUniqueWithoutUserInput | AvailabilityWindowUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: AvailabilityWindowUpdateManyWithWhereWithoutUserInput | AvailabilityWindowUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: AvailabilityWindowScalarWhereInput | AvailabilityWindowScalarWhereInput[]
+  }
+
   export type DeviceTokenUncheckedUpdateManyWithoutUserNestedInput = {
     create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
     connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
@@ -10850,6 +15223,20 @@ export namespace Prisma {
     update?: NotificationLogUpdateWithWhereUniqueWithoutSenderUserInput | NotificationLogUpdateWithWhereUniqueWithoutSenderUserInput[]
     updateMany?: NotificationLogUpdateManyWithWhereWithoutSenderUserInput | NotificationLogUpdateManyWithWhereWithoutSenderUserInput[]
     deleteMany?: NotificationLogScalarWhereInput | NotificationLogScalarWhereInput[]
+  }
+
+  export type NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput = {
+    create?: XOR<NotificationAutomationRunCreateWithoutActorUserInput, NotificationAutomationRunUncheckedCreateWithoutActorUserInput> | NotificationAutomationRunCreateWithoutActorUserInput[] | NotificationAutomationRunUncheckedCreateWithoutActorUserInput[]
+    connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutActorUserInput | NotificationAutomationRunCreateOrConnectWithoutActorUserInput[]
+    upsert?: NotificationAutomationRunUpsertWithWhereUniqueWithoutActorUserInput | NotificationAutomationRunUpsertWithWhereUniqueWithoutActorUserInput[]
+    createMany?: NotificationAutomationRunCreateManyActorUserInputEnvelope
+    set?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    disconnect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    delete?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    connect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+    update?: NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput | NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput[]
+    updateMany?: NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput | NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput[]
+    deleteMany?: NotificationAutomationRunScalarWhereInput | NotificationAutomationRunScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutRolesInput = {
@@ -11046,6 +15433,92 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
+  }
+
+  export type UserCreateNestedOneWithoutAvailabilityWindowsInput = {
+    create?: XOR<UserCreateWithoutAvailabilityWindowsInput, UserUncheckedCreateWithoutAvailabilityWindowsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAvailabilityWindowsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type UserUpdateOneRequiredWithoutAvailabilityWindowsNestedInput = {
+    create?: XOR<UserCreateWithoutAvailabilityWindowsInput, UserUncheckedCreateWithoutAvailabilityWindowsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutAvailabilityWindowsInput
+    upsert?: UserUpsertWithoutAvailabilityWindowsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAvailabilityWindowsInput, UserUpdateWithoutAvailabilityWindowsInput>, UserUncheckedUpdateWithoutAvailabilityWindowsInput>
+  }
+
+  export type UserCreateNestedOneWithoutNotificationAutomationRunsInput = {
+    create?: XOR<UserCreateWithoutNotificationAutomationRunsInput, UserUncheckedCreateWithoutNotificationAutomationRunsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationAutomationRunsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type NotificationAutomationTaskRunCreateNestedManyWithoutRunInput = {
+    create?: XOR<NotificationAutomationTaskRunCreateWithoutRunInput, NotificationAutomationTaskRunUncheckedCreateWithoutRunInput> | NotificationAutomationTaskRunCreateWithoutRunInput[] | NotificationAutomationTaskRunUncheckedCreateWithoutRunInput[]
+    connectOrCreate?: NotificationAutomationTaskRunCreateOrConnectWithoutRunInput | NotificationAutomationTaskRunCreateOrConnectWithoutRunInput[]
+    createMany?: NotificationAutomationTaskRunCreateManyRunInputEnvelope
+    connect?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+  }
+
+  export type NotificationAutomationTaskRunUncheckedCreateNestedManyWithoutRunInput = {
+    create?: XOR<NotificationAutomationTaskRunCreateWithoutRunInput, NotificationAutomationTaskRunUncheckedCreateWithoutRunInput> | NotificationAutomationTaskRunCreateWithoutRunInput[] | NotificationAutomationTaskRunUncheckedCreateWithoutRunInput[]
+    connectOrCreate?: NotificationAutomationTaskRunCreateOrConnectWithoutRunInput | NotificationAutomationTaskRunCreateOrConnectWithoutRunInput[]
+    createMany?: NotificationAutomationTaskRunCreateManyRunInputEnvelope
+    connect?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+  }
+
+  export type UserUpdateOneWithoutNotificationAutomationRunsNestedInput = {
+    create?: XOR<UserCreateWithoutNotificationAutomationRunsInput, UserUncheckedCreateWithoutNotificationAutomationRunsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutNotificationAutomationRunsInput
+    upsert?: UserUpsertWithoutNotificationAutomationRunsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationAutomationRunsInput, UserUpdateWithoutNotificationAutomationRunsInput>, UserUncheckedUpdateWithoutNotificationAutomationRunsInput>
+  }
+
+  export type NotificationAutomationTaskRunUpdateManyWithoutRunNestedInput = {
+    create?: XOR<NotificationAutomationTaskRunCreateWithoutRunInput, NotificationAutomationTaskRunUncheckedCreateWithoutRunInput> | NotificationAutomationTaskRunCreateWithoutRunInput[] | NotificationAutomationTaskRunUncheckedCreateWithoutRunInput[]
+    connectOrCreate?: NotificationAutomationTaskRunCreateOrConnectWithoutRunInput | NotificationAutomationTaskRunCreateOrConnectWithoutRunInput[]
+    upsert?: NotificationAutomationTaskRunUpsertWithWhereUniqueWithoutRunInput | NotificationAutomationTaskRunUpsertWithWhereUniqueWithoutRunInput[]
+    createMany?: NotificationAutomationTaskRunCreateManyRunInputEnvelope
+    set?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    disconnect?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    delete?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    connect?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    update?: NotificationAutomationTaskRunUpdateWithWhereUniqueWithoutRunInput | NotificationAutomationTaskRunUpdateWithWhereUniqueWithoutRunInput[]
+    updateMany?: NotificationAutomationTaskRunUpdateManyWithWhereWithoutRunInput | NotificationAutomationTaskRunUpdateManyWithWhereWithoutRunInput[]
+    deleteMany?: NotificationAutomationTaskRunScalarWhereInput | NotificationAutomationTaskRunScalarWhereInput[]
+  }
+
+  export type NotificationAutomationTaskRunUncheckedUpdateManyWithoutRunNestedInput = {
+    create?: XOR<NotificationAutomationTaskRunCreateWithoutRunInput, NotificationAutomationTaskRunUncheckedCreateWithoutRunInput> | NotificationAutomationTaskRunCreateWithoutRunInput[] | NotificationAutomationTaskRunUncheckedCreateWithoutRunInput[]
+    connectOrCreate?: NotificationAutomationTaskRunCreateOrConnectWithoutRunInput | NotificationAutomationTaskRunCreateOrConnectWithoutRunInput[]
+    upsert?: NotificationAutomationTaskRunUpsertWithWhereUniqueWithoutRunInput | NotificationAutomationTaskRunUpsertWithWhereUniqueWithoutRunInput[]
+    createMany?: NotificationAutomationTaskRunCreateManyRunInputEnvelope
+    set?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    disconnect?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    delete?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    connect?: NotificationAutomationTaskRunWhereUniqueInput | NotificationAutomationTaskRunWhereUniqueInput[]
+    update?: NotificationAutomationTaskRunUpdateWithWhereUniqueWithoutRunInput | NotificationAutomationTaskRunUpdateWithWhereUniqueWithoutRunInput[]
+    updateMany?: NotificationAutomationTaskRunUpdateManyWithWhereWithoutRunInput | NotificationAutomationTaskRunUpdateManyWithWhereWithoutRunInput[]
+    deleteMany?: NotificationAutomationTaskRunScalarWhereInput | NotificationAutomationTaskRunScalarWhereInput[]
+  }
+
+  export type NotificationAutomationRunCreateNestedOneWithoutTasksInput = {
+    create?: XOR<NotificationAutomationRunCreateWithoutTasksInput, NotificationAutomationRunUncheckedCreateWithoutTasksInput>
+    connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutTasksInput
+    connect?: NotificationAutomationRunWhereUniqueInput
+  }
+
+  export type NotificationAutomationRunUpdateOneRequiredWithoutTasksNestedInput = {
+    create?: XOR<NotificationAutomationRunCreateWithoutTasksInput, NotificationAutomationRunUncheckedCreateWithoutTasksInput>
+    connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutTasksInput
+    upsert?: NotificationAutomationRunUpsertWithoutTasksInput
+    connect?: NotificationAutomationRunWhereUniqueInput
+    update?: XOR<XOR<NotificationAutomationRunUpdateToOneWithWhereWithoutTasksInput, NotificationAutomationRunUpdateWithoutTasksInput>, NotificationAutomationRunUncheckedUpdateWithoutTasksInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -11316,6 +15789,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
     convocatoria: ConvocatoriaCreateNestedOneWithoutRespostasInput
   }
 
@@ -11326,6 +15801,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
   }
 
   export type RespuestaCreateOrConnectWithoutUserInput = {
@@ -11335,6 +15812,36 @@ export namespace Prisma {
 
   export type RespuestaCreateManyUserInputEnvelope = {
     data: RespuestaCreateManyUserInput | RespuestaCreateManyUserInput[]
+  }
+
+  export type AvailabilityWindowCreateWithoutUserInput = {
+    fromDateTime: Date | string
+    toDateTime: Date | string
+    availabilityType: string
+    source?: string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AvailabilityWindowUncheckedCreateWithoutUserInput = {
+    id?: number
+    fromDateTime: Date | string
+    toDateTime: Date | string
+    availabilityType: string
+    source?: string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type AvailabilityWindowCreateOrConnectWithoutUserInput = {
+    where: AvailabilityWindowWhereUniqueInput
+    create: XOR<AvailabilityWindowCreateWithoutUserInput, AvailabilityWindowUncheckedCreateWithoutUserInput>
+  }
+
+  export type AvailabilityWindowCreateManyUserInputEnvelope = {
+    data: AvailabilityWindowCreateManyUserInput | AvailabilityWindowCreateManyUserInput[]
   }
 
   export type DeviceTokenCreateWithoutUserInput = {
@@ -11401,6 +15908,42 @@ export namespace Prisma {
 
   export type NotificationLogCreateManySenderUserInputEnvelope = {
     data: NotificationLogCreateManySenderUserInput | NotificationLogCreateManySenderUserInput[]
+  }
+
+  export type NotificationAutomationRunCreateWithoutActorUserInput = {
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    correlationId: string
+    createdAt?: Date | string
+    tasks?: NotificationAutomationTaskRunCreateNestedManyWithoutRunInput
+  }
+
+  export type NotificationAutomationRunUncheckedCreateWithoutActorUserInput = {
+    id?: number
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    correlationId: string
+    createdAt?: Date | string
+    tasks?: NotificationAutomationTaskRunUncheckedCreateNestedManyWithoutRunInput
+  }
+
+  export type NotificationAutomationRunCreateOrConnectWithoutActorUserInput = {
+    where: NotificationAutomationRunWhereUniqueInput
+    create: XOR<NotificationAutomationRunCreateWithoutActorUserInput, NotificationAutomationRunUncheckedCreateWithoutActorUserInput>
+  }
+
+  export type NotificationAutomationRunCreateManyActorUserInputEnvelope = {
+    data: NotificationAutomationRunCreateManyActorUserInput | NotificationAutomationRunCreateManyActorUserInput[]
   }
 
   export type RoleUpsertWithWhereUniqueWithoutUserInput = {
@@ -11492,6 +16035,39 @@ export namespace Prisma {
     customText?: StringNullableFilter<"Respuesta"> | string | null
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
+    source?: StringFilter<"Respuesta"> | string
+    autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
+  }
+
+  export type AvailabilityWindowUpsertWithWhereUniqueWithoutUserInput = {
+    where: AvailabilityWindowWhereUniqueInput
+    update: XOR<AvailabilityWindowUpdateWithoutUserInput, AvailabilityWindowUncheckedUpdateWithoutUserInput>
+    create: XOR<AvailabilityWindowCreateWithoutUserInput, AvailabilityWindowUncheckedCreateWithoutUserInput>
+  }
+
+  export type AvailabilityWindowUpdateWithWhereUniqueWithoutUserInput = {
+    where: AvailabilityWindowWhereUniqueInput
+    data: XOR<AvailabilityWindowUpdateWithoutUserInput, AvailabilityWindowUncheckedUpdateWithoutUserInput>
+  }
+
+  export type AvailabilityWindowUpdateManyWithWhereWithoutUserInput = {
+    where: AvailabilityWindowScalarWhereInput
+    data: XOR<AvailabilityWindowUpdateManyMutationInput, AvailabilityWindowUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type AvailabilityWindowScalarWhereInput = {
+    AND?: AvailabilityWindowScalarWhereInput | AvailabilityWindowScalarWhereInput[]
+    OR?: AvailabilityWindowScalarWhereInput[]
+    NOT?: AvailabilityWindowScalarWhereInput | AvailabilityWindowScalarWhereInput[]
+    id?: IntFilter<"AvailabilityWindow"> | number
+    userNCarnet?: StringFilter<"AvailabilityWindow"> | string
+    fromDateTime?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    toDateTime?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    availabilityType?: StringFilter<"AvailabilityWindow"> | string
+    source?: StringFilter<"AvailabilityWindow"> | string
+    notes?: StringNullableFilter<"AvailabilityWindow"> | string | null
+    createdAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
+    updatedAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
   }
 
   export type DeviceTokenUpsertWithWhereUniqueWithoutUserInput = {
@@ -11559,6 +16135,39 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"NotificationLog"> | Date | string
   }
 
+  export type NotificationAutomationRunUpsertWithWhereUniqueWithoutActorUserInput = {
+    where: NotificationAutomationRunWhereUniqueInput
+    update: XOR<NotificationAutomationRunUpdateWithoutActorUserInput, NotificationAutomationRunUncheckedUpdateWithoutActorUserInput>
+    create: XOR<NotificationAutomationRunCreateWithoutActorUserInput, NotificationAutomationRunUncheckedCreateWithoutActorUserInput>
+  }
+
+  export type NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput = {
+    where: NotificationAutomationRunWhereUniqueInput
+    data: XOR<NotificationAutomationRunUpdateWithoutActorUserInput, NotificationAutomationRunUncheckedUpdateWithoutActorUserInput>
+  }
+
+  export type NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput = {
+    where: NotificationAutomationRunScalarWhereInput
+    data: XOR<NotificationAutomationRunUpdateManyMutationInput, NotificationAutomationRunUncheckedUpdateManyWithoutActorUserInput>
+  }
+
+  export type NotificationAutomationRunScalarWhereInput = {
+    AND?: NotificationAutomationRunScalarWhereInput | NotificationAutomationRunScalarWhereInput[]
+    OR?: NotificationAutomationRunScalarWhereInput[]
+    NOT?: NotificationAutomationRunScalarWhereInput | NotificationAutomationRunScalarWhereInput[]
+    id?: IntFilter<"NotificationAutomationRun"> | number
+    trigger?: StringFilter<"NotificationAutomationRun"> | string
+    source?: StringFilter<"NotificationAutomationRun"> | string
+    status?: StringFilter<"NotificationAutomationRun"> | string
+    startedAt?: DateTimeFilter<"NotificationAutomationRun"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"NotificationAutomationRun"> | Date | string | null
+    durationMs?: IntNullableFilter<"NotificationAutomationRun"> | number | null
+    actorUserId?: IntNullableFilter<"NotificationAutomationRun"> | number | null
+    errorMessage?: StringNullableFilter<"NotificationAutomationRun"> | string | null
+    correlationId?: StringFilter<"NotificationAutomationRun"> | string
+    createdAt?: DateTimeFilter<"NotificationAutomationRun"> | Date | string
+  }
+
   export type UserCreateWithoutRolesInput = {
     nCarnet: string
     nIndicatiu?: string | null
@@ -11570,8 +16179,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
   }
 
   export type UserUncheckedCreateWithoutRolesInput = {
@@ -11586,8 +16197,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
   }
 
   export type UserCreateOrConnectWithoutRolesInput = {
@@ -11617,8 +16230,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRolesInput = {
@@ -11633,8 +16248,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
   }
 
   export type ConvocatoriaCreateWithoutConvoTypeInput = {
@@ -11702,8 +16319,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
   }
 
   export type UserUncheckedCreateWithoutConvocatoriesInput = {
@@ -11718,8 +16337,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
   }
 
   export type UserCreateOrConnectWithoutConvocatoriesInput = {
@@ -11752,6 +16373,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
     user: UserCreateNestedOneWithoutRespostasInput
   }
 
@@ -11762,6 +16385,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
   }
 
   export type RespuestaCreateOrConnectWithoutConvocatoriaInput = {
@@ -11795,8 +16420,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutConvocatoriesInput = {
@@ -11811,8 +16438,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
   }
 
   export type ConvoTypeUpsertWithoutConvocatoriesInput = {
@@ -11902,8 +16531,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
   }
 
   export type UserUncheckedCreateWithoutRespostasInput = {
@@ -11918,8 +16549,10 @@ export namespace Prisma {
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
   }
 
   export type UserCreateOrConnectWithoutRespostasInput = {
@@ -11989,8 +16622,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRespostasInput = {
@@ -12005,8 +16640,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserCreateWithoutDeviceTokensInput = {
@@ -12021,7 +16658,9 @@ export namespace Prisma {
     roles?: RoleCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
   }
 
   export type UserUncheckedCreateWithoutDeviceTokensInput = {
@@ -12037,7 +16676,9 @@ export namespace Prisma {
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
   }
 
   export type UserCreateOrConnectWithoutDeviceTokensInput = {
@@ -12068,7 +16709,9 @@ export namespace Prisma {
     roles?: RoleUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutDeviceTokensInput = {
@@ -12084,7 +16727,9 @@ export namespace Prisma {
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserCreateWithoutNotificationLogsInput = {
@@ -12099,7 +16744,9 @@ export namespace Prisma {
     roles?: RoleCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationLogsInput = {
@@ -12115,7 +16762,9 @@ export namespace Prisma {
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
     deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationLogsInput = {
@@ -12146,7 +16795,9 @@ export namespace Prisma {
     roles?: RoleUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationLogsInput = {
@@ -12162,7 +16813,315 @@ export namespace Prisma {
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
     deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+  }
+
+  export type UserCreateWithoutAvailabilityWindowsInput = {
+    nCarnet: string
+    nIndicatiu?: string | null
+    name: string
+    lastName?: string | null
+    password: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roles?: RoleCreateNestedManyWithoutUserInput
+    convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
+    respostas?: RespuestaCreateNestedManyWithoutUserInput
+    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+  }
+
+  export type UserUncheckedCreateWithoutAvailabilityWindowsInput = {
+    id?: number
+    nCarnet: string
+    nIndicatiu?: string | null
+    name: string
+    lastName?: string | null
+    password: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roles?: RoleUncheckedCreateNestedManyWithoutUserInput
+    convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
+    respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+  }
+
+  export type UserCreateOrConnectWithoutAvailabilityWindowsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutAvailabilityWindowsInput, UserUncheckedCreateWithoutAvailabilityWindowsInput>
+  }
+
+  export type UserUpsertWithoutAvailabilityWindowsInput = {
+    update: XOR<UserUpdateWithoutAvailabilityWindowsInput, UserUncheckedUpdateWithoutAvailabilityWindowsInput>
+    create: XOR<UserCreateWithoutAvailabilityWindowsInput, UserUncheckedCreateWithoutAvailabilityWindowsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutAvailabilityWindowsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutAvailabilityWindowsInput, UserUncheckedUpdateWithoutAvailabilityWindowsInput>
+  }
+
+  export type UserUpdateWithoutAvailabilityWindowsInput = {
+    nCarnet?: StringFieldUpdateOperationsInput | string
+    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roles?: RoleUpdateManyWithoutUserNestedInput
+    convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
+    respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutAvailabilityWindowsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    nCarnet?: StringFieldUpdateOperationsInput | string
+    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
+    convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
+    respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+  }
+
+  export type UserCreateWithoutNotificationAutomationRunsInput = {
+    nCarnet: string
+    nIndicatiu?: string | null
+    name: string
+    lastName?: string | null
+    password: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roles?: RoleCreateNestedManyWithoutUserInput
+    convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
+    respostas?: RespuestaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
+    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+  }
+
+  export type UserUncheckedCreateWithoutNotificationAutomationRunsInput = {
+    id?: number
+    nCarnet: string
+    nIndicatiu?: string | null
+    name: string
+    lastName?: string | null
+    password: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roles?: RoleUncheckedCreateNestedManyWithoutUserInput
+    convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
+    respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
+    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+  }
+
+  export type UserCreateOrConnectWithoutNotificationAutomationRunsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutNotificationAutomationRunsInput, UserUncheckedCreateWithoutNotificationAutomationRunsInput>
+  }
+
+  export type NotificationAutomationTaskRunCreateWithoutRunInput = {
+    taskKey: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    detailsJson?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationTaskRunUncheckedCreateWithoutRunInput = {
+    id?: number
+    taskKey: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    detailsJson?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationTaskRunCreateOrConnectWithoutRunInput = {
+    where: NotificationAutomationTaskRunWhereUniqueInput
+    create: XOR<NotificationAutomationTaskRunCreateWithoutRunInput, NotificationAutomationTaskRunUncheckedCreateWithoutRunInput>
+  }
+
+  export type NotificationAutomationTaskRunCreateManyRunInputEnvelope = {
+    data: NotificationAutomationTaskRunCreateManyRunInput | NotificationAutomationTaskRunCreateManyRunInput[]
+  }
+
+  export type UserUpsertWithoutNotificationAutomationRunsInput = {
+    update: XOR<UserUpdateWithoutNotificationAutomationRunsInput, UserUncheckedUpdateWithoutNotificationAutomationRunsInput>
+    create: XOR<UserCreateWithoutNotificationAutomationRunsInput, UserUncheckedCreateWithoutNotificationAutomationRunsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutNotificationAutomationRunsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutNotificationAutomationRunsInput, UserUncheckedUpdateWithoutNotificationAutomationRunsInput>
+  }
+
+  export type UserUpdateWithoutNotificationAutomationRunsInput = {
+    nCarnet?: StringFieldUpdateOperationsInput | string
+    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roles?: RoleUpdateManyWithoutUserNestedInput
+    convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
+    respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
+    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutNotificationAutomationRunsInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    nCarnet?: StringFieldUpdateOperationsInput | string
+    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
+    convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
+    respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
+    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+  }
+
+  export type NotificationAutomationTaskRunUpsertWithWhereUniqueWithoutRunInput = {
+    where: NotificationAutomationTaskRunWhereUniqueInput
+    update: XOR<NotificationAutomationTaskRunUpdateWithoutRunInput, NotificationAutomationTaskRunUncheckedUpdateWithoutRunInput>
+    create: XOR<NotificationAutomationTaskRunCreateWithoutRunInput, NotificationAutomationTaskRunUncheckedCreateWithoutRunInput>
+  }
+
+  export type NotificationAutomationTaskRunUpdateWithWhereUniqueWithoutRunInput = {
+    where: NotificationAutomationTaskRunWhereUniqueInput
+    data: XOR<NotificationAutomationTaskRunUpdateWithoutRunInput, NotificationAutomationTaskRunUncheckedUpdateWithoutRunInput>
+  }
+
+  export type NotificationAutomationTaskRunUpdateManyWithWhereWithoutRunInput = {
+    where: NotificationAutomationTaskRunScalarWhereInput
+    data: XOR<NotificationAutomationTaskRunUpdateManyMutationInput, NotificationAutomationTaskRunUncheckedUpdateManyWithoutRunInput>
+  }
+
+  export type NotificationAutomationTaskRunScalarWhereInput = {
+    AND?: NotificationAutomationTaskRunScalarWhereInput | NotificationAutomationTaskRunScalarWhereInput[]
+    OR?: NotificationAutomationTaskRunScalarWhereInput[]
+    NOT?: NotificationAutomationTaskRunScalarWhereInput | NotificationAutomationTaskRunScalarWhereInput[]
+    id?: IntFilter<"NotificationAutomationTaskRun"> | number
+    runId?: IntFilter<"NotificationAutomationTaskRun"> | number
+    taskKey?: StringFilter<"NotificationAutomationTaskRun"> | string
+    status?: StringFilter<"NotificationAutomationTaskRun"> | string
+    startedAt?: DateTimeFilter<"NotificationAutomationTaskRun"> | Date | string
+    finishedAt?: DateTimeNullableFilter<"NotificationAutomationTaskRun"> | Date | string | null
+    durationMs?: IntNullableFilter<"NotificationAutomationTaskRun"> | number | null
+    errorMessage?: StringNullableFilter<"NotificationAutomationTaskRun"> | string | null
+    detailsJson?: StringNullableFilter<"NotificationAutomationTaskRun"> | string | null
+    createdAt?: DateTimeFilter<"NotificationAutomationTaskRun"> | Date | string
+  }
+
+  export type NotificationAutomationRunCreateWithoutTasksInput = {
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    correlationId: string
+    createdAt?: Date | string
+    actorUser?: UserCreateNestedOneWithoutNotificationAutomationRunsInput
+  }
+
+  export type NotificationAutomationRunUncheckedCreateWithoutTasksInput = {
+    id?: number
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    actorUserId?: number | null
+    errorMessage?: string | null
+    correlationId: string
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationRunCreateOrConnectWithoutTasksInput = {
+    where: NotificationAutomationRunWhereUniqueInput
+    create: XOR<NotificationAutomationRunCreateWithoutTasksInput, NotificationAutomationRunUncheckedCreateWithoutTasksInput>
+  }
+
+  export type NotificationAutomationRunUpsertWithoutTasksInput = {
+    update: XOR<NotificationAutomationRunUpdateWithoutTasksInput, NotificationAutomationRunUncheckedUpdateWithoutTasksInput>
+    create: XOR<NotificationAutomationRunCreateWithoutTasksInput, NotificationAutomationRunUncheckedCreateWithoutTasksInput>
+    where?: NotificationAutomationRunWhereInput
+  }
+
+  export type NotificationAutomationRunUpdateToOneWithWhereWithoutTasksInput = {
+    where?: NotificationAutomationRunWhereInput
+    data: XOR<NotificationAutomationRunUpdateWithoutTasksInput, NotificationAutomationRunUncheckedUpdateWithoutTasksInput>
+  }
+
+  export type NotificationAutomationRunUpdateWithoutTasksInput = {
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    actorUser?: UserUpdateOneWithoutNotificationAutomationRunsNestedInput
+  }
+
+  export type NotificationAutomationRunUncheckedUpdateWithoutTasksInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    actorUserId?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RoleCreateManyUserInput = {
@@ -12194,6 +17153,19 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
+  }
+
+  export type AvailabilityWindowCreateManyUserInput = {
+    id?: number
+    fromDateTime: Date | string
+    toDateTime: Date | string
+    availabilityType: string
+    source?: string
+    notes?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type DeviceTokenCreateManyUserInput = {
@@ -12218,6 +17190,19 @@ export namespace Prisma {
     targetScope?: string
     status?: string
     errorMessage?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationRunCreateManyActorUserInput = {
+    id?: number
+    trigger: string
+    source: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    correlationId: string
     createdAt?: Date | string
   }
 
@@ -12292,6 +17277,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     convocatoria?: ConvocatoriaUpdateOneRequiredWithoutRespostasNestedInput
   }
 
@@ -12302,6 +17289,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RespuestaUncheckedUpdateManyWithoutUserInput = {
@@ -12311,6 +17300,40 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type AvailabilityWindowUpdateWithoutUserInput = {
+    fromDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    toDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    availabilityType?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AvailabilityWindowUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fromDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    toDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    availabilityType?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type AvailabilityWindowUncheckedUpdateManyWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    fromDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    toDateTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    availabilityType?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type DeviceTokenUpdateWithoutUserInput = {
@@ -12386,6 +17409,46 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type NotificationAutomationRunUpdateWithoutActorUserInput = {
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tasks?: NotificationAutomationTaskRunUpdateManyWithoutRunNestedInput
+  }
+
+  export type NotificationAutomationRunUncheckedUpdateWithoutActorUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    tasks?: NotificationAutomationTaskRunUncheckedUpdateManyWithoutRunNestedInput
+  }
+
+  export type NotificationAutomationRunUncheckedUpdateManyWithoutActorUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    trigger?: StringFieldUpdateOperationsInput | string
+    source?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    correlationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type ConvocatoriaCreateManyConvoTypeInput = {
     id?: number
     date: Date | string
@@ -12450,6 +17513,8 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    source?: string
+    autoAssignReason?: string | null
   }
 
   export type RespuestaUpdateWithoutConvocatoriaInput = {
@@ -12457,6 +17522,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutRespostasNestedInput
   }
 
@@ -12467,6 +17534,8 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type RespuestaUncheckedUpdateManyWithoutConvocatoriaInput = {
@@ -12476,6 +17545,55 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    source?: StringFieldUpdateOperationsInput | string
+    autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type NotificationAutomationTaskRunCreateManyRunInput = {
+    id?: number
+    taskKey: string
+    status?: string
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    durationMs?: number | null
+    errorMessage?: string | null
+    detailsJson?: string | null
+    createdAt?: Date | string
+  }
+
+  export type NotificationAutomationTaskRunUpdateWithoutRunInput = {
+    taskKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    detailsJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationAutomationTaskRunUncheckedUpdateWithoutRunInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    taskKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    detailsJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type NotificationAutomationTaskRunUncheckedUpdateManyWithoutRunInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    taskKey?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    durationMs?: NullableIntFieldUpdateOperationsInput | number | null
+    errorMessage?: NullableStringFieldUpdateOperationsInput | string | null
+    detailsJson?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 
@@ -12495,6 +17613,10 @@ export namespace Prisma {
      * @deprecated Use ConvocatoriaCountOutputTypeDefaultArgs instead
      */
     export type ConvocatoriaCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ConvocatoriaCountOutputTypeDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use NotificationAutomationRunCountOutputTypeDefaultArgs instead
+     */
+    export type NotificationAutomationRunCountOutputTypeArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationAutomationRunCountOutputTypeDefaultArgs<ExtArgs>
     /**
      * @deprecated Use UserDefaultArgs instead
      */
@@ -12523,6 +17645,18 @@ export namespace Prisma {
      * @deprecated Use NotificationLogDefaultArgs instead
      */
     export type NotificationLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationLogDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use AvailabilityWindowDefaultArgs instead
+     */
+    export type AvailabilityWindowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = AvailabilityWindowDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use NotificationAutomationRunDefaultArgs instead
+     */
+    export type NotificationAutomationRunArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationAutomationRunDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use NotificationAutomationTaskRunDefaultArgs instead
+     */
+    export type NotificationAutomationTaskRunArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationAutomationTaskRunDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

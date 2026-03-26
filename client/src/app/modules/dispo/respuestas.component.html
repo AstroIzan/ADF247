@@ -85,6 +85,9 @@
                 @if (respuesta.isCustom) {
                   <span class="badge badge-custom">Personalitzat</span>
                 }
+                @if (respuesta.source && respuesta.source !== 'manual') {
+                  <span class="badge badge-auto" [title]="respuesta.autoAssignReason || ''">Auto</span>
+                }
               </div>
             </div>
             <div class="respuesta-actions">
@@ -333,6 +336,16 @@
               <p class="custom-text">{{ respuestaDetail.customText }}</p>
             </div>
           }
+
+          <div class="detail-group">
+            <label>Origen</label>
+            <p>
+              <span [class]="'badge ' + getSourceBadgeClass(respuestaDetail.source)">{{ getSourceLabel(respuestaDetail.source) }}</span>
+              @if (respuestaDetail.autoAssignReason) {
+                <small class="assign-reason"> — {{ respuestaDetail.autoAssignReason }}</small>
+              }
+            </p>
+          </div>
 
           <div class="detail-group">
             <label>Data de Creació</label>

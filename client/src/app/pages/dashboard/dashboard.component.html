@@ -101,6 +101,13 @@
         >
           🔔 Notificacions
         </button>
+        <button 
+          (click)="activeTab.set('orchestrator')"
+          [class.active]="activeTab() === 'orchestrator'"
+          class="tab-btn"
+        >
+          ⚙️ Orquestrador
+        </button>
       }
     </nav>
 
@@ -162,6 +169,26 @@
           [loadingLogs]="loadingNotifLogs()"
           [error]="notifConfigError()"
           [logsError]="notifLogsError()"
+          [title]="'Notificacions'"
+          [description]="'Registre d\'enviaments i resultat de les notificacions.'"
+          [visibleTabs]="['logs']"
+          (onLogsRefresh)="loadNotificationLogs()"
+        ></app-notifications-admin>
+      }
+
+      @if (activeTab() === 'orchestrator' && isAdmin()) {
+        <app-notifications-admin
+          [config]="notificationConfig()"
+          [logs]="notificationLogs()"
+          [convoTypes]="convoTypes()"
+          [users]="users()"
+          [loading]="loadingNotifConfig()"
+          [loadingLogs]="loadingNotifLogs()"
+          [error]="notifConfigError()"
+          [logsError]="notifLogsError()"
+          [title]="'Orquestrador'"
+          [description]="'Històric d\'execucions, estat de tasques i seguiment dels jobs automàtics.'"
+          [visibleTabs]="['automation']"
           (onLogsRefresh)="loadNotificationLogs()"
         ></app-notifications-admin>
       }

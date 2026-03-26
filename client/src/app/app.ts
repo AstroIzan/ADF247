@@ -5,18 +5,21 @@ import { filter } from 'rxjs';
 import { AuthService } from './services/auth.service';
 import { PushNotificationsService } from './services/push-notifications.service';
 import { ProfileComponent } from './pages/profile/profile.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ProfileComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ProfileComponent, SettingsComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   @ViewChild(ProfileComponent) profileComponent?: ProfileComponent;
+  @ViewChild(SettingsComponent) settingsComponent?: SettingsComponent;
   currentPath = '';
   notificationWarning = '';
+  isMobileMenuOpen = false;
 
   constructor(
     public authService: AuthService,
@@ -38,6 +41,7 @@ export class App {
       .subscribe((event) => {
         const navEvent = event as NavigationEnd
         this.currentPath = navEvent.urlAfterRedirects
+        this.isMobileMenuOpen = false
         void this.handleHomeNotificationCheck()
       })
 
@@ -52,13 +56,31 @@ export class App {
     this.profileComponent?.openModal();
   }
 
-  closeNotificationsSetup() {
-    this.pushNotificationsService.closeSetupModal();
+  openSettingsModal(tab: 'device' | 'system' = 'device') {
+    this.settingsComponent?.openModal(tab);
   }
 
-  async requestNotificationPermissions() {
-    await this.pushNotificationsService.requestPermissionAndRegister();
-    this.updateNotificationWarning();
+  toggleMobileMenu() {
+    this.isMobileMenuOpen = !this.isMobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.isMobileMenuOpen = false;
+  }
+
+  openProfileFromMenu() {
+    this.openProfileModal();
+    this.closeMobileMenu();
+  }
+
+  openSettingsFromMenu(tab: 'device' | 'system' = 'device') {
+    this.openSettingsModal(tab);
+    this.closeMobileMenu();
+  }
+
+  logoutFromMenu() {
+    this.closeMobileMenu();
+    this.authService.logout();
   }
 
   isHomeRoute() {
@@ -77,6 +99,7 @@ export class App {
         // ignore sync errors outside home
       }
       this.updateNotificationWarning()
+      this.openNotificationSettingsIfNeeded()
       return
     }
 
@@ -86,6 +109,7 @@ export class App {
       // ignore — updateNotificationWarning will reflect current state
     }
     this.updateNotificationWarning()
+    this.openNotificationSettingsIfNeeded()
   }
 
   private updateNotificationWarning() {
@@ -118,10 +142,20 @@ export class App {
     }
 
     if (!this.pushNotificationsService.hasRegisteredCurrentToken()) {
-      this.notificationWarning = 'Aquest dispositiu encara no està registrat al servidor. Torna a entrar a les notificacions.'
+      this.notificationWarning = 'Aquest dispositiu encara no està registrat al servidor. Revisa-ho a Configuració.'
       return
     }
 
     this.notificationWarning = ''
+  }
+
+  private openNotificationSettingsIfNeeded() {
+    if (!this.pushNotificationsService.modalVisible()) {
+      return
+    }
+
+    setTimeout(() => {
+      this.settingsComponent?.openModal('device')
+    }, 0)
   }
 }

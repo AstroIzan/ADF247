@@ -5,6 +5,7 @@
       <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Obrir filtres d'usuaris">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
+      <button (click)="openImportCsvModal()" class="btn btn-secondary">Importar CSV</button>
       <button (click)="openForm()" class="btn btn-primary">+ Nou Usuari</button>
     </div>
   </div>
@@ -344,6 +345,80 @@
           <button (click)="closeForm()" class="btn btn-secondary" [disabled]="formSubmitting()">Cancel·lar</button>
           <button (click)="submitForm()" class="btn btn-primary" [disabled]="formSubmitting()">
             {{ formSubmitting() ? 'Guardant...' : 'Desar' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showImportModal()) {
+    <div class="modal-overlay" (click)="closeImportCsvModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Importació d'Usuaris per CSV</h3>
+          <button (click)="closeImportCsvModal()" class="close-btn">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p class="import-help-text">
+            Aquesta fase només crea usuaris nous. Els nCarnet duplicats es reporten com a rebutjats.
+          </p>
+
+          <div class="import-actions-row">
+            <button type="button" class="btn btn-secondary" (click)="downloadCsvTemplate()">Descarregar plantilla v1</button>
+          </div>
+
+          <div class="form-group">
+            <label>Seleccionar fitxer CSV</label>
+            <input type="file" accept=".csv,text/csv" (change)="onCsvFileSelected($event)" [disabled]="importSubmitting()" />
+          </div>
+
+          @if (importCsvName()) {
+            <div class="import-preview">
+              <p><strong>Fitxer:</strong> {{ importCsvName() }}</p>
+              <p><strong>Capçaleres detectades:</strong> {{ importCsvHeaders().join(', ') || '-' }}</p>
+            </div>
+          }
+
+          @if (importResult()) {
+            <div class="import-result">
+              <h4>Resultat de la importació</h4>
+              <p>Total files: {{ importResult()?.totalRows }}</p>
+              <p>Inserides: {{ importResult()?.inserted }}</p>
+              <p>Rebutjades: {{ importResult()?.rejected }}</p>
+
+              @if ((importResult()?.rows || []).length > 0) {
+                <div class="table-responsive">
+                  <table class="users-table import-table">
+                    <thead>
+                      <tr>
+                        <th>Fila</th>
+                        <th>nCarnet</th>
+                        <th>Estat</th>
+                        <th>Motiu</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (item of importResult()?.rows || []; track item.rowNumber) {
+                        <tr>
+                          <td>{{ item.rowNumber }}</td>
+                          <td>{{ item.nCarnet || '-' }}</td>
+                          <td>{{ item.status }}</td>
+                          <td>{{ item.reason || '-' }}</td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button (click)="closeImportCsvModal()" class="btn btn-secondary" [disabled]="importSubmitting()">Tancar</button>
+          <button (click)="submitCsvImport()" class="btn btn-primary" [disabled]="importSubmitting()">
+            {{ importSubmitting() ? 'Processant...' : 'Processar importació' }}
           </button>
         </div>
       </div>

@@ -21,15 +21,26 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
     pendingLeadDays: 0,
     pendingLeadHours: 24,
     link: '/dashboard',
-    creationTitle: 'Nova convocatòria per respondre',
+    creationTitle: 'Nova convocatòria',
     creationBody: '{title} ({type}) per al dia {date}. Revisa i respon la teva disponibilitat.',
+    fireTitle: 'Incendi',
+    fireBody: 'S\'ha creat una convocatòria d\'incendi: {title} ({date}).',
+    weeklyCreatedTitle: 'Disponibilitat setmanal',
+    weeklyCreatedBody: 'Aquesta setmana hi ha {count} convocatòries setmanals creades.',
     pendingTitle: 'Tens convocatòries pendents',
     pendingBody: 'Encara tens {count} convocatòries pendents per respondre.',
+  },
+  availabilityMatching: {
+    conflictPolicy: 'unavailable-wins',
+    createAvailableResponses: true,
+    createUnavailableResponses: true,
+    autoCreateUnavailableForUsersWithoutWindow: false,
+    notifyOnAutoAvailableResponse: false,
   },
   weeklyRequest: {
     enabled: true,
     requestWeekday: 5,
-    requestHour: 19,
+    requestHour: 8,
     requestMinute: 0,
     link: '/dashboard',
     title: 'Disponibilitat pendent per convocatòries setmanals',
@@ -41,10 +52,31 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
     confirmHour: 19,
     confirmMinute: 0,
     link: '/dashboard',
-    titleYes: 'Demà sí que se surt',
-    bodyYes: '{title} ({type}) està confirmada per demà {date}.',
-    titleNo: 'Demà no se surt',
+    titleYes: '**Convocatoria** {title}',
+    bodyYes: 'Demà a les {horaInici} a {ubicació}\nResponsable {nºCarnet} {nom + cognom}',
+    titleNo: 'Convocatòria cancel·lada',
     bodyNo: '{title} ({type}) finalment no surt demà {date}.',
+    titleCancelled: 'Convocatòria cancel·lada',
+    bodyCancelled: '{title} ({type}) finalment no surt demà {date}.',
+    titleReten: 'Retén',
+    bodyReten: '{title} ({type}) passa a retén per demà {date}.',
+    perTypeTemplates: {},
+  },
+  automation: {
+    retentionDays: 7,
+    viewerNCarnets: [],
+    monitoring: {
+      enabled: false,
+      alertRecipientNCarnets: [],
+      alertOnMissedRun: true,
+      alertOnTaskFailure: true,
+    },
+    tasks: [
+      { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+      { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+      { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+      { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', convoTypeFilter: ['Guardia', 'Guardia PVI'], enabled: true, schedule: { kind: 'weekly' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+    ],
   },
 }
 
@@ -84,6 +116,58 @@ function normalizeStringList(value, fallback) {
     .filter(Boolean)
 
   return normalized.length > 0 ? normalized : fallback
+}
+
+function normalizePerTypeTemplates(value, fallbackTitle, fallbackBody) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return {}
+  }
+
+  const normalized = {}
+
+  for (const [rawTypeName, rawTemplate] of Object.entries(value)) {
+    const typeName = typeof rawTypeName === 'string' ? rawTypeName.trim() : ''
+    if (!typeName || !rawTemplate || typeof rawTemplate !== 'object' || Array.isArray(rawTemplate)) {
+      continue
+    }
+
+    normalized[typeName] = {
+      title: normalizeText(rawTemplate.title, fallbackTitle),
+      body: normalizeText(rawTemplate.body, fallbackBody),
+    }
+  }
+
+  return normalized
+}
+
+function normalizeAutomationTask(task, fallbackTask) {
+  const source = task && typeof task === 'object' ? task : {}
+  const fallback = fallbackTask && typeof fallbackTask === 'object' ? fallbackTask : {}
+
+  const allowedKinds = ['pending-responses', 'sortida-status', 'weekly-digest', 'sortida-confirmed', 'sortida-cancelled', 'sortida-reten', 'weekly-pending']
+  const rawKind = source.notifyKind || fallback.notifyKind || source.taskKey || fallback.taskKey || ''
+  const notifyKind = allowedKinds.includes(rawKind) ? rawKind : 'pending-responses'
+
+  const convoTypeFilter = Array.isArray(source.convoTypeFilter)
+    ? (source.convoTypeFilter.map((v) => (typeof v === 'string' ? v.trim() : '')).filter(Boolean))
+    : (Array.isArray(fallback.convoTypeFilter) ? fallback.convoTypeFilter : [])
+
+  return {
+    taskKey: normalizeText(source.taskKey, fallback.taskKey || ''),
+    notifyKind,
+    convoTypeFilter,
+    enabled: normalizeBoolean(source.enabled, fallback.enabled ?? true),
+    schedule: {
+      kind: ['daily', 'weekly', 'manual'].includes(source.schedule?.kind)
+        ? source.schedule.kind
+        : (fallback.schedule?.kind || 'daily'),
+    },
+    timeoutMs: normalizeInteger(source.timeoutMs, fallback.timeoutMs || 120000, 1000, 900000),
+    retryPolicy: {
+      maxRetries: normalizeInteger(source.retryPolicy?.maxRetries, fallback.retryPolicy?.maxRetries || 0, 0, 5),
+    },
+    dependsOn: normalizeStringList(source.dependsOn, fallback.dependsOn || []),
+  }
 }
 
 function normalizeNotificationSettings(input = {}) {
@@ -133,8 +217,35 @@ function normalizeNotificationSettings(input = {}) {
       link: normalizeText(input.responseRequest?.link, defaults.responseRequest.link),
       creationTitle: normalizeText(input.responseRequest?.creationTitle, defaults.responseRequest.creationTitle),
       creationBody: normalizeText(input.responseRequest?.creationBody, defaults.responseRequest.creationBody),
+      fireTitle: normalizeText(input.responseRequest?.fireTitle, defaults.responseRequest.fireTitle),
+      fireBody: normalizeText(input.responseRequest?.fireBody, defaults.responseRequest.fireBody),
+      weeklyCreatedTitle: normalizeText(input.responseRequest?.weeklyCreatedTitle, defaults.responseRequest.weeklyCreatedTitle),
+      weeklyCreatedBody: normalizeText(input.responseRequest?.weeklyCreatedBody, defaults.responseRequest.weeklyCreatedBody),
       pendingTitle: normalizeText(input.responseRequest?.pendingTitle, defaults.responseRequest.pendingTitle),
       pendingBody: normalizeText(input.responseRequest?.pendingBody, defaults.responseRequest.pendingBody),
+    },
+    availabilityMatching: {
+      conflictPolicy: ['unavailable-wins', 'available-wins', 'skip-on-conflict'].includes(
+        input.availabilityMatching?.conflictPolicy
+      )
+        ? input.availabilityMatching.conflictPolicy
+        : defaults.availabilityMatching.conflictPolicy,
+      createAvailableResponses: normalizeBoolean(
+        input.availabilityMatching?.createAvailableResponses,
+        defaults.availabilityMatching.createAvailableResponses
+      ),
+      createUnavailableResponses: normalizeBoolean(
+        input.availabilityMatching?.createUnavailableResponses,
+        defaults.availabilityMatching.createUnavailableResponses
+      ),
+      autoCreateUnavailableForUsersWithoutWindow: normalizeBoolean(
+        input.availabilityMatching?.autoCreateUnavailableForUsersWithoutWindow,
+        defaults.availabilityMatching.autoCreateUnavailableForUsersWithoutWindow
+      ),
+      notifyOnAutoAvailableResponse: normalizeBoolean(
+        input.availabilityMatching?.notifyOnAutoAvailableResponse,
+        defaults.availabilityMatching.notifyOnAutoAvailableResponse
+      ),
     },
     weeklyRequest: {
       enabled: normalizeBoolean(weeklySource.enabled, defaults.weeklyRequest.enabled),
@@ -160,6 +271,33 @@ function normalizeNotificationSettings(input = {}) {
       bodyYes: normalizeText(input.sortidaStatus?.bodyYes, defaults.sortidaStatus.bodyYes),
       titleNo: normalizeText(input.sortidaStatus?.titleNo, defaults.sortidaStatus.titleNo),
       bodyNo: normalizeText(input.sortidaStatus?.bodyNo, defaults.sortidaStatus.bodyNo),
+      titleCancelled: normalizeText(input.sortidaStatus?.titleCancelled, defaults.sortidaStatus.titleCancelled),
+      bodyCancelled: normalizeText(input.sortidaStatus?.bodyCancelled, defaults.sortidaStatus.bodyCancelled),
+      titleReten: normalizeText(input.sortidaStatus?.titleReten, defaults.sortidaStatus.titleReten),
+      bodyReten: normalizeText(input.sortidaStatus?.bodyReten, defaults.sortidaStatus.bodyReten),
+      perTypeTemplates: normalizePerTypeTemplates(
+        input.sortidaStatus?.perTypeTemplates,
+        defaults.sortidaStatus.titleYes,
+        defaults.sortidaStatus.bodyYes
+      ),
+    },
+    automation: {
+      retentionDays: normalizeInteger(input.automation?.retentionDays, defaults.automation.retentionDays, 1, 60),
+      viewerNCarnets: Array.isArray(input.automation?.viewerNCarnets)
+        ? normalizeStringList(input.automation?.viewerNCarnets, [])
+        : defaults.automation.viewerNCarnets,
+      monitoring: {
+        enabled: normalizeBoolean(input.automation?.monitoring?.enabled, defaults.automation.monitoring.enabled),
+        alertRecipientNCarnets: Array.isArray(input.automation?.monitoring?.alertRecipientNCarnets)
+          ? normalizeStringList(input.automation?.monitoring?.alertRecipientNCarnets, [])
+          : defaults.automation.monitoring.alertRecipientNCarnets,
+        alertOnMissedRun: normalizeBoolean(input.automation?.monitoring?.alertOnMissedRun, defaults.automation.monitoring.alertOnMissedRun),
+        alertOnTaskFailure: normalizeBoolean(input.automation?.monitoring?.alertOnTaskFailure, defaults.automation.monitoring.alertOnTaskFailure),
+      },
+      tasks: Array.isArray(input.automation?.tasks) && input.automation.tasks.length > 0
+        ? input.automation.tasks.map((task, index) => normalizeAutomationTask(task, defaults.automation.tasks[index]))
+          .filter((task) => Boolean(task.taskKey))
+        : defaults.automation.tasks,
     },
   }
 }
@@ -214,6 +352,10 @@ function updateNotificationSettings(partialPayload) {
       ...current.responseRequest,
       ...(partialPayload.responseRequest || {}),
     },
+    availabilityMatching: {
+      ...current.availabilityMatching,
+      ...(partialPayload.availabilityMatching || {}),
+    },
     weeklyDigest: {
       ...(current.weeklyDigest || {}),
       ...(partialPayload.weeklyDigest || {}),
@@ -225,6 +367,14 @@ function updateNotificationSettings(partialPayload) {
     sortidaStatus: {
       ...current.sortidaStatus,
       ...(partialPayload.sortidaStatus || {}),
+    },
+    automation: {
+      ...current.automation,
+      ...(partialPayload.automation || {}),
+      monitoring: {
+        ...(current.automation?.monitoring || {}),
+        ...(partialPayload.automation?.monitoring || {}),
+      },
     },
   }
 

@@ -1,10 +1,13 @@
 const {
   ensureConfiguredConvoTypes,
   runDailyNotificationAutomation,
+  detectAndRecordMissedRun,
+  runRetentionCleanup,
 } = require('../notifications/notifications.service')
 const { readNotificationSettings } = require('../notifications/notifications.config')
 
 let scheduledTimer = null
+let cleanupTimer = null
 
 function getNextRunDate(referenceDate = new Date()) {
   const settings = readNotificationSettings()
@@ -18,6 +21,26 @@ function getNextRunDate(referenceDate = new Date()) {
   return nextRun
 }
 
+function scheduleRetentionCleanup() {
+  const now = new Date()
+  const nextCleanup = new Date(now)
+  nextCleanup.setHours(3, 0, 0, 0)
+  if (nextCleanup <= now) {
+    nextCleanup.setDate(nextCleanup.getDate() + 1)
+  }
+
+  const delay = nextCleanup.getTime() - now.getTime()
+  cleanupTimer = setTimeout(async () => {
+    try {
+      await runRetentionCleanup()
+    } catch (error) {
+      console.error('[convos.scheduler] Error en limpieza de histórico:', error)
+    } finally {
+      scheduleRetentionCleanup()
+    }
+  }, delay)
+}
+
 function scheduleNextRun() {
   const now = new Date()
   const nextRun = getNextRunDate(now)
@@ -25,6 +48,10 @@ function scheduleNextRun() {
 
   scheduledTimer = setTimeout(async () => {
     try {
+      // Check for potential missed runs before executing (edge case: server was briefly down)
+      await detectAndRecordMissedRun(new Date()).catch((err) => {
+        console.error('[convos.scheduler] Error al detectar correguda omesa:', err)
+      })
       const summary = await runDailyNotificationAutomation(null, new Date())
       console.log('[convos.scheduler] Automatizacion diaria completada.', summary)
     } catch (error) {
@@ -42,11 +69,23 @@ async function startConvoScheduler() {
 
   try {
     await ensureConfiguredConvoTypes()
+    // Detect missed runs before attempting the initial run
+    await detectAndRecordMissedRun(new Date()).catch((err) => {
+      console.error('[convos.scheduler] Error al detectar correguda omesa en inicio:', err)
+    })
     await runDailyNotificationAutomation(null, new Date())
     console.log('[convos.scheduler] Estado inicial de automatizacion sincronizado.')
   } catch (error) {
     console.error('[convos.scheduler] Error en sincronizacion inicial de automatizacion:', error)
   }
+
+  // Run initial cleanup and schedule daily cleanup at 03:00
+  try {
+    await runRetentionCleanup()
+  } catch (error) {
+    console.error('[convos.scheduler] Error en limpieza inicial de histórico:', error)
+  }
+  scheduleRetentionCleanup()
 
   scheduleNextRun()
 }

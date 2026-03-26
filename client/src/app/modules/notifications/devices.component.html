@@ -36,10 +36,10 @@
             <span>{{ device.platform || 'web' }}</span>
             @if (device.lastSeenAt) {
               <span class="separator">·</span>
-              <span>Últim ús: {{ device.lastSeenAt | date:'short' }}</span>
+              <span>Últim ús: {{ device.lastSeenAt | date:'dd/MM/yyyy HH:mm' }}</span>
             }
             <span class="separator">·</span>
-            <span>Alta: {{ device.createdAt | date:'short' }}</span>
+            <span>Alta: {{ device.createdAt | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
           <code class="device-item-token">{{ device.token.slice(0, 40) }}…</code>
         </article>

@@ -1,8 +1,9 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Convocatoria, ConvoType, User } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { DateFormatService } from '../../services/date-format.service';
 
 type ConvocatoriaFormData = Partial<Convocatoria> & {
   incendiReadyInMinutes?: number;
@@ -16,6 +17,7 @@ type ConvocatoriaFormData = Partial<Convocatoria> & {
   styleUrl: './convos.component.css'
 })
 export class ConvosComponent implements OnDestroy {
+  private dateFormatService = inject(DateFormatService);
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
   readonly pageSizeOptions = [10, 25, 50];
   readonly todayDate = this.toDateInputValue(new Date());
@@ -421,7 +423,7 @@ export class ConvosComponent implements OnDestroy {
   }
 
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('ca-ES');
+    return this.dateFormatService.formatDate(dateString);
   }
 
   getSortidaLabel(sortida?: boolean): string {

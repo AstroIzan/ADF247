@@ -51,6 +51,7 @@ export class DashboardComponent implements OnInit {
   loadingNotifLogs = signal(false);
   notifConfigError = signal('');
   notifLogsError = signal('');
+
   firebaseConfigured = signal(true);
   firebaseHealthMessage = signal('');
 

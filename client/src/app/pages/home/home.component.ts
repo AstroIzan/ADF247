@@ -1,9 +1,10 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { DataService, Convocatoria, ConvoType, Respuesta, User } from '../../services/data.service';
+import { DateFormatService } from '../../services/date-format.service';
 
 @Component({
   selector: 'app-home',
@@ -13,6 +14,7 @@ import { DataService, Convocatoria, ConvoType, Respuesta, User } from '../../ser
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
+  private dateFormatService = inject(DateFormatService);
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
   readonly todayDate = this.toDateInputValue(new Date());
   readonly hourOptions = this.buildHourOptions();
@@ -699,7 +701,12 @@ export class HomeComponent implements OnInit {
           return leftTime - rightTime;
         }
 
-        return this.getUserNameByNCarnet(left.userNCarnet).localeCompare(this.getUserNameByNCarnet(right.userNCarnet));
+        const byName = this.getUserNameByNCarnet(left.userNCarnet).localeCompare(this.getUserNameByNCarnet(right.userNCarnet));
+        if (byName !== 0) {
+          return byName;
+        }
+
+        return String(left.userNCarnet || '').localeCompare(String(right.userNCarnet || ''));
       });
   }
 

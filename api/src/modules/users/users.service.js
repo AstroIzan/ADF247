@@ -8,6 +8,22 @@ const {
 } = require('./users.dto')
 const { hashPassword } = require('../auth/auth.password')
 
+const CSV_HEADERS = [
+  'nCarnet',
+  'nIndicatiu',
+  'name',
+  'lastName',
+  'password',
+  'isActive',
+  'isAdmin',
+  'isGroc',
+  'isCapOperatiu',
+  'isCapColla',
+]
+
+const CSV_MAX_BYTES = 2 * 1024 * 1024
+const CSV_MAX_ROWS = 1500
+
 // Siempre que consultamos un usuario necesitamos tambien sus roles
 const userInclude = {
   roles: true,
@@ -152,6 +168,211 @@ function mapPrismaError(error) {
   return error
 }
 
+function parseCsvLine(line) {
+  const fields = []
+  let current = ''
+  let insideQuotes = false
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index]
+    const nextChar = line[index + 1]
+
+    if (char === '"') {
+      if (insideQuotes && nextChar === '"') {
+        current += '"'
+        index += 1
+      } else {
+        insideQuotes = !insideQuotes
+      }
+
+      continue
+    }
+
+    if (char === ',' && !insideQuotes) {
+      fields.push(current.trim())
+      current = ''
+      continue
+    }
+
+    current += char
+  }
+
+  fields.push(current.trim())
+  return fields
+}
+
+function parseCsvBoolean(value, { defaultValue = false, rowNumber, fieldName } = {}) {
+  if (value === undefined || value === null || value === '') {
+    return defaultValue
+  }
+
+  const normalized = String(value).trim().toLowerCase()
+
+  if (['true', '1', 'yes', 'si', 's'].includes(normalized)) {
+    return true
+  }
+
+  if (['false', '0', 'no', 'n'].includes(normalized)) {
+    return false
+  }
+
+  throw createDtoError(`Fila ${rowNumber}: el campo "${fieldName}" debe ser booleano (true/false/1/0/yes/no).`)
+}
+
+function parseCsvRows(csvContent) {
+  const normalizedContent = String(csvContent).replace(/^\uFEFF/, '')
+  const lines = normalizedContent
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+
+  if (lines.length < 2) {
+    throw createDtoError('El CSV debe incluir cabecera y al menos una fila de datos.')
+  }
+
+  const header = parseCsvLine(lines[0])
+
+  if (header.length !== CSV_HEADERS.length || header.some((entry, index) => entry !== CSV_HEADERS[index])) {
+    throw createDtoError(`Cabecera CSV invalida. Debe ser exactamente: ${CSV_HEADERS.join(',')}`)
+  }
+
+  const rows = lines.slice(1)
+
+  if (rows.length > CSV_MAX_ROWS) {
+    throw createDtoError(`El CSV supera el maximo permitido de ${CSV_MAX_ROWS} filas.`)
+  }
+
+  return rows.map((row, rowIndex) => {
+    const rowNumber = rowIndex + 2
+    const values = parseCsvLine(row)
+
+    if (values.length > CSV_HEADERS.length) {
+      throw createDtoError(`Fila ${rowNumber}: tiene mas columnas de las esperadas (${CSV_HEADERS.length}).`)
+    }
+
+    const alignedValues = [...values]
+    while (alignedValues.length < CSV_HEADERS.length) {
+      alignedValues.push('')
+    }
+
+    return CSV_HEADERS.reduce((acc, headerName, index) => {
+      acc[headerName] = alignedValues[index]
+      return acc
+    }, { __rowNumber: rowNumber })
+  })
+}
+
+function mapCsvRowToUserPayload(row) {
+  const rowNumber = row.__rowNumber
+  const nCarnet = String(row.nCarnet || '').trim()
+  const name = String(row.name || '').trim()
+  const password = String(row.password || '').trim()
+
+  if (!nCarnet) {
+    throw createDtoError(`Fila ${rowNumber}: "nCarnet" es obligatorio.`)
+  }
+
+  if (!name) {
+    throw createDtoError(`Fila ${rowNumber}: "name" es obligatorio.`)
+  }
+
+  if (!password || password.length < 6) {
+    throw createDtoError(`Fila ${rowNumber}: "password" es obligatorio y debe tener al menos 6 caracteres.`)
+  }
+
+  return {
+    nCarnet,
+    nIndicatiu: String(row.nIndicatiu || '').trim() || undefined,
+    name,
+    lastName: String(row.lastName || '').trim() || undefined,
+    password,
+    isActive: parseCsvBoolean(row.isActive, {
+      defaultValue: true,
+      rowNumber,
+      fieldName: 'isActive',
+    }),
+    roles: {
+      isAdmin: parseCsvBoolean(row.isAdmin, { rowNumber, fieldName: 'isAdmin' }),
+      isGroc: parseCsvBoolean(row.isGroc, { rowNumber, fieldName: 'isGroc' }),
+      isCapOperatiu: parseCsvBoolean(row.isCapOperatiu, { rowNumber, fieldName: 'isCapOperatiu' }),
+      isCapColla: parseCsvBoolean(row.isCapColla, { rowNumber, fieldName: 'isCapColla' }),
+    },
+    __rowNumber: rowNumber,
+  }
+}
+
+async function importUsersFromCsv(payload, options = {}) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    throw createDtoError('El body de importacion debe ser un objeto JSON valido.')
+  }
+
+  const csvContent = typeof payload.csvContent === 'string' ? payload.csvContent : ''
+  const fileName = typeof payload.fileName === 'string' ? payload.fileName.trim() : ''
+  const createUserFn = typeof options.createUserFn === 'function' ? options.createUserFn : createUser
+
+  if (!csvContent.trim()) {
+    throw createDtoError('El campo "csvContent" es obligatorio y debe contener el fichero CSV.')
+  }
+
+  if (fileName && !fileName.toLowerCase().endsWith('.csv')) {
+    throw createDtoError('El nombre de fichero debe terminar en .csv.')
+  }
+
+  const byteSize = Buffer.byteLength(csvContent, 'utf8')
+
+  if (byteSize > CSV_MAX_BYTES) {
+    throw createDtoError(`El CSV supera el tamaño maximo permitido (${CSV_MAX_BYTES} bytes).`)
+  }
+
+  const parsedRows = parseCsvRows(csvContent)
+  const result = {
+    totalRows: parsedRows.length,
+    inserted: 0,
+    rejected: 0,
+    rows: [],
+  }
+
+  for (const row of parsedRows) {
+    try {
+      const userPayload = mapCsvRowToUserPayload(row)
+
+      await createUserFn({
+        nCarnet: userPayload.nCarnet,
+        nIndicatiu: userPayload.nIndicatiu,
+        name: userPayload.name,
+        lastName: userPayload.lastName,
+        password: userPayload.password,
+        isActive: userPayload.isActive,
+        roles: userPayload.roles,
+      })
+
+      result.inserted += 1
+      result.rows.push({
+        rowNumber: userPayload.__rowNumber,
+        nCarnet: userPayload.nCarnet,
+        status: 'inserted',
+      })
+    } catch (error) {
+      result.rejected += 1
+      result.rows.push({
+        rowNumber: row.__rowNumber,
+        nCarnet: row.nCarnet || null,
+        status: 'rejected',
+        reason: error.message,
+      })
+    }
+  }
+
+  console.info('[users.import] Resultado import CSV', {
+    fileName: fileName || 'inline-content',
+    totalRows: result.totalRows,
+    inserted: result.inserted,
+    rejected: result.rejected,
+  })
+
+  return result
+}
+
 // Devuelve todos los usuarios ordenados por id para mantener una respuesta estable.
 async function getAllUsers() {
   const users = await database.user.findMany({
@@ -236,6 +457,11 @@ module.exports = {
   deleteUser,
   getAllUsers,
   getUserById,
+  importUsersFromCsv,
+  __csvInternals: {
+    mapCsvRowToUserPayload,
+    parseCsvRows,
+  },
   mapPrismaError,
   updateUser,
 }

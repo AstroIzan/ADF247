@@ -63,6 +63,16 @@ async function createUser(req, res) {
   }
 }
 
+// POST /users/import -> procesa altas en lote desde contenido CSV.
+async function importUsers(req, res) {
+  try {
+    const result = await usersService.importUsersFromCsv(req.body)
+    res.status(201).json(result)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
 // PUT /users/:id -> actualiza un usuario existente. No crea si no existe.
 async function updateUser(req, res) {
   try {
@@ -90,5 +100,6 @@ module.exports = {
   deleteUser,
   getUserById,
   getUsers,
+  importUsers,
   updateUser,
 }

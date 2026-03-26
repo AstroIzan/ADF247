@@ -199,6 +199,8 @@ function mapRespuestaToDto(respuesta) {
     customText: respuesta.customText,
     fullHorari: respuesta.fullHorari,
     response: respuesta.response,
+    source: respuesta.source ?? 'manual',
+    autoAssignReason: respuesta.autoAssignReason ?? null,
   }
 }
 

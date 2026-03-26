@@ -8,6 +8,9 @@ async function main() {
 
   // Limpiar datos existentes
   console.log('\n\uD83D\uDDD1\uFE0F  Limpiando datos existentes...')
+  await prisma.notificationAutomationTaskRun.deleteMany({})
+  await prisma.notificationAutomationRun.deleteMany({})
+  await prisma.availabilityWindow.deleteMany({})
   await prisma.respuesta.deleteMany({})
   await prisma.convocatoria.deleteMany({})
   await prisma.role.deleteMany({})
@@ -96,6 +99,41 @@ async function main() {
     })
     console.log(`\u2705 Convocatoria: ${convo.title}`)
   }
+
+  console.log('\n\uD83D\uDD52 Creando ventanas de disponibilidad de ejemplo...')
+  const windowsData = [
+    {
+      userNCarnet: '247/GI/239',
+      fromDateTime: new Date('2026-03-25T11:00:00'),
+      toDateTime: new Date('2026-03-25T14:00:00'),
+      availabilityType: 'available',
+      source: 'manual',
+      notes: 'Disponible para turno de mediodia',
+    },
+    {
+      userNCarnet: '247/GI/230',
+      fromDateTime: new Date('2026-03-25T10:30:00'),
+      toDateTime: new Date('2026-03-25T16:00:00'),
+      availabilityType: 'unavailable',
+      source: 'manual',
+      notes: 'No disponible por trabajo',
+    },
+    {
+      userNCarnet: '247/069',
+      fromDateTime: new Date('2026-03-25T11:30:00'),
+      toDateTime: new Date('2026-03-25T13:30:00'),
+      availabilityType: 'available',
+      source: 'import',
+      notes: 'Importado desde planilla',
+    },
+  ]
+
+  for (const windowData of windowsData) {
+    await prisma.availabilityWindow.create({
+      data: windowData,
+    })
+  }
+  console.log(`\u2705 Ventanas creadas: ${windowsData.length}`)
 
   console.log('\n\uD83C\uDF89 Seed completado correctamente!')
 }

@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService, User } from '../../services/data.service';
+import { DataService, User, UsersCsvImportResult } from '../../services/data.service';
 
 @Component({
   selector: 'app-users',
@@ -25,6 +25,12 @@ export class UsersComponent implements OnDestroy {
   selectedUser = signal<User | null>(null);
   changePassword = signal(false);
   confirmPassword = signal('');
+  showImportModal = signal(false);
+  importCsvName = signal('');
+  importCsvHeaders = signal<string[]>([]);
+  importCsvContent = signal('');
+  importSubmitting = signal(false);
+  importResult = signal<UsersCsvImportResult | null>(null);
 
   filters = signal({
     name: '',
@@ -169,6 +175,97 @@ export class UsersComponent implements OnDestroy {
   closeForm() {
     this.showForm.set(false);
     document.body.classList.remove('modal-open');
+  }
+
+  openImportCsvModal() {
+    this.showImportModal.set(true);
+    this.importResult.set(null);
+    this.importCsvName.set('');
+    this.importCsvHeaders.set([]);
+    this.importCsvContent.set('');
+    document.body.classList.add('modal-open');
+  }
+
+  closeImportCsvModal() {
+    this.showImportModal.set(false);
+    document.body.classList.remove('modal-open');
+  }
+
+  downloadCsvTemplate() {
+    const template = [
+      'nCarnet,nIndicatiu,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
+      '247001,BR-01,Izan,Admin,Passw0rd!,true,true,false,false,false',
+      '247002,BR-12,Joan,Perez,Passw0rd!,true,false,true,false,false',
+    ].join('\n');
+
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'users-import-template-v1.csv';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async onCsvFileSelected(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const file = inputElement.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('El fitxer supera el límit de 2MB.');
+      inputElement.value = '';
+      return;
+    }
+
+    const name = file.name.toLowerCase();
+
+    if (!name.endsWith('.csv')) {
+      alert('Només es permeten fitxers CSV.');
+      inputElement.value = '';
+      return;
+    }
+
+    const text = await file.text();
+    const [headerLine] = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+    const headers = (headerLine || '')
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+
+    this.importCsvName.set(file.name);
+    this.importCsvHeaders.set(headers);
+    this.importCsvContent.set(text);
+    this.importResult.set(null);
+  }
+
+  submitCsvImport() {
+    const csvContent = this.importCsvContent();
+
+    if (!csvContent.trim()) {
+      alert('Selecciona un fitxer CSV abans de processar.');
+      return;
+    }
+
+    this.importSubmitting.set(true);
+
+    this.dataService.importUsersFromCsv({
+      csvContent,
+      fileName: this.importCsvName() || undefined,
+    }).subscribe({
+      next: (result) => {
+        this.importResult.set(result);
+        this.importSubmitting.set(false);
+        this.onChanged.emit();
+      },
+      error: (err) => {
+        alert('Error en importar CSV: ' + (err?.error?.message || err.message || 'Error desconegut'));
+        this.importSubmitting.set(false);
+      },
+    });
   }
 
   submitForm() {
