@@ -427,19 +427,6 @@
             <label class="checkbox-label">
               <input
                 type="checkbox"
-                [ngModel]="formData().moreThan2"
-                (ngModelChange)="updateFormField('moreThan2', $event)"
-                [disabled]="formSubmitting()"
-                name="moreThan2"
-              />
-              Més de 2 participants
-            </label>
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
                 [ngModel]="formData().isActive"
                 (ngModelChange)="updateFormField('isActive', $event)"
                 [disabled]="formSubmitting()"
@@ -516,13 +503,6 @@
               </span>
             </p>
           </div>
-
-          @if (selectedConvo()?.moreThan2) {
-            <div class="detail-group">
-              <label>Més de 2 Participants</label>
-              <p>Sí</p>
-            </div>
-          }
         </div>
 
         <div class="modal-footer">
