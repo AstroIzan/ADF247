@@ -50,7 +50,6 @@ export class HomeComponent implements OnInit {
     convoTypeId: null as number | null,
     startTime: '',
     finalTime: '',
-    moreThan2: false,
     isActive: true,
     autoAssignResponsable: false,
     sortida: false,
@@ -92,7 +91,6 @@ export class HomeComponent implements OnInit {
     startTime: '',
     finalTime: '',
     incendiReadyInMinutes: 10,
-    moreThan2: false,
     isActive: true,
     autoAssignResponsable: true,
     sortida: false,
@@ -739,6 +737,35 @@ export class HomeComponent implements OnInit {
     return Boolean(currentUserId && convo.responsableId === currentUserId);
   }
 
+  canManageAttendanceForConvo(convo: Convocatoria | null) {
+    if (!convo) {
+      return false;
+    }
+
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    return Boolean(currentUserId && convo.responsableId === currentUserId);
+  }
+
+  updateAttendanceConfirmation(respuesta: Respuesta, attendanceConfirmed: boolean) {
+    if (!this.canManageAttendanceForConvo(respuesta.convocatoria || null)) {
+      this.error.set('No tens permisos per modificar l\'assistència d\'aquesta convocatòria.');
+      return;
+    }
+
+    this.dataService.updateRespuesta(respuesta.id, { attendanceConfirmed }).subscribe({
+      next: () => {
+        this.loadRespuestas();
+      },
+      error: (err) => {
+        this.error.set(err.message || 'No s\'ha pogut actualitzar l\'assistència.');
+      },
+    });
+  }
+
   openGuardiaResponsesModal(convo: Convocatoria) {
     if (!this.canOpenGuardiaResponses(convo)) {
       return;
@@ -879,7 +906,7 @@ export class HomeComponent implements OnInit {
       convoTypeId: convo.convoTypeId || null,
       startTime: this.extractTimeValue(convo.startTime),
       finalTime: this.extractTimeValue(convo.finalTime),
-      moreThan2: Boolean(convo.moreThan2),
+
       isActive: Boolean(convo.isActive),
       autoAssignResponsable: Boolean(convo.autoAssignResponsable),
       sortida: Boolean(convo.sortida),
@@ -895,7 +922,7 @@ export class HomeComponent implements OnInit {
   }
 
   updateAdminConvoField(
-    field: 'title' | 'date' | 'ubiSortida' | 'responsableId' | 'convoTypeId' | 'startTime' | 'finalTime' | 'moreThan2' | 'isActive' | 'autoAssignResponsable' | 'sortida',
+    field: 'title' | 'date' | 'ubiSortida' | 'responsableId' | 'convoTypeId' | 'startTime' | 'finalTime' | 'isActive' | 'autoAssignResponsable' | 'sortida',
     value: string | boolean
   ) {
     const current = this.adminConvoForm();
@@ -944,7 +971,6 @@ export class HomeComponent implements OnInit {
       convoTypeId: form.convoTypeId,
       startTime: this.composeDateTime(form.date, form.startTime),
       finalTime: form.finalTime ? this.composeDateTime(form.date, form.finalTime) : undefined,
-      moreThan2: form.moreThan2,
       isActive: form.isActive,
       autoAssignResponsable: form.autoAssignResponsable,
       sortida: form.sortida,
@@ -960,6 +986,34 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => {
         this.error.set(err.message || 'No s\'ha pogut actualitzar la convocatòria.');
+        this.adminConvoSaving.set(false);
+      },
+    });
+  }
+
+  deleteAdminConvocatoria() {
+    const convo = this.adminConvo();
+
+    if (!convo) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Vols eliminar la convocatòria "${convo.title}"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.adminConvoSaving.set(true);
+
+    this.dataService.deleteConvocatoria(convo.id).subscribe({
+      next: () => {
+        this.adminConvoSaving.set(false);
+        this.closeAdminConvoModal();
+        this.loadConvocatorias();
+        this.loadRespuestas();
+      },
+      error: (err) => {
+        this.error.set(err.message || 'No s\'ha pogut eliminar la convocatòria.');
         this.adminConvoSaving.set(false);
       },
     });
@@ -1000,7 +1054,6 @@ export class HomeComponent implements OnInit {
       startTime: '',
       finalTime: '',
       incendiReadyInMinutes: 10,
-      moreThan2: false,
       isActive: true,
       autoAssignResponsable: true,
       sortida: false,
@@ -1032,7 +1085,6 @@ export class HomeComponent implements OnInit {
       | 'startTime'
       | 'finalTime'
       | 'incendiReadyInMinutes'
-      | 'moreThan2'
       | 'isActive'
       | 'autoAssignResponsable'
       | 'sortida',
@@ -1199,7 +1251,6 @@ export class HomeComponent implements OnInit {
           convoTypeId: form.convoTypeId,
           startTime: this.composeDateTime(startDate, this.toTimeInputValue(startDateTime)),
           finalTime: this.composeDateTime(finalDate, this.toTimeInputValue(finalDateTime)),
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
@@ -1220,7 +1271,6 @@ export class HomeComponent implements OnInit {
           convoTypeId: form.convoTypeId,
           startTime: this.composeDateTime(form.date, form.startTime),
           finalTime: form.finalTime ? this.composeDateTime(form.date, form.finalTime) : undefined,
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
@@ -1387,7 +1437,6 @@ export class HomeComponent implements OnInit {
     ubiSortida: string;
     responsableId: number | null;
     convoTypeId: number | null;
-    moreThan2: boolean;
     isActive: boolean;
     autoAssignResponsable: boolean;
     sortida: boolean;
@@ -1425,7 +1474,6 @@ export class HomeComponent implements OnInit {
           convoTypeId: form.convoTypeId || undefined,
           startTime: this.composeDateTime(dateValue, shift.start),
           finalTime: this.composeDateTime(dateValue, shift.end),
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
@@ -1446,7 +1494,6 @@ export class HomeComponent implements OnInit {
       ubiSortida: string;
       responsableId: number | null;
       convoTypeId: number | null;
-      moreThan2: boolean;
       isActive: boolean;
       autoAssignResponsable: boolean;
       sortida: boolean;
@@ -1476,7 +1523,6 @@ export class HomeComponent implements OnInit {
           convoTypeId: form.convoTypeId || undefined,
           startTime: this.composeDateTime(dateValue, slot.start),
           finalTime: this.composeDateTime(dateValue, slot.end),
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,

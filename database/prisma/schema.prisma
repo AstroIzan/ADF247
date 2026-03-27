@@ -57,7 +57,7 @@ model Convocatoria {
   user          User      @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
   convoTypeId   Int
   convoType     ConvoType @relation(fields: [convoTypeId], references: [id])
-  moreThan2     Boolean   @default(false)
+
   startTime     DateTime
   finalTime     DateTime?
   isActive      Boolean   @default(true)
@@ -77,6 +77,7 @@ model Respuesta {
   customText   String?
   fullHorari   Boolean      @default(false)
   response     Boolean
+  attendanceConfirmed Boolean @default(true)
   source       String       @default("manual")
   autoAssignReason String?
 

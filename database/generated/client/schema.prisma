@@ -49,15 +49,15 @@ model ConvoType {
 }
 
 model Convocatoria {
-  id                    Int       @id @default(autoincrement())
-  date                  DateTime
-  title                 String
-  ubiSortida            String
-  responsableId         Int
-  user                  User      @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
-  convoTypeId           Int
-  convoType             ConvoType @relation(fields: [convoTypeId], references: [id])
-  moreThan2             Boolean   @default(false)
+  id            Int       @id @default(autoincrement())
+  date          DateTime
+  title         String
+  ubiSortida    String
+  responsableId Int
+  user          User      @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
+  convoTypeId   Int
+  convoType     ConvoType @relation(fields: [convoTypeId], references: [id])
+
   startTime             DateTime
   finalTime             DateTime?
   isActive              Boolean   @default(true)
@@ -68,17 +68,18 @@ model Convocatoria {
 }
 
 model Respuesta {
-  id               Int          @id @default(autoincrement())
-  convoId          Int
-  convocatoria     Convocatoria @relation(fields: [convoId], references: [id])
-  userNCarnet      String
-  user             User         @relation(fields: [userNCarnet], references: [nCarnet])
-  isCustom         Boolean      @default(false)
-  customText       String?
-  fullHorari       Boolean      @default(false)
-  response         Boolean
-  source           String       @default("manual")
-  autoAssignReason String?
+  id                  Int          @id @default(autoincrement())
+  convoId             Int
+  convocatoria        Convocatoria @relation(fields: [convoId], references: [id])
+  userNCarnet         String
+  user                User         @relation(fields: [userNCarnet], references: [nCarnet])
+  isCustom            Boolean      @default(false)
+  customText          String?
+  fullHorari          Boolean      @default(false)
+  response            Boolean
+  attendanceConfirmed Boolean      @default(true)
+  source              String       @default("manual")
+  autoAssignReason    String?
 
   @@index([source])
 }

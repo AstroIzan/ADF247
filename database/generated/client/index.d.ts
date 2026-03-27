@@ -4962,7 +4962,6 @@ export namespace Prisma {
     ubiSortida: string | null
     responsableId: number | null
     convoTypeId: number | null
-    moreThan2: boolean | null
     startTime: Date | null
     finalTime: Date | null
     isActive: boolean | null
@@ -4977,7 +4976,6 @@ export namespace Prisma {
     ubiSortida: string | null
     responsableId: number | null
     convoTypeId: number | null
-    moreThan2: boolean | null
     startTime: Date | null
     finalTime: Date | null
     isActive: boolean | null
@@ -4992,7 +4990,6 @@ export namespace Prisma {
     ubiSortida: number
     responsableId: number
     convoTypeId: number
-    moreThan2: number
     startTime: number
     finalTime: number
     isActive: number
@@ -5021,7 +5018,6 @@ export namespace Prisma {
     ubiSortida?: true
     responsableId?: true
     convoTypeId?: true
-    moreThan2?: true
     startTime?: true
     finalTime?: true
     isActive?: true
@@ -5036,7 +5032,6 @@ export namespace Prisma {
     ubiSortida?: true
     responsableId?: true
     convoTypeId?: true
-    moreThan2?: true
     startTime?: true
     finalTime?: true
     isActive?: true
@@ -5051,7 +5046,6 @@ export namespace Prisma {
     ubiSortida?: true
     responsableId?: true
     convoTypeId?: true
-    moreThan2?: true
     startTime?: true
     finalTime?: true
     isActive?: true
@@ -5153,7 +5147,6 @@ export namespace Prisma {
     ubiSortida: string
     responsableId: number
     convoTypeId: number
-    moreThan2: boolean
     startTime: Date
     finalTime: Date | null
     isActive: boolean
@@ -5187,7 +5180,6 @@ export namespace Prisma {
     ubiSortida?: boolean
     responsableId?: boolean
     convoTypeId?: boolean
-    moreThan2?: boolean
     startTime?: boolean
     finalTime?: boolean
     isActive?: boolean
@@ -5206,7 +5198,6 @@ export namespace Prisma {
     ubiSortida?: boolean
     responsableId?: boolean
     convoTypeId?: boolean
-    moreThan2?: boolean
     startTime?: boolean
     finalTime?: boolean
     isActive?: boolean
@@ -5223,7 +5214,6 @@ export namespace Prisma {
     ubiSortida?: boolean
     responsableId?: boolean
     convoTypeId?: boolean
-    moreThan2?: boolean
     startTime?: boolean
     finalTime?: boolean
     isActive?: boolean
@@ -5256,7 +5246,6 @@ export namespace Prisma {
       ubiSortida: string
       responsableId: number
       convoTypeId: number
-      moreThan2: boolean
       startTime: Date
       finalTime: Date | null
       isActive: boolean
@@ -5664,7 +5653,6 @@ export namespace Prisma {
     readonly ubiSortida: FieldRef<"Convocatoria", 'String'>
     readonly responsableId: FieldRef<"Convocatoria", 'Int'>
     readonly convoTypeId: FieldRef<"Convocatoria", 'Int'>
-    readonly moreThan2: FieldRef<"Convocatoria", 'Boolean'>
     readonly startTime: FieldRef<"Convocatoria", 'DateTime'>
     readonly finalTime: FieldRef<"Convocatoria", 'DateTime'>
     readonly isActive: FieldRef<"Convocatoria", 'Boolean'>
@@ -6050,6 +6038,7 @@ export namespace Prisma {
     customText: string | null
     fullHorari: boolean | null
     response: boolean | null
+    attendanceConfirmed: boolean | null
     source: string | null
     autoAssignReason: string | null
   }
@@ -6062,6 +6051,7 @@ export namespace Prisma {
     customText: string | null
     fullHorari: boolean | null
     response: boolean | null
+    attendanceConfirmed: boolean | null
     source: string | null
     autoAssignReason: string | null
   }
@@ -6074,6 +6064,7 @@ export namespace Prisma {
     customText: number
     fullHorari: number
     response: number
+    attendanceConfirmed: number
     source: number
     autoAssignReason: number
     _all: number
@@ -6098,6 +6089,7 @@ export namespace Prisma {
     customText?: true
     fullHorari?: true
     response?: true
+    attendanceConfirmed?: true
     source?: true
     autoAssignReason?: true
   }
@@ -6110,6 +6102,7 @@ export namespace Prisma {
     customText?: true
     fullHorari?: true
     response?: true
+    attendanceConfirmed?: true
     source?: true
     autoAssignReason?: true
   }
@@ -6122,6 +6115,7 @@ export namespace Prisma {
     customText?: true
     fullHorari?: true
     response?: true
+    attendanceConfirmed?: true
     source?: true
     autoAssignReason?: true
     _all?: true
@@ -6221,6 +6215,7 @@ export namespace Prisma {
     customText: string | null
     fullHorari: boolean
     response: boolean
+    attendanceConfirmed: boolean
     source: string
     autoAssignReason: string | null
     _count: RespuestaCountAggregateOutputType | null
@@ -6252,6 +6247,7 @@ export namespace Prisma {
     customText?: boolean
     fullHorari?: boolean
     response?: boolean
+    attendanceConfirmed?: boolean
     source?: boolean
     autoAssignReason?: boolean
     convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
@@ -6266,6 +6262,7 @@ export namespace Prisma {
     customText?: boolean
     fullHorari?: boolean
     response?: boolean
+    attendanceConfirmed?: boolean
     source?: boolean
     autoAssignReason?: boolean
     convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
@@ -6280,6 +6277,7 @@ export namespace Prisma {
     customText?: boolean
     fullHorari?: boolean
     response?: boolean
+    attendanceConfirmed?: boolean
     source?: boolean
     autoAssignReason?: boolean
   }
@@ -6307,6 +6305,7 @@ export namespace Prisma {
       customText: string | null
       fullHorari: boolean
       response: boolean
+      attendanceConfirmed: boolean
       source: string
       autoAssignReason: string | null
     }, ExtArgs["result"]["respuesta"]>
@@ -6711,6 +6710,7 @@ export namespace Prisma {
     readonly customText: FieldRef<"Respuesta", 'String'>
     readonly fullHorari: FieldRef<"Respuesta", 'Boolean'>
     readonly response: FieldRef<"Respuesta", 'Boolean'>
+    readonly attendanceConfirmed: FieldRef<"Respuesta", 'Boolean'>
     readonly source: FieldRef<"Respuesta", 'String'>
     readonly autoAssignReason: FieldRef<"Respuesta", 'String'>
   }
@@ -12328,7 +12328,6 @@ export namespace Prisma {
     ubiSortida: 'ubiSortida',
     responsableId: 'responsableId',
     convoTypeId: 'convoTypeId',
-    moreThan2: 'moreThan2',
     startTime: 'startTime',
     finalTime: 'finalTime',
     isActive: 'isActive',
@@ -12347,6 +12346,7 @@ export namespace Prisma {
     customText: 'customText',
     fullHorari: 'fullHorari',
     response: 'response',
+    attendanceConfirmed: 'attendanceConfirmed',
     source: 'source',
     autoAssignReason: 'autoAssignReason'
   };
@@ -12718,7 +12718,6 @@ export namespace Prisma {
     ubiSortida?: StringFilter<"Convocatoria"> | string
     responsableId?: IntFilter<"Convocatoria"> | number
     convoTypeId?: IntFilter<"Convocatoria"> | number
-    moreThan2?: BoolFilter<"Convocatoria"> | boolean
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
@@ -12736,7 +12735,6 @@ export namespace Prisma {
     ubiSortida?: SortOrder
     responsableId?: SortOrder
     convoTypeId?: SortOrder
-    moreThan2?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrderInput | SortOrder
     isActive?: SortOrder
@@ -12757,7 +12755,6 @@ export namespace Prisma {
     ubiSortida?: StringFilter<"Convocatoria"> | string
     responsableId?: IntFilter<"Convocatoria"> | number
     convoTypeId?: IntFilter<"Convocatoria"> | number
-    moreThan2?: BoolFilter<"Convocatoria"> | boolean
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
@@ -12775,7 +12772,6 @@ export namespace Prisma {
     ubiSortida?: SortOrder
     responsableId?: SortOrder
     convoTypeId?: SortOrder
-    moreThan2?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrderInput | SortOrder
     isActive?: SortOrder
@@ -12798,7 +12794,6 @@ export namespace Prisma {
     ubiSortida?: StringWithAggregatesFilter<"Convocatoria"> | string
     responsableId?: IntWithAggregatesFilter<"Convocatoria"> | number
     convoTypeId?: IntWithAggregatesFilter<"Convocatoria"> | number
-    moreThan2?: BoolWithAggregatesFilter<"Convocatoria"> | boolean
     startTime?: DateTimeWithAggregatesFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableWithAggregatesFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolWithAggregatesFilter<"Convocatoria"> | boolean
@@ -12817,6 +12812,7 @@ export namespace Prisma {
     customText?: StringNullableFilter<"Respuesta"> | string | null
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
+    attendanceConfirmed?: BoolFilter<"Respuesta"> | boolean
     source?: StringFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
     convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
@@ -12831,6 +12827,7 @@ export namespace Prisma {
     customText?: SortOrderInput | SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    attendanceConfirmed?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrderInput | SortOrder
     convocatoria?: ConvocatoriaOrderByWithRelationInput
@@ -12848,6 +12845,7 @@ export namespace Prisma {
     customText?: StringNullableFilter<"Respuesta"> | string | null
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
+    attendanceConfirmed?: BoolFilter<"Respuesta"> | boolean
     source?: StringFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
     convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
@@ -12862,6 +12860,7 @@ export namespace Prisma {
     customText?: SortOrderInput | SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    attendanceConfirmed?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrderInput | SortOrder
     _count?: RespuestaCountOrderByAggregateInput
@@ -12882,6 +12881,7 @@ export namespace Prisma {
     customText?: StringNullableWithAggregatesFilter<"Respuesta"> | string | null
     fullHorari?: BoolWithAggregatesFilter<"Respuesta"> | boolean
     response?: BoolWithAggregatesFilter<"Respuesta"> | boolean
+    attendanceConfirmed?: BoolWithAggregatesFilter<"Respuesta"> | boolean
     source?: StringWithAggregatesFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableWithAggregatesFilter<"Respuesta"> | string | null
   }
@@ -13533,7 +13533,6 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -13551,7 +13550,6 @@ export namespace Prisma {
     ubiSortida: string
     responsableId: number
     convoTypeId: number
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -13564,7 +13562,6 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -13582,7 +13579,6 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     responsableId?: IntFieldUpdateOperationsInput | number
     convoTypeId?: IntFieldUpdateOperationsInput | number
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -13598,7 +13594,6 @@ export namespace Prisma {
     ubiSortida: string
     responsableId: number
     convoTypeId: number
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -13610,7 +13605,6 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -13625,7 +13619,6 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     responsableId?: IntFieldUpdateOperationsInput | number
     convoTypeId?: IntFieldUpdateOperationsInput | number
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -13638,6 +13631,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
     convocatoria: ConvocatoriaCreateNestedOneWithoutRespostasInput
@@ -13652,6 +13646,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -13661,6 +13656,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     convocatoria?: ConvocatoriaUpdateOneRequiredWithoutRespostasNestedInput
@@ -13675,6 +13671,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -13687,6 +13684,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -13696,6 +13694,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -13708,6 +13707,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -14503,7 +14503,6 @@ export namespace Prisma {
     ubiSortida?: SortOrder
     responsableId?: SortOrder
     convoTypeId?: SortOrder
-    moreThan2?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrder
     isActive?: SortOrder
@@ -14524,7 +14523,6 @@ export namespace Prisma {
     ubiSortida?: SortOrder
     responsableId?: SortOrder
     convoTypeId?: SortOrder
-    moreThan2?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrder
     isActive?: SortOrder
@@ -14539,7 +14537,6 @@ export namespace Prisma {
     ubiSortida?: SortOrder
     responsableId?: SortOrder
     convoTypeId?: SortOrder
-    moreThan2?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrder
     isActive?: SortOrder
@@ -14580,6 +14577,7 @@ export namespace Prisma {
     customText?: SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    attendanceConfirmed?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrder
   }
@@ -14597,6 +14595,7 @@ export namespace Prisma {
     customText?: SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    attendanceConfirmed?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrder
   }
@@ -14609,6 +14608,7 @@ export namespace Prisma {
     customText?: SortOrder
     fullHorari?: SortOrder
     response?: SortOrder
+    attendanceConfirmed?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrder
   }
@@ -15750,7 +15750,6 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -15766,7 +15765,6 @@ export namespace Prisma {
     title: string
     ubiSortida: string
     convoTypeId: number
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -15789,6 +15787,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
     convocatoria: ConvocatoriaCreateNestedOneWithoutRespostasInput
@@ -15801,6 +15800,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -16000,7 +16000,6 @@ export namespace Prisma {
     ubiSortida?: StringFilter<"Convocatoria"> | string
     responsableId?: IntFilter<"Convocatoria"> | number
     convoTypeId?: IntFilter<"Convocatoria"> | number
-    moreThan2?: BoolFilter<"Convocatoria"> | boolean
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
@@ -16035,6 +16034,7 @@ export namespace Prisma {
     customText?: StringNullableFilter<"Respuesta"> | string | null
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
+    attendanceConfirmed?: BoolFilter<"Respuesta"> | boolean
     source?: StringFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
   }
@@ -16258,7 +16258,6 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -16274,7 +16273,6 @@ export namespace Prisma {
     title: string
     ubiSortida: string
     responsableId: number
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -16373,6 +16371,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
     user: UserCreateNestedOneWithoutRespostasInput
@@ -16385,6 +16384,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -16490,7 +16490,6 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -16507,7 +16506,6 @@ export namespace Prisma {
     ubiSortida: string
     responsableId: number
     convoTypeId: number
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -16575,7 +16573,6 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -16592,7 +16589,6 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     responsableId?: IntFieldUpdateOperationsInput | number
     convoTypeId?: IntFieldUpdateOperationsInput | number
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17138,7 +17134,6 @@ export namespace Prisma {
     title: string
     ubiSortida: string
     convoTypeId: number
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -17153,6 +17148,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -17233,7 +17229,6 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17249,7 +17244,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
     convoTypeId?: IntFieldUpdateOperationsInput | number
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17264,7 +17258,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
     convoTypeId?: IntFieldUpdateOperationsInput | number
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17277,6 +17270,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     convocatoria?: ConvocatoriaUpdateOneRequiredWithoutRespostasNestedInput
@@ -17289,6 +17283,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -17300,6 +17295,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -17455,7 +17451,6 @@ export namespace Prisma {
     title: string
     ubiSortida: string
     responsableId: number
-    moreThan2?: boolean
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -17467,7 +17462,6 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17483,7 +17477,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
     responsableId?: IntFieldUpdateOperationsInput | number
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17498,7 +17491,6 @@ export namespace Prisma {
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
     responsableId?: IntFieldUpdateOperationsInput | number
-    moreThan2?: BoolFieldUpdateOperationsInput | boolean
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17513,6 +17505,7 @@ export namespace Prisma {
     customText?: string | null
     fullHorari?: boolean
     response: boolean
+    attendanceConfirmed?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -17522,6 +17515,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutRespostasNestedInput
@@ -17534,6 +17528,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -17545,6 +17540,7 @@ export namespace Prisma {
     customText?: NullableStringFieldUpdateOperationsInput | string | null
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
+    attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }

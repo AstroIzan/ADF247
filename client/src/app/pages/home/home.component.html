@@ -473,13 +473,13 @@
                       >
                         <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
                         <span class="responsable-pill-group">
-                          @if (user.roles?.isCapOperatiu) {
+                          @if (user.roles.isCapOperatiu) {
                             <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
-                          } @else if (user.roles?.isCapColla) {
+                          } @else if (user.roles.isCapColla) {
                             <span class="role-pill role-pill-cap-colla">Cap Colla</span>
                           }
-                          <span class="role-pill" [class.role-pill-groc]="user.roles?.isGroc" [class.role-pill-verd]="!user.roles?.isGroc">
-                            {{ user.roles?.isGroc ? 'groc' : 'verd' }}
+                          <span class="role-pill" [class.role-pill-groc]="user.roles.isGroc" [class.role-pill-verd]="!user.roles.isGroc">
+                            {{ user.roles.isGroc ? 'groc' : 'verd' }}
                           </span>
                         </span>
                       </button>
@@ -523,17 +523,6 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [checked]="adminConvoForm().moreThan2"
-                (change)="updateAdminConvoField('moreThan2', $any($event.target).checked)"
-              />
-              Més de 2 participants
-            </label>
-          </div>
-
           <h4 class="responses-title">Respostes d'usuaris</h4>
           @if (getRespuestasForConvocatoria(adminConvo()!.id).length === 0) {
             <p class="empty-state">No hi ha respostes registrades.</p>
@@ -545,18 +534,19 @@
                     <th>Usuari</th>
                     <th>Disponible</th>
                     <th>Personalitzat</th>
+                    <th>Assistència</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (respuesta of getRespuestasForConvocatoria(adminConvo()!.id); track respuesta.id) {
-                    <tr>
-                      <td>{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</td>
-                      <td>
+                    <tr [class.attendance-unconfirmed-row]="respuesta.attendanceConfirmed === false">
+                      <td class="attendance-muted-cell">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</td>
+                      <td class="attendance-muted-cell">
                         <span [class]="respuesta.response ? 'badge-yes' : 'badge-no'">
                           {{ respuesta.response ? 'Sí' : 'No' }}
                         </span>
                       </td>
-                      <td>
+                      <td class="attendance-muted-cell">
                         @if (respuesta.customText) {
                           <button
                             type="button"
@@ -567,6 +557,27 @@
                           </button>
                         } @else {
                           <span>-</span>
+                        }
+                      </td>
+                      <td class="attendance-cell-end">
+                        @if (canManageAttendanceForConvo(adminConvo())) {
+                          <div class="attendance-actions">
+                            <button
+                              type="button"
+                              class="btn btn-sm attendance-toggle-btn"
+                              [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
+                              [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                              [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                              [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                              (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
+                            >
+                              <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
+                            </button>
+                          </div>
+                        } @else {
+                          <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
+                            {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                          </span>
                         }
                       </td>
                     </tr>
@@ -582,6 +593,7 @@
                   [class.admin-response-card-verd]="respuesta.response && !isUserGrocByNCarnet(respuesta.userNCarnet)"
                   [class.admin-response-card-groc]="respuesta.response && isUserGrocByNCarnet(respuesta.userNCarnet)"
                   [class.admin-response-card-no]="!respuesta.response"
+                  [class.attendance-unconfirmed]="respuesta.attendanceConfirmed === false"
                 >
                   <div class="admin-response-card-head">
                     <strong>{{ respuesta.userNCarnet }}</strong>
@@ -600,6 +612,26 @@
                   </div>
 
                   <p class="admin-response-card-name">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</p>
+
+                  <div class="attendance-actions">
+                    @if (canManageAttendanceForConvo(adminConvo())) {
+                      <button
+                        type="button"
+                        class="btn btn-sm attendance-toggle-btn"
+                        [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
+                        [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                        [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                        [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                        (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
+                      >
+                        <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
+                      </button>
+                    } @else {
+                      <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
+                        {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                      </span>
+                    }
+                  </div>
                 </article>
               }
             </div>
@@ -607,6 +639,7 @@
         </div>
 
         <div class="modal-footer">
+          <button class="btn btn-danger" [disabled]="adminConvoSaving()" (click)="deleteAdminConvocatoria()">Eliminar convocatòria</button>
           <button class="btn btn-secondary" (click)="closeAdminConvoModal()">Tancar</button>
           <button class="btn btn-primary" [disabled]="adminConvoSaving()" (click)="saveAdminConvoChanges()">
             {{ adminConvoSaving() ? 'Desant...' : 'Desar canvis' }}
@@ -634,24 +667,51 @@
                   class="guardia-response-card"
                   [class.guardia-response-card-groc]="isUserGrocByNCarnet(respuesta.userNCarnet)"
                   [class.guardia-response-card-verd]="!isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.attendance-unconfirmed]="respuesta.attendanceConfirmed === false"
                 >
-                  <div class="guardia-response-card-head">
-                    <strong>{{ respuesta.userNCarnet }}</strong>
+                  <div class="guardia-response-card-wrapper">
+                    <div class="guardia-response-card-content">
+                      <div class="guardia-response-card-head">
+                        <strong>{{ respuesta.userNCarnet }}</strong>
 
-                    @if (hasRespuestaInfo(respuesta)) {
-                      <button
-                        type="button"
-                        class="info-icon-btn"
-                        (click)="openRespuestaInfoModal(respuesta)"
-                        title="Veure detall"
-                        aria-label="Veure detall"
-                      >
-                        <span class="info-circle-icon" aria-hidden="true">i</span>
-                      </button>
-                    }
+                        @if (hasRespuestaInfo(respuesta)) {
+                          <button
+                            type="button"
+                            class="info-icon-btn"
+                            (click)="openRespuestaInfoModal(respuesta)"
+                            title="Veure detall"
+                            aria-label="Veure detall"
+                          >
+                            <span class="info-circle-icon" aria-hidden="true">i</span>
+                          </button>
+                        }
+                      </div>
+
+                      <p class="guardia-response-card-name">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</p>
+                    </div>
+
+                    <div class="guardia-response-card-button">
+                      <div class="attendance-actions">
+                        @if (canManageAttendanceForConvo(guardiaResponsesConvo())) {
+                          <button
+                            type="button"
+                            class="btn btn-sm attendance-toggle-btn"
+                            [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
+                            [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                            [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                            [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                            (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
+                          >
+                            <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
+                          </button>
+                        } @else {
+                          <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
+                            {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                          </span>
+                        }
+                      </div>
+                    </div>
                   </div>
-
-                  <p class="guardia-response-card-name">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</p>
                 </article>
               }
             </div>
@@ -984,13 +1044,13 @@
                     >
                       <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
                       <span class="responsable-pill-group">
-                        @if (user.roles?.isCapOperatiu) {
+                        @if (user.roles.isCapOperatiu) {
                           <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
-                        } @else if (user.roles?.isCapColla) {
+                        } @else if (user.roles.isCapColla) {
                           <span class="role-pill role-pill-cap-colla">Cap Colla</span>
                         }
-                        <span class="role-pill" [class.role-pill-groc]="user.roles?.isGroc" [class.role-pill-verd]="!user.roles?.isGroc">
-                          {{ user.roles?.isGroc ? 'groc' : 'verd' }}
+                        <span class="role-pill" [class.role-pill-groc]="user.roles.isGroc" [class.role-pill-verd]="!user.roles.isGroc">
+                          {{ user.roles.isGroc ? 'groc' : 'verd' }}
                         </span>
                       </span>
                     </button>

@@ -109,6 +109,7 @@ function buildRespuestaCreateDto(payload) {
     customText: normalizeText(payload.customText, { fieldName: 'customText', nullable: true }),
     fullHorari: normalizeBoolean(payload.fullHorari, 'fullHorari') ?? false,
     response: normalizeBoolean(payload.response, 'response'),
+    attendanceConfirmed: normalizeBoolean(payload.attendanceConfirmed, 'attendanceConfirmed') ?? true,
   }
 
   if (dto.response === undefined) {
@@ -148,6 +149,10 @@ function buildRespuestaUpdateDto(payload) {
 
   if (payload.response !== undefined) {
     dto.response = normalizeBoolean(payload.response, 'response')
+  }
+
+  if (payload.attendanceConfirmed !== undefined) {
+    dto.attendanceConfirmed = normalizeBoolean(payload.attendanceConfirmed, 'attendanceConfirmed')
   }
 
   if (Object.keys(dto).length === 0) {
@@ -199,6 +204,7 @@ function mapRespuestaToDto(respuesta) {
     customText: respuesta.customText,
     fullHorari: respuesta.fullHorari,
     response: respuesta.response,
+    attendanceConfirmed: respuesta.attendanceConfirmed,
     source: respuesta.source ?? 'manual',
     autoAssignReason: respuesta.autoAssignReason ?? null,
   }

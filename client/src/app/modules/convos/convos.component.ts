@@ -64,7 +64,6 @@ export class ConvosComponent implements OnDestroy {
     incendiReadyInMinutes: 10,
     autoAssignResponsable: true,
     sortida: false,
-    moreThan2: false,
     isActive: true
   });
 
@@ -173,7 +172,6 @@ export class ConvosComponent implements OnDestroy {
         incendiReadyInMinutes: 10,
         autoAssignResponsable: true,
         sortida: false,
-        moreThan2: false,
         isActive: true
       });
     }
@@ -242,7 +240,6 @@ export class ConvosComponent implements OnDestroy {
       finalTime: data.finalTime || undefined,
       autoAssignResponsable: Boolean(data.autoAssignResponsable),
       sortida: Boolean(data.sortida),
-      moreThan2: Boolean(data.moreThan2),
       isActive: Boolean(data.isActive),
     };
 
@@ -674,7 +671,6 @@ export class ConvosComponent implements OnDestroy {
       incendiReadyInMinutes: 10,
       autoAssignResponsable: Boolean(convo.autoAssignResponsable),
       sortida: Boolean(convo.sortida),
-      moreThan2: Boolean(convo.moreThan2),
       isActive: Boolean(convo.isActive),
     };
   }

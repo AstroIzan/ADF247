@@ -37,7 +37,6 @@ export interface Convocatoria {
   convoTypeId: number;
   startTime: string;
   finalTime?: string;
-  moreThan2: boolean;
   isActive: boolean;
   autoAssignResponsable: boolean;
   sortida: boolean;
@@ -59,6 +58,7 @@ export interface Respuesta {
   isCustom: boolean;
   customText?: string | null;
   fullHorari: boolean;
+  attendanceConfirmed: boolean;
   createdAt?: string;
   updatedAt?: string;
   convocatoria?: Convocatoria;

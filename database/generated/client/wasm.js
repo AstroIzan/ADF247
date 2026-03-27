@@ -155,7 +155,6 @@ exports.Prisma.ConvocatoriaScalarFieldEnum = {
   ubiSortida: 'ubiSortida',
   responsableId: 'responsableId',
   convoTypeId: 'convoTypeId',
-  moreThan2: 'moreThan2',
   startTime: 'startTime',
   finalTime: 'finalTime',
   isActive: 'isActive',
@@ -171,6 +170,7 @@ exports.Prisma.RespuestaScalarFieldEnum = {
   customText: 'customText',
   fullHorari: 'fullHorari',
   response: 'response',
+  attendanceConfirmed: 'attendanceConfirmed',
   source: 'source',
   autoAssignReason: 'autoAssignReason'
 };

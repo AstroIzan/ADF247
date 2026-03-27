@@ -326,13 +326,13 @@
                     >
                       <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
                       <span class="responsable-pill-group">
-                        @if (user.roles?.isCapOperatiu) {
+                        @if (user.roles.isCapOperatiu) {
                           <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
-                        } @else if (user.roles?.isCapColla) {
+                        } @else if (user.roles.isCapColla) {
                           <span class="role-pill role-pill-cap-colla">Cap Colla</span>
                         }
-                        <span class="role-pill" [class.role-pill-groc]="user.roles?.isGroc" [class.role-pill-verd]="!user.roles?.isGroc">
-                          {{ user.roles?.isGroc ? 'groc' : 'verd' }}
+                        <span class="role-pill" [class.role-pill-groc]="user.roles.isGroc" [class.role-pill-verd]="!user.roles.isGroc">
+                          {{ user.roles.isGroc ? 'groc' : 'verd' }}
                         </span>
                       </span>
                     </button>

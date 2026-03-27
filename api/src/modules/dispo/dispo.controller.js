@@ -79,7 +79,7 @@ async function createRespuesta(req, res) {
 async function updateRespuesta(req, res) {
   try {
     const respuestaId = parsePositiveInt(req.params.id, 'id')
-    const respuesta = await dispoService.updateRespuesta(respuestaId, req.body)
+    const respuesta = await dispoService.updateRespuesta(respuestaId, req.body, req.auth)
     res.json(respuesta)
   } catch (error) {
     sendErrorResponse(res, error)

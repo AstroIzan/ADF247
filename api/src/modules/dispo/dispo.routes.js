@@ -1,4 +1,5 @@
 const express = require('express')
+const { requireAuth } = require('../../middlewares/auth.middleware')
 const dispoController = require('./dispo.controller')
 
 const router = express.Router()
@@ -9,7 +10,7 @@ router.route('/')
 
 router.route('/:id')
   .get(dispoController.getRespuestaById)
-  .put(dispoController.updateRespuesta)
+  .put(requireAuth, dispoController.updateRespuesta)
   .delete(dispoController.deleteRespuesta)
 
 module.exports = router

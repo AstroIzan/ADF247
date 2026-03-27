@@ -663,6 +663,19 @@
   border-color: #e4cf82;
 }
 
+.guardia-response-card-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.guardia-response-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
 .guardia-response-card-head {
   display: flex;
   align-items: center;
@@ -679,6 +692,21 @@
   margin: 0;
   font-size: 14px;
   font-weight: 600;
+}
+
+.guardia-response-card-button {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.guardia-response-card-button .attendance-actions {
+  margin: 0;
+  gap: 0;
+  width: auto;
+  flex-wrap: nowrap;
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .info-icon-btn {
@@ -858,6 +886,84 @@
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+.attendance-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.attendance-actions .btn {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+}
+
+.attendance-toggle-btn {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.attendance-toggle-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.attendance-toggle-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(20, 20, 20, 0.12);
+}
+
+.attendance-toggle-btn.attendance-toggle-btn-mark-absent {
+  border-color: #d39a9a;
+  background: #fff1f1;
+  color: #8e2f2f;
+}
+
+.attendance-toggle-btn.attendance-toggle-btn-mark-present {
+  border-color: #99cbad;
+  background: #eefaf2;
+  color: #1f6942;
+}
+
+.attendance-cell-end {
+  text-align: right;
+  vertical-align: middle;
+}
+
+.attendance-unconfirmed-row .attendance-muted-cell {
+  opacity: 0.45;
+  filter: grayscale(0.35);
+}
+
+.guardia-response-card.attendance-unconfirmed {
+  background: #ececec;
+  border-color: #cfcfcf;
+}
+
+.guardia-response-card.attendance-unconfirmed .guardia-response-card-content {
+  opacity: 0.45;
+  filter: grayscale(0.35);
+}
+
+.guardia-response-card.attendance-unconfirmed .guardia-response-card-button .attendance-toggle-btn,
+.guardia-response-card.attendance-unconfirmed .guardia-response-card-button .attendance-toggle-btn.attendance-toggle-btn-mark-present,
+.guardia-response-card.attendance-unconfirmed .guardia-response-card-button .attendance-toggle-btn.attendance-toggle-btn-mark-absent {
+  opacity: 1 !important;
+  filter: none !important;
 }
 
 .custom-choice-row .btn {

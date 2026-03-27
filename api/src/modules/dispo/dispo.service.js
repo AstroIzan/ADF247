@@ -72,6 +72,26 @@ async function ensureUserExistsByNCarnet(userNCarnet) {
   return user
 }
 
+async function canManageAttendance(authUser, respuesta) {
+  if (!authUser?.userId || !authUser?.nCarnet) {
+    return false
+  }
+
+  if (respuesta?.convocatoria?.responsableId === authUser.userId) {
+    return true
+  }
+
+  const role = await database.role.findFirst({
+    where: {
+      nCarnet: authUser.nCarnet,
+      isAdmin: true,
+    },
+    select: { id: true },
+  })
+
+  return Boolean(role)
+}
+
 function mapPrismaError(error) {
   if (error?.code === 'P2002') {
     return createServiceError('Ya existe una respuesta con esa combinacion unica.', 409)
@@ -186,9 +206,17 @@ async function createRespuesta(payload) {
   }
 }
 
-async function updateRespuesta(id, payload) {
+async function updateRespuesta(id, payload, authUser) {
   const existing = await findRespuestaOrThrow(id)
   const updateDto = buildRespuestaUpdateDto(payload)
+
+  if (Object.prototype.hasOwnProperty.call(updateDto, 'attendanceConfirmed')) {
+    const allowed = await canManageAttendance(authUser, existing)
+
+    if (!allowed) {
+      throw createDispoDtoError('Solo el responsable de la convocatoria o un admin puede confirmar asistencia.', 403)
+    }
+  }
 
   const nextConvoId = updateDto.convoId ?? existing.convoId
   const nextUserNCarnet = updateDto.userNCarnet ?? existing.userNCarnet
