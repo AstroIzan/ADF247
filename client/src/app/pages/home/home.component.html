@@ -362,7 +362,7 @@
 
   @if (showAdminConvoModal() && adminConvo()) {
     <div class="modal-overlay" (click)="closeAdminConvoModal()">
-      <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal modal-wide modal-allow-overflow" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Gestió de Convocatòria</h3>
           <button class="close-btn" (click)="closeAdminConvoModal()">&times;</button>
@@ -444,15 +444,49 @@
 
             <div class="form-group">
               <label>Responsable</label>
-              <select
-                [value]="adminConvoForm().responsableId || ''"
-                (change)="updateAdminConvoField('responsableId', $any($event.target).value)"
-              >
-                <option value="">Selecciona responsable</option>
-                @for (user of users(); track user.id) {
-                  <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+              <div class="responsable-picker">
+                <button type="button" class="responsable-picker-trigger" (click)="toggleAdminResponsableMenu()">
+                  <span class="responsable-picker-label">{{ getResponsablePickerName(adminConvoForm().responsableId) }}</span>
+                  <span class="responsable-pill-group">
+                    @if (getResponsableLeadershipLabel(adminConvoForm().responsableId) === 'cap-operatiu') {
+                      <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                    } @else if (getResponsableLeadershipLabel(adminConvoForm().responsableId) === 'cap-colla') {
+                      <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                    }
+
+                    @if (getResponsableRoleLabel(adminConvoForm().responsableId) === 'groc') {
+                      <span class="role-pill role-pill-groc">groc</span>
+                    } @else if (getResponsableRoleLabel(adminConvoForm().responsableId) === 'verd') {
+                      <span class="role-pill role-pill-verd">verd</span>
+                    }
+                  </span>
+                </button>
+
+                @if (showAdminResponsableMenu()) {
+                  <div class="responsable-picker-menu">
+                    @for (user of users(); track user.id) {
+                      <button
+                        type="button"
+                        class="responsable-picker-option"
+                        [class.active]="adminConvoForm().responsableId === user.id"
+                        (click)="selectAdminResponsable(user.id)"
+                      >
+                        <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
+                        <span class="responsable-pill-group">
+                          @if (user.roles?.isCapOperatiu) {
+                            <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                          } @else if (user.roles?.isCapColla) {
+                            <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                          }
+                          <span class="role-pill" [class.role-pill-groc]="user.roles?.isGroc" [class.role-pill-verd]="!user.roles?.isGroc">
+                            {{ user.roles?.isGroc ? 'groc' : 'verd' }}
+                          </span>
+                        </span>
+                      </button>
+                    }
+                  </div>
                 }
-              </select>
+              </div>
             </div>
 
             <div class="form-group">
@@ -681,7 +715,7 @@
 
   @if (showCreateConvoModal()) {
     <div class="modal-overlay" (click)="closeCreateConvoModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal modal-allow-overflow" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Nova convocatòria</h3>
           <button class="close-btn" (click)="closeCreateConvoModal()">&times;</button>
@@ -696,13 +730,28 @@
           }
 
           <div class="form-group">
-            <label>Títol</label>
-            <input
-              type="text"
-              [value]="createConvoForm().title"
-              (input)="updateCreateConvoField('title', $any($event.target).value)"
-            />
+            <label>Tipus</label>
+            <select
+              [value]="createConvoForm().convoTypeId || ''"
+              (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
+            >
+              <option value="">Selecciona tipus</option>
+              @for (type of convoTypes(); track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
           </div>
+
+          @if (!shouldHideCreateConvoTitleField()) {
+            <div class="form-group">
+              <label>Títol</label>
+              <input
+                type="text"
+                [value]="createConvoForm().title"
+                (input)="updateCreateConvoField('title', $any($event.target).value)"
+              />
+            </div>
+          }
 
           @if (!isGuardiaTypeSelected() && !isSemanalTypeSelected() && !isIncendiTypeSelected()) {
             <div class="form-group">
@@ -722,19 +771,6 @@
               [value]="createConvoForm().ubiSortida"
               (input)="updateCreateConvoField('ubiSortida', $any($event.target).value)"
             />
-          </div>
-
-          <div class="form-group">
-            <label>Tipus</label>
-            <select
-              [value]="createConvoForm().convoTypeId || ''"
-              (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
-            >
-              <option value="">Selecciona tipus</option>
-              @for (type of convoTypes(); track type.id) {
-                <option [value]="type.id">{{ type.name }}</option>
-              }
-            </select>
           </div>
 
           @if (isGuardiaTypeSelected()) {
@@ -919,15 +955,49 @@
 
           <div class="form-group">
             <label>Responsable</label>
-            <select
-              [value]="createConvoForm().responsableId || ''"
-              (change)="updateCreateConvoField('responsableId', $any($event.target).value)"
-            >
-              <option value="">Selecciona responsable</option>
-              @for (user of users(); track user.id) {
-                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+            <div class="responsable-picker">
+              <button type="button" class="responsable-picker-trigger" (click)="toggleCreateResponsableMenu()">
+                <span class="responsable-picker-label">{{ getResponsablePickerName(createConvoForm().responsableId) }}</span>
+                <span class="responsable-pill-group">
+                  @if (getResponsableLeadershipLabel(createConvoForm().responsableId) === 'cap-operatiu') {
+                    <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                  } @else if (getResponsableLeadershipLabel(createConvoForm().responsableId) === 'cap-colla') {
+                    <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                  }
+
+                  @if (getResponsableRoleLabel(createConvoForm().responsableId) === 'groc') {
+                    <span class="role-pill role-pill-groc">groc</span>
+                  } @else if (getResponsableRoleLabel(createConvoForm().responsableId) === 'verd') {
+                    <span class="role-pill role-pill-verd">verd</span>
+                  }
+                </span>
+              </button>
+
+              @if (showCreateResponsableMenu()) {
+                <div class="responsable-picker-menu">
+                  @for (user of users(); track user.id) {
+                    <button
+                      type="button"
+                      class="responsable-picker-option"
+                      [class.active]="createConvoForm().responsableId === user.id"
+                      (click)="selectCreateResponsable(user.id)"
+                    >
+                      <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
+                      <span class="responsable-pill-group">
+                        @if (user.roles?.isCapOperatiu) {
+                          <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                        } @else if (user.roles?.isCapColla) {
+                          <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                        }
+                        <span class="role-pill" [class.role-pill-groc]="user.roles?.isGroc" [class.role-pill-verd]="!user.roles?.isGroc">
+                          {{ user.roles?.isGroc ? 'groc' : 'verd' }}
+                        </span>
+                      </span>
+                    </button>
+                  }
+                </div>
               }
-            </select>
+            </div>
           </div>
 
           <div class="form-group">

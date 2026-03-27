@@ -190,6 +190,51 @@ async function getAvailabilityWindows(filters, authUser) {
   return windows.map(mapAvailabilityWindowToDto)
 }
 
+async function applyWindowToExistingConvocatorias(resolvedWindow) {
+  // eslint-disable-next-line global-require
+  const { applyAvailabilityWindowsToConvocatoria } = require('../convos/convos.service')
+
+  const overlappingConvocatorias = await database.convocatoria.findMany({
+    where: {
+      isActive: true,
+      AND: [
+        { startTime: { lt: resolvedWindow.toDateTime } },
+        {
+          OR: [
+            { finalTime: { gt: resolvedWindow.fromDateTime } },
+            { finalTime: null, startTime: { gte: resolvedWindow.fromDateTime } },
+          ],
+        },
+      ],
+    },
+    select: {
+      id: true,
+      startTime: true,
+      finalTime: true,
+    },
+  })
+
+  if (overlappingConvocatorias.length === 0) {
+    return 0
+  }
+
+  let totalApplied = 0
+
+  for (const convocatoria of overlappingConvocatorias) {
+    try {
+      const applied = await applyAvailabilityWindowsToConvocatoria(convocatoria)
+      totalApplied += applied
+    } catch (error) {
+      console.error(
+        `[availability.service] Error al aplicar disponibilidad a convocatoria ${convocatoria.id}:`,
+        error.message
+      )
+    }
+  }
+
+  return totalApplied
+}
+
 async function createAvailabilityWindow(payload, authUser) {
   const createDto = buildAvailabilityWindowCreateDto(payload)
   createDto.userNCarnet = await resolveAllowedUserNCarnet(createDto.userNCarnet, authUser)
@@ -210,6 +255,13 @@ async function createAvailabilityWindow(payload, authUser) {
   })
 
   const resolved = await mergeCompatibleOverlaps(created, overlapping)
+
+  try {
+    await applyWindowToExistingConvocatorias(resolved)
+  } catch (error) {
+    console.error('[availability.service] Error al aplicar ventana a convocatorias existentes:', error.message)
+  }
+
   return mapAvailabilityWindowToDto(resolved)
 }
 
@@ -273,6 +325,13 @@ async function updateAvailabilityWindow(id, payload, authUser) {
   })
 
   const resolved = await mergeCompatibleOverlaps(updated, overlapping)
+
+  try {
+    await applyWindowToExistingConvocatorias(resolved)
+  } catch (error) {
+    console.error('[availability.service] Error al aplicar ventana a convocatorias existentes:', error.message)
+  }
+
   return mapAvailabilityWindowToDto(resolved)
 }
 

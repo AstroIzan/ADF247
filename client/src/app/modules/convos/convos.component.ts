@@ -42,6 +42,7 @@ export class ConvosComponent implements OnDestroy {
   timeMenuHour = signal('');
   timeMenuMinute = signal('');
   timeMenuField = signal<'startTime' | 'finalTime' | null>(null);
+  showResponsableMenu = signal(false);
 
   filters = signal({
     title: '',
@@ -61,7 +62,7 @@ export class ConvosComponent implements OnDestroy {
     startTime: '',
     finalTime: '',
     incendiReadyInMinutes: 10,
-    autoAssignResponsable: false,
+    autoAssignResponsable: true,
     sortida: false,
     moreThan2: false,
     isActive: true
@@ -170,7 +171,7 @@ export class ConvosComponent implements OnDestroy {
         startTime: '',
         finalTime: '',
         incendiReadyInMinutes: 10,
-        autoAssignResponsable: false,
+        autoAssignResponsable: true,
         sortida: false,
         moreThan2: false,
         isActive: true
@@ -182,6 +183,7 @@ export class ConvosComponent implements OnDestroy {
 
   closeForm() {
     this.showForm.set(false);
+    this.showResponsableMenu.set(false);
     document.body.classList.remove('modal-open');
   }
 
@@ -189,9 +191,14 @@ export class ConvosComponent implements OnDestroy {
     const data = { ...this.formData() };
     const isIncendiType = this.isIncendiTypeById(Number(data.convoTypeId));
     const isGuardiaType = this.isGuardiaTypeById(Number(data.convoTypeId));
+    const forcedTitle = this.getForcedTitleForTypeId(Number(data.convoTypeId));
 
-    if (!data.title || !data.responsableId || !data.convoTypeId) {
-      alert('El titol, el responsable i el tipus de convocatòria son obligatoris.');
+    if (forcedTitle) {
+      data.title = forcedTitle;
+    }
+
+    if ((!data.title && !forcedTitle) || !data.responsableId || !data.convoTypeId) {
+      alert('El responsable i el tipus de convocatòria son obligatoris.');
       return;
     }
 
@@ -356,6 +363,11 @@ export class ConvosComponent implements OnDestroy {
         convoTypeId: Number(value) || undefined,
       };
 
+      const forcedTitle = this.getForcedTitleForTypeId(Number(next.convoTypeId));
+      if (forcedTitle) {
+        next.title = forcedTitle;
+      }
+
       if (this.isGuardiaTypeById(Number(next.convoTypeId))) {
         next.ubiSortida = this.getDefaultLocationForType(Number(next.convoTypeId)) || 'Brigadas';
       }
@@ -402,12 +414,22 @@ export class ConvosComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
+    this.showResponsableMenu.set(false);
     document.body.classList.remove('modal-open');
   }
 
   isIncendiTypeSelected(): boolean {
     const convoTypeId = Number(this.formData().convoTypeId);
     return this.isIncendiTypeById(convoTypeId);
+  }
+
+  shouldHideTitleField(): boolean {
+    if (this.editingId()) {
+      return false;
+    }
+
+    const forcedTitle = this.getForcedTitleForTypeId(Number(this.formData().convoTypeId));
+    return Boolean(forcedTitle);
   }
 
   getUserName(userId?: number): string {
@@ -420,6 +442,66 @@ export class ConvosComponent implements OnDestroy {
     if (!typeId) return '-';
     const type = this.convoTypes().find((t) => t.id === typeId);
     return type ? type.name : '-';
+  }
+
+  getResponsableRoleLabel(userId?: number | null): 'groc' | 'verd' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    return user.roles?.isGroc ? 'groc' : 'verd';
+  }
+
+  getResponsableLeadershipLabel(userId?: number | null): 'cap-operatiu' | 'cap-colla' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    if (user.roles?.isCapOperatiu) {
+      return 'cap-operatiu';
+    }
+
+    if (user.roles?.isCapColla) {
+      return 'cap-colla';
+    }
+
+    return '';
+  }
+
+  getResponsableName(userId?: number | null): string {
+    if (!userId) {
+      return 'Selecciona un responsable';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return 'Selecciona un responsable';
+    }
+
+    return `${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  toggleResponsableMenu() {
+    if (this.formSubmitting()) {
+      return;
+    }
+
+    this.showResponsableMenu.set(!this.showResponsableMenu());
+  }
+
+  selectResponsable(userId: number) {
+    this.updateFormField('responsableId', userId);
+    this.showResponsableMenu.set(false);
   }
 
   formatDate(dateString: string): string {
@@ -540,6 +622,25 @@ export class ConvosComponent implements OnDestroy {
 
     const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /guardia/i.test(type.name));
+  }
+
+  private getForcedTitleForTypeId(convoTypeId?: number): string | null {
+    if (!convoTypeId) {
+      return null;
+    }
+
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
+    const typeName = type?.name || '';
+
+    if (/pvi/i.test(typeName)) {
+      return 'PVI';
+    }
+
+    if (/guardia/i.test(typeName)) {
+      return 'Guardia';
+    }
+
+    return null;
   }
 
   private getDefaultLocationForType(convoTypeId?: number): string {

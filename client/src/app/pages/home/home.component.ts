@@ -68,6 +68,8 @@ export class HomeComponent implements OnInit {
     fullHorari: boolean;
   } | null>(null);
   showCreateConvoModal = signal(false);
+  showCreateResponsableMenu = signal(false);
+  showAdminResponsableMenu = signal(false);
   creatingConvo = signal(false);
   createConvoError = signal('');
   showTimeMenu = signal(false);
@@ -92,7 +94,7 @@ export class HomeComponent implements OnInit {
     incendiReadyInMinutes: 10,
     moreThan2: false,
     isActive: true,
-    autoAssignResponsable: false,
+    autoAssignResponsable: true,
     sortida: false,
   });
 
@@ -325,6 +327,71 @@ export class HomeComponent implements OnInit {
 
   getSortidaBadgeLabel(sortida?: boolean) {
     return sortida ? 'Se surt' : 'No se surt';
+  }
+
+  getResponsableRoleLabel(userId: number | null): 'groc' | 'verd' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    return user.roles?.isGroc ? 'groc' : 'verd';
+  }
+
+  getResponsableLeadershipLabel(userId: number | null): 'cap-operatiu' | 'cap-colla' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    if (user.roles?.isCapOperatiu) {
+      return 'cap-operatiu';
+    }
+
+    if (user.roles?.isCapColla) {
+      return 'cap-colla';
+    }
+
+    return '';
+  }
+
+  getResponsablePickerName(userId: number | null): string {
+    if (!userId) {
+      return 'Selecciona responsable';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return 'Selecciona responsable';
+    }
+
+    return `${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  toggleCreateResponsableMenu() {
+    this.showCreateResponsableMenu.set(!this.showCreateResponsableMenu());
+  }
+
+  toggleAdminResponsableMenu() {
+    this.showAdminResponsableMenu.set(!this.showAdminResponsableMenu());
+  }
+
+  selectCreateResponsable(userId: number) {
+    this.updateCreateConvoField('responsableId', userId);
+    this.showCreateResponsableMenu.set(false);
+  }
+
+  selectAdminResponsable(userId: number) {
+    this.updateAdminConvoField('responsableId', String(userId));
+    this.showAdminResponsableMenu.set(false);
   }
 
   isRunningConvoAdminAction(action: 'sortida' | 'automation', convoId: number) {
@@ -817,10 +884,12 @@ export class HomeComponent implements OnInit {
       autoAssignResponsable: Boolean(convo.autoAssignResponsable),
       sortida: Boolean(convo.sortida),
     });
+    this.showAdminResponsableMenu.set(false);
     this.showAdminConvoModal.set(true);
   }
 
   closeAdminConvoModal() {
+    this.showAdminResponsableMenu.set(false);
     this.showAdminConvoModal.set(false);
     this.adminConvo.set(null);
   }
@@ -933,14 +1002,16 @@ export class HomeComponent implements OnInit {
       incendiReadyInMinutes: 10,
       moreThan2: false,
       isActive: true,
-      autoAssignResponsable: false,
+      autoAssignResponsable: true,
       sortida: false,
     });
     this.createConvoError.set('');
+    this.showCreateResponsableMenu.set(false);
     this.showCreateConvoModal.set(true);
   }
 
   closeCreateConvoModal() {
+    this.showCreateResponsableMenu.set(false);
     this.createConvoError.set('');
     this.showCreateConvoModal.set(false);
   }
@@ -974,6 +1045,13 @@ export class HomeComponent implements OnInit {
         ...current,
         [field]: value ? Number(value) : null,
       };
+
+      if (field === 'convoTypeId') {
+        const forcedTitle = this.getForcedCreateTitleByTypeId(next.convoTypeId);
+        if (forcedTitle) {
+          next.title = forcedTitle;
+        }
+      }
 
       if (field === 'convoTypeId' && this.isGuardiaTypeById(next.convoTypeId)) {
         next.guardiaRangeStart = current.date || this.selectedDate();
@@ -1035,8 +1113,11 @@ export class HomeComponent implements OnInit {
     const form = this.createConvoForm();
     this.createConvoError.set('');
 
-    if (!form.title || !form.responsableId || !form.convoTypeId) {
-      this.createConvoError.set('Completa titol, responsable i tipus per crear.');
+    const forcedTitle = this.getForcedCreateTitleByTypeId(form.convoTypeId);
+    const titleToUse = forcedTitle || (form.title || '').trim();
+
+    if (!titleToUse || !form.responsableId || !form.convoTypeId) {
+      this.createConvoError.set('Completa responsable i tipus per crear.');
       return;
     }
 
@@ -1056,7 +1137,10 @@ export class HomeComponent implements OnInit {
         return;
       }
 
-      payloads = this.buildGuardiaPayloads(form);
+      payloads = this.buildGuardiaPayloads({
+        ...form,
+        title: titleToUse,
+      });
 
       if (payloads.length === 0) {
         this.createConvoError.set('No hi ha dies laborables al rang seleccionat per crear guardies.');
@@ -1081,7 +1165,13 @@ export class HomeComponent implements OnInit {
         return;
       }
 
-      payloads = this.buildSemanalPayloads(form, validSlots);
+      payloads = this.buildSemanalPayloads(
+        {
+          ...form,
+          title: titleToUse,
+        },
+        validSlots
+      );
 
       if (payloads.length === 0) {
         this.createConvoError.set('No s\'han pogut generar convocatories setmanals amb aquest rang.');
@@ -1102,7 +1192,7 @@ export class HomeComponent implements OnInit {
 
       payloads = [
         {
-          title: form.title.trim(),
+          title: titleToUse,
           date: `${startDate}T00:00:00`,
           ubiSortida: (form.ubiSortida || '').trim() || 'Brigadas',
           responsableId: form.responsableId,
@@ -1123,7 +1213,7 @@ export class HomeComponent implements OnInit {
 
       payloads = [
         {
-          title: form.title.trim(),
+          title: titleToUse,
           date: `${form.date}T00:00:00`,
           ubiSortida: form.ubiSortida.trim(),
           responsableId: form.responsableId,
@@ -1146,6 +1236,7 @@ export class HomeComponent implements OnInit {
         this.createConvoError.set('');
         this.closeCreateConvoModal();
         this.loadConvocatorias();
+        this.loadRespuestas();
       },
       error: (err) => {
         this.createConvoError.set(err.message || 'No s\'ha pogut crear la convocatòria.');
@@ -1164,6 +1255,10 @@ export class HomeComponent implements OnInit {
 
   isIncendiTypeSelected() {
     return this.isIncendiTypeById(this.createConvoForm().convoTypeId);
+  }
+
+  shouldHideCreateConvoTitleField() {
+    return Boolean(this.getForcedCreateTitleByTypeId(this.createConvoForm().convoTypeId));
   }
 
   addSemanalSlot() {
@@ -1253,6 +1348,25 @@ export class HomeComponent implements OnInit {
 
     const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /incendi/i.test(type.name));
+  }
+
+  private getForcedCreateTitleByTypeId(convoTypeId: number | null) {
+    if (!convoTypeId) {
+      return null;
+    }
+
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
+    const typeName = type?.name || '';
+
+    if (/pvi/i.test(typeName)) {
+      return 'PVI';
+    }
+
+    if (/guardia/i.test(typeName)) {
+      return 'Guardia';
+    }
+
+    return null;
   }
 
   private getConvoTypeDefaultLocation(convoTypeId: number | null) {

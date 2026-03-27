@@ -32,6 +32,124 @@
   gap: 8px;
 }
 
+.responsable-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.responsable-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.responsable-picker-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.responsable-picker-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 18px rgba(22, 22, 22, 0.14);
+  z-index: 40;
+}
+
+.modal.modal-allow-overflow {
+  overflow: visible;
+}
+
+.responsable-pill-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.responsable-picker-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid #efefef;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.responsable-picker-option:last-child {
+  border-bottom: 0;
+}
+
+.responsable-picker-option:hover,
+.responsable-picker-option.active {
+  background: #fafafa;
+}
+
+.responsable-picker-option-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.role-pill-groc {
+  background: #fff2c9;
+  border-color: #cf9f2f;
+  color: #7a5605;
+}
+
+.role-pill-verd {
+  background: #ddf3e3;
+  border-color: #4f8f5b;
+  color: #245f2f;
+}
+
+.role-pill-cap-colla {
+  background: #f9dddd;
+  border-color: #b23a3a;
+  color: #7a1f1f;
+}
+
+.role-pill-cap-operatiu {
+  background: #dce9fb;
+  border-color: #3971b9;
+  color: #1e4f90;
+}
+
 .convo-top-right {
   display: inline-flex;
   align-items: center;

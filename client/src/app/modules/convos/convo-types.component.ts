@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed } from '@angular/core';
+import { Component, Output, EventEmitter, signal, computed, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, ConvoType } from '../../services/data.service';
@@ -12,7 +12,7 @@ import { DataService, ConvoType } from '../../services/data.service';
 })
 export class ConvoTypesComponent {
   readonly pageSizeOptions = [10, 25, 50];
-  @Input() convoTypes: ConvoType[] = [];
+  convoTypes = input<ConvoType[]>([]);
   @Output() onChanged = new EventEmitter<void>();
 
   showForm = signal(false);
@@ -38,7 +38,7 @@ export class ConvoTypesComponent {
     const nameQuery = activeFilters.name.trim().toLowerCase();
     const idQuery = activeFilters.id.trim();
 
-    return this.convoTypes.filter((type) => {
+    return this.convoTypes().filter((type) => {
       const matchesName = !nameQuery || (type.name || '').toLowerCase().includes(nameQuery);
       const matchesId = !idQuery || String(type.id).includes(idQuery);
       return matchesName && matchesId;

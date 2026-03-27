@@ -318,6 +318,13 @@ async function applyAvailabilityWindowsToConvocatoria(convocatoria) {
     data: rowsToInsert,
   })
 
+  try {
+    await recalculateSortidaForConvocatoria(convocatoria.id)
+    await recalculateAutoAssignedResponsable(convocatoria.id)
+  } catch (error) {
+    console.error('[convos.service] Error al recalcular sortida/autoresponsable tras auto-respuestas:', error.message)
+  }
+
   if (matchingRules.notifyOnAutoAvailableResponse && autoAvailableUserIds.length > 0) {
     try {
       const notificationsService = require('../notifications/notifications.service')
@@ -502,7 +509,7 @@ async function createConvocatoria(payload) {
       console.error('[convos.service] Error al enviar aviso de nueva convocatoria:', error.message)
     }
 
-    return mapConvocatoriaToDto(convocatoria)
+    return getConvocatoriaById(convocatoria.id)
   } catch (error) {
     throw mapPrismaError(error)
   }
@@ -664,6 +671,7 @@ async function updateSortidaForTomorrow(referenceDate = new Date()) {
 }
 
 module.exports = {
+  applyAvailabilityWindowsToConvocatoria,
   createConvocatoria,
   createConvoType,
   createServiceError,
