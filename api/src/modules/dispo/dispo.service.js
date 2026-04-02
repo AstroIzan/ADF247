@@ -77,7 +77,7 @@ async function canManageAttendance(authUser, respuesta) {
     return false
   }
 
-  if (respuesta?.convocatoria?.responsableId === authUser.userId) {
+  if (Number(respuesta?.convocatoria?.responsableId) === Number(authUser.userId)) {
     return true
   }
 
@@ -210,7 +210,11 @@ async function updateRespuesta(id, payload, authUser) {
   const existing = await findRespuestaOrThrow(id)
   const updateDto = buildRespuestaUpdateDto(payload)
 
-  if (Object.prototype.hasOwnProperty.call(updateDto, 'attendanceConfirmed')) {
+  const isAttendanceUpdate =
+    Object.prototype.hasOwnProperty.call(updateDto, 'attendanceConfirmed') ||
+    Object.prototype.hasOwnProperty.call(updateDto, 'attendanceJustified')
+
+  if (isAttendanceUpdate) {
     const allowed = await canManageAttendance(authUser, existing)
 
     if (!allowed) {
@@ -243,6 +247,14 @@ async function updateRespuesta(id, payload, authUser) {
 
   const finalData = {
     ...updateDto,
+  }
+
+  if (finalData.attendanceConfirmed === true) {
+    finalData.attendanceJustified = false
+  }
+
+  if (finalData.attendanceJustified === true) {
+    finalData.attendanceConfirmed = false
   }
 
   try {

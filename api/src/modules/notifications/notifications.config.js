@@ -37,6 +37,16 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
     autoCreateUnavailableForUsersWithoutWindow: false,
     notifyOnAutoAvailableResponse: false,
   },
+  hourComputation: {
+    campaignStartDate: null,
+    campaignEndDate: null,
+    unansweredPenaltyThreshold: 0,
+    unansweredPenaltyHours: 1,
+    noShowPenaltyHours: 4,
+  },
+  campaignForm: {
+    vehicleCatalog: [],
+  },
   weeklyRequest: {
     enabled: true,
     requestWeekday: 5,
@@ -116,6 +126,70 @@ function normalizeStringList(value, fallback) {
     .filter(Boolean)
 
   return normalized.length > 0 ? normalized : fallback
+}
+
+function normalizeVehicleCatalog(value, fallback = []) {
+  if (!Array.isArray(value)) {
+    return fallback
+  }
+
+  const normalized = value
+    .map((entry) => {
+      if (typeof entry === 'string') {
+        const indicativo = entry.trim()
+        if (!indicativo) {
+          return null
+        }
+
+        return {
+          indicativo,
+          modelo: '',
+          litros: 0,
+          kms: 0,
+        }
+      }
+
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) {
+        return null
+      }
+
+      const indicativo = normalizeText(entry.indicativo, '')
+      if (!indicativo) {
+        return null
+      }
+
+      const modelo = normalizeText(entry.modelo, '')
+      const litrosRaw = Number(entry.litros)
+      const litros = Number.isFinite(litrosRaw) && litrosRaw >= 0
+        ? Number(litrosRaw.toFixed(2))
+        : 0
+      const kmsRaw = Number(entry.kms)
+      const kms = Number.isFinite(kmsRaw) && kmsRaw >= 0
+        ? Number(kmsRaw.toFixed(2))
+        : 0
+
+      return {
+        indicativo,
+        modelo,
+        litros,
+        kms,
+      }
+    })
+    .filter(Boolean)
+
+  const deduped = []
+  const seen = new Set()
+  for (const vehicle of normalized) {
+    const key = String(vehicle.indicativo).toLowerCase()
+    if (seen.has(key)) {
+      continue
+    }
+
+    seen.add(key)
+    deduped.push(vehicle)
+  }
+
+  return deduped
 }
 
 function normalizePerTypeTemplates(value, fallbackTitle, fallbackBody) {
@@ -247,6 +321,33 @@ function normalizeNotificationSettings(input = {}) {
         defaults.availabilityMatching.notifyOnAutoAvailableResponse
       ),
     },
+    hourComputation: {
+      campaignStartDate: normalizeText(input.hourComputation?.campaignStartDate, '') || null,
+      campaignEndDate: normalizeText(input.hourComputation?.campaignEndDate, '') || null,
+      unansweredPenaltyThreshold: normalizeInteger(
+        input.hourComputation?.unansweredPenaltyThreshold,
+        defaults.hourComputation.unansweredPenaltyThreshold,
+        0,
+        365
+      ),
+      unansweredPenaltyHours: normalizeInteger(
+        input.hourComputation?.unansweredPenaltyHours,
+        defaults.hourComputation.unansweredPenaltyHours,
+        0,
+        24
+      ),
+      noShowPenaltyHours: normalizeInteger(
+        input.hourComputation?.noShowPenaltyHours,
+        defaults.hourComputation.noShowPenaltyHours,
+        0,
+        24
+      ),
+    },
+    campaignForm: {
+      vehicleCatalog: Array.isArray(input.campaignForm?.vehicleCatalog)
+        ? normalizeVehicleCatalog(input.campaignForm?.vehicleCatalog, defaults.campaignForm.vehicleCatalog)
+        : defaults.campaignForm.vehicleCatalog,
+    },
     weeklyRequest: {
       enabled: normalizeBoolean(weeklySource.enabled, defaults.weeklyRequest.enabled),
       requestWeekday: weeklyRequestWeekday,
@@ -355,6 +456,14 @@ function updateNotificationSettings(partialPayload) {
     availabilityMatching: {
       ...current.availabilityMatching,
       ...(partialPayload.availabilityMatching || {}),
+    },
+    hourComputation: {
+      ...(current.hourComputation || {}),
+      ...(partialPayload.hourComputation || {}),
+    },
+    campaignForm: {
+      ...(current.campaignForm || {}),
+      ...(partialPayload.campaignForm || {}),
     },
     weeklyDigest: {
       ...(current.weeklyDigest || {}),

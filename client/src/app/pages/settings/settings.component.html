@@ -46,14 +46,6 @@
                   @else { pendent }
                 </span>
               </article>
-              <article>
-                <strong>Token detectat</strong>
-                <span>{{ pushNotificationsService.currentToken() || pushNotificationsService.hasAnyRegisteredToken() ? 'Sí' : 'No' }}</span>
-              </article>
-              <article>
-                <strong>Registrat a servidor</strong>
-                <span>{{ pushNotificationsService.hasAnyRegisteredToken() ? 'Sí' : 'No' }}</span>
-              </article>
             </div>
           }
 

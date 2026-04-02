@@ -37,6 +37,8 @@ export interface Convocatoria {
   convoTypeId: number;
   startTime: string;
   finalTime?: string;
+  actualStartTime?: string | null;
+  actualEndTime?: string | null;
   isActive: boolean;
   autoAssignResponsable: boolean;
   sortida: boolean;
@@ -59,6 +61,7 @@ export interface Respuesta {
   customText?: string | null;
   fullHorari: boolean;
   attendanceConfirmed: boolean;
+  attendanceJustified?: boolean;
   createdAt?: string;
   updatedAt?: string;
   convocatoria?: Convocatoria;
@@ -127,7 +130,106 @@ export interface NotificationSettings {
     autoCreateUnavailableForUsersWithoutWindow: boolean;
     notifyOnAutoAvailableResponse: boolean;
   };
+  hourComputation?: {
+    campaignStartDate: string | null;
+    campaignEndDate: string | null;
+    unansweredPenaltyThreshold: number;
+    unansweredPenaltyHours: number;
+    noShowPenaltyHours: number;
+  };
+  campaignForm?: {
+    vehicleCatalog: CampaignVehicleCatalogItem[];
+  };
   automation?: NotificationAutomationConfig;
+}
+
+export interface CampaignVehicleCatalogItem {
+  indicativo: string;
+  modelo: string;
+  litros: number;
+  kms: number;
+}
+
+export interface CampaignFormVehicleInput {
+  vehicleName: string;
+  kms: number;
+  conductorUserId: number | null;
+  volunteerUserIds: number[];
+}
+
+export interface CampaignFormSubmitPayload {
+  dia?: string;
+  volunteerUserIds: number[];
+  vehicles: CampaignFormVehicleInput[];
+}
+
+export interface CampaignFormPrefill {
+  dia?: string;
+  volunteerUserIds: number[];
+  vehicles: CampaignFormVehicleInput[];
+}
+
+export interface CampaignFormContext {
+  convocatoria: Convocatoria;
+  responsable: {
+    id: number;
+    nCarnet: string;
+    name: string;
+    lastName?: string | null;
+  } | null;
+  eligibleUsers: Array<{
+    id: number;
+    nCarnet: string;
+    name: string;
+    lastName?: string | null;
+  }>;
+  vehicleCatalog: CampaignVehicleCatalogItem[];
+  lockedVehicleNames?: string[];
+  prefill?: CampaignFormPrefill | null;
+}
+
+export interface CampaignFormRecord {
+  id: number;
+  convocatoriaId: number;
+  serviceMoment: 'START' | 'END';
+  dia: string;
+  responsableId: number | null;
+  responsableNCarnet: string | null;
+  createdByNCarnet: string | null;
+  createdAt: string;
+  updatedAt: string;
+  voluntaris: number[];
+  vehicles: CampaignFormVehicleInput[];
+  convocatoria: {
+    id: number;
+    title: string;
+    date: string;
+  } | null;
+}
+
+export interface UserHoursSummaryRow {
+  userId: number;
+  userNCarnet: string;
+  userName: string;
+  campaignHours: number;
+  offCampaignHours: number;
+  unansweredCount: number;
+  noShowCount: number;
+  unansweredPenaltyHours: number;
+  noShowPenaltyHours: number;
+  totalHours: number;
+}
+
+export interface UserHoursSummaryResponse {
+  generatedAt: string;
+  settings: {
+    campaignStartDate: string | null;
+    campaignEndDate: string | null;
+    unansweredPenaltyThreshold: number;
+    unansweredPenaltyHours: number;
+    noShowPenaltyHours: number;
+  };
+  users: UserHoursSummaryRow[];
 }
 
 export interface NotificationAutomationTaskConfig {
@@ -233,16 +335,6 @@ export interface NotificationLog {
   errorMessage?: string | null;
   createdAt: string;
   senderUserId?: number | null;
-}
-
-export interface DeviceTokenAdmin {
-  id: number;
-  token: string;
-  platform?: string | null;
-  isActive: boolean;
-  lastSeenAt?: string | null;
-  createdAt?: string | null;
-  user?: { id: number; nCarnet: string; name: string; lastName?: string | null } | null;
 }
 
 export interface ApiHealthStatus {
@@ -374,6 +466,52 @@ export class DataService {
     return this.http.put<Convocatoria>(`/convos/${id}`, data);
   }
 
+  startConvocatoria(id: number, campaignForm: CampaignFormSubmitPayload): Observable<Convocatoria> {
+    return this.http.post<Convocatoria>(`/convos/${id}/start`, campaignForm);
+  }
+
+  finishConvocatoria(id: number, campaignForm: CampaignFormSubmitPayload): Observable<Convocatoria> {
+    return this.http.post<Convocatoria>(`/convos/${id}/finish`, campaignForm);
+  }
+
+  getCampaignFormContext(id: number, mode?: 'start' | 'finish'): Observable<CampaignFormContext> {
+    const query = new URLSearchParams();
+    if (mode) {
+      query.set('mode', mode);
+    }
+
+    const queryText = query.toString();
+    return this.http.get<CampaignFormContext>(`/convos/${id}/campaign-form-context${queryText ? `?${queryText}` : ''}`);
+  }
+
+  getCampaignForms(filters?: { convoId?: number; serviceMoment?: 'START' | 'END' }): Observable<CampaignFormRecord[]> {
+    const query = new URLSearchParams();
+    if (filters?.convoId) {
+      query.set('convoId', String(filters.convoId));
+    }
+    if (filters?.serviceMoment) {
+      query.set('serviceMoment', filters.serviceMoment);
+    }
+
+    const queryText = query.toString();
+    return this.http.get<CampaignFormRecord[]>(`/convos/campaign-forms/list${queryText ? `?${queryText}` : ''}`);
+  }
+
+  deleteCampaignForm(id: number): Observable<CampaignFormRecord> {
+    return this.http.delete<CampaignFormRecord>(`/convos/campaign-forms/${id}`);
+  }
+
+  getHoursSummary(): Observable<UserHoursSummaryResponse> {
+    return this.http.get<UserHoursSummaryResponse>('/convos/hours/summary');
+  }
+
+  updateConvocatoriaLifecycle(
+    id: number,
+    payload: { actualStartTime?: string | null; actualEndTime?: string | null }
+  ): Observable<Convocatoria> {
+    return this.http.patch<Convocatoria>(`/convos/${id}/lifecycle`, payload);
+  }
+
   deleteConvocatoria(id: number): Observable<any> {
     return this.http.delete<any>(`/convos/${id}`);
   }
@@ -410,10 +548,6 @@ export class DataService {
 
   getNotificationLogs(limit = 30): Observable<NotificationLog[]> {
     return this.http.get<NotificationLog[]>(`/notifications/logs?limit=${limit}`);
-  }
-
-  getAllDeviceTokens(): Observable<DeviceTokenAdmin[]> {
-    return this.http.get<DeviceTokenAdmin[]>('/notifications/device-tokens/all');
   }
 
   sendConvocatoriaResponseRequest(convoId: number): Observable<any> {

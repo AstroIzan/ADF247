@@ -40,6 +40,12 @@ export class HttpService {
     );
   }
 
+  patch<T>(endpoint: string, data: any): Observable<T> {
+    return this.http.patch<T>(`${this.baseUrl}${endpoint}`, data).pipe(
+      catchError(err => this.handleError(err))
+    );
+  }
+
   delete<T>(endpoint: string): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${endpoint}`).pipe(
       catchError(err => this.handleError(err))

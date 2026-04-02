@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { DataService, User, Convocatoria, ConvoType, Respuesta, DeviceTokenAdmin, NotificationSettings, NotificationLog } from '../../services/data.service';
+import { DataService, User, Convocatoria, ConvoType, Respuesta, NotificationSettings, NotificationLog, UserHoursSummaryRow, CampaignFormRecord } from '../../services/data.service';
 import { UsersModule } from '../../modules/users/users.module';
 import { ConvosModule } from '../../modules/convos/convos.module';
 import { DispoModule } from '../../modules/dispo/dispo.module';
@@ -39,10 +39,10 @@ export class DashboardComponent implements OnInit {
   loadingRespuestas = signal(false);
   respuestaError = signal('');
 
-  // Devices data
-  devices = signal<DeviceTokenAdmin[]>([]);
-  loadingDevices = signal(false);
-  deviceError = signal('');
+  // Hours summary data
+  userHoursSummaryRows = signal<UserHoursSummaryRow[]>([]);
+  loadingUserHoursSummary = signal(false);
+  userHoursSummaryError = signal('');
 
   // Notifications data
   notificationConfig = signal<NotificationSettings | null>(null);
@@ -54,6 +54,12 @@ export class DashboardComponent implements OnInit {
 
   firebaseConfigured = signal(true);
   firebaseHealthMessage = signal('');
+
+  // Campaign forms data
+  campaignForms = signal<CampaignFormRecord[]>([]);
+  loadingCampaignForms = signal(false);
+  campaignFormsError = signal('');
+  campaignFormsExpandedIds = signal<number[]>([]);
 
   constructor(
     private authService: AuthService,
@@ -90,11 +96,70 @@ export class DashboardComponent implements OnInit {
     this.loadConvoTypes();
     this.loadRespuestas();
     if (this.isAdmin()) {
-      this.loadDevices();
+      this.loadUserHoursSummary();
       this.loadNotificationConfig();
       this.loadNotificationLogs();
+      this.loadCampaignForms();
       this.loadHealthStatus();
     }
+  }
+
+  loadCampaignForms() {
+    this.loadingCampaignForms.set(true);
+    this.campaignFormsError.set('');
+    this.campaignFormsExpandedIds.set([]);
+
+    this.dataService.getCampaignForms().subscribe({
+      next: (rows) => {
+        this.campaignForms.set(Array.isArray(rows) ? rows : []);
+        this.loadingCampaignForms.set(false);
+      },
+      error: (err) => {
+        this.campaignForms.set([]);
+        this.campaignFormsError.set(err.message || 'No s\'han pogut carregar els formularis de campanya.');
+        this.loadingCampaignForms.set(false);
+      }
+    });
+  }
+
+  toggleCampaignFormDetails(formId: number) {
+    const current = new Set(this.campaignFormsExpandedIds());
+    if (current.has(formId)) {
+      current.delete(formId);
+    } else {
+      current.add(formId);
+    }
+
+    this.campaignFormsExpandedIds.set(Array.from(current));
+  }
+
+  isCampaignFormDetailsOpen(formId: number) {
+    return this.campaignFormsExpandedIds().includes(formId);
+  }
+
+  getUserLabelById(userId: number) {
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return String(userId);
+    }
+
+    return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  getCampaignFormVolunteerLabels(form: CampaignFormRecord) {
+    return (form.voluntaris || []).map((userId) => this.getUserLabelById(userId));
+  }
+
+  getCampaignFormVehicleConductorLabel(vehicle: CampaignFormRecord['vehicles'][number]) {
+    if (vehicle.conductorUserId == null) {
+      return 'Sense conductor';
+    }
+
+    return this.getUserLabelById(vehicle.conductorUserId);
+  }
+
+  getCampaignFormVehicleVolunteerLabels(vehicle: CampaignFormRecord['vehicles'][number]) {
+    return (vehicle.volunteerUserIds || []).map((userId) => this.getUserLabelById(userId));
   }
 
   loadHealthStatus() {
@@ -167,17 +232,19 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  loadDevices() {
-    this.loadingDevices.set(true);
-    this.deviceError.set('');
-    this.dataService.getAllDeviceTokens().subscribe({
-      next: (data) => {
-        this.devices.set(data);
-        this.loadingDevices.set(false);
+  loadUserHoursSummary() {
+    this.loadingUserHoursSummary.set(true);
+    this.userHoursSummaryError.set('');
+
+    this.dataService.getHoursSummary().subscribe({
+      next: (summary) => {
+        this.userHoursSummaryRows.set(Array.isArray(summary?.users) ? summary.users : []);
+        this.loadingUserHoursSummary.set(false);
       },
       error: (err) => {
-        this.deviceError.set(err.message);
-        this.loadingDevices.set(false);
+        this.userHoursSummaryRows.set([]);
+        this.userHoursSummaryError.set(err.message || 'No s\'ha pogut carregar el resum d\'hores.');
+        this.loadingUserHoursSummary.set(false);
       }
     });
   }
@@ -215,6 +282,9 @@ export class DashboardComponent implements OnInit {
 
   onUserChanged() {
     this.loadUsers();
+    if (this.isAdmin()) {
+      this.loadUserHoursSummary();
+    }
   }
 
   onConvoChanged(convo: any) {

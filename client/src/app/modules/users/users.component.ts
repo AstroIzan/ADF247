@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService, User, UsersCsvImportResult } from '../../services/data.service';
+import { DataService, User, UsersCsvImportResult, UserHoursSummaryRow } from '../../services/data.service';
 
 @Component({
   selector: 'app-users',
@@ -13,6 +13,7 @@ import { DataService, User, UsersCsvImportResult } from '../../services/data.ser
 export class UsersComponent implements OnDestroy {
   readonly pageSizeOptions = [10, 25, 50];
   users = input<User[]>([]);
+  hoursSummaryRows = input<UserHoursSummaryRow[]>([]);
   loading = input(false);
   error = input('');
   @Output() onChanged = new EventEmitter<void>();
@@ -76,6 +77,14 @@ export class UsersComponent implements OnDestroy {
 
       return matchesName && matchesIndicatiu && matchesCarnet && matchesRole;
     });
+  });
+
+  userHoursSummaryMap = computed(() => {
+    const map = new Map<string, UserHoursSummaryRow>();
+    for (const row of this.hoursSummaryRows()) {
+      map.set(String(row.userNCarnet || ''), row);
+    }
+    return map;
   });
 
   pageSize = signal(10);
@@ -390,6 +399,16 @@ export class UsersComponent implements OnDestroy {
     if (user.roles?.isCapOperatiu) labels.push('Cap Operatiu');
 
     return labels;
+  }
+
+  getUserCampaignHours(user: User) {
+    const row = this.userHoursSummaryMap().get(String(user.nCarnet || ''));
+    return row?.campaignHours ?? 0;
+  }
+
+  getUserOffCampaignHours(user: User) {
+    const row = this.userHoursSummaryMap().get(String(user.nCarnet || ''));
+    return row?.offCampaignHours ?? 0;
   }
 
   ngOnDestroy() {

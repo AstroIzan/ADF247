@@ -39,11 +39,6 @@ export type Convocatoria = $Result.DefaultSelection<Prisma.$ConvocatoriaPayload>
  */
 export type Respuesta = $Result.DefaultSelection<Prisma.$RespuestaPayload>
 /**
- * Model DeviceToken
- * 
- */
-export type DeviceToken = $Result.DefaultSelection<Prisma.$DeviceTokenPayload>
-/**
  * Model NotificationLog
  * 
  */
@@ -63,6 +58,16 @@ export type NotificationAutomationRun = $Result.DefaultSelection<Prisma.$Notific
  * 
  */
 export type NotificationAutomationTaskRun = $Result.DefaultSelection<Prisma.$NotificationAutomationTaskRunPayload>
+/**
+ * Model UserHoursSummary
+ * 
+ */
+export type UserHoursSummary = $Result.DefaultSelection<Prisma.$UserHoursSummaryPayload>
+/**
+ * Model FormulariCampanya
+ * 
+ */
+export type FormulariCampanya = $Result.DefaultSelection<Prisma.$FormulariCampanyaPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -238,16 +243,6 @@ export class PrismaClient<
   get respuesta(): Prisma.RespuestaDelegate<ExtArgs>;
 
   /**
-   * `prisma.deviceToken`: Exposes CRUD operations for the **DeviceToken** model.
-    * Example usage:
-    * ```ts
-    * // Fetch zero or more DeviceTokens
-    * const deviceTokens = await prisma.deviceToken.findMany()
-    * ```
-    */
-  get deviceToken(): Prisma.DeviceTokenDelegate<ExtArgs>;
-
-  /**
    * `prisma.notificationLog`: Exposes CRUD operations for the **NotificationLog** model.
     * Example usage:
     * ```ts
@@ -286,6 +281,26 @@ export class PrismaClient<
     * ```
     */
   get notificationAutomationTaskRun(): Prisma.NotificationAutomationTaskRunDelegate<ExtArgs>;
+
+  /**
+   * `prisma.userHoursSummary`: Exposes CRUD operations for the **UserHoursSummary** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more UserHoursSummaries
+    * const userHoursSummaries = await prisma.userHoursSummary.findMany()
+    * ```
+    */
+  get userHoursSummary(): Prisma.UserHoursSummaryDelegate<ExtArgs>;
+
+  /**
+   * `prisma.formulariCampanya`: Exposes CRUD operations for the **FormulariCampanya** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more FormulariCampanyas
+    * const formulariCampanyas = await prisma.formulariCampanya.findMany()
+    * ```
+    */
+  get formulariCampanya(): Prisma.FormulariCampanyaDelegate<ExtArgs>;
 }
 
 export namespace Prisma {
@@ -732,11 +747,12 @@ export namespace Prisma {
     ConvoType: 'ConvoType',
     Convocatoria: 'Convocatoria',
     Respuesta: 'Respuesta',
-    DeviceToken: 'DeviceToken',
     NotificationLog: 'NotificationLog',
     AvailabilityWindow: 'AvailabilityWindow',
     NotificationAutomationRun: 'NotificationAutomationRun',
-    NotificationAutomationTaskRun: 'NotificationAutomationTaskRun'
+    NotificationAutomationTaskRun: 'NotificationAutomationTaskRun',
+    UserHoursSummary: 'UserHoursSummary',
+    FormulariCampanya: 'FormulariCampanya'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -752,7 +768,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "role" | "convoType" | "convocatoria" | "respuesta" | "deviceToken" | "notificationLog" | "availabilityWindow" | "notificationAutomationRun" | "notificationAutomationTaskRun"
+      modelProps: "user" | "role" | "convoType" | "convocatoria" | "respuesta" | "notificationLog" | "availabilityWindow" | "notificationAutomationRun" | "notificationAutomationTaskRun" | "userHoursSummary" | "formulariCampanya"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1106,76 +1122,6 @@ export namespace Prisma {
           }
         }
       }
-      DeviceToken: {
-        payload: Prisma.$DeviceTokenPayload<ExtArgs>
-        fields: Prisma.DeviceTokenFieldRefs
-        operations: {
-          findUnique: {
-            args: Prisma.DeviceTokenFindUniqueArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload> | null
-          }
-          findUniqueOrThrow: {
-            args: Prisma.DeviceTokenFindUniqueOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
-          }
-          findFirst: {
-            args: Prisma.DeviceTokenFindFirstArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload> | null
-          }
-          findFirstOrThrow: {
-            args: Prisma.DeviceTokenFindFirstOrThrowArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
-          }
-          findMany: {
-            args: Prisma.DeviceTokenFindManyArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>[]
-          }
-          create: {
-            args: Prisma.DeviceTokenCreateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
-          }
-          createMany: {
-            args: Prisma.DeviceTokenCreateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          createManyAndReturn: {
-            args: Prisma.DeviceTokenCreateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>[]
-          }
-          delete: {
-            args: Prisma.DeviceTokenDeleteArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
-          }
-          update: {
-            args: Prisma.DeviceTokenUpdateArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
-          }
-          deleteMany: {
-            args: Prisma.DeviceTokenDeleteManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          updateMany: {
-            args: Prisma.DeviceTokenUpdateManyArgs<ExtArgs>
-            result: BatchPayload
-          }
-          upsert: {
-            args: Prisma.DeviceTokenUpsertArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$DeviceTokenPayload>
-          }
-          aggregate: {
-            args: Prisma.DeviceTokenAggregateArgs<ExtArgs>
-            result: $Utils.Optional<AggregateDeviceToken>
-          }
-          groupBy: {
-            args: Prisma.DeviceTokenGroupByArgs<ExtArgs>
-            result: $Utils.Optional<DeviceTokenGroupByOutputType>[]
-          }
-          count: {
-            args: Prisma.DeviceTokenCountArgs<ExtArgs>
-            result: $Utils.Optional<DeviceTokenCountAggregateOutputType> | number
-          }
-        }
-      }
       NotificationLog: {
         payload: Prisma.$NotificationLogPayload<ExtArgs>
         fields: Prisma.NotificationLogFieldRefs
@@ -1456,6 +1402,146 @@ export namespace Prisma {
           }
         }
       }
+      UserHoursSummary: {
+        payload: Prisma.$UserHoursSummaryPayload<ExtArgs>
+        fields: Prisma.UserHoursSummaryFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.UserHoursSummaryFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.UserHoursSummaryFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>
+          }
+          findFirst: {
+            args: Prisma.UserHoursSummaryFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.UserHoursSummaryFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>
+          }
+          findMany: {
+            args: Prisma.UserHoursSummaryFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>[]
+          }
+          create: {
+            args: Prisma.UserHoursSummaryCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>
+          }
+          createMany: {
+            args: Prisma.UserHoursSummaryCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.UserHoursSummaryCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>[]
+          }
+          delete: {
+            args: Prisma.UserHoursSummaryDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>
+          }
+          update: {
+            args: Prisma.UserHoursSummaryUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>
+          }
+          deleteMany: {
+            args: Prisma.UserHoursSummaryDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.UserHoursSummaryUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.UserHoursSummaryUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$UserHoursSummaryPayload>
+          }
+          aggregate: {
+            args: Prisma.UserHoursSummaryAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateUserHoursSummary>
+          }
+          groupBy: {
+            args: Prisma.UserHoursSummaryGroupByArgs<ExtArgs>
+            result: $Utils.Optional<UserHoursSummaryGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.UserHoursSummaryCountArgs<ExtArgs>
+            result: $Utils.Optional<UserHoursSummaryCountAggregateOutputType> | number
+          }
+        }
+      }
+      FormulariCampanya: {
+        payload: Prisma.$FormulariCampanyaPayload<ExtArgs>
+        fields: Prisma.FormulariCampanyaFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.FormulariCampanyaFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.FormulariCampanyaFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>
+          }
+          findFirst: {
+            args: Prisma.FormulariCampanyaFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.FormulariCampanyaFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>
+          }
+          findMany: {
+            args: Prisma.FormulariCampanyaFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>[]
+          }
+          create: {
+            args: Prisma.FormulariCampanyaCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>
+          }
+          createMany: {
+            args: Prisma.FormulariCampanyaCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.FormulariCampanyaCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>[]
+          }
+          delete: {
+            args: Prisma.FormulariCampanyaDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>
+          }
+          update: {
+            args: Prisma.FormulariCampanyaUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>
+          }
+          deleteMany: {
+            args: Prisma.FormulariCampanyaDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.FormulariCampanyaUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.FormulariCampanyaUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$FormulariCampanyaPayload>
+          }
+          aggregate: {
+            args: Prisma.FormulariCampanyaAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateFormulariCampanya>
+          }
+          groupBy: {
+            args: Prisma.FormulariCampanyaGroupByArgs<ExtArgs>
+            result: $Utils.Optional<FormulariCampanyaGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.FormulariCampanyaCountArgs<ExtArgs>
+            result: $Utils.Optional<FormulariCampanyaCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1621,7 +1707,6 @@ export namespace Prisma {
     convocatories: number
     respostas: number
     availabilityWindows: number
-    deviceTokens: number
     notificationLogs: number
     notificationAutomationRuns: number
   }
@@ -1631,7 +1716,6 @@ export namespace Prisma {
     convocatories?: boolean | UserCountOutputTypeCountConvocatoriesArgs
     respostas?: boolean | UserCountOutputTypeCountRespostasArgs
     availabilityWindows?: boolean | UserCountOutputTypeCountAvailabilityWindowsArgs
-    deviceTokens?: boolean | UserCountOutputTypeCountDeviceTokensArgs
     notificationLogs?: boolean | UserCountOutputTypeCountNotificationLogsArgs
     notificationAutomationRuns?: boolean | UserCountOutputTypeCountNotificationAutomationRunsArgs
   }
@@ -1673,13 +1757,6 @@ export namespace Prisma {
    */
   export type UserCountOutputTypeCountAvailabilityWindowsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: AvailabilityWindowWhereInput
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountDeviceTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: DeviceTokenWhereInput
   }
 
   /**
@@ -1734,10 +1811,12 @@ export namespace Prisma {
 
   export type ConvocatoriaCountOutputType = {
     respostas: number
+    formularisCampanya: number
   }
 
   export type ConvocatoriaCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     respostas?: boolean | ConvocatoriaCountOutputTypeCountRespostasArgs
+    formularisCampanya?: boolean | ConvocatoriaCountOutputTypeCountFormularisCampanyaArgs
   }
 
   // Custom InputTypes
@@ -1756,6 +1835,13 @@ export namespace Prisma {
    */
   export type ConvocatoriaCountOutputTypeCountRespostasArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RespuestaWhereInput
+  }
+
+  /**
+   * ConvocatoriaCountOutputType without action
+   */
+  export type ConvocatoriaCountOutputTypeCountFormularisCampanyaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormulariCampanyaWhereInput
   }
 
 
@@ -2028,9 +2114,9 @@ export namespace Prisma {
     convocatories?: boolean | User$convocatoriesArgs<ExtArgs>
     respostas?: boolean | User$respostasArgs<ExtArgs>
     availabilityWindows?: boolean | User$availabilityWindowsArgs<ExtArgs>
-    deviceTokens?: boolean | User$deviceTokensArgs<ExtArgs>
     notificationLogs?: boolean | User$notificationLogsArgs<ExtArgs>
     notificationAutomationRuns?: boolean | User$notificationAutomationRunsArgs<ExtArgs>
+    hoursSummary?: boolean | User$hoursSummaryArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -2063,9 +2149,9 @@ export namespace Prisma {
     convocatories?: boolean | User$convocatoriesArgs<ExtArgs>
     respostas?: boolean | User$respostasArgs<ExtArgs>
     availabilityWindows?: boolean | User$availabilityWindowsArgs<ExtArgs>
-    deviceTokens?: boolean | User$deviceTokensArgs<ExtArgs>
     notificationLogs?: boolean | User$notificationLogsArgs<ExtArgs>
     notificationAutomationRuns?: boolean | User$notificationAutomationRunsArgs<ExtArgs>
+    hoursSummary?: boolean | User$hoursSummaryArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2077,9 +2163,9 @@ export namespace Prisma {
       convocatories: Prisma.$ConvocatoriaPayload<ExtArgs>[]
       respostas: Prisma.$RespuestaPayload<ExtArgs>[]
       availabilityWindows: Prisma.$AvailabilityWindowPayload<ExtArgs>[]
-      deviceTokens: Prisma.$DeviceTokenPayload<ExtArgs>[]
       notificationLogs: Prisma.$NotificationLogPayload<ExtArgs>[]
       notificationAutomationRuns: Prisma.$NotificationAutomationRunPayload<ExtArgs>[]
+      hoursSummary: Prisma.$UserHoursSummaryPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -2459,9 +2545,9 @@ export namespace Prisma {
     convocatories<T extends User$convocatoriesArgs<ExtArgs> = {}>(args?: Subset<T, User$convocatoriesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ConvocatoriaPayload<ExtArgs>, T, "findMany"> | Null>
     respostas<T extends User$respostasArgs<ExtArgs> = {}>(args?: Subset<T, User$respostasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RespuestaPayload<ExtArgs>, T, "findMany"> | Null>
     availabilityWindows<T extends User$availabilityWindowsArgs<ExtArgs> = {}>(args?: Subset<T, User$availabilityWindowsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AvailabilityWindowPayload<ExtArgs>, T, "findMany"> | Null>
-    deviceTokens<T extends User$deviceTokensArgs<ExtArgs> = {}>(args?: Subset<T, User$deviceTokensArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findMany"> | Null>
     notificationLogs<T extends User$notificationLogsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationLogPayload<ExtArgs>, T, "findMany"> | Null>
     notificationAutomationRuns<T extends User$notificationAutomationRunsArgs<ExtArgs> = {}>(args?: Subset<T, User$notificationAutomationRunsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$NotificationAutomationRunPayload<ExtArgs>, T, "findMany"> | Null>
+    hoursSummary<T extends User$hoursSummaryArgs<ExtArgs> = {}>(args?: Subset<T, User$hoursSummaryArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2892,26 +2978,6 @@ export namespace Prisma {
   }
 
   /**
-   * User.deviceTokens
-   */
-  export type User$deviceTokensArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    where?: DeviceTokenWhereInput
-    orderBy?: DeviceTokenOrderByWithRelationInput | DeviceTokenOrderByWithRelationInput[]
-    cursor?: DeviceTokenWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: DeviceTokenScalarFieldEnum | DeviceTokenScalarFieldEnum[]
-  }
-
-  /**
    * User.notificationLogs
    */
   export type User$notificationLogsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2949,6 +3015,21 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: NotificationAutomationRunScalarFieldEnum | NotificationAutomationRunScalarFieldEnum[]
+  }
+
+  /**
+   * User.hoursSummary
+   */
+  export type User$hoursSummaryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    where?: UserHoursSummaryWhereInput
   }
 
   /**
@@ -4964,6 +5045,8 @@ export namespace Prisma {
     convoTypeId: number | null
     startTime: Date | null
     finalTime: Date | null
+    actualStartTime: Date | null
+    actualEndTime: Date | null
     isActive: boolean | null
     autoAssignResponsable: boolean | null
     sortida: boolean | null
@@ -4978,6 +5061,8 @@ export namespace Prisma {
     convoTypeId: number | null
     startTime: Date | null
     finalTime: Date | null
+    actualStartTime: Date | null
+    actualEndTime: Date | null
     isActive: boolean | null
     autoAssignResponsable: boolean | null
     sortida: boolean | null
@@ -4992,6 +5077,8 @@ export namespace Prisma {
     convoTypeId: number
     startTime: number
     finalTime: number
+    actualStartTime: number
+    actualEndTime: number
     isActive: number
     autoAssignResponsable: number
     sortida: number
@@ -5020,6 +5107,8 @@ export namespace Prisma {
     convoTypeId?: true
     startTime?: true
     finalTime?: true
+    actualStartTime?: true
+    actualEndTime?: true
     isActive?: true
     autoAssignResponsable?: true
     sortida?: true
@@ -5034,6 +5123,8 @@ export namespace Prisma {
     convoTypeId?: true
     startTime?: true
     finalTime?: true
+    actualStartTime?: true
+    actualEndTime?: true
     isActive?: true
     autoAssignResponsable?: true
     sortida?: true
@@ -5048,6 +5139,8 @@ export namespace Prisma {
     convoTypeId?: true
     startTime?: true
     finalTime?: true
+    actualStartTime?: true
+    actualEndTime?: true
     isActive?: true
     autoAssignResponsable?: true
     sortida?: true
@@ -5149,6 +5242,8 @@ export namespace Prisma {
     convoTypeId: number
     startTime: Date
     finalTime: Date | null
+    actualStartTime: Date | null
+    actualEndTime: Date | null
     isActive: boolean
     autoAssignResponsable: boolean
     sortida: boolean
@@ -5182,12 +5277,15 @@ export namespace Prisma {
     convoTypeId?: boolean
     startTime?: boolean
     finalTime?: boolean
+    actualStartTime?: boolean
+    actualEndTime?: boolean
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     user?: boolean | Convocatoria$userArgs<ExtArgs>
     convoType?: boolean | ConvoTypeDefaultArgs<ExtArgs>
     respostas?: boolean | Convocatoria$respostasArgs<ExtArgs>
+    formularisCampanya?: boolean | Convocatoria$formularisCampanyaArgs<ExtArgs>
     _count?: boolean | ConvocatoriaCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["convocatoria"]>
 
@@ -5200,6 +5298,8 @@ export namespace Prisma {
     convoTypeId?: boolean
     startTime?: boolean
     finalTime?: boolean
+    actualStartTime?: boolean
+    actualEndTime?: boolean
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
@@ -5216,6 +5316,8 @@ export namespace Prisma {
     convoTypeId?: boolean
     startTime?: boolean
     finalTime?: boolean
+    actualStartTime?: boolean
+    actualEndTime?: boolean
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
@@ -5225,6 +5327,7 @@ export namespace Prisma {
     user?: boolean | Convocatoria$userArgs<ExtArgs>
     convoType?: boolean | ConvoTypeDefaultArgs<ExtArgs>
     respostas?: boolean | Convocatoria$respostasArgs<ExtArgs>
+    formularisCampanya?: boolean | Convocatoria$formularisCampanyaArgs<ExtArgs>
     _count?: boolean | ConvocatoriaCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ConvocatoriaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5238,6 +5341,7 @@ export namespace Prisma {
       user: Prisma.$UserPayload<ExtArgs> | null
       convoType: Prisma.$ConvoTypePayload<ExtArgs>
       respostas: Prisma.$RespuestaPayload<ExtArgs>[]
+      formularisCampanya: Prisma.$FormulariCampanyaPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: number
@@ -5248,6 +5352,8 @@ export namespace Prisma {
       convoTypeId: number
       startTime: Date
       finalTime: Date | null
+      actualStartTime: Date | null
+      actualEndTime: Date | null
       isActive: boolean
       autoAssignResponsable: boolean
       sortida: boolean
@@ -5618,6 +5724,7 @@ export namespace Prisma {
     user<T extends Convocatoria$userArgs<ExtArgs> = {}>(args?: Subset<T, Convocatoria$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     convoType<T extends ConvoTypeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ConvoTypeDefaultArgs<ExtArgs>>): Prisma__ConvoTypeClient<$Result.GetResult<Prisma.$ConvoTypePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     respostas<T extends Convocatoria$respostasArgs<ExtArgs> = {}>(args?: Subset<T, Convocatoria$respostasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RespuestaPayload<ExtArgs>, T, "findMany"> | Null>
+    formularisCampanya<T extends Convocatoria$formularisCampanyaArgs<ExtArgs> = {}>(args?: Subset<T, Convocatoria$formularisCampanyaArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -5655,6 +5762,8 @@ export namespace Prisma {
     readonly convoTypeId: FieldRef<"Convocatoria", 'Int'>
     readonly startTime: FieldRef<"Convocatoria", 'DateTime'>
     readonly finalTime: FieldRef<"Convocatoria", 'DateTime'>
+    readonly actualStartTime: FieldRef<"Convocatoria", 'DateTime'>
+    readonly actualEndTime: FieldRef<"Convocatoria", 'DateTime'>
     readonly isActive: FieldRef<"Convocatoria", 'Boolean'>
     readonly autoAssignResponsable: FieldRef<"Convocatoria", 'Boolean'>
     readonly sortida: FieldRef<"Convocatoria", 'Boolean'>
@@ -6009,6 +6118,26 @@ export namespace Prisma {
   }
 
   /**
+   * Convocatoria.formularisCampanya
+   */
+  export type Convocatoria$formularisCampanyaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    where?: FormulariCampanyaWhereInput
+    orderBy?: FormulariCampanyaOrderByWithRelationInput | FormulariCampanyaOrderByWithRelationInput[]
+    cursor?: FormulariCampanyaWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: FormulariCampanyaScalarFieldEnum | FormulariCampanyaScalarFieldEnum[]
+  }
+
+  /**
    * Convocatoria without action
    */
   export type ConvocatoriaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -6054,6 +6183,7 @@ export namespace Prisma {
     fullHorari: boolean | null
     response: boolean | null
     attendanceConfirmed: boolean | null
+    attendanceJustified: boolean | null
     source: string | null
     autoAssignReason: string | null
   }
@@ -6067,6 +6197,7 @@ export namespace Prisma {
     fullHorari: boolean | null
     response: boolean | null
     attendanceConfirmed: boolean | null
+    attendanceJustified: boolean | null
     source: string | null
     autoAssignReason: string | null
   }
@@ -6080,6 +6211,7 @@ export namespace Prisma {
     fullHorari: number
     response: number
     attendanceConfirmed: number
+    attendanceJustified: number
     source: number
     autoAssignReason: number
     _all: number
@@ -6105,6 +6237,7 @@ export namespace Prisma {
     fullHorari?: true
     response?: true
     attendanceConfirmed?: true
+    attendanceJustified?: true
     source?: true
     autoAssignReason?: true
   }
@@ -6118,6 +6251,7 @@ export namespace Prisma {
     fullHorari?: true
     response?: true
     attendanceConfirmed?: true
+    attendanceJustified?: true
     source?: true
     autoAssignReason?: true
   }
@@ -6131,6 +6265,7 @@ export namespace Prisma {
     fullHorari?: true
     response?: true
     attendanceConfirmed?: true
+    attendanceJustified?: true
     source?: true
     autoAssignReason?: true
     _all?: true
@@ -6231,6 +6366,7 @@ export namespace Prisma {
     fullHorari: boolean
     response: boolean
     attendanceConfirmed: boolean
+    attendanceJustified: boolean
     source: string
     autoAssignReason: string | null
     _count: RespuestaCountAggregateOutputType | null
@@ -6263,6 +6399,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response?: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: boolean
     autoAssignReason?: boolean
     convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
@@ -6278,6 +6415,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response?: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: boolean
     autoAssignReason?: boolean
     convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
@@ -6293,6 +6431,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response?: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: boolean
     autoAssignReason?: boolean
   }
@@ -6321,6 +6460,7 @@ export namespace Prisma {
       fullHorari: boolean
       response: boolean
       attendanceConfirmed: boolean
+      attendanceJustified: boolean
       source: string
       autoAssignReason: string | null
     }, ExtArgs["result"]["respuesta"]>
@@ -6726,6 +6866,7 @@ export namespace Prisma {
     readonly fullHorari: FieldRef<"Respuesta", 'Boolean'>
     readonly response: FieldRef<"Respuesta", 'Boolean'>
     readonly attendanceConfirmed: FieldRef<"Respuesta", 'Boolean'>
+    readonly attendanceJustified: FieldRef<"Respuesta", 'Boolean'>
     readonly source: FieldRef<"Respuesta", 'String'>
     readonly autoAssignReason: FieldRef<"Respuesta", 'String'>
   }
@@ -7055,1023 +7196,6 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: RespuestaInclude<ExtArgs> | null
-  }
-
-
-  /**
-   * Model DeviceToken
-   */
-
-  export type AggregateDeviceToken = {
-    _count: DeviceTokenCountAggregateOutputType | null
-    _avg: DeviceTokenAvgAggregateOutputType | null
-    _sum: DeviceTokenSumAggregateOutputType | null
-    _min: DeviceTokenMinAggregateOutputType | null
-    _max: DeviceTokenMaxAggregateOutputType | null
-  }
-
-  export type DeviceTokenAvgAggregateOutputType = {
-    id: number | null
-    userId: number | null
-  }
-
-  export type DeviceTokenSumAggregateOutputType = {
-    id: number | null
-    userId: number | null
-  }
-
-  export type DeviceTokenMinAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    token: string | null
-    platform: string | null
-    userAgent: string | null
-    isActive: boolean | null
-    lastSeenAt: Date | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type DeviceTokenMaxAggregateOutputType = {
-    id: number | null
-    userId: number | null
-    token: string | null
-    platform: string | null
-    userAgent: string | null
-    isActive: boolean | null
-    lastSeenAt: Date | null
-    createdAt: Date | null
-    updatedAt: Date | null
-  }
-
-  export type DeviceTokenCountAggregateOutputType = {
-    id: number
-    userId: number
-    token: number
-    platform: number
-    userAgent: number
-    isActive: number
-    lastSeenAt: number
-    createdAt: number
-    updatedAt: number
-    _all: number
-  }
-
-
-  export type DeviceTokenAvgAggregateInputType = {
-    id?: true
-    userId?: true
-  }
-
-  export type DeviceTokenSumAggregateInputType = {
-    id?: true
-    userId?: true
-  }
-
-  export type DeviceTokenMinAggregateInputType = {
-    id?: true
-    userId?: true
-    token?: true
-    platform?: true
-    userAgent?: true
-    isActive?: true
-    lastSeenAt?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type DeviceTokenMaxAggregateInputType = {
-    id?: true
-    userId?: true
-    token?: true
-    platform?: true
-    userAgent?: true
-    isActive?: true
-    lastSeenAt?: true
-    createdAt?: true
-    updatedAt?: true
-  }
-
-  export type DeviceTokenCountAggregateInputType = {
-    id?: true
-    userId?: true
-    token?: true
-    platform?: true
-    userAgent?: true
-    isActive?: true
-    lastSeenAt?: true
-    createdAt?: true
-    updatedAt?: true
-    _all?: true
-  }
-
-  export type DeviceTokenAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which DeviceToken to aggregate.
-     */
-    where?: DeviceTokenWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of DeviceTokens to fetch.
-     */
-    orderBy?: DeviceTokenOrderByWithRelationInput | DeviceTokenOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the start position
-     */
-    cursor?: DeviceTokenWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` DeviceTokens from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` DeviceTokens.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Count returned DeviceTokens
-    **/
-    _count?: true | DeviceTokenCountAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to average
-    **/
-    _avg?: DeviceTokenAvgAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to sum
-    **/
-    _sum?: DeviceTokenSumAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the minimum value
-    **/
-    _min?: DeviceTokenMinAggregateInputType
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
-     * 
-     * Select which fields to find the maximum value
-    **/
-    _max?: DeviceTokenMaxAggregateInputType
-  }
-
-  export type GetDeviceTokenAggregateType<T extends DeviceTokenAggregateArgs> = {
-        [P in keyof T & keyof AggregateDeviceToken]: P extends '_count' | 'count'
-      ? T[P] extends true
-        ? number
-        : GetScalarType<T[P], AggregateDeviceToken[P]>
-      : GetScalarType<T[P], AggregateDeviceToken[P]>
-  }
-
-
-
-
-  export type DeviceTokenGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: DeviceTokenWhereInput
-    orderBy?: DeviceTokenOrderByWithAggregationInput | DeviceTokenOrderByWithAggregationInput[]
-    by: DeviceTokenScalarFieldEnum[] | DeviceTokenScalarFieldEnum
-    having?: DeviceTokenScalarWhereWithAggregatesInput
-    take?: number
-    skip?: number
-    _count?: DeviceTokenCountAggregateInputType | true
-    _avg?: DeviceTokenAvgAggregateInputType
-    _sum?: DeviceTokenSumAggregateInputType
-    _min?: DeviceTokenMinAggregateInputType
-    _max?: DeviceTokenMaxAggregateInputType
-  }
-
-  export type DeviceTokenGroupByOutputType = {
-    id: number
-    userId: number
-    token: string
-    platform: string | null
-    userAgent: string | null
-    isActive: boolean
-    lastSeenAt: Date
-    createdAt: Date
-    updatedAt: Date
-    _count: DeviceTokenCountAggregateOutputType | null
-    _avg: DeviceTokenAvgAggregateOutputType | null
-    _sum: DeviceTokenSumAggregateOutputType | null
-    _min: DeviceTokenMinAggregateOutputType | null
-    _max: DeviceTokenMaxAggregateOutputType | null
-  }
-
-  type GetDeviceTokenGroupByPayload<T extends DeviceTokenGroupByArgs> = Prisma.PrismaPromise<
-    Array<
-      PickEnumerable<DeviceTokenGroupByOutputType, T['by']> &
-        {
-          [P in ((keyof T) & (keyof DeviceTokenGroupByOutputType))]: P extends '_count'
-            ? T[P] extends boolean
-              ? number
-              : GetScalarType<T[P], DeviceTokenGroupByOutputType[P]>
-            : GetScalarType<T[P], DeviceTokenGroupByOutputType[P]>
-        }
-      >
-    >
-
-
-  export type DeviceTokenSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    token?: boolean
-    platform?: boolean
-    userAgent?: boolean
-    isActive?: boolean
-    lastSeenAt?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["deviceToken"]>
-
-  export type DeviceTokenSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    userId?: boolean
-    token?: boolean
-    platform?: boolean
-    userAgent?: boolean
-    isActive?: boolean
-    lastSeenAt?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["deviceToken"]>
-
-  export type DeviceTokenSelectScalar = {
-    id?: boolean
-    userId?: boolean
-    token?: boolean
-    platform?: boolean
-    userAgent?: boolean
-    isActive?: boolean
-    lastSeenAt?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-  }
-
-  export type DeviceTokenInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type DeviceTokenIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }
-
-  export type $DeviceTokenPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    name: "DeviceToken"
-    objects: {
-      user: Prisma.$UserPayload<ExtArgs>
-    }
-    scalars: $Extensions.GetPayloadResult<{
-      id: number
-      userId: number
-      token: string
-      platform: string | null
-      userAgent: string | null
-      isActive: boolean
-      lastSeenAt: Date
-      createdAt: Date
-      updatedAt: Date
-    }, ExtArgs["result"]["deviceToken"]>
-    composites: {}
-  }
-
-  type DeviceTokenGetPayload<S extends boolean | null | undefined | DeviceTokenDefaultArgs> = $Result.GetResult<Prisma.$DeviceTokenPayload, S>
-
-  type DeviceTokenCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
-    Omit<DeviceTokenFindManyArgs, 'select' | 'include' | 'distinct'> & {
-      select?: DeviceTokenCountAggregateInputType | true
-    }
-
-  export interface DeviceTokenDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
-    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['DeviceToken'], meta: { name: 'DeviceToken' } }
-    /**
-     * Find zero or one DeviceToken that matches the filter.
-     * @param {DeviceTokenFindUniqueArgs} args - Arguments to find a DeviceToken
-     * @example
-     * // Get one DeviceToken
-     * const deviceToken = await prisma.deviceToken.findUnique({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUnique<T extends DeviceTokenFindUniqueArgs>(args: SelectSubset<T, DeviceTokenFindUniqueArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
-
-    /**
-     * Find one DeviceToken that matches the filter or throw an error with `error.code='P2025'` 
-     * if no matches were found.
-     * @param {DeviceTokenFindUniqueOrThrowArgs} args - Arguments to find a DeviceToken
-     * @example
-     * // Get one DeviceToken
-     * const deviceToken = await prisma.deviceToken.findUniqueOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findUniqueOrThrow<T extends DeviceTokenFindUniqueOrThrowArgs>(args: SelectSubset<T, DeviceTokenFindUniqueOrThrowArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
-
-    /**
-     * Find the first DeviceToken that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {DeviceTokenFindFirstArgs} args - Arguments to find a DeviceToken
-     * @example
-     * // Get one DeviceToken
-     * const deviceToken = await prisma.deviceToken.findFirst({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirst<T extends DeviceTokenFindFirstArgs>(args?: SelectSubset<T, DeviceTokenFindFirstArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
-
-    /**
-     * Find the first DeviceToken that matches the filter or
-     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {DeviceTokenFindFirstOrThrowArgs} args - Arguments to find a DeviceToken
-     * @example
-     * // Get one DeviceToken
-     * const deviceToken = await prisma.deviceToken.findFirstOrThrow({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     */
-    findFirstOrThrow<T extends DeviceTokenFindFirstOrThrowArgs>(args?: SelectSubset<T, DeviceTokenFindFirstOrThrowArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
-
-    /**
-     * Find zero or more DeviceTokens that matches the filter.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {DeviceTokenFindManyArgs} args - Arguments to filter and select certain fields only.
-     * @example
-     * // Get all DeviceTokens
-     * const deviceTokens = await prisma.deviceToken.findMany()
-     * 
-     * // Get first 10 DeviceTokens
-     * const deviceTokens = await prisma.deviceToken.findMany({ take: 10 })
-     * 
-     * // Only select the `id`
-     * const deviceTokenWithIdOnly = await prisma.deviceToken.findMany({ select: { id: true } })
-     * 
-     */
-    findMany<T extends DeviceTokenFindManyArgs>(args?: SelectSubset<T, DeviceTokenFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "findMany">>
-
-    /**
-     * Create a DeviceToken.
-     * @param {DeviceTokenCreateArgs} args - Arguments to create a DeviceToken.
-     * @example
-     * // Create one DeviceToken
-     * const DeviceToken = await prisma.deviceToken.create({
-     *   data: {
-     *     // ... data to create a DeviceToken
-     *   }
-     * })
-     * 
-     */
-    create<T extends DeviceTokenCreateArgs>(args: SelectSubset<T, DeviceTokenCreateArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "create">, never, ExtArgs>
-
-    /**
-     * Create many DeviceTokens.
-     * @param {DeviceTokenCreateManyArgs} args - Arguments to create many DeviceTokens.
-     * @example
-     * // Create many DeviceTokens
-     * const deviceToken = await prisma.deviceToken.createMany({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     *     
-     */
-    createMany<T extends DeviceTokenCreateManyArgs>(args?: SelectSubset<T, DeviceTokenCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create many DeviceTokens and returns the data saved in the database.
-     * @param {DeviceTokenCreateManyAndReturnArgs} args - Arguments to create many DeviceTokens.
-     * @example
-     * // Create many DeviceTokens
-     * const deviceToken = await prisma.deviceToken.createManyAndReturn({
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Create many DeviceTokens and only return the `id`
-     * const deviceTokenWithIdOnly = await prisma.deviceToken.createManyAndReturn({ 
-     *   select: { id: true },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    createManyAndReturn<T extends DeviceTokenCreateManyAndReturnArgs>(args?: SelectSubset<T, DeviceTokenCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "createManyAndReturn">>
-
-    /**
-     * Delete a DeviceToken.
-     * @param {DeviceTokenDeleteArgs} args - Arguments to delete one DeviceToken.
-     * @example
-     * // Delete one DeviceToken
-     * const DeviceToken = await prisma.deviceToken.delete({
-     *   where: {
-     *     // ... filter to delete one DeviceToken
-     *   }
-     * })
-     * 
-     */
-    delete<T extends DeviceTokenDeleteArgs>(args: SelectSubset<T, DeviceTokenDeleteArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "delete">, never, ExtArgs>
-
-    /**
-     * Update one DeviceToken.
-     * @param {DeviceTokenUpdateArgs} args - Arguments to update one DeviceToken.
-     * @example
-     * // Update one DeviceToken
-     * const deviceToken = await prisma.deviceToken.update({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    update<T extends DeviceTokenUpdateArgs>(args: SelectSubset<T, DeviceTokenUpdateArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "update">, never, ExtArgs>
-
-    /**
-     * Delete zero or more DeviceTokens.
-     * @param {DeviceTokenDeleteManyArgs} args - Arguments to filter DeviceTokens to delete.
-     * @example
-     * // Delete a few DeviceTokens
-     * const { count } = await prisma.deviceToken.deleteMany({
-     *   where: {
-     *     // ... provide filter here
-     *   }
-     * })
-     * 
-     */
-    deleteMany<T extends DeviceTokenDeleteManyArgs>(args?: SelectSubset<T, DeviceTokenDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more DeviceTokens.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {DeviceTokenUpdateManyArgs} args - Arguments to update one or more rows.
-     * @example
-     * // Update many DeviceTokens
-     * const deviceToken = await prisma.deviceToken.updateMany({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: {
-     *     // ... provide data here
-     *   }
-     * })
-     * 
-     */
-    updateMany<T extends DeviceTokenUpdateManyArgs>(args: SelectSubset<T, DeviceTokenUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Create or update one DeviceToken.
-     * @param {DeviceTokenUpsertArgs} args - Arguments to update or create a DeviceToken.
-     * @example
-     * // Update or create a DeviceToken
-     * const deviceToken = await prisma.deviceToken.upsert({
-     *   create: {
-     *     // ... data to create a DeviceToken
-     *   },
-     *   update: {
-     *     // ... in case it already exists, update
-     *   },
-     *   where: {
-     *     // ... the filter for the DeviceToken we want to update
-     *   }
-     * })
-     */
-    upsert<T extends DeviceTokenUpsertArgs>(args: SelectSubset<T, DeviceTokenUpsertArgs<ExtArgs>>): Prisma__DeviceTokenClient<$Result.GetResult<Prisma.$DeviceTokenPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
-
-
-    /**
-     * Count the number of DeviceTokens.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {DeviceTokenCountArgs} args - Arguments to filter DeviceTokens to count.
-     * @example
-     * // Count the number of DeviceTokens
-     * const count = await prisma.deviceToken.count({
-     *   where: {
-     *     // ... the filter for the DeviceTokens we want to count
-     *   }
-     * })
-    **/
-    count<T extends DeviceTokenCountArgs>(
-      args?: Subset<T, DeviceTokenCountArgs>,
-    ): Prisma.PrismaPromise<
-      T extends $Utils.Record<'select', any>
-        ? T['select'] extends true
-          ? number
-          : GetScalarType<T['select'], DeviceTokenCountAggregateOutputType>
-        : number
-    >
-
-    /**
-     * Allows you to perform aggregations operations on a DeviceToken.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {DeviceTokenAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
-     * @example
-     * // Ordered by age ascending
-     * // Where email contains prisma.io
-     * // Limited to the 10 users
-     * const aggregations = await prisma.user.aggregate({
-     *   _avg: {
-     *     age: true,
-     *   },
-     *   where: {
-     *     email: {
-     *       contains: "prisma.io",
-     *     },
-     *   },
-     *   orderBy: {
-     *     age: "asc",
-     *   },
-     *   take: 10,
-     * })
-    **/
-    aggregate<T extends DeviceTokenAggregateArgs>(args: Subset<T, DeviceTokenAggregateArgs>): Prisma.PrismaPromise<GetDeviceTokenAggregateType<T>>
-
-    /**
-     * Group by DeviceToken.
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * @param {DeviceTokenGroupByArgs} args - Group by arguments.
-     * @example
-     * // Group by city, order by createdAt, get count
-     * const result = await prisma.user.groupBy({
-     *   by: ['city', 'createdAt'],
-     *   orderBy: {
-     *     createdAt: true
-     *   },
-     *   _count: {
-     *     _all: true
-     *   },
-     * })
-     * 
-    **/
-    groupBy<
-      T extends DeviceTokenGroupByArgs,
-      HasSelectOrTake extends Or<
-        Extends<'skip', Keys<T>>,
-        Extends<'take', Keys<T>>
-      >,
-      OrderByArg extends True extends HasSelectOrTake
-        ? { orderBy: DeviceTokenGroupByArgs['orderBy'] }
-        : { orderBy?: DeviceTokenGroupByArgs['orderBy'] },
-      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
-      ByFields extends MaybeTupleToUnion<T['by']>,
-      ByValid extends Has<ByFields, OrderFields>,
-      HavingFields extends GetHavingFields<T['having']>,
-      HavingValid extends Has<ByFields, HavingFields>,
-      ByEmpty extends T['by'] extends never[] ? True : False,
-      InputErrors extends ByEmpty extends True
-      ? `Error: "by" must not be empty.`
-      : HavingValid extends False
-      ? {
-          [P in HavingFields]: P extends ByFields
-            ? never
-            : P extends string
-            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
-            : [
-                Error,
-                'Field ',
-                P,
-                ` in "having" needs to be provided in "by"`,
-              ]
-        }[HavingFields]
-      : 'take' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "take", you also need to provide "orderBy"'
-      : 'skip' extends Keys<T>
-      ? 'orderBy' extends Keys<T>
-        ? ByValid extends True
-          ? {}
-          : {
-              [P in OrderFields]: P extends ByFields
-                ? never
-                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-            }[OrderFields]
-        : 'Error: If you provide "skip", you also need to provide "orderBy"'
-      : ByValid extends True
-      ? {}
-      : {
-          [P in OrderFields]: P extends ByFields
-            ? never
-            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
-        }[OrderFields]
-    >(args: SubsetIntersection<T, DeviceTokenGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetDeviceTokenGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
-  /**
-   * Fields of the DeviceToken model
-   */
-  readonly fields: DeviceTokenFieldRefs;
-  }
-
-  /**
-   * The delegate class that acts as a "Promise-like" for DeviceToken.
-   * Why is this prefixed with `Prisma__`?
-   * Because we want to prevent naming conflicts as mentioned in
-   * https://github.com/prisma/prisma-client-js/issues/707
-   */
-  export interface Prisma__DeviceTokenClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
-    readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
-    /**
-     * Attaches callbacks for the resolution and/or rejection of the Promise.
-     * @param onfulfilled The callback to execute when the Promise is resolved.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of which ever callback is executed.
-     */
-    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
-    /**
-     * Attaches a callback for only the rejection of the Promise.
-     * @param onrejected The callback to execute when the Promise is rejected.
-     * @returns A Promise for the completion of the callback.
-     */
-    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
-    /**
-     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-     * resolved value cannot be modified from the callback.
-     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
-     * @returns A Promise for the completion of the callback.
-     */
-    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
-  }
-
-
-
-
-  /**
-   * Fields of the DeviceToken model
-   */ 
-  interface DeviceTokenFieldRefs {
-    readonly id: FieldRef<"DeviceToken", 'Int'>
-    readonly userId: FieldRef<"DeviceToken", 'Int'>
-    readonly token: FieldRef<"DeviceToken", 'String'>
-    readonly platform: FieldRef<"DeviceToken", 'String'>
-    readonly userAgent: FieldRef<"DeviceToken", 'String'>
-    readonly isActive: FieldRef<"DeviceToken", 'Boolean'>
-    readonly lastSeenAt: FieldRef<"DeviceToken", 'DateTime'>
-    readonly createdAt: FieldRef<"DeviceToken", 'DateTime'>
-    readonly updatedAt: FieldRef<"DeviceToken", 'DateTime'>
-  }
-    
-
-  // Custom InputTypes
-  /**
-   * DeviceToken findUnique
-   */
-  export type DeviceTokenFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * Filter, which DeviceToken to fetch.
-     */
-    where: DeviceTokenWhereUniqueInput
-  }
-
-  /**
-   * DeviceToken findUniqueOrThrow
-   */
-  export type DeviceTokenFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * Filter, which DeviceToken to fetch.
-     */
-    where: DeviceTokenWhereUniqueInput
-  }
-
-  /**
-   * DeviceToken findFirst
-   */
-  export type DeviceTokenFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * Filter, which DeviceToken to fetch.
-     */
-    where?: DeviceTokenWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of DeviceTokens to fetch.
-     */
-    orderBy?: DeviceTokenOrderByWithRelationInput | DeviceTokenOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for DeviceTokens.
-     */
-    cursor?: DeviceTokenWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` DeviceTokens from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` DeviceTokens.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of DeviceTokens.
-     */
-    distinct?: DeviceTokenScalarFieldEnum | DeviceTokenScalarFieldEnum[]
-  }
-
-  /**
-   * DeviceToken findFirstOrThrow
-   */
-  export type DeviceTokenFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * Filter, which DeviceToken to fetch.
-     */
-    where?: DeviceTokenWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of DeviceTokens to fetch.
-     */
-    orderBy?: DeviceTokenOrderByWithRelationInput | DeviceTokenOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for searching for DeviceTokens.
-     */
-    cursor?: DeviceTokenWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` DeviceTokens from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` DeviceTokens.
-     */
-    skip?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
-     * 
-     * Filter by unique combinations of DeviceTokens.
-     */
-    distinct?: DeviceTokenScalarFieldEnum | DeviceTokenScalarFieldEnum[]
-  }
-
-  /**
-   * DeviceToken findMany
-   */
-  export type DeviceTokenFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * Filter, which DeviceTokens to fetch.
-     */
-    where?: DeviceTokenWhereInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
-     * 
-     * Determine the order of DeviceTokens to fetch.
-     */
-    orderBy?: DeviceTokenOrderByWithRelationInput | DeviceTokenOrderByWithRelationInput[]
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
-     * 
-     * Sets the position for listing DeviceTokens.
-     */
-    cursor?: DeviceTokenWhereUniqueInput
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Take `±n` DeviceTokens from the position of the cursor.
-     */
-    take?: number
-    /**
-     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
-     * 
-     * Skip the first `n` DeviceTokens.
-     */
-    skip?: number
-    distinct?: DeviceTokenScalarFieldEnum | DeviceTokenScalarFieldEnum[]
-  }
-
-  /**
-   * DeviceToken create
-   */
-  export type DeviceTokenCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * The data needed to create a DeviceToken.
-     */
-    data: XOR<DeviceTokenCreateInput, DeviceTokenUncheckedCreateInput>
-  }
-
-  /**
-   * DeviceToken createMany
-   */
-  export type DeviceTokenCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to create many DeviceTokens.
-     */
-    data: DeviceTokenCreateManyInput | DeviceTokenCreateManyInput[]
-  }
-
-  /**
-   * DeviceToken createManyAndReturn
-   */
-  export type DeviceTokenCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelectCreateManyAndReturn<ExtArgs> | null
-    /**
-     * The data used to create many DeviceTokens.
-     */
-    data: DeviceTokenCreateManyInput | DeviceTokenCreateManyInput[]
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenIncludeCreateManyAndReturn<ExtArgs> | null
-  }
-
-  /**
-   * DeviceToken update
-   */
-  export type DeviceTokenUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * The data needed to update a DeviceToken.
-     */
-    data: XOR<DeviceTokenUpdateInput, DeviceTokenUncheckedUpdateInput>
-    /**
-     * Choose, which DeviceToken to update.
-     */
-    where: DeviceTokenWhereUniqueInput
-  }
-
-  /**
-   * DeviceToken updateMany
-   */
-  export type DeviceTokenUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * The data used to update DeviceTokens.
-     */
-    data: XOR<DeviceTokenUpdateManyMutationInput, DeviceTokenUncheckedUpdateManyInput>
-    /**
-     * Filter which DeviceTokens to update
-     */
-    where?: DeviceTokenWhereInput
-  }
-
-  /**
-   * DeviceToken upsert
-   */
-  export type DeviceTokenUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * The filter to search for the DeviceToken to update in case it exists.
-     */
-    where: DeviceTokenWhereUniqueInput
-    /**
-     * In case the DeviceToken found by the `where` argument doesn't exist, create a new DeviceToken with this data.
-     */
-    create: XOR<DeviceTokenCreateInput, DeviceTokenUncheckedCreateInput>
-    /**
-     * In case the DeviceToken was found with the provided `where` argument, update it with this data.
-     */
-    update: XOR<DeviceTokenUpdateInput, DeviceTokenUncheckedUpdateInput>
-  }
-
-  /**
-   * DeviceToken delete
-   */
-  export type DeviceTokenDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
-    /**
-     * Filter which DeviceToken to delete.
-     */
-    where: DeviceTokenWhereUniqueInput
-  }
-
-  /**
-   * DeviceToken deleteMany
-   */
-  export type DeviceTokenDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Filter which DeviceTokens to delete
-     */
-    where?: DeviceTokenWhereInput
-  }
-
-  /**
-   * DeviceToken without action
-   */
-  export type DeviceTokenDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the DeviceToken
-     */
-    select?: DeviceTokenSelect<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: DeviceTokenInclude<ExtArgs> | null
   }
 
 
@@ -12288,6 +11412,2120 @@ export namespace Prisma {
 
 
   /**
+   * Model UserHoursSummary
+   */
+
+  export type AggregateUserHoursSummary = {
+    _count: UserHoursSummaryCountAggregateOutputType | null
+    _avg: UserHoursSummaryAvgAggregateOutputType | null
+    _sum: UserHoursSummarySumAggregateOutputType | null
+    _min: UserHoursSummaryMinAggregateOutputType | null
+    _max: UserHoursSummaryMaxAggregateOutputType | null
+  }
+
+  export type UserHoursSummaryAvgAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    campaignHours: number | null
+    offCampaignHours: number | null
+    unansweredCount: number | null
+    noShowCount: number | null
+    unansweredPenaltyHours: number | null
+    noShowPenaltyHours: number | null
+    totalHours: number | null
+  }
+
+  export type UserHoursSummarySumAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    campaignHours: number | null
+    offCampaignHours: number | null
+    unansweredCount: number | null
+    noShowCount: number | null
+    unansweredPenaltyHours: number | null
+    noShowPenaltyHours: number | null
+    totalHours: number | null
+  }
+
+  export type UserHoursSummaryMinAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    campaignHours: number | null
+    offCampaignHours: number | null
+    unansweredCount: number | null
+    noShowCount: number | null
+    unansweredPenaltyHours: number | null
+    noShowPenaltyHours: number | null
+    totalHours: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserHoursSummaryMaxAggregateOutputType = {
+    id: number | null
+    userId: number | null
+    campaignHours: number | null
+    offCampaignHours: number | null
+    unansweredCount: number | null
+    noShowCount: number | null
+    unansweredPenaltyHours: number | null
+    noShowPenaltyHours: number | null
+    totalHours: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type UserHoursSummaryCountAggregateOutputType = {
+    id: number
+    userId: number
+    campaignHours: number
+    offCampaignHours: number
+    unansweredCount: number
+    noShowCount: number
+    unansweredPenaltyHours: number
+    noShowPenaltyHours: number
+    totalHours: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type UserHoursSummaryAvgAggregateInputType = {
+    id?: true
+    userId?: true
+    campaignHours?: true
+    offCampaignHours?: true
+    unansweredCount?: true
+    noShowCount?: true
+    unansweredPenaltyHours?: true
+    noShowPenaltyHours?: true
+    totalHours?: true
+  }
+
+  export type UserHoursSummarySumAggregateInputType = {
+    id?: true
+    userId?: true
+    campaignHours?: true
+    offCampaignHours?: true
+    unansweredCount?: true
+    noShowCount?: true
+    unansweredPenaltyHours?: true
+    noShowPenaltyHours?: true
+    totalHours?: true
+  }
+
+  export type UserHoursSummaryMinAggregateInputType = {
+    id?: true
+    userId?: true
+    campaignHours?: true
+    offCampaignHours?: true
+    unansweredCount?: true
+    noShowCount?: true
+    unansweredPenaltyHours?: true
+    noShowPenaltyHours?: true
+    totalHours?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserHoursSummaryMaxAggregateInputType = {
+    id?: true
+    userId?: true
+    campaignHours?: true
+    offCampaignHours?: true
+    unansweredCount?: true
+    noShowCount?: true
+    unansweredPenaltyHours?: true
+    noShowPenaltyHours?: true
+    totalHours?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type UserHoursSummaryCountAggregateInputType = {
+    id?: true
+    userId?: true
+    campaignHours?: true
+    offCampaignHours?: true
+    unansweredCount?: true
+    noShowCount?: true
+    unansweredPenaltyHours?: true
+    noShowPenaltyHours?: true
+    totalHours?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type UserHoursSummaryAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserHoursSummary to aggregate.
+     */
+    where?: UserHoursSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserHoursSummaries to fetch.
+     */
+    orderBy?: UserHoursSummaryOrderByWithRelationInput | UserHoursSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: UserHoursSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserHoursSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserHoursSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned UserHoursSummaries
+    **/
+    _count?: true | UserHoursSummaryCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: UserHoursSummaryAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: UserHoursSummarySumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: UserHoursSummaryMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: UserHoursSummaryMaxAggregateInputType
+  }
+
+  export type GetUserHoursSummaryAggregateType<T extends UserHoursSummaryAggregateArgs> = {
+        [P in keyof T & keyof AggregateUserHoursSummary]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateUserHoursSummary[P]>
+      : GetScalarType<T[P], AggregateUserHoursSummary[P]>
+  }
+
+
+
+
+  export type UserHoursSummaryGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserHoursSummaryWhereInput
+    orderBy?: UserHoursSummaryOrderByWithAggregationInput | UserHoursSummaryOrderByWithAggregationInput[]
+    by: UserHoursSummaryScalarFieldEnum[] | UserHoursSummaryScalarFieldEnum
+    having?: UserHoursSummaryScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: UserHoursSummaryCountAggregateInputType | true
+    _avg?: UserHoursSummaryAvgAggregateInputType
+    _sum?: UserHoursSummarySumAggregateInputType
+    _min?: UserHoursSummaryMinAggregateInputType
+    _max?: UserHoursSummaryMaxAggregateInputType
+  }
+
+  export type UserHoursSummaryGroupByOutputType = {
+    id: number
+    userId: number
+    campaignHours: number
+    offCampaignHours: number
+    unansweredCount: number
+    noShowCount: number
+    unansweredPenaltyHours: number
+    noShowPenaltyHours: number
+    totalHours: number
+    createdAt: Date
+    updatedAt: Date
+    _count: UserHoursSummaryCountAggregateOutputType | null
+    _avg: UserHoursSummaryAvgAggregateOutputType | null
+    _sum: UserHoursSummarySumAggregateOutputType | null
+    _min: UserHoursSummaryMinAggregateOutputType | null
+    _max: UserHoursSummaryMaxAggregateOutputType | null
+  }
+
+  type GetUserHoursSummaryGroupByPayload<T extends UserHoursSummaryGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<UserHoursSummaryGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof UserHoursSummaryGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], UserHoursSummaryGroupByOutputType[P]>
+            : GetScalarType<T[P], UserHoursSummaryGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type UserHoursSummarySelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    campaignHours?: boolean
+    offCampaignHours?: boolean
+    unansweredCount?: boolean
+    noShowCount?: boolean
+    unansweredPenaltyHours?: boolean
+    noShowPenaltyHours?: boolean
+    totalHours?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userHoursSummary"]>
+
+  export type UserHoursSummarySelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    userId?: boolean
+    campaignHours?: boolean
+    offCampaignHours?: boolean
+    unansweredCount?: boolean
+    noShowCount?: boolean
+    unansweredPenaltyHours?: boolean
+    noShowPenaltyHours?: boolean
+    totalHours?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["userHoursSummary"]>
+
+  export type UserHoursSummarySelectScalar = {
+    id?: boolean
+    userId?: boolean
+    campaignHours?: boolean
+    offCampaignHours?: boolean
+    unansweredCount?: boolean
+    noShowCount?: boolean
+    unansweredPenaltyHours?: boolean
+    noShowPenaltyHours?: boolean
+    totalHours?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type UserHoursSummaryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+  export type UserHoursSummaryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    user?: boolean | UserDefaultArgs<ExtArgs>
+  }
+
+  export type $UserHoursSummaryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "UserHoursSummary"
+    objects: {
+      user: Prisma.$UserPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      userId: number
+      campaignHours: number
+      offCampaignHours: number
+      unansweredCount: number
+      noShowCount: number
+      unansweredPenaltyHours: number
+      noShowPenaltyHours: number
+      totalHours: number
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["userHoursSummary"]>
+    composites: {}
+  }
+
+  type UserHoursSummaryGetPayload<S extends boolean | null | undefined | UserHoursSummaryDefaultArgs> = $Result.GetResult<Prisma.$UserHoursSummaryPayload, S>
+
+  type UserHoursSummaryCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<UserHoursSummaryFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: UserHoursSummaryCountAggregateInputType | true
+    }
+
+  export interface UserHoursSummaryDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['UserHoursSummary'], meta: { name: 'UserHoursSummary' } }
+    /**
+     * Find zero or one UserHoursSummary that matches the filter.
+     * @param {UserHoursSummaryFindUniqueArgs} args - Arguments to find a UserHoursSummary
+     * @example
+     * // Get one UserHoursSummary
+     * const userHoursSummary = await prisma.userHoursSummary.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends UserHoursSummaryFindUniqueArgs>(args: SelectSubset<T, UserHoursSummaryFindUniqueArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one UserHoursSummary that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {UserHoursSummaryFindUniqueOrThrowArgs} args - Arguments to find a UserHoursSummary
+     * @example
+     * // Get one UserHoursSummary
+     * const userHoursSummary = await prisma.userHoursSummary.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends UserHoursSummaryFindUniqueOrThrowArgs>(args: SelectSubset<T, UserHoursSummaryFindUniqueOrThrowArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first UserHoursSummary that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserHoursSummaryFindFirstArgs} args - Arguments to find a UserHoursSummary
+     * @example
+     * // Get one UserHoursSummary
+     * const userHoursSummary = await prisma.userHoursSummary.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends UserHoursSummaryFindFirstArgs>(args?: SelectSubset<T, UserHoursSummaryFindFirstArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first UserHoursSummary that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserHoursSummaryFindFirstOrThrowArgs} args - Arguments to find a UserHoursSummary
+     * @example
+     * // Get one UserHoursSummary
+     * const userHoursSummary = await prisma.userHoursSummary.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends UserHoursSummaryFindFirstOrThrowArgs>(args?: SelectSubset<T, UserHoursSummaryFindFirstOrThrowArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more UserHoursSummaries that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserHoursSummaryFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all UserHoursSummaries
+     * const userHoursSummaries = await prisma.userHoursSummary.findMany()
+     * 
+     * // Get first 10 UserHoursSummaries
+     * const userHoursSummaries = await prisma.userHoursSummary.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const userHoursSummaryWithIdOnly = await prisma.userHoursSummary.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends UserHoursSummaryFindManyArgs>(args?: SelectSubset<T, UserHoursSummaryFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a UserHoursSummary.
+     * @param {UserHoursSummaryCreateArgs} args - Arguments to create a UserHoursSummary.
+     * @example
+     * // Create one UserHoursSummary
+     * const UserHoursSummary = await prisma.userHoursSummary.create({
+     *   data: {
+     *     // ... data to create a UserHoursSummary
+     *   }
+     * })
+     * 
+     */
+    create<T extends UserHoursSummaryCreateArgs>(args: SelectSubset<T, UserHoursSummaryCreateArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many UserHoursSummaries.
+     * @param {UserHoursSummaryCreateManyArgs} args - Arguments to create many UserHoursSummaries.
+     * @example
+     * // Create many UserHoursSummaries
+     * const userHoursSummary = await prisma.userHoursSummary.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends UserHoursSummaryCreateManyArgs>(args?: SelectSubset<T, UserHoursSummaryCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many UserHoursSummaries and returns the data saved in the database.
+     * @param {UserHoursSummaryCreateManyAndReturnArgs} args - Arguments to create many UserHoursSummaries.
+     * @example
+     * // Create many UserHoursSummaries
+     * const userHoursSummary = await prisma.userHoursSummary.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many UserHoursSummaries and only return the `id`
+     * const userHoursSummaryWithIdOnly = await prisma.userHoursSummary.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends UserHoursSummaryCreateManyAndReturnArgs>(args?: SelectSubset<T, UserHoursSummaryCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a UserHoursSummary.
+     * @param {UserHoursSummaryDeleteArgs} args - Arguments to delete one UserHoursSummary.
+     * @example
+     * // Delete one UserHoursSummary
+     * const UserHoursSummary = await prisma.userHoursSummary.delete({
+     *   where: {
+     *     // ... filter to delete one UserHoursSummary
+     *   }
+     * })
+     * 
+     */
+    delete<T extends UserHoursSummaryDeleteArgs>(args: SelectSubset<T, UserHoursSummaryDeleteArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one UserHoursSummary.
+     * @param {UserHoursSummaryUpdateArgs} args - Arguments to update one UserHoursSummary.
+     * @example
+     * // Update one UserHoursSummary
+     * const userHoursSummary = await prisma.userHoursSummary.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends UserHoursSummaryUpdateArgs>(args: SelectSubset<T, UserHoursSummaryUpdateArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more UserHoursSummaries.
+     * @param {UserHoursSummaryDeleteManyArgs} args - Arguments to filter UserHoursSummaries to delete.
+     * @example
+     * // Delete a few UserHoursSummaries
+     * const { count } = await prisma.userHoursSummary.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends UserHoursSummaryDeleteManyArgs>(args?: SelectSubset<T, UserHoursSummaryDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more UserHoursSummaries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserHoursSummaryUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many UserHoursSummaries
+     * const userHoursSummary = await prisma.userHoursSummary.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends UserHoursSummaryUpdateManyArgs>(args: SelectSubset<T, UserHoursSummaryUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one UserHoursSummary.
+     * @param {UserHoursSummaryUpsertArgs} args - Arguments to update or create a UserHoursSummary.
+     * @example
+     * // Update or create a UserHoursSummary
+     * const userHoursSummary = await prisma.userHoursSummary.upsert({
+     *   create: {
+     *     // ... data to create a UserHoursSummary
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the UserHoursSummary we want to update
+     *   }
+     * })
+     */
+    upsert<T extends UserHoursSummaryUpsertArgs>(args: SelectSubset<T, UserHoursSummaryUpsertArgs<ExtArgs>>): Prisma__UserHoursSummaryClient<$Result.GetResult<Prisma.$UserHoursSummaryPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of UserHoursSummaries.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserHoursSummaryCountArgs} args - Arguments to filter UserHoursSummaries to count.
+     * @example
+     * // Count the number of UserHoursSummaries
+     * const count = await prisma.userHoursSummary.count({
+     *   where: {
+     *     // ... the filter for the UserHoursSummaries we want to count
+     *   }
+     * })
+    **/
+    count<T extends UserHoursSummaryCountArgs>(
+      args?: Subset<T, UserHoursSummaryCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], UserHoursSummaryCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a UserHoursSummary.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserHoursSummaryAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends UserHoursSummaryAggregateArgs>(args: Subset<T, UserHoursSummaryAggregateArgs>): Prisma.PrismaPromise<GetUserHoursSummaryAggregateType<T>>
+
+    /**
+     * Group by UserHoursSummary.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {UserHoursSummaryGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends UserHoursSummaryGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: UserHoursSummaryGroupByArgs['orderBy'] }
+        : { orderBy?: UserHoursSummaryGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, UserHoursSummaryGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetUserHoursSummaryGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the UserHoursSummary model
+   */
+  readonly fields: UserHoursSummaryFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for UserHoursSummary.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__UserHoursSummaryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the UserHoursSummary model
+   */ 
+  interface UserHoursSummaryFieldRefs {
+    readonly id: FieldRef<"UserHoursSummary", 'Int'>
+    readonly userId: FieldRef<"UserHoursSummary", 'Int'>
+    readonly campaignHours: FieldRef<"UserHoursSummary", 'Float'>
+    readonly offCampaignHours: FieldRef<"UserHoursSummary", 'Float'>
+    readonly unansweredCount: FieldRef<"UserHoursSummary", 'Int'>
+    readonly noShowCount: FieldRef<"UserHoursSummary", 'Int'>
+    readonly unansweredPenaltyHours: FieldRef<"UserHoursSummary", 'Float'>
+    readonly noShowPenaltyHours: FieldRef<"UserHoursSummary", 'Float'>
+    readonly totalHours: FieldRef<"UserHoursSummary", 'Float'>
+    readonly createdAt: FieldRef<"UserHoursSummary", 'DateTime'>
+    readonly updatedAt: FieldRef<"UserHoursSummary", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * UserHoursSummary findUnique
+   */
+  export type UserHoursSummaryFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserHoursSummary to fetch.
+     */
+    where: UserHoursSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserHoursSummary findUniqueOrThrow
+   */
+  export type UserHoursSummaryFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserHoursSummary to fetch.
+     */
+    where: UserHoursSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserHoursSummary findFirst
+   */
+  export type UserHoursSummaryFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserHoursSummary to fetch.
+     */
+    where?: UserHoursSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserHoursSummaries to fetch.
+     */
+    orderBy?: UserHoursSummaryOrderByWithRelationInput | UserHoursSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserHoursSummaries.
+     */
+    cursor?: UserHoursSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserHoursSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserHoursSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserHoursSummaries.
+     */
+    distinct?: UserHoursSummaryScalarFieldEnum | UserHoursSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * UserHoursSummary findFirstOrThrow
+   */
+  export type UserHoursSummaryFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserHoursSummary to fetch.
+     */
+    where?: UserHoursSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserHoursSummaries to fetch.
+     */
+    orderBy?: UserHoursSummaryOrderByWithRelationInput | UserHoursSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for UserHoursSummaries.
+     */
+    cursor?: UserHoursSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserHoursSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserHoursSummaries.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of UserHoursSummaries.
+     */
+    distinct?: UserHoursSummaryScalarFieldEnum | UserHoursSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * UserHoursSummary findMany
+   */
+  export type UserHoursSummaryFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * Filter, which UserHoursSummaries to fetch.
+     */
+    where?: UserHoursSummaryWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of UserHoursSummaries to fetch.
+     */
+    orderBy?: UserHoursSummaryOrderByWithRelationInput | UserHoursSummaryOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing UserHoursSummaries.
+     */
+    cursor?: UserHoursSummaryWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` UserHoursSummaries from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` UserHoursSummaries.
+     */
+    skip?: number
+    distinct?: UserHoursSummaryScalarFieldEnum | UserHoursSummaryScalarFieldEnum[]
+  }
+
+  /**
+   * UserHoursSummary create
+   */
+  export type UserHoursSummaryCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * The data needed to create a UserHoursSummary.
+     */
+    data: XOR<UserHoursSummaryCreateInput, UserHoursSummaryUncheckedCreateInput>
+  }
+
+  /**
+   * UserHoursSummary createMany
+   */
+  export type UserHoursSummaryCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many UserHoursSummaries.
+     */
+    data: UserHoursSummaryCreateManyInput | UserHoursSummaryCreateManyInput[]
+  }
+
+  /**
+   * UserHoursSummary createManyAndReturn
+   */
+  export type UserHoursSummaryCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many UserHoursSummaries.
+     */
+    data: UserHoursSummaryCreateManyInput | UserHoursSummaryCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * UserHoursSummary update
+   */
+  export type UserHoursSummaryUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * The data needed to update a UserHoursSummary.
+     */
+    data: XOR<UserHoursSummaryUpdateInput, UserHoursSummaryUncheckedUpdateInput>
+    /**
+     * Choose, which UserHoursSummary to update.
+     */
+    where: UserHoursSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserHoursSummary updateMany
+   */
+  export type UserHoursSummaryUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update UserHoursSummaries.
+     */
+    data: XOR<UserHoursSummaryUpdateManyMutationInput, UserHoursSummaryUncheckedUpdateManyInput>
+    /**
+     * Filter which UserHoursSummaries to update
+     */
+    where?: UserHoursSummaryWhereInput
+  }
+
+  /**
+   * UserHoursSummary upsert
+   */
+  export type UserHoursSummaryUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * The filter to search for the UserHoursSummary to update in case it exists.
+     */
+    where: UserHoursSummaryWhereUniqueInput
+    /**
+     * In case the UserHoursSummary found by the `where` argument doesn't exist, create a new UserHoursSummary with this data.
+     */
+    create: XOR<UserHoursSummaryCreateInput, UserHoursSummaryUncheckedCreateInput>
+    /**
+     * In case the UserHoursSummary was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<UserHoursSummaryUpdateInput, UserHoursSummaryUncheckedUpdateInput>
+  }
+
+  /**
+   * UserHoursSummary delete
+   */
+  export type UserHoursSummaryDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+    /**
+     * Filter which UserHoursSummary to delete.
+     */
+    where: UserHoursSummaryWhereUniqueInput
+  }
+
+  /**
+   * UserHoursSummary deleteMany
+   */
+  export type UserHoursSummaryDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which UserHoursSummaries to delete
+     */
+    where?: UserHoursSummaryWhereInput
+  }
+
+  /**
+   * UserHoursSummary without action
+   */
+  export type UserHoursSummaryDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserHoursSummary
+     */
+    select?: UserHoursSummarySelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserHoursSummaryInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model FormulariCampanya
+   */
+
+  export type AggregateFormulariCampanya = {
+    _count: FormulariCampanyaCountAggregateOutputType | null
+    _avg: FormulariCampanyaAvgAggregateOutputType | null
+    _sum: FormulariCampanyaSumAggregateOutputType | null
+    _min: FormulariCampanyaMinAggregateOutputType | null
+    _max: FormulariCampanyaMaxAggregateOutputType | null
+  }
+
+  export type FormulariCampanyaAvgAggregateOutputType = {
+    id: number | null
+    convocatoriaId: number | null
+    responsableId: number | null
+  }
+
+  export type FormulariCampanyaSumAggregateOutputType = {
+    id: number | null
+    convocatoriaId: number | null
+    responsableId: number | null
+  }
+
+  export type FormulariCampanyaMinAggregateOutputType = {
+    id: number | null
+    convocatoriaId: number | null
+    dia: Date | null
+    responsableId: number | null
+    responsableNCarnet: string | null
+    voluntarisJson: string | null
+    vehiclesJson: string | null
+    serviceMoment: string | null
+    createdByNCarnet: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FormulariCampanyaMaxAggregateOutputType = {
+    id: number | null
+    convocatoriaId: number | null
+    dia: Date | null
+    responsableId: number | null
+    responsableNCarnet: string | null
+    voluntarisJson: string | null
+    vehiclesJson: string | null
+    serviceMoment: string | null
+    createdByNCarnet: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type FormulariCampanyaCountAggregateOutputType = {
+    id: number
+    convocatoriaId: number
+    dia: number
+    responsableId: number
+    responsableNCarnet: number
+    voluntarisJson: number
+    vehiclesJson: number
+    serviceMoment: number
+    createdByNCarnet: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type FormulariCampanyaAvgAggregateInputType = {
+    id?: true
+    convocatoriaId?: true
+    responsableId?: true
+  }
+
+  export type FormulariCampanyaSumAggregateInputType = {
+    id?: true
+    convocatoriaId?: true
+    responsableId?: true
+  }
+
+  export type FormulariCampanyaMinAggregateInputType = {
+    id?: true
+    convocatoriaId?: true
+    dia?: true
+    responsableId?: true
+    responsableNCarnet?: true
+    voluntarisJson?: true
+    vehiclesJson?: true
+    serviceMoment?: true
+    createdByNCarnet?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FormulariCampanyaMaxAggregateInputType = {
+    id?: true
+    convocatoriaId?: true
+    dia?: true
+    responsableId?: true
+    responsableNCarnet?: true
+    voluntarisJson?: true
+    vehiclesJson?: true
+    serviceMoment?: true
+    createdByNCarnet?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type FormulariCampanyaCountAggregateInputType = {
+    id?: true
+    convocatoriaId?: true
+    dia?: true
+    responsableId?: true
+    responsableNCarnet?: true
+    voluntarisJson?: true
+    vehiclesJson?: true
+    serviceMoment?: true
+    createdByNCarnet?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type FormulariCampanyaAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FormulariCampanya to aggregate.
+     */
+    where?: FormulariCampanyaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormulariCampanyas to fetch.
+     */
+    orderBy?: FormulariCampanyaOrderByWithRelationInput | FormulariCampanyaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: FormulariCampanyaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormulariCampanyas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormulariCampanyas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned FormulariCampanyas
+    **/
+    _count?: true | FormulariCampanyaCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: FormulariCampanyaAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: FormulariCampanyaSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: FormulariCampanyaMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: FormulariCampanyaMaxAggregateInputType
+  }
+
+  export type GetFormulariCampanyaAggregateType<T extends FormulariCampanyaAggregateArgs> = {
+        [P in keyof T & keyof AggregateFormulariCampanya]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateFormulariCampanya[P]>
+      : GetScalarType<T[P], AggregateFormulariCampanya[P]>
+  }
+
+
+
+
+  export type FormulariCampanyaGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: FormulariCampanyaWhereInput
+    orderBy?: FormulariCampanyaOrderByWithAggregationInput | FormulariCampanyaOrderByWithAggregationInput[]
+    by: FormulariCampanyaScalarFieldEnum[] | FormulariCampanyaScalarFieldEnum
+    having?: FormulariCampanyaScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: FormulariCampanyaCountAggregateInputType | true
+    _avg?: FormulariCampanyaAvgAggregateInputType
+    _sum?: FormulariCampanyaSumAggregateInputType
+    _min?: FormulariCampanyaMinAggregateInputType
+    _max?: FormulariCampanyaMaxAggregateInputType
+  }
+
+  export type FormulariCampanyaGroupByOutputType = {
+    id: number
+    convocatoriaId: number
+    dia: Date
+    responsableId: number | null
+    responsableNCarnet: string | null
+    voluntarisJson: string
+    vehiclesJson: string
+    serviceMoment: string
+    createdByNCarnet: string | null
+    createdAt: Date
+    updatedAt: Date
+    _count: FormulariCampanyaCountAggregateOutputType | null
+    _avg: FormulariCampanyaAvgAggregateOutputType | null
+    _sum: FormulariCampanyaSumAggregateOutputType | null
+    _min: FormulariCampanyaMinAggregateOutputType | null
+    _max: FormulariCampanyaMaxAggregateOutputType | null
+  }
+
+  type GetFormulariCampanyaGroupByPayload<T extends FormulariCampanyaGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<FormulariCampanyaGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof FormulariCampanyaGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], FormulariCampanyaGroupByOutputType[P]>
+            : GetScalarType<T[P], FormulariCampanyaGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type FormulariCampanyaSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    convocatoriaId?: boolean
+    dia?: boolean
+    responsableId?: boolean
+    responsableNCarnet?: boolean
+    voluntarisJson?: boolean
+    vehiclesJson?: boolean
+    serviceMoment?: boolean
+    createdByNCarnet?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["formulariCampanya"]>
+
+  export type FormulariCampanyaSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    convocatoriaId?: boolean
+    dia?: boolean
+    responsableId?: boolean
+    responsableNCarnet?: boolean
+    voluntarisJson?: boolean
+    vehiclesJson?: boolean
+    serviceMoment?: boolean
+    createdByNCarnet?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["formulariCampanya"]>
+
+  export type FormulariCampanyaSelectScalar = {
+    id?: boolean
+    convocatoriaId?: boolean
+    dia?: boolean
+    responsableId?: boolean
+    responsableNCarnet?: boolean
+    voluntarisJson?: boolean
+    vehiclesJson?: boolean
+    serviceMoment?: boolean
+    createdByNCarnet?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type FormulariCampanyaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
+  }
+  export type FormulariCampanyaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    convocatoria?: boolean | ConvocatoriaDefaultArgs<ExtArgs>
+  }
+
+  export type $FormulariCampanyaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "FormulariCampanya"
+    objects: {
+      convocatoria: Prisma.$ConvocatoriaPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: number
+      convocatoriaId: number
+      dia: Date
+      responsableId: number | null
+      responsableNCarnet: string | null
+      voluntarisJson: string
+      vehiclesJson: string
+      serviceMoment: string
+      createdByNCarnet: string | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["formulariCampanya"]>
+    composites: {}
+  }
+
+  type FormulariCampanyaGetPayload<S extends boolean | null | undefined | FormulariCampanyaDefaultArgs> = $Result.GetResult<Prisma.$FormulariCampanyaPayload, S>
+
+  type FormulariCampanyaCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<FormulariCampanyaFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: FormulariCampanyaCountAggregateInputType | true
+    }
+
+  export interface FormulariCampanyaDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['FormulariCampanya'], meta: { name: 'FormulariCampanya' } }
+    /**
+     * Find zero or one FormulariCampanya that matches the filter.
+     * @param {FormulariCampanyaFindUniqueArgs} args - Arguments to find a FormulariCampanya
+     * @example
+     * // Get one FormulariCampanya
+     * const formulariCampanya = await prisma.formulariCampanya.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends FormulariCampanyaFindUniqueArgs>(args: SelectSubset<T, FormulariCampanyaFindUniqueArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one FormulariCampanya that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {FormulariCampanyaFindUniqueOrThrowArgs} args - Arguments to find a FormulariCampanya
+     * @example
+     * // Get one FormulariCampanya
+     * const formulariCampanya = await prisma.formulariCampanya.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends FormulariCampanyaFindUniqueOrThrowArgs>(args: SelectSubset<T, FormulariCampanyaFindUniqueOrThrowArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first FormulariCampanya that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormulariCampanyaFindFirstArgs} args - Arguments to find a FormulariCampanya
+     * @example
+     * // Get one FormulariCampanya
+     * const formulariCampanya = await prisma.formulariCampanya.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends FormulariCampanyaFindFirstArgs>(args?: SelectSubset<T, FormulariCampanyaFindFirstArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first FormulariCampanya that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormulariCampanyaFindFirstOrThrowArgs} args - Arguments to find a FormulariCampanya
+     * @example
+     * // Get one FormulariCampanya
+     * const formulariCampanya = await prisma.formulariCampanya.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends FormulariCampanyaFindFirstOrThrowArgs>(args?: SelectSubset<T, FormulariCampanyaFindFirstOrThrowArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more FormulariCampanyas that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormulariCampanyaFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all FormulariCampanyas
+     * const formulariCampanyas = await prisma.formulariCampanya.findMany()
+     * 
+     * // Get first 10 FormulariCampanyas
+     * const formulariCampanyas = await prisma.formulariCampanya.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const formulariCampanyaWithIdOnly = await prisma.formulariCampanya.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends FormulariCampanyaFindManyArgs>(args?: SelectSubset<T, FormulariCampanyaFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a FormulariCampanya.
+     * @param {FormulariCampanyaCreateArgs} args - Arguments to create a FormulariCampanya.
+     * @example
+     * // Create one FormulariCampanya
+     * const FormulariCampanya = await prisma.formulariCampanya.create({
+     *   data: {
+     *     // ... data to create a FormulariCampanya
+     *   }
+     * })
+     * 
+     */
+    create<T extends FormulariCampanyaCreateArgs>(args: SelectSubset<T, FormulariCampanyaCreateArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many FormulariCampanyas.
+     * @param {FormulariCampanyaCreateManyArgs} args - Arguments to create many FormulariCampanyas.
+     * @example
+     * // Create many FormulariCampanyas
+     * const formulariCampanya = await prisma.formulariCampanya.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends FormulariCampanyaCreateManyArgs>(args?: SelectSubset<T, FormulariCampanyaCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many FormulariCampanyas and returns the data saved in the database.
+     * @param {FormulariCampanyaCreateManyAndReturnArgs} args - Arguments to create many FormulariCampanyas.
+     * @example
+     * // Create many FormulariCampanyas
+     * const formulariCampanya = await prisma.formulariCampanya.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many FormulariCampanyas and only return the `id`
+     * const formulariCampanyaWithIdOnly = await prisma.formulariCampanya.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends FormulariCampanyaCreateManyAndReturnArgs>(args?: SelectSubset<T, FormulariCampanyaCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a FormulariCampanya.
+     * @param {FormulariCampanyaDeleteArgs} args - Arguments to delete one FormulariCampanya.
+     * @example
+     * // Delete one FormulariCampanya
+     * const FormulariCampanya = await prisma.formulariCampanya.delete({
+     *   where: {
+     *     // ... filter to delete one FormulariCampanya
+     *   }
+     * })
+     * 
+     */
+    delete<T extends FormulariCampanyaDeleteArgs>(args: SelectSubset<T, FormulariCampanyaDeleteArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one FormulariCampanya.
+     * @param {FormulariCampanyaUpdateArgs} args - Arguments to update one FormulariCampanya.
+     * @example
+     * // Update one FormulariCampanya
+     * const formulariCampanya = await prisma.formulariCampanya.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends FormulariCampanyaUpdateArgs>(args: SelectSubset<T, FormulariCampanyaUpdateArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more FormulariCampanyas.
+     * @param {FormulariCampanyaDeleteManyArgs} args - Arguments to filter FormulariCampanyas to delete.
+     * @example
+     * // Delete a few FormulariCampanyas
+     * const { count } = await prisma.formulariCampanya.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends FormulariCampanyaDeleteManyArgs>(args?: SelectSubset<T, FormulariCampanyaDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more FormulariCampanyas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormulariCampanyaUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many FormulariCampanyas
+     * const formulariCampanya = await prisma.formulariCampanya.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends FormulariCampanyaUpdateManyArgs>(args: SelectSubset<T, FormulariCampanyaUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one FormulariCampanya.
+     * @param {FormulariCampanyaUpsertArgs} args - Arguments to update or create a FormulariCampanya.
+     * @example
+     * // Update or create a FormulariCampanya
+     * const formulariCampanya = await prisma.formulariCampanya.upsert({
+     *   create: {
+     *     // ... data to create a FormulariCampanya
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the FormulariCampanya we want to update
+     *   }
+     * })
+     */
+    upsert<T extends FormulariCampanyaUpsertArgs>(args: SelectSubset<T, FormulariCampanyaUpsertArgs<ExtArgs>>): Prisma__FormulariCampanyaClient<$Result.GetResult<Prisma.$FormulariCampanyaPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of FormulariCampanyas.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormulariCampanyaCountArgs} args - Arguments to filter FormulariCampanyas to count.
+     * @example
+     * // Count the number of FormulariCampanyas
+     * const count = await prisma.formulariCampanya.count({
+     *   where: {
+     *     // ... the filter for the FormulariCampanyas we want to count
+     *   }
+     * })
+    **/
+    count<T extends FormulariCampanyaCountArgs>(
+      args?: Subset<T, FormulariCampanyaCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], FormulariCampanyaCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a FormulariCampanya.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormulariCampanyaAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends FormulariCampanyaAggregateArgs>(args: Subset<T, FormulariCampanyaAggregateArgs>): Prisma.PrismaPromise<GetFormulariCampanyaAggregateType<T>>
+
+    /**
+     * Group by FormulariCampanya.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {FormulariCampanyaGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends FormulariCampanyaGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: FormulariCampanyaGroupByArgs['orderBy'] }
+        : { orderBy?: FormulariCampanyaGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, FormulariCampanyaGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetFormulariCampanyaGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the FormulariCampanya model
+   */
+  readonly fields: FormulariCampanyaFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for FormulariCampanya.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__FormulariCampanyaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    convocatoria<T extends ConvocatoriaDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ConvocatoriaDefaultArgs<ExtArgs>>): Prisma__ConvocatoriaClient<$Result.GetResult<Prisma.$ConvocatoriaPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the FormulariCampanya model
+   */ 
+  interface FormulariCampanyaFieldRefs {
+    readonly id: FieldRef<"FormulariCampanya", 'Int'>
+    readonly convocatoriaId: FieldRef<"FormulariCampanya", 'Int'>
+    readonly dia: FieldRef<"FormulariCampanya", 'DateTime'>
+    readonly responsableId: FieldRef<"FormulariCampanya", 'Int'>
+    readonly responsableNCarnet: FieldRef<"FormulariCampanya", 'String'>
+    readonly voluntarisJson: FieldRef<"FormulariCampanya", 'String'>
+    readonly vehiclesJson: FieldRef<"FormulariCampanya", 'String'>
+    readonly serviceMoment: FieldRef<"FormulariCampanya", 'String'>
+    readonly createdByNCarnet: FieldRef<"FormulariCampanya", 'String'>
+    readonly createdAt: FieldRef<"FormulariCampanya", 'DateTime'>
+    readonly updatedAt: FieldRef<"FormulariCampanya", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * FormulariCampanya findUnique
+   */
+  export type FormulariCampanyaFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * Filter, which FormulariCampanya to fetch.
+     */
+    where: FormulariCampanyaWhereUniqueInput
+  }
+
+  /**
+   * FormulariCampanya findUniqueOrThrow
+   */
+  export type FormulariCampanyaFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * Filter, which FormulariCampanya to fetch.
+     */
+    where: FormulariCampanyaWhereUniqueInput
+  }
+
+  /**
+   * FormulariCampanya findFirst
+   */
+  export type FormulariCampanyaFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * Filter, which FormulariCampanya to fetch.
+     */
+    where?: FormulariCampanyaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormulariCampanyas to fetch.
+     */
+    orderBy?: FormulariCampanyaOrderByWithRelationInput | FormulariCampanyaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FormulariCampanyas.
+     */
+    cursor?: FormulariCampanyaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormulariCampanyas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormulariCampanyas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FormulariCampanyas.
+     */
+    distinct?: FormulariCampanyaScalarFieldEnum | FormulariCampanyaScalarFieldEnum[]
+  }
+
+  /**
+   * FormulariCampanya findFirstOrThrow
+   */
+  export type FormulariCampanyaFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * Filter, which FormulariCampanya to fetch.
+     */
+    where?: FormulariCampanyaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormulariCampanyas to fetch.
+     */
+    orderBy?: FormulariCampanyaOrderByWithRelationInput | FormulariCampanyaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for FormulariCampanyas.
+     */
+    cursor?: FormulariCampanyaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormulariCampanyas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormulariCampanyas.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of FormulariCampanyas.
+     */
+    distinct?: FormulariCampanyaScalarFieldEnum | FormulariCampanyaScalarFieldEnum[]
+  }
+
+  /**
+   * FormulariCampanya findMany
+   */
+  export type FormulariCampanyaFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * Filter, which FormulariCampanyas to fetch.
+     */
+    where?: FormulariCampanyaWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of FormulariCampanyas to fetch.
+     */
+    orderBy?: FormulariCampanyaOrderByWithRelationInput | FormulariCampanyaOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing FormulariCampanyas.
+     */
+    cursor?: FormulariCampanyaWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` FormulariCampanyas from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` FormulariCampanyas.
+     */
+    skip?: number
+    distinct?: FormulariCampanyaScalarFieldEnum | FormulariCampanyaScalarFieldEnum[]
+  }
+
+  /**
+   * FormulariCampanya create
+   */
+  export type FormulariCampanyaCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * The data needed to create a FormulariCampanya.
+     */
+    data: XOR<FormulariCampanyaCreateInput, FormulariCampanyaUncheckedCreateInput>
+  }
+
+  /**
+   * FormulariCampanya createMany
+   */
+  export type FormulariCampanyaCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many FormulariCampanyas.
+     */
+    data: FormulariCampanyaCreateManyInput | FormulariCampanyaCreateManyInput[]
+  }
+
+  /**
+   * FormulariCampanya createManyAndReturn
+   */
+  export type FormulariCampanyaCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many FormulariCampanyas.
+     */
+    data: FormulariCampanyaCreateManyInput | FormulariCampanyaCreateManyInput[]
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * FormulariCampanya update
+   */
+  export type FormulariCampanyaUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * The data needed to update a FormulariCampanya.
+     */
+    data: XOR<FormulariCampanyaUpdateInput, FormulariCampanyaUncheckedUpdateInput>
+    /**
+     * Choose, which FormulariCampanya to update.
+     */
+    where: FormulariCampanyaWhereUniqueInput
+  }
+
+  /**
+   * FormulariCampanya updateMany
+   */
+  export type FormulariCampanyaUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update FormulariCampanyas.
+     */
+    data: XOR<FormulariCampanyaUpdateManyMutationInput, FormulariCampanyaUncheckedUpdateManyInput>
+    /**
+     * Filter which FormulariCampanyas to update
+     */
+    where?: FormulariCampanyaWhereInput
+  }
+
+  /**
+   * FormulariCampanya upsert
+   */
+  export type FormulariCampanyaUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * The filter to search for the FormulariCampanya to update in case it exists.
+     */
+    where: FormulariCampanyaWhereUniqueInput
+    /**
+     * In case the FormulariCampanya found by the `where` argument doesn't exist, create a new FormulariCampanya with this data.
+     */
+    create: XOR<FormulariCampanyaCreateInput, FormulariCampanyaUncheckedCreateInput>
+    /**
+     * In case the FormulariCampanya was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<FormulariCampanyaUpdateInput, FormulariCampanyaUncheckedUpdateInput>
+  }
+
+  /**
+   * FormulariCampanya delete
+   */
+  export type FormulariCampanyaDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+    /**
+     * Filter which FormulariCampanya to delete.
+     */
+    where: FormulariCampanyaWhereUniqueInput
+  }
+
+  /**
+   * FormulariCampanya deleteMany
+   */
+  export type FormulariCampanyaDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which FormulariCampanyas to delete
+     */
+    where?: FormulariCampanyaWhereInput
+  }
+
+  /**
+   * FormulariCampanya without action
+   */
+  export type FormulariCampanyaDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the FormulariCampanya
+     */
+    select?: FormulariCampanyaSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: FormulariCampanyaInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -12345,6 +13583,8 @@ export namespace Prisma {
     convoTypeId: 'convoTypeId',
     startTime: 'startTime',
     finalTime: 'finalTime',
+    actualStartTime: 'actualStartTime',
+    actualEndTime: 'actualEndTime',
     isActive: 'isActive',
     autoAssignResponsable: 'autoAssignResponsable',
     sortida: 'sortida'
@@ -12362,26 +13602,12 @@ export namespace Prisma {
     fullHorari: 'fullHorari',
     response: 'response',
     attendanceConfirmed: 'attendanceConfirmed',
+    attendanceJustified: 'attendanceJustified',
     source: 'source',
     autoAssignReason: 'autoAssignReason'
   };
 
   export type RespuestaScalarFieldEnum = (typeof RespuestaScalarFieldEnum)[keyof typeof RespuestaScalarFieldEnum]
-
-
-  export const DeviceTokenScalarFieldEnum: {
-    id: 'id',
-    userId: 'userId',
-    token: 'token',
-    platform: 'platform',
-    userAgent: 'userAgent',
-    isActive: 'isActive',
-    lastSeenAt: 'lastSeenAt',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
-  };
-
-  export type DeviceTokenScalarFieldEnum = (typeof DeviceTokenScalarFieldEnum)[keyof typeof DeviceTokenScalarFieldEnum]
 
 
   export const NotificationLogScalarFieldEnum: {
@@ -12448,6 +13674,40 @@ export namespace Prisma {
   };
 
   export type NotificationAutomationTaskRunScalarFieldEnum = (typeof NotificationAutomationTaskRunScalarFieldEnum)[keyof typeof NotificationAutomationTaskRunScalarFieldEnum]
+
+
+  export const UserHoursSummaryScalarFieldEnum: {
+    id: 'id',
+    userId: 'userId',
+    campaignHours: 'campaignHours',
+    offCampaignHours: 'offCampaignHours',
+    unansweredCount: 'unansweredCount',
+    noShowCount: 'noShowCount',
+    unansweredPenaltyHours: 'unansweredPenaltyHours',
+    noShowPenaltyHours: 'noShowPenaltyHours',
+    totalHours: 'totalHours',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type UserHoursSummaryScalarFieldEnum = (typeof UserHoursSummaryScalarFieldEnum)[keyof typeof UserHoursSummaryScalarFieldEnum]
+
+
+  export const FormulariCampanyaScalarFieldEnum: {
+    id: 'id',
+    convocatoriaId: 'convocatoriaId',
+    dia: 'dia',
+    responsableId: 'responsableId',
+    responsableNCarnet: 'responsableNCarnet',
+    voluntarisJson: 'voluntarisJson',
+    vehiclesJson: 'vehiclesJson',
+    serviceMoment: 'serviceMoment',
+    createdByNCarnet: 'createdByNCarnet',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type FormulariCampanyaScalarFieldEnum = (typeof FormulariCampanyaScalarFieldEnum)[keyof typeof FormulariCampanyaScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -12526,9 +13786,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaListRelationFilter
     respostas?: RespuestaListRelationFilter
     availabilityWindows?: AvailabilityWindowListRelationFilter
-    deviceTokens?: DeviceTokenListRelationFilter
     notificationLogs?: NotificationLogListRelationFilter
     notificationAutomationRuns?: NotificationAutomationRunListRelationFilter
+    hoursSummary?: XOR<UserHoursSummaryNullableRelationFilter, UserHoursSummaryWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -12545,9 +13805,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaOrderByRelationAggregateInput
     respostas?: RespuestaOrderByRelationAggregateInput
     availabilityWindows?: AvailabilityWindowOrderByRelationAggregateInput
-    deviceTokens?: DeviceTokenOrderByRelationAggregateInput
     notificationLogs?: NotificationLogOrderByRelationAggregateInput
     notificationAutomationRuns?: NotificationAutomationRunOrderByRelationAggregateInput
+    hoursSummary?: UserHoursSummaryOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -12567,9 +13827,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaListRelationFilter
     respostas?: RespuestaListRelationFilter
     availabilityWindows?: AvailabilityWindowListRelationFilter
-    deviceTokens?: DeviceTokenListRelationFilter
     notificationLogs?: NotificationLogListRelationFilter
     notificationAutomationRuns?: NotificationAutomationRunListRelationFilter
+    hoursSummary?: XOR<UserHoursSummaryNullableRelationFilter, UserHoursSummaryWhereInput> | null
   }, "id" | "nCarnet">
 
   export type UserOrderByWithAggregationInput = {
@@ -12735,12 +13995,15 @@ export namespace Prisma {
     convoTypeId?: IntFilter<"Convocatoria"> | number
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
+    actualStartTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
+    actualEndTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
     autoAssignResponsable?: BoolFilter<"Convocatoria"> | boolean
     sortida?: BoolFilter<"Convocatoria"> | boolean
     user?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     convoType?: XOR<ConvoTypeRelationFilter, ConvoTypeWhereInput>
     respostas?: RespuestaListRelationFilter
+    formularisCampanya?: FormulariCampanyaListRelationFilter
   }
 
   export type ConvocatoriaOrderByWithRelationInput = {
@@ -12752,12 +14015,15 @@ export namespace Prisma {
     convoTypeId?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrderInput | SortOrder
+    actualStartTime?: SortOrderInput | SortOrder
+    actualEndTime?: SortOrderInput | SortOrder
     isActive?: SortOrder
     autoAssignResponsable?: SortOrder
     sortida?: SortOrder
     user?: UserOrderByWithRelationInput
     convoType?: ConvoTypeOrderByWithRelationInput
     respostas?: RespuestaOrderByRelationAggregateInput
+    formularisCampanya?: FormulariCampanyaOrderByRelationAggregateInput
   }
 
   export type ConvocatoriaWhereUniqueInput = Prisma.AtLeast<{
@@ -12772,12 +14038,15 @@ export namespace Prisma {
     convoTypeId?: IntFilter<"Convocatoria"> | number
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
+    actualStartTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
+    actualEndTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
     autoAssignResponsable?: BoolFilter<"Convocatoria"> | boolean
     sortida?: BoolFilter<"Convocatoria"> | boolean
     user?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     convoType?: XOR<ConvoTypeRelationFilter, ConvoTypeWhereInput>
     respostas?: RespuestaListRelationFilter
+    formularisCampanya?: FormulariCampanyaListRelationFilter
   }, "id">
 
   export type ConvocatoriaOrderByWithAggregationInput = {
@@ -12789,6 +14058,8 @@ export namespace Prisma {
     convoTypeId?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrderInput | SortOrder
+    actualStartTime?: SortOrderInput | SortOrder
+    actualEndTime?: SortOrderInput | SortOrder
     isActive?: SortOrder
     autoAssignResponsable?: SortOrder
     sortida?: SortOrder
@@ -12811,6 +14082,8 @@ export namespace Prisma {
     convoTypeId?: IntWithAggregatesFilter<"Convocatoria"> | number
     startTime?: DateTimeWithAggregatesFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableWithAggregatesFilter<"Convocatoria"> | Date | string | null
+    actualStartTime?: DateTimeNullableWithAggregatesFilter<"Convocatoria"> | Date | string | null
+    actualEndTime?: DateTimeNullableWithAggregatesFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolWithAggregatesFilter<"Convocatoria"> | boolean
     autoAssignResponsable?: BoolWithAggregatesFilter<"Convocatoria"> | boolean
     sortida?: BoolWithAggregatesFilter<"Convocatoria"> | boolean
@@ -12828,6 +14101,7 @@ export namespace Prisma {
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
     attendanceConfirmed?: BoolFilter<"Respuesta"> | boolean
+    attendanceJustified?: BoolFilter<"Respuesta"> | boolean
     source?: StringFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
     convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
@@ -12843,6 +14117,7 @@ export namespace Prisma {
     fullHorari?: SortOrder
     response?: SortOrder
     attendanceConfirmed?: SortOrder
+    attendanceJustified?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrderInput | SortOrder
     convocatoria?: ConvocatoriaOrderByWithRelationInput
@@ -12861,6 +14136,7 @@ export namespace Prisma {
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
     attendanceConfirmed?: BoolFilter<"Respuesta"> | boolean
+    attendanceJustified?: BoolFilter<"Respuesta"> | boolean
     source?: StringFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
     convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
@@ -12876,6 +14152,7 @@ export namespace Prisma {
     fullHorari?: SortOrder
     response?: SortOrder
     attendanceConfirmed?: SortOrder
+    attendanceJustified?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrderInput | SortOrder
     _count?: RespuestaCountOrderByAggregateInput
@@ -12897,85 +14174,9 @@ export namespace Prisma {
     fullHorari?: BoolWithAggregatesFilter<"Respuesta"> | boolean
     response?: BoolWithAggregatesFilter<"Respuesta"> | boolean
     attendanceConfirmed?: BoolWithAggregatesFilter<"Respuesta"> | boolean
+    attendanceJustified?: BoolWithAggregatesFilter<"Respuesta"> | boolean
     source?: StringWithAggregatesFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableWithAggregatesFilter<"Respuesta"> | string | null
-  }
-
-  export type DeviceTokenWhereInput = {
-    AND?: DeviceTokenWhereInput | DeviceTokenWhereInput[]
-    OR?: DeviceTokenWhereInput[]
-    NOT?: DeviceTokenWhereInput | DeviceTokenWhereInput[]
-    id?: IntFilter<"DeviceToken"> | number
-    userId?: IntFilter<"DeviceToken"> | number
-    token?: StringFilter<"DeviceToken"> | string
-    platform?: StringNullableFilter<"DeviceToken"> | string | null
-    userAgent?: StringNullableFilter<"DeviceToken"> | string | null
-    isActive?: BoolFilter<"DeviceToken"> | boolean
-    lastSeenAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    createdAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    updatedAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    user?: XOR<UserRelationFilter, UserWhereInput>
-  }
-
-  export type DeviceTokenOrderByWithRelationInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    token?: SortOrder
-    platform?: SortOrderInput | SortOrder
-    userAgent?: SortOrderInput | SortOrder
-    isActive?: SortOrder
-    lastSeenAt?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    user?: UserOrderByWithRelationInput
-  }
-
-  export type DeviceTokenWhereUniqueInput = Prisma.AtLeast<{
-    id?: number
-    token?: string
-    AND?: DeviceTokenWhereInput | DeviceTokenWhereInput[]
-    OR?: DeviceTokenWhereInput[]
-    NOT?: DeviceTokenWhereInput | DeviceTokenWhereInput[]
-    userId?: IntFilter<"DeviceToken"> | number
-    platform?: StringNullableFilter<"DeviceToken"> | string | null
-    userAgent?: StringNullableFilter<"DeviceToken"> | string | null
-    isActive?: BoolFilter<"DeviceToken"> | boolean
-    lastSeenAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    createdAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    updatedAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    user?: XOR<UserRelationFilter, UserWhereInput>
-  }, "id" | "token">
-
-  export type DeviceTokenOrderByWithAggregationInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    token?: SortOrder
-    platform?: SortOrderInput | SortOrder
-    userAgent?: SortOrderInput | SortOrder
-    isActive?: SortOrder
-    lastSeenAt?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    _count?: DeviceTokenCountOrderByAggregateInput
-    _avg?: DeviceTokenAvgOrderByAggregateInput
-    _max?: DeviceTokenMaxOrderByAggregateInput
-    _min?: DeviceTokenMinOrderByAggregateInput
-    _sum?: DeviceTokenSumOrderByAggregateInput
-  }
-
-  export type DeviceTokenScalarWhereWithAggregatesInput = {
-    AND?: DeviceTokenScalarWhereWithAggregatesInput | DeviceTokenScalarWhereWithAggregatesInput[]
-    OR?: DeviceTokenScalarWhereWithAggregatesInput[]
-    NOT?: DeviceTokenScalarWhereWithAggregatesInput | DeviceTokenScalarWhereWithAggregatesInput[]
-    id?: IntWithAggregatesFilter<"DeviceToken"> | number
-    userId?: IntWithAggregatesFilter<"DeviceToken"> | number
-    token?: StringWithAggregatesFilter<"DeviceToken"> | string
-    platform?: StringNullableWithAggregatesFilter<"DeviceToken"> | string | null
-    userAgent?: StringNullableWithAggregatesFilter<"DeviceToken"> | string | null
-    isActive?: BoolWithAggregatesFilter<"DeviceToken"> | boolean
-    lastSeenAt?: DateTimeWithAggregatesFilter<"DeviceToken"> | Date | string
-    createdAt?: DateTimeWithAggregatesFilter<"DeviceToken"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"DeviceToken"> | Date | string
   }
 
   export type NotificationLogWhereInput = {
@@ -13319,6 +14520,180 @@ export namespace Prisma {
     createdAt?: DateTimeWithAggregatesFilter<"NotificationAutomationTaskRun"> | Date | string
   }
 
+  export type UserHoursSummaryWhereInput = {
+    AND?: UserHoursSummaryWhereInput | UserHoursSummaryWhereInput[]
+    OR?: UserHoursSummaryWhereInput[]
+    NOT?: UserHoursSummaryWhereInput | UserHoursSummaryWhereInput[]
+    id?: IntFilter<"UserHoursSummary"> | number
+    userId?: IntFilter<"UserHoursSummary"> | number
+    campaignHours?: FloatFilter<"UserHoursSummary"> | number
+    offCampaignHours?: FloatFilter<"UserHoursSummary"> | number
+    unansweredCount?: IntFilter<"UserHoursSummary"> | number
+    noShowCount?: IntFilter<"UserHoursSummary"> | number
+    unansweredPenaltyHours?: FloatFilter<"UserHoursSummary"> | number
+    noShowPenaltyHours?: FloatFilter<"UserHoursSummary"> | number
+    totalHours?: FloatFilter<"UserHoursSummary"> | number
+    createdAt?: DateTimeFilter<"UserHoursSummary"> | Date | string
+    updatedAt?: DateTimeFilter<"UserHoursSummary"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }
+
+  export type UserHoursSummaryOrderByWithRelationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    campaignHours?: SortOrder
+    offCampaignHours?: SortOrder
+    unansweredCount?: SortOrder
+    noShowCount?: SortOrder
+    unansweredPenaltyHours?: SortOrder
+    noShowPenaltyHours?: SortOrder
+    totalHours?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    user?: UserOrderByWithRelationInput
+  }
+
+  export type UserHoursSummaryWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    userId?: number
+    AND?: UserHoursSummaryWhereInput | UserHoursSummaryWhereInput[]
+    OR?: UserHoursSummaryWhereInput[]
+    NOT?: UserHoursSummaryWhereInput | UserHoursSummaryWhereInput[]
+    campaignHours?: FloatFilter<"UserHoursSummary"> | number
+    offCampaignHours?: FloatFilter<"UserHoursSummary"> | number
+    unansweredCount?: IntFilter<"UserHoursSummary"> | number
+    noShowCount?: IntFilter<"UserHoursSummary"> | number
+    unansweredPenaltyHours?: FloatFilter<"UserHoursSummary"> | number
+    noShowPenaltyHours?: FloatFilter<"UserHoursSummary"> | number
+    totalHours?: FloatFilter<"UserHoursSummary"> | number
+    createdAt?: DateTimeFilter<"UserHoursSummary"> | Date | string
+    updatedAt?: DateTimeFilter<"UserHoursSummary"> | Date | string
+    user?: XOR<UserRelationFilter, UserWhereInput>
+  }, "id" | "userId">
+
+  export type UserHoursSummaryOrderByWithAggregationInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    campaignHours?: SortOrder
+    offCampaignHours?: SortOrder
+    unansweredCount?: SortOrder
+    noShowCount?: SortOrder
+    unansweredPenaltyHours?: SortOrder
+    noShowPenaltyHours?: SortOrder
+    totalHours?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: UserHoursSummaryCountOrderByAggregateInput
+    _avg?: UserHoursSummaryAvgOrderByAggregateInput
+    _max?: UserHoursSummaryMaxOrderByAggregateInput
+    _min?: UserHoursSummaryMinOrderByAggregateInput
+    _sum?: UserHoursSummarySumOrderByAggregateInput
+  }
+
+  export type UserHoursSummaryScalarWhereWithAggregatesInput = {
+    AND?: UserHoursSummaryScalarWhereWithAggregatesInput | UserHoursSummaryScalarWhereWithAggregatesInput[]
+    OR?: UserHoursSummaryScalarWhereWithAggregatesInput[]
+    NOT?: UserHoursSummaryScalarWhereWithAggregatesInput | UserHoursSummaryScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"UserHoursSummary"> | number
+    userId?: IntWithAggregatesFilter<"UserHoursSummary"> | number
+    campaignHours?: FloatWithAggregatesFilter<"UserHoursSummary"> | number
+    offCampaignHours?: FloatWithAggregatesFilter<"UserHoursSummary"> | number
+    unansweredCount?: IntWithAggregatesFilter<"UserHoursSummary"> | number
+    noShowCount?: IntWithAggregatesFilter<"UserHoursSummary"> | number
+    unansweredPenaltyHours?: FloatWithAggregatesFilter<"UserHoursSummary"> | number
+    noShowPenaltyHours?: FloatWithAggregatesFilter<"UserHoursSummary"> | number
+    totalHours?: FloatWithAggregatesFilter<"UserHoursSummary"> | number
+    createdAt?: DateTimeWithAggregatesFilter<"UserHoursSummary"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"UserHoursSummary"> | Date | string
+  }
+
+  export type FormulariCampanyaWhereInput = {
+    AND?: FormulariCampanyaWhereInput | FormulariCampanyaWhereInput[]
+    OR?: FormulariCampanyaWhereInput[]
+    NOT?: FormulariCampanyaWhereInput | FormulariCampanyaWhereInput[]
+    id?: IntFilter<"FormulariCampanya"> | number
+    convocatoriaId?: IntFilter<"FormulariCampanya"> | number
+    dia?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    responsableId?: IntNullableFilter<"FormulariCampanya"> | number | null
+    responsableNCarnet?: StringNullableFilter<"FormulariCampanya"> | string | null
+    voluntarisJson?: StringFilter<"FormulariCampanya"> | string
+    vehiclesJson?: StringFilter<"FormulariCampanya"> | string
+    serviceMoment?: StringFilter<"FormulariCampanya"> | string
+    createdByNCarnet?: StringNullableFilter<"FormulariCampanya"> | string | null
+    createdAt?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    updatedAt?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
+  }
+
+  export type FormulariCampanyaOrderByWithRelationInput = {
+    id?: SortOrder
+    convocatoriaId?: SortOrder
+    dia?: SortOrder
+    responsableId?: SortOrderInput | SortOrder
+    responsableNCarnet?: SortOrderInput | SortOrder
+    voluntarisJson?: SortOrder
+    vehiclesJson?: SortOrder
+    serviceMoment?: SortOrder
+    createdByNCarnet?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    convocatoria?: ConvocatoriaOrderByWithRelationInput
+  }
+
+  export type FormulariCampanyaWhereUniqueInput = Prisma.AtLeast<{
+    id?: number
+    AND?: FormulariCampanyaWhereInput | FormulariCampanyaWhereInput[]
+    OR?: FormulariCampanyaWhereInput[]
+    NOT?: FormulariCampanyaWhereInput | FormulariCampanyaWhereInput[]
+    convocatoriaId?: IntFilter<"FormulariCampanya"> | number
+    dia?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    responsableId?: IntNullableFilter<"FormulariCampanya"> | number | null
+    responsableNCarnet?: StringNullableFilter<"FormulariCampanya"> | string | null
+    voluntarisJson?: StringFilter<"FormulariCampanya"> | string
+    vehiclesJson?: StringFilter<"FormulariCampanya"> | string
+    serviceMoment?: StringFilter<"FormulariCampanya"> | string
+    createdByNCarnet?: StringNullableFilter<"FormulariCampanya"> | string | null
+    createdAt?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    updatedAt?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    convocatoria?: XOR<ConvocatoriaRelationFilter, ConvocatoriaWhereInput>
+  }, "id">
+
+  export type FormulariCampanyaOrderByWithAggregationInput = {
+    id?: SortOrder
+    convocatoriaId?: SortOrder
+    dia?: SortOrder
+    responsableId?: SortOrderInput | SortOrder
+    responsableNCarnet?: SortOrderInput | SortOrder
+    voluntarisJson?: SortOrder
+    vehiclesJson?: SortOrder
+    serviceMoment?: SortOrder
+    createdByNCarnet?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: FormulariCampanyaCountOrderByAggregateInput
+    _avg?: FormulariCampanyaAvgOrderByAggregateInput
+    _max?: FormulariCampanyaMaxOrderByAggregateInput
+    _min?: FormulariCampanyaMinOrderByAggregateInput
+    _sum?: FormulariCampanyaSumOrderByAggregateInput
+  }
+
+  export type FormulariCampanyaScalarWhereWithAggregatesInput = {
+    AND?: FormulariCampanyaScalarWhereWithAggregatesInput | FormulariCampanyaScalarWhereWithAggregatesInput[]
+    OR?: FormulariCampanyaScalarWhereWithAggregatesInput[]
+    NOT?: FormulariCampanyaScalarWhereWithAggregatesInput | FormulariCampanyaScalarWhereWithAggregatesInput[]
+    id?: IntWithAggregatesFilter<"FormulariCampanya"> | number
+    convocatoriaId?: IntWithAggregatesFilter<"FormulariCampanya"> | number
+    dia?: DateTimeWithAggregatesFilter<"FormulariCampanya"> | Date | string
+    responsableId?: IntNullableWithAggregatesFilter<"FormulariCampanya"> | number | null
+    responsableNCarnet?: StringNullableWithAggregatesFilter<"FormulariCampanya"> | string | null
+    voluntarisJson?: StringWithAggregatesFilter<"FormulariCampanya"> | string
+    vehiclesJson?: StringWithAggregatesFilter<"FormulariCampanya"> | string
+    serviceMoment?: StringWithAggregatesFilter<"FormulariCampanya"> | string
+    createdByNCarnet?: StringNullableWithAggregatesFilter<"FormulariCampanya"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"FormulariCampanya"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"FormulariCampanya"> | Date | string
+  }
+
   export type UserCreateInput = {
     nCarnet: string
     nIndicatiu?: string | null
@@ -13332,9 +14707,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -13351,9 +14726,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -13369,9 +14744,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -13388,9 +14763,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -13550,12 +14925,15 @@ export namespace Prisma {
     ubiSortida: string
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     user?: UserCreateNestedOneWithoutConvocatoriesInput
     convoType: ConvoTypeCreateNestedOneWithoutConvocatoriesInput
     respostas?: RespuestaCreateNestedManyWithoutConvocatoriaInput
+    formularisCampanya?: FormulariCampanyaCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaUncheckedCreateInput = {
@@ -13567,10 +14945,13 @@ export namespace Prisma {
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     respostas?: RespuestaUncheckedCreateNestedManyWithoutConvocatoriaInput
+    formularisCampanya?: FormulariCampanyaUncheckedCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaUpdateInput = {
@@ -13579,12 +14960,15 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneWithoutConvocatoriesNestedInput
     convoType?: ConvoTypeUpdateOneRequiredWithoutConvocatoriesNestedInput
     respostas?: RespuestaUpdateManyWithoutConvocatoriaNestedInput
+    formularisCampanya?: FormulariCampanyaUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type ConvocatoriaUncheckedUpdateInput = {
@@ -13596,10 +14980,13 @@ export namespace Prisma {
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
     respostas?: RespuestaUncheckedUpdateManyWithoutConvocatoriaNestedInput
+    formularisCampanya?: FormulariCampanyaUncheckedUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type ConvocatoriaCreateManyInput = {
@@ -13611,6 +14998,8 @@ export namespace Prisma {
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
@@ -13622,6 +15011,8 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
@@ -13636,6 +15027,8 @@ export namespace Prisma {
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
@@ -13647,6 +15040,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
     convocatoria: ConvocatoriaCreateNestedOneWithoutRespostasInput
@@ -13662,6 +15056,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -13672,6 +15067,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     convocatoria?: ConvocatoriaUpdateOneRequiredWithoutRespostasNestedInput
@@ -13687,6 +15083,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -13700,6 +15097,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -13710,6 +15108,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -13723,88 +15122,9 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type DeviceTokenCreateInput = {
-    token: string
-    platform?: string | null
-    userAgent?: string | null
-    isActive?: boolean
-    lastSeenAt?: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutDeviceTokensInput
-  }
-
-  export type DeviceTokenUncheckedCreateInput = {
-    id?: number
-    userId: number
-    token: string
-    platform?: string | null
-    userAgent?: string | null
-    isActive?: boolean
-    lastSeenAt?: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type DeviceTokenUpdateInput = {
-    token?: StringFieldUpdateOperationsInput | string
-    platform?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutDeviceTokensNestedInput
-  }
-
-  export type DeviceTokenUncheckedUpdateInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
-    token?: StringFieldUpdateOperationsInput | string
-    platform?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type DeviceTokenCreateManyInput = {
-    id?: number
-    userId: number
-    token: string
-    platform?: string | null
-    userAgent?: string | null
-    isActive?: boolean
-    lastSeenAt?: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type DeviceTokenUpdateManyMutationInput = {
-    token?: StringFieldUpdateOperationsInput | string
-    platform?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type DeviceTokenUncheckedUpdateManyInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    userId?: IntFieldUpdateOperationsInput | number
-    token?: StringFieldUpdateOperationsInput | string
-    platform?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type NotificationLogCreateInput = {
@@ -14173,6 +15493,194 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserHoursSummaryCreateInput = {
+    campaignHours?: number
+    offCampaignHours?: number
+    unansweredCount?: number
+    noShowCount?: number
+    unansweredPenaltyHours?: number
+    noShowPenaltyHours?: number
+    totalHours?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutHoursSummaryInput
+  }
+
+  export type UserHoursSummaryUncheckedCreateInput = {
+    id?: number
+    userId: number
+    campaignHours?: number
+    offCampaignHours?: number
+    unansweredCount?: number
+    noShowCount?: number
+    unansweredPenaltyHours?: number
+    noShowPenaltyHours?: number
+    totalHours?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserHoursSummaryUpdateInput = {
+    campaignHours?: FloatFieldUpdateOperationsInput | number
+    offCampaignHours?: FloatFieldUpdateOperationsInput | number
+    unansweredCount?: IntFieldUpdateOperationsInput | number
+    noShowCount?: IntFieldUpdateOperationsInput | number
+    unansweredPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    noShowPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutHoursSummaryNestedInput
+  }
+
+  export type UserHoursSummaryUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    campaignHours?: FloatFieldUpdateOperationsInput | number
+    offCampaignHours?: FloatFieldUpdateOperationsInput | number
+    unansweredCount?: IntFieldUpdateOperationsInput | number
+    noShowCount?: IntFieldUpdateOperationsInput | number
+    unansweredPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    noShowPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserHoursSummaryCreateManyInput = {
+    id?: number
+    userId: number
+    campaignHours?: number
+    offCampaignHours?: number
+    unansweredCount?: number
+    noShowCount?: number
+    unansweredPenaltyHours?: number
+    noShowPenaltyHours?: number
+    totalHours?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserHoursSummaryUpdateManyMutationInput = {
+    campaignHours?: FloatFieldUpdateOperationsInput | number
+    offCampaignHours?: FloatFieldUpdateOperationsInput | number
+    unansweredCount?: IntFieldUpdateOperationsInput | number
+    noShowCount?: IntFieldUpdateOperationsInput | number
+    unansweredPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    noShowPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserHoursSummaryUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    userId?: IntFieldUpdateOperationsInput | number
+    campaignHours?: FloatFieldUpdateOperationsInput | number
+    offCampaignHours?: FloatFieldUpdateOperationsInput | number
+    unansweredCount?: IntFieldUpdateOperationsInput | number
+    noShowCount?: IntFieldUpdateOperationsInput | number
+    unansweredPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    noShowPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormulariCampanyaCreateInput = {
+    dia: Date | string
+    responsableId?: number | null
+    responsableNCarnet?: string | null
+    voluntarisJson: string
+    vehiclesJson: string
+    serviceMoment: string
+    createdByNCarnet?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    convocatoria: ConvocatoriaCreateNestedOneWithoutFormularisCampanyaInput
+  }
+
+  export type FormulariCampanyaUncheckedCreateInput = {
+    id?: number
+    convocatoriaId: number
+    dia: Date | string
+    responsableId?: number | null
+    responsableNCarnet?: string | null
+    voluntarisJson: string
+    vehiclesJson: string
+    serviceMoment: string
+    createdByNCarnet?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FormulariCampanyaUpdateInput = {
+    dia?: DateTimeFieldUpdateOperationsInput | Date | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    responsableNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    voluntarisJson?: StringFieldUpdateOperationsInput | string
+    vehiclesJson?: StringFieldUpdateOperationsInput | string
+    serviceMoment?: StringFieldUpdateOperationsInput | string
+    createdByNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    convocatoria?: ConvocatoriaUpdateOneRequiredWithoutFormularisCampanyaNestedInput
+  }
+
+  export type FormulariCampanyaUncheckedUpdateInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    convocatoriaId?: IntFieldUpdateOperationsInput | number
+    dia?: DateTimeFieldUpdateOperationsInput | Date | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    responsableNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    voluntarisJson?: StringFieldUpdateOperationsInput | string
+    vehiclesJson?: StringFieldUpdateOperationsInput | string
+    serviceMoment?: StringFieldUpdateOperationsInput | string
+    createdByNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormulariCampanyaCreateManyInput = {
+    id?: number
+    convocatoriaId: number
+    dia: Date | string
+    responsableId?: number | null
+    responsableNCarnet?: string | null
+    voluntarisJson: string
+    vehiclesJson: string
+    serviceMoment: string
+    createdByNCarnet?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FormulariCampanyaUpdateManyMutationInput = {
+    dia?: DateTimeFieldUpdateOperationsInput | Date | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    responsableNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    voluntarisJson?: StringFieldUpdateOperationsInput | string
+    vehiclesJson?: StringFieldUpdateOperationsInput | string
+    serviceMoment?: StringFieldUpdateOperationsInput | string
+    createdByNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormulariCampanyaUncheckedUpdateManyInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    convocatoriaId?: IntFieldUpdateOperationsInput | number
+    dia?: DateTimeFieldUpdateOperationsInput | Date | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    responsableNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    voluntarisJson?: StringFieldUpdateOperationsInput | string
+    vehiclesJson?: StringFieldUpdateOperationsInput | string
+    serviceMoment?: StringFieldUpdateOperationsInput | string
+    createdByNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type IntFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel>
     in?: number[]
@@ -14252,12 +15760,6 @@ export namespace Prisma {
     none?: AvailabilityWindowWhereInput
   }
 
-  export type DeviceTokenListRelationFilter = {
-    every?: DeviceTokenWhereInput
-    some?: DeviceTokenWhereInput
-    none?: DeviceTokenWhereInput
-  }
-
   export type NotificationLogListRelationFilter = {
     every?: NotificationLogWhereInput
     some?: NotificationLogWhereInput
@@ -14268,6 +15770,11 @@ export namespace Prisma {
     every?: NotificationAutomationRunWhereInput
     some?: NotificationAutomationRunWhereInput
     none?: NotificationAutomationRunWhereInput
+  }
+
+  export type UserHoursSummaryNullableRelationFilter = {
+    is?: UserHoursSummaryWhereInput | null
+    isNot?: UserHoursSummaryWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -14288,10 +15795,6 @@ export namespace Prisma {
   }
 
   export type AvailabilityWindowOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type DeviceTokenOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -14527,6 +16030,16 @@ export namespace Prisma {
     isNot?: ConvoTypeWhereInput
   }
 
+  export type FormulariCampanyaListRelationFilter = {
+    every?: FormulariCampanyaWhereInput
+    some?: FormulariCampanyaWhereInput
+    none?: FormulariCampanyaWhereInput
+  }
+
+  export type FormulariCampanyaOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type ConvocatoriaCountOrderByAggregateInput = {
     id?: SortOrder
     date?: SortOrder
@@ -14536,6 +16049,8 @@ export namespace Prisma {
     convoTypeId?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrder
+    actualStartTime?: SortOrder
+    actualEndTime?: SortOrder
     isActive?: SortOrder
     autoAssignResponsable?: SortOrder
     sortida?: SortOrder
@@ -14556,6 +16071,8 @@ export namespace Prisma {
     convoTypeId?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrder
+    actualStartTime?: SortOrder
+    actualEndTime?: SortOrder
     isActive?: SortOrder
     autoAssignResponsable?: SortOrder
     sortida?: SortOrder
@@ -14570,6 +16087,8 @@ export namespace Prisma {
     convoTypeId?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrder
+    actualStartTime?: SortOrder
+    actualEndTime?: SortOrder
     isActive?: SortOrder
     autoAssignResponsable?: SortOrder
     sortida?: SortOrder
@@ -14625,6 +16144,7 @@ export namespace Prisma {
     fullHorari?: SortOrder
     response?: SortOrder
     attendanceConfirmed?: SortOrder
+    attendanceJustified?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrder
   }
@@ -14643,6 +16163,7 @@ export namespace Prisma {
     fullHorari?: SortOrder
     response?: SortOrder
     attendanceConfirmed?: SortOrder
+    attendanceJustified?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrder
   }
@@ -14656,6 +16177,7 @@ export namespace Prisma {
     fullHorari?: SortOrder
     response?: SortOrder
     attendanceConfirmed?: SortOrder
+    attendanceJustified?: SortOrder
     source?: SortOrder
     autoAssignReason?: SortOrder
   }
@@ -14663,52 +16185,6 @@ export namespace Prisma {
   export type RespuestaSumOrderByAggregateInput = {
     id?: SortOrder
     convoId?: SortOrder
-  }
-
-  export type DeviceTokenCountOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    token?: SortOrder
-    platform?: SortOrder
-    userAgent?: SortOrder
-    isActive?: SortOrder
-    lastSeenAt?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type DeviceTokenAvgOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-  }
-
-  export type DeviceTokenMaxOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    token?: SortOrder
-    platform?: SortOrder
-    userAgent?: SortOrder
-    isActive?: SortOrder
-    lastSeenAt?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type DeviceTokenMinOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
-    token?: SortOrder
-    platform?: SortOrder
-    userAgent?: SortOrder
-    isActive?: SortOrder
-    lastSeenAt?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-  }
-
-  export type DeviceTokenSumOrderByAggregateInput = {
-    id?: SortOrder
-    userId?: SortOrder
   }
 
   export type NotificationLogCountOrderByAggregateInput = {
@@ -14936,6 +16412,153 @@ export namespace Prisma {
     durationMs?: SortOrder
   }
 
+  export type FloatFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type UserHoursSummaryCountOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    campaignHours?: SortOrder
+    offCampaignHours?: SortOrder
+    unansweredCount?: SortOrder
+    noShowCount?: SortOrder
+    unansweredPenaltyHours?: SortOrder
+    noShowPenaltyHours?: SortOrder
+    totalHours?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserHoursSummaryAvgOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    campaignHours?: SortOrder
+    offCampaignHours?: SortOrder
+    unansweredCount?: SortOrder
+    noShowCount?: SortOrder
+    unansweredPenaltyHours?: SortOrder
+    noShowPenaltyHours?: SortOrder
+    totalHours?: SortOrder
+  }
+
+  export type UserHoursSummaryMaxOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    campaignHours?: SortOrder
+    offCampaignHours?: SortOrder
+    unansweredCount?: SortOrder
+    noShowCount?: SortOrder
+    unansweredPenaltyHours?: SortOrder
+    noShowPenaltyHours?: SortOrder
+    totalHours?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserHoursSummaryMinOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    campaignHours?: SortOrder
+    offCampaignHours?: SortOrder
+    unansweredCount?: SortOrder
+    noShowCount?: SortOrder
+    unansweredPenaltyHours?: SortOrder
+    noShowPenaltyHours?: SortOrder
+    totalHours?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type UserHoursSummarySumOrderByAggregateInput = {
+    id?: SortOrder
+    userId?: SortOrder
+    campaignHours?: SortOrder
+    offCampaignHours?: SortOrder
+    unansweredCount?: SortOrder
+    noShowCount?: SortOrder
+    unansweredPenaltyHours?: SortOrder
+    noShowPenaltyHours?: SortOrder
+    totalHours?: SortOrder
+  }
+
+  export type FloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
+  export type FormulariCampanyaCountOrderByAggregateInput = {
+    id?: SortOrder
+    convocatoriaId?: SortOrder
+    dia?: SortOrder
+    responsableId?: SortOrder
+    responsableNCarnet?: SortOrder
+    voluntarisJson?: SortOrder
+    vehiclesJson?: SortOrder
+    serviceMoment?: SortOrder
+    createdByNCarnet?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FormulariCampanyaAvgOrderByAggregateInput = {
+    id?: SortOrder
+    convocatoriaId?: SortOrder
+    responsableId?: SortOrder
+  }
+
+  export type FormulariCampanyaMaxOrderByAggregateInput = {
+    id?: SortOrder
+    convocatoriaId?: SortOrder
+    dia?: SortOrder
+    responsableId?: SortOrder
+    responsableNCarnet?: SortOrder
+    voluntarisJson?: SortOrder
+    vehiclesJson?: SortOrder
+    serviceMoment?: SortOrder
+    createdByNCarnet?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FormulariCampanyaMinOrderByAggregateInput = {
+    id?: SortOrder
+    convocatoriaId?: SortOrder
+    dia?: SortOrder
+    responsableId?: SortOrder
+    responsableNCarnet?: SortOrder
+    voluntarisJson?: SortOrder
+    vehiclesJson?: SortOrder
+    serviceMoment?: SortOrder
+    createdByNCarnet?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type FormulariCampanyaSumOrderByAggregateInput = {
+    id?: SortOrder
+    convocatoriaId?: SortOrder
+    responsableId?: SortOrder
+  }
+
   export type RoleCreateNestedManyWithoutUserInput = {
     create?: XOR<RoleCreateWithoutUserInput, RoleUncheckedCreateWithoutUserInput> | RoleCreateWithoutUserInput[] | RoleUncheckedCreateWithoutUserInput[]
     connectOrCreate?: RoleCreateOrConnectWithoutUserInput | RoleCreateOrConnectWithoutUserInput[]
@@ -14964,13 +16587,6 @@ export namespace Prisma {
     connect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
   }
 
-  export type DeviceTokenCreateNestedManyWithoutUserInput = {
-    create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
-    createMany?: DeviceTokenCreateManyUserInputEnvelope
-    connect?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-  }
-
   export type NotificationLogCreateNestedManyWithoutSenderUserInput = {
     create?: XOR<NotificationLogCreateWithoutSenderUserInput, NotificationLogUncheckedCreateWithoutSenderUserInput> | NotificationLogCreateWithoutSenderUserInput[] | NotificationLogUncheckedCreateWithoutSenderUserInput[]
     connectOrCreate?: NotificationLogCreateOrConnectWithoutSenderUserInput | NotificationLogCreateOrConnectWithoutSenderUserInput[]
@@ -14983,6 +16599,12 @@ export namespace Prisma {
     connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutActorUserInput | NotificationAutomationRunCreateOrConnectWithoutActorUserInput[]
     createMany?: NotificationAutomationRunCreateManyActorUserInputEnvelope
     connect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+  }
+
+  export type UserHoursSummaryCreateNestedOneWithoutUserInput = {
+    create?: XOR<UserHoursSummaryCreateWithoutUserInput, UserHoursSummaryUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserHoursSummaryCreateOrConnectWithoutUserInput
+    connect?: UserHoursSummaryWhereUniqueInput
   }
 
   export type RoleUncheckedCreateNestedManyWithoutUserInput = {
@@ -15013,13 +16635,6 @@ export namespace Prisma {
     connect?: AvailabilityWindowWhereUniqueInput | AvailabilityWindowWhereUniqueInput[]
   }
 
-  export type DeviceTokenUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
-    createMany?: DeviceTokenCreateManyUserInputEnvelope
-    connect?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-  }
-
   export type NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput = {
     create?: XOR<NotificationLogCreateWithoutSenderUserInput, NotificationLogUncheckedCreateWithoutSenderUserInput> | NotificationLogCreateWithoutSenderUserInput[] | NotificationLogUncheckedCreateWithoutSenderUserInput[]
     connectOrCreate?: NotificationLogCreateOrConnectWithoutSenderUserInput | NotificationLogCreateOrConnectWithoutSenderUserInput[]
@@ -15032,6 +16647,12 @@ export namespace Prisma {
     connectOrCreate?: NotificationAutomationRunCreateOrConnectWithoutActorUserInput | NotificationAutomationRunCreateOrConnectWithoutActorUserInput[]
     createMany?: NotificationAutomationRunCreateManyActorUserInputEnvelope
     connect?: NotificationAutomationRunWhereUniqueInput | NotificationAutomationRunWhereUniqueInput[]
+  }
+
+  export type UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<UserHoursSummaryCreateWithoutUserInput, UserHoursSummaryUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserHoursSummaryCreateOrConnectWithoutUserInput
+    connect?: UserHoursSummaryWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -15106,20 +16727,6 @@ export namespace Prisma {
     deleteMany?: AvailabilityWindowScalarWhereInput | AvailabilityWindowScalarWhereInput[]
   }
 
-  export type DeviceTokenUpdateManyWithoutUserNestedInput = {
-    create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
-    upsert?: DeviceTokenUpsertWithWhereUniqueWithoutUserInput | DeviceTokenUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: DeviceTokenCreateManyUserInputEnvelope
-    set?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    disconnect?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    delete?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    connect?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    update?: DeviceTokenUpdateWithWhereUniqueWithoutUserInput | DeviceTokenUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: DeviceTokenUpdateManyWithWhereWithoutUserInput | DeviceTokenUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: DeviceTokenScalarWhereInput | DeviceTokenScalarWhereInput[]
-  }
-
   export type NotificationLogUpdateManyWithoutSenderUserNestedInput = {
     create?: XOR<NotificationLogCreateWithoutSenderUserInput, NotificationLogUncheckedCreateWithoutSenderUserInput> | NotificationLogCreateWithoutSenderUserInput[] | NotificationLogUncheckedCreateWithoutSenderUserInput[]
     connectOrCreate?: NotificationLogCreateOrConnectWithoutSenderUserInput | NotificationLogCreateOrConnectWithoutSenderUserInput[]
@@ -15146,6 +16753,16 @@ export namespace Prisma {
     update?: NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput | NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput[]
     updateMany?: NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput | NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput[]
     deleteMany?: NotificationAutomationRunScalarWhereInput | NotificationAutomationRunScalarWhereInput[]
+  }
+
+  export type UserHoursSummaryUpdateOneWithoutUserNestedInput = {
+    create?: XOR<UserHoursSummaryCreateWithoutUserInput, UserHoursSummaryUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserHoursSummaryCreateOrConnectWithoutUserInput
+    upsert?: UserHoursSummaryUpsertWithoutUserInput
+    disconnect?: UserHoursSummaryWhereInput | boolean
+    delete?: UserHoursSummaryWhereInput | boolean
+    connect?: UserHoursSummaryWhereUniqueInput
+    update?: XOR<XOR<UserHoursSummaryUpdateToOneWithWhereWithoutUserInput, UserHoursSummaryUpdateWithoutUserInput>, UserHoursSummaryUncheckedUpdateWithoutUserInput>
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -15212,20 +16829,6 @@ export namespace Prisma {
     deleteMany?: AvailabilityWindowScalarWhereInput | AvailabilityWindowScalarWhereInput[]
   }
 
-  export type DeviceTokenUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput> | DeviceTokenCreateWithoutUserInput[] | DeviceTokenUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: DeviceTokenCreateOrConnectWithoutUserInput | DeviceTokenCreateOrConnectWithoutUserInput[]
-    upsert?: DeviceTokenUpsertWithWhereUniqueWithoutUserInput | DeviceTokenUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: DeviceTokenCreateManyUserInputEnvelope
-    set?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    disconnect?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    delete?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    connect?: DeviceTokenWhereUniqueInput | DeviceTokenWhereUniqueInput[]
-    update?: DeviceTokenUpdateWithWhereUniqueWithoutUserInput | DeviceTokenUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: DeviceTokenUpdateManyWithWhereWithoutUserInput | DeviceTokenUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: DeviceTokenScalarWhereInput | DeviceTokenScalarWhereInput[]
-  }
-
   export type NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput = {
     create?: XOR<NotificationLogCreateWithoutSenderUserInput, NotificationLogUncheckedCreateWithoutSenderUserInput> | NotificationLogCreateWithoutSenderUserInput[] | NotificationLogUncheckedCreateWithoutSenderUserInput[]
     connectOrCreate?: NotificationLogCreateOrConnectWithoutSenderUserInput | NotificationLogCreateOrConnectWithoutSenderUserInput[]
@@ -15252,6 +16855,16 @@ export namespace Prisma {
     update?: NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput | NotificationAutomationRunUpdateWithWhereUniqueWithoutActorUserInput[]
     updateMany?: NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput | NotificationAutomationRunUpdateManyWithWhereWithoutActorUserInput[]
     deleteMany?: NotificationAutomationRunScalarWhereInput | NotificationAutomationRunScalarWhereInput[]
+  }
+
+  export type UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<UserHoursSummaryCreateWithoutUserInput, UserHoursSummaryUncheckedCreateWithoutUserInput>
+    connectOrCreate?: UserHoursSummaryCreateOrConnectWithoutUserInput
+    upsert?: UserHoursSummaryUpsertWithoutUserInput
+    disconnect?: UserHoursSummaryWhereInput | boolean
+    delete?: UserHoursSummaryWhereInput | boolean
+    connect?: UserHoursSummaryWhereUniqueInput
+    update?: XOR<XOR<UserHoursSummaryUpdateToOneWithWhereWithoutUserInput, UserHoursSummaryUpdateWithoutUserInput>, UserHoursSummaryUncheckedUpdateWithoutUserInput>
   }
 
   export type UserCreateNestedOneWithoutRolesInput = {
@@ -15329,11 +16942,25 @@ export namespace Prisma {
     connect?: RespuestaWhereUniqueInput | RespuestaWhereUniqueInput[]
   }
 
+  export type FormulariCampanyaCreateNestedManyWithoutConvocatoriaInput = {
+    create?: XOR<FormulariCampanyaCreateWithoutConvocatoriaInput, FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput> | FormulariCampanyaCreateWithoutConvocatoriaInput[] | FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput[]
+    connectOrCreate?: FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput | FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput[]
+    createMany?: FormulariCampanyaCreateManyConvocatoriaInputEnvelope
+    connect?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+  }
+
   export type RespuestaUncheckedCreateNestedManyWithoutConvocatoriaInput = {
     create?: XOR<RespuestaCreateWithoutConvocatoriaInput, RespuestaUncheckedCreateWithoutConvocatoriaInput> | RespuestaCreateWithoutConvocatoriaInput[] | RespuestaUncheckedCreateWithoutConvocatoriaInput[]
     connectOrCreate?: RespuestaCreateOrConnectWithoutConvocatoriaInput | RespuestaCreateOrConnectWithoutConvocatoriaInput[]
     createMany?: RespuestaCreateManyConvocatoriaInputEnvelope
     connect?: RespuestaWhereUniqueInput | RespuestaWhereUniqueInput[]
+  }
+
+  export type FormulariCampanyaUncheckedCreateNestedManyWithoutConvocatoriaInput = {
+    create?: XOR<FormulariCampanyaCreateWithoutConvocatoriaInput, FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput> | FormulariCampanyaCreateWithoutConvocatoriaInput[] | FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput[]
+    connectOrCreate?: FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput | FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput[]
+    createMany?: FormulariCampanyaCreateManyConvocatoriaInputEnvelope
+    connect?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -15372,6 +16999,20 @@ export namespace Prisma {
     deleteMany?: RespuestaScalarWhereInput | RespuestaScalarWhereInput[]
   }
 
+  export type FormulariCampanyaUpdateManyWithoutConvocatoriaNestedInput = {
+    create?: XOR<FormulariCampanyaCreateWithoutConvocatoriaInput, FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput> | FormulariCampanyaCreateWithoutConvocatoriaInput[] | FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput[]
+    connectOrCreate?: FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput | FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput[]
+    upsert?: FormulariCampanyaUpsertWithWhereUniqueWithoutConvocatoriaInput | FormulariCampanyaUpsertWithWhereUniqueWithoutConvocatoriaInput[]
+    createMany?: FormulariCampanyaCreateManyConvocatoriaInputEnvelope
+    set?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    disconnect?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    delete?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    connect?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    update?: FormulariCampanyaUpdateWithWhereUniqueWithoutConvocatoriaInput | FormulariCampanyaUpdateWithWhereUniqueWithoutConvocatoriaInput[]
+    updateMany?: FormulariCampanyaUpdateManyWithWhereWithoutConvocatoriaInput | FormulariCampanyaUpdateManyWithWhereWithoutConvocatoriaInput[]
+    deleteMany?: FormulariCampanyaScalarWhereInput | FormulariCampanyaScalarWhereInput[]
+  }
+
   export type NullableIntFieldUpdateOperationsInput = {
     set?: number | null
     increment?: number
@@ -15392,6 +17033,20 @@ export namespace Prisma {
     update?: RespuestaUpdateWithWhereUniqueWithoutConvocatoriaInput | RespuestaUpdateWithWhereUniqueWithoutConvocatoriaInput[]
     updateMany?: RespuestaUpdateManyWithWhereWithoutConvocatoriaInput | RespuestaUpdateManyWithWhereWithoutConvocatoriaInput[]
     deleteMany?: RespuestaScalarWhereInput | RespuestaScalarWhereInput[]
+  }
+
+  export type FormulariCampanyaUncheckedUpdateManyWithoutConvocatoriaNestedInput = {
+    create?: XOR<FormulariCampanyaCreateWithoutConvocatoriaInput, FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput> | FormulariCampanyaCreateWithoutConvocatoriaInput[] | FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput[]
+    connectOrCreate?: FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput | FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput[]
+    upsert?: FormulariCampanyaUpsertWithWhereUniqueWithoutConvocatoriaInput | FormulariCampanyaUpsertWithWhereUniqueWithoutConvocatoriaInput[]
+    createMany?: FormulariCampanyaCreateManyConvocatoriaInputEnvelope
+    set?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    disconnect?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    delete?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    connect?: FormulariCampanyaWhereUniqueInput | FormulariCampanyaWhereUniqueInput[]
+    update?: FormulariCampanyaUpdateWithWhereUniqueWithoutConvocatoriaInput | FormulariCampanyaUpdateWithWhereUniqueWithoutConvocatoriaInput[]
+    updateMany?: FormulariCampanyaUpdateManyWithWhereWithoutConvocatoriaInput | FormulariCampanyaUpdateManyWithWhereWithoutConvocatoriaInput[]
+    deleteMany?: FormulariCampanyaScalarWhereInput | FormulariCampanyaScalarWhereInput[]
   }
 
   export type ConvocatoriaCreateNestedOneWithoutRespostasInput = {
@@ -15420,20 +17075,6 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutRespostasInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutRespostasInput, UserUpdateWithoutRespostasInput>, UserUncheckedUpdateWithoutRespostasInput>
-  }
-
-  export type UserCreateNestedOneWithoutDeviceTokensInput = {
-    create?: XOR<UserCreateWithoutDeviceTokensInput, UserUncheckedCreateWithoutDeviceTokensInput>
-    connectOrCreate?: UserCreateOrConnectWithoutDeviceTokensInput
-    connect?: UserWhereUniqueInput
-  }
-
-  export type UserUpdateOneRequiredWithoutDeviceTokensNestedInput = {
-    create?: XOR<UserCreateWithoutDeviceTokensInput, UserUncheckedCreateWithoutDeviceTokensInput>
-    connectOrCreate?: UserCreateOrConnectWithoutDeviceTokensInput
-    upsert?: UserUpsertWithoutDeviceTokensInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutDeviceTokensInput, UserUpdateWithoutDeviceTokensInput>, UserUncheckedUpdateWithoutDeviceTokensInput>
   }
 
   export type UserCreateNestedOneWithoutNotificationLogsInput = {
@@ -15536,6 +17177,42 @@ export namespace Prisma {
     upsert?: NotificationAutomationRunUpsertWithoutTasksInput
     connect?: NotificationAutomationRunWhereUniqueInput
     update?: XOR<XOR<NotificationAutomationRunUpdateToOneWithWhereWithoutTasksInput, NotificationAutomationRunUpdateWithoutTasksInput>, NotificationAutomationRunUncheckedUpdateWithoutTasksInput>
+  }
+
+  export type UserCreateNestedOneWithoutHoursSummaryInput = {
+    create?: XOR<UserCreateWithoutHoursSummaryInput, UserUncheckedCreateWithoutHoursSummaryInput>
+    connectOrCreate?: UserCreateOrConnectWithoutHoursSummaryInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type FloatFieldUpdateOperationsInput = {
+    set?: number
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
+  }
+
+  export type UserUpdateOneRequiredWithoutHoursSummaryNestedInput = {
+    create?: XOR<UserCreateWithoutHoursSummaryInput, UserUncheckedCreateWithoutHoursSummaryInput>
+    connectOrCreate?: UserCreateOrConnectWithoutHoursSummaryInput
+    upsert?: UserUpsertWithoutHoursSummaryInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutHoursSummaryInput, UserUpdateWithoutHoursSummaryInput>, UserUncheckedUpdateWithoutHoursSummaryInput>
+  }
+
+  export type ConvocatoriaCreateNestedOneWithoutFormularisCampanyaInput = {
+    create?: XOR<ConvocatoriaCreateWithoutFormularisCampanyaInput, ConvocatoriaUncheckedCreateWithoutFormularisCampanyaInput>
+    connectOrCreate?: ConvocatoriaCreateOrConnectWithoutFormularisCampanyaInput
+    connect?: ConvocatoriaWhereUniqueInput
+  }
+
+  export type ConvocatoriaUpdateOneRequiredWithoutFormularisCampanyaNestedInput = {
+    create?: XOR<ConvocatoriaCreateWithoutFormularisCampanyaInput, ConvocatoriaUncheckedCreateWithoutFormularisCampanyaInput>
+    connectOrCreate?: ConvocatoriaCreateOrConnectWithoutFormularisCampanyaInput
+    upsert?: ConvocatoriaUpsertWithoutFormularisCampanyaInput
+    connect?: ConvocatoriaWhereUniqueInput
+    update?: XOR<XOR<ConvocatoriaUpdateToOneWithWhereWithoutFormularisCampanyaInput, ConvocatoriaUpdateWithoutFormularisCampanyaInput>, ConvocatoriaUncheckedUpdateWithoutFormularisCampanyaInput>
   }
 
   export type NestedIntFilter<$PrismaModel = never> = {
@@ -15739,6 +17416,22 @@ export namespace Prisma {
     _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
+  export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | FloatFieldRefInput<$PrismaModel>
+    in?: number[]
+    notIn?: number[]
+    lt?: number | FloatFieldRefInput<$PrismaModel>
+    lte?: number | FloatFieldRefInput<$PrismaModel>
+    gt?: number | FloatFieldRefInput<$PrismaModel>
+    gte?: number | FloatFieldRefInput<$PrismaModel>
+    not?: NestedFloatWithAggregatesFilter<$PrismaModel> | number
+    _count?: NestedIntFilter<$PrismaModel>
+    _avg?: NestedFloatFilter<$PrismaModel>
+    _sum?: NestedFloatFilter<$PrismaModel>
+    _min?: NestedFloatFilter<$PrismaModel>
+    _max?: NestedFloatFilter<$PrismaModel>
+  }
+
   export type RoleCreateWithoutUserInput = {
     isCapOperatiu?: boolean
     isCapColla?: boolean
@@ -15769,11 +17462,14 @@ export namespace Prisma {
     ubiSortida: string
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     convoType: ConvoTypeCreateNestedOneWithoutConvocatoriesInput
     respostas?: RespuestaCreateNestedManyWithoutConvocatoriaInput
+    formularisCampanya?: FormulariCampanyaCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaUncheckedCreateWithoutUserInput = {
@@ -15784,10 +17480,13 @@ export namespace Prisma {
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     respostas?: RespuestaUncheckedCreateNestedManyWithoutConvocatoriaInput
+    formularisCampanya?: FormulariCampanyaUncheckedCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaCreateOrConnectWithoutUserInput = {
@@ -15805,6 +17504,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
     convocatoria: ConvocatoriaCreateNestedOneWithoutRespostasInput
@@ -15818,6 +17518,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -15859,36 +17560,6 @@ export namespace Prisma {
 
   export type AvailabilityWindowCreateManyUserInputEnvelope = {
     data: AvailabilityWindowCreateManyUserInput | AvailabilityWindowCreateManyUserInput[]
-  }
-
-  export type DeviceTokenCreateWithoutUserInput = {
-    token: string
-    platform?: string | null
-    userAgent?: string | null
-    isActive?: boolean
-    lastSeenAt?: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type DeviceTokenUncheckedCreateWithoutUserInput = {
-    id?: number
-    token: string
-    platform?: string | null
-    userAgent?: string | null
-    isActive?: boolean
-    lastSeenAt?: Date | string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type DeviceTokenCreateOrConnectWithoutUserInput = {
-    where: DeviceTokenWhereUniqueInput
-    create: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput>
-  }
-
-  export type DeviceTokenCreateManyUserInputEnvelope = {
-    data: DeviceTokenCreateManyUserInput | DeviceTokenCreateManyUserInput[]
   }
 
   export type NotificationLogCreateWithoutSenderUserInput = {
@@ -15963,6 +17634,36 @@ export namespace Prisma {
     data: NotificationAutomationRunCreateManyActorUserInput | NotificationAutomationRunCreateManyActorUserInput[]
   }
 
+  export type UserHoursSummaryCreateWithoutUserInput = {
+    campaignHours?: number
+    offCampaignHours?: number
+    unansweredCount?: number
+    noShowCount?: number
+    unansweredPenaltyHours?: number
+    noShowPenaltyHours?: number
+    totalHours?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserHoursSummaryUncheckedCreateWithoutUserInput = {
+    id?: number
+    campaignHours?: number
+    offCampaignHours?: number
+    unansweredCount?: number
+    noShowCount?: number
+    unansweredPenaltyHours?: number
+    noShowPenaltyHours?: number
+    totalHours?: number
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type UserHoursSummaryCreateOrConnectWithoutUserInput = {
+    where: UserHoursSummaryWhereUniqueInput
+    create: XOR<UserHoursSummaryCreateWithoutUserInput, UserHoursSummaryUncheckedCreateWithoutUserInput>
+  }
+
   export type RoleUpsertWithWhereUniqueWithoutUserInput = {
     where: RoleWhereUniqueInput
     update: XOR<RoleUpdateWithoutUserInput, RoleUncheckedUpdateWithoutUserInput>
@@ -16019,6 +17720,8 @@ export namespace Prisma {
     convoTypeId?: IntFilter<"Convocatoria"> | number
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
+    actualStartTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
+    actualEndTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
     autoAssignResponsable?: BoolFilter<"Convocatoria"> | boolean
     sortida?: BoolFilter<"Convocatoria"> | boolean
@@ -16052,6 +17755,7 @@ export namespace Prisma {
     fullHorari?: BoolFilter<"Respuesta"> | boolean
     response?: BoolFilter<"Respuesta"> | boolean
     attendanceConfirmed?: BoolFilter<"Respuesta"> | boolean
+    attendanceJustified?: BoolFilter<"Respuesta"> | boolean
     source?: StringFilter<"Respuesta"> | string
     autoAssignReason?: StringNullableFilter<"Respuesta"> | string | null
   }
@@ -16085,37 +17789,6 @@ export namespace Prisma {
     notes?: StringNullableFilter<"AvailabilityWindow"> | string | null
     createdAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
     updatedAt?: DateTimeFilter<"AvailabilityWindow"> | Date | string
-  }
-
-  export type DeviceTokenUpsertWithWhereUniqueWithoutUserInput = {
-    where: DeviceTokenWhereUniqueInput
-    update: XOR<DeviceTokenUpdateWithoutUserInput, DeviceTokenUncheckedUpdateWithoutUserInput>
-    create: XOR<DeviceTokenCreateWithoutUserInput, DeviceTokenUncheckedCreateWithoutUserInput>
-  }
-
-  export type DeviceTokenUpdateWithWhereUniqueWithoutUserInput = {
-    where: DeviceTokenWhereUniqueInput
-    data: XOR<DeviceTokenUpdateWithoutUserInput, DeviceTokenUncheckedUpdateWithoutUserInput>
-  }
-
-  export type DeviceTokenUpdateManyWithWhereWithoutUserInput = {
-    where: DeviceTokenScalarWhereInput
-    data: XOR<DeviceTokenUpdateManyMutationInput, DeviceTokenUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type DeviceTokenScalarWhereInput = {
-    AND?: DeviceTokenScalarWhereInput | DeviceTokenScalarWhereInput[]
-    OR?: DeviceTokenScalarWhereInput[]
-    NOT?: DeviceTokenScalarWhereInput | DeviceTokenScalarWhereInput[]
-    id?: IntFilter<"DeviceToken"> | number
-    userId?: IntFilter<"DeviceToken"> | number
-    token?: StringFilter<"DeviceToken"> | string
-    platform?: StringNullableFilter<"DeviceToken"> | string | null
-    userAgent?: StringNullableFilter<"DeviceToken"> | string | null
-    isActive?: BoolFilter<"DeviceToken"> | boolean
-    lastSeenAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    createdAt?: DateTimeFilter<"DeviceToken"> | Date | string
-    updatedAt?: DateTimeFilter<"DeviceToken"> | Date | string
   }
 
   export type NotificationLogUpsertWithWhereUniqueWithoutSenderUserInput = {
@@ -16185,6 +17858,42 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"NotificationAutomationRun"> | Date | string
   }
 
+  export type UserHoursSummaryUpsertWithoutUserInput = {
+    update: XOR<UserHoursSummaryUpdateWithoutUserInput, UserHoursSummaryUncheckedUpdateWithoutUserInput>
+    create: XOR<UserHoursSummaryCreateWithoutUserInput, UserHoursSummaryUncheckedCreateWithoutUserInput>
+    where?: UserHoursSummaryWhereInput
+  }
+
+  export type UserHoursSummaryUpdateToOneWithWhereWithoutUserInput = {
+    where?: UserHoursSummaryWhereInput
+    data: XOR<UserHoursSummaryUpdateWithoutUserInput, UserHoursSummaryUncheckedUpdateWithoutUserInput>
+  }
+
+  export type UserHoursSummaryUpdateWithoutUserInput = {
+    campaignHours?: FloatFieldUpdateOperationsInput | number
+    offCampaignHours?: FloatFieldUpdateOperationsInput | number
+    unansweredCount?: IntFieldUpdateOperationsInput | number
+    noShowCount?: IntFieldUpdateOperationsInput | number
+    unansweredPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    noShowPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type UserHoursSummaryUncheckedUpdateWithoutUserInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    campaignHours?: FloatFieldUpdateOperationsInput | number
+    offCampaignHours?: FloatFieldUpdateOperationsInput | number
+    unansweredCount?: IntFieldUpdateOperationsInput | number
+    noShowCount?: IntFieldUpdateOperationsInput | number
+    unansweredPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    noShowPenaltyHours?: FloatFieldUpdateOperationsInput | number
+    totalHours?: FloatFieldUpdateOperationsInput | number
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UserCreateWithoutRolesInput = {
     nCarnet: string
     nIndicatiu?: string | null
@@ -16197,9 +17906,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRolesInput = {
@@ -16215,9 +17924,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRolesInput = {
@@ -16248,9 +17957,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRolesInput = {
@@ -16266,9 +17975,9 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ConvocatoriaCreateWithoutConvoTypeInput = {
@@ -16277,11 +17986,14 @@ export namespace Prisma {
     ubiSortida: string
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     user?: UserCreateNestedOneWithoutConvocatoriesInput
     respostas?: RespuestaCreateNestedManyWithoutConvocatoriaInput
+    formularisCampanya?: FormulariCampanyaCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaUncheckedCreateWithoutConvoTypeInput = {
@@ -16292,10 +18004,13 @@ export namespace Prisma {
     responsableId?: number | null
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     respostas?: RespuestaUncheckedCreateNestedManyWithoutConvocatoriaInput
+    formularisCampanya?: FormulariCampanyaUncheckedCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaCreateOrConnectWithoutConvoTypeInput = {
@@ -16335,9 +18050,9 @@ export namespace Prisma {
     roles?: RoleCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutConvocatoriesInput = {
@@ -16353,9 +18068,9 @@ export namespace Prisma {
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutConvocatoriesInput = {
@@ -16389,6 +18104,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
     user: UserCreateNestedOneWithoutRespostasInput
@@ -16402,6 +18118,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -16413,6 +18130,40 @@ export namespace Prisma {
 
   export type RespuestaCreateManyConvocatoriaInputEnvelope = {
     data: RespuestaCreateManyConvocatoriaInput | RespuestaCreateManyConvocatoriaInput[]
+  }
+
+  export type FormulariCampanyaCreateWithoutConvocatoriaInput = {
+    dia: Date | string
+    responsableId?: number | null
+    responsableNCarnet?: string | null
+    voluntarisJson: string
+    vehiclesJson: string
+    serviceMoment: string
+    createdByNCarnet?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput = {
+    id?: number
+    dia: Date | string
+    responsableId?: number | null
+    responsableNCarnet?: string | null
+    voluntarisJson: string
+    vehiclesJson: string
+    serviceMoment: string
+    createdByNCarnet?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type FormulariCampanyaCreateOrConnectWithoutConvocatoriaInput = {
+    where: FormulariCampanyaWhereUniqueInput
+    create: XOR<FormulariCampanyaCreateWithoutConvocatoriaInput, FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput>
+  }
+
+  export type FormulariCampanyaCreateManyConvocatoriaInputEnvelope = {
+    data: FormulariCampanyaCreateManyConvocatoriaInput | FormulariCampanyaCreateManyConvocatoriaInput[]
   }
 
   export type UserUpsertWithoutConvocatoriesInput = {
@@ -16438,9 +18189,9 @@ export namespace Prisma {
     roles?: RoleUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutConvocatoriesInput = {
@@ -16456,9 +18207,9 @@ export namespace Prisma {
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type ConvoTypeUpsertWithoutConvocatoriesInput = {
@@ -16503,17 +18254,53 @@ export namespace Prisma {
     data: XOR<RespuestaUpdateManyMutationInput, RespuestaUncheckedUpdateManyWithoutConvocatoriaInput>
   }
 
+  export type FormulariCampanyaUpsertWithWhereUniqueWithoutConvocatoriaInput = {
+    where: FormulariCampanyaWhereUniqueInput
+    update: XOR<FormulariCampanyaUpdateWithoutConvocatoriaInput, FormulariCampanyaUncheckedUpdateWithoutConvocatoriaInput>
+    create: XOR<FormulariCampanyaCreateWithoutConvocatoriaInput, FormulariCampanyaUncheckedCreateWithoutConvocatoriaInput>
+  }
+
+  export type FormulariCampanyaUpdateWithWhereUniqueWithoutConvocatoriaInput = {
+    where: FormulariCampanyaWhereUniqueInput
+    data: XOR<FormulariCampanyaUpdateWithoutConvocatoriaInput, FormulariCampanyaUncheckedUpdateWithoutConvocatoriaInput>
+  }
+
+  export type FormulariCampanyaUpdateManyWithWhereWithoutConvocatoriaInput = {
+    where: FormulariCampanyaScalarWhereInput
+    data: XOR<FormulariCampanyaUpdateManyMutationInput, FormulariCampanyaUncheckedUpdateManyWithoutConvocatoriaInput>
+  }
+
+  export type FormulariCampanyaScalarWhereInput = {
+    AND?: FormulariCampanyaScalarWhereInput | FormulariCampanyaScalarWhereInput[]
+    OR?: FormulariCampanyaScalarWhereInput[]
+    NOT?: FormulariCampanyaScalarWhereInput | FormulariCampanyaScalarWhereInput[]
+    id?: IntFilter<"FormulariCampanya"> | number
+    convocatoriaId?: IntFilter<"FormulariCampanya"> | number
+    dia?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    responsableId?: IntNullableFilter<"FormulariCampanya"> | number | null
+    responsableNCarnet?: StringNullableFilter<"FormulariCampanya"> | string | null
+    voluntarisJson?: StringFilter<"FormulariCampanya"> | string
+    vehiclesJson?: StringFilter<"FormulariCampanya"> | string
+    serviceMoment?: StringFilter<"FormulariCampanya"> | string
+    createdByNCarnet?: StringNullableFilter<"FormulariCampanya"> | string | null
+    createdAt?: DateTimeFilter<"FormulariCampanya"> | Date | string
+    updatedAt?: DateTimeFilter<"FormulariCampanya"> | Date | string
+  }
+
   export type ConvocatoriaCreateWithoutRespostasInput = {
     date: Date | string
     title: string
     ubiSortida: string
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
     user?: UserCreateNestedOneWithoutConvocatoriesInput
     convoType: ConvoTypeCreateNestedOneWithoutConvocatoriesInput
+    formularisCampanya?: FormulariCampanyaCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaUncheckedCreateWithoutRespostasInput = {
@@ -16525,9 +18312,12 @@ export namespace Prisma {
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
+    formularisCampanya?: FormulariCampanyaUncheckedCreateNestedManyWithoutConvocatoriaInput
   }
 
   export type ConvocatoriaCreateOrConnectWithoutRespostasInput = {
@@ -16547,9 +18337,9 @@ export namespace Prisma {
     roles?: RoleCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutRespostasInput = {
@@ -16565,9 +18355,9 @@ export namespace Prisma {
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutRespostasInput = {
@@ -16592,11 +18382,14 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneWithoutConvocatoriesNestedInput
     convoType?: ConvoTypeUpdateOneRequiredWithoutConvocatoriesNestedInput
+    formularisCampanya?: FormulariCampanyaUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type ConvocatoriaUncheckedUpdateWithoutRespostasInput = {
@@ -16608,9 +18401,12 @@ export namespace Prisma {
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
+    formularisCampanya?: FormulariCampanyaUncheckedUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type UserUpsertWithoutRespostasInput = {
@@ -16636,9 +18432,9 @@ export namespace Prisma {
     roles?: RoleUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutRespostasInput = {
@@ -16654,95 +18450,9 @@ export namespace Prisma {
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
-  }
-
-  export type UserCreateWithoutDeviceTokensInput = {
-    nCarnet: string
-    nIndicatiu?: string | null
-    name: string
-    lastName?: string | null
-    password: string
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    roles?: RoleCreateNestedManyWithoutUserInput
-    convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
-    respostas?: RespuestaCreateNestedManyWithoutUserInput
-    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
-    notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
-    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
-  }
-
-  export type UserUncheckedCreateWithoutDeviceTokensInput = {
-    id?: number
-    nCarnet: string
-    nIndicatiu?: string | null
-    name: string
-    lastName?: string | null
-    password: string
-    isActive?: boolean
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    roles?: RoleUncheckedCreateNestedManyWithoutUserInput
-    convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
-    respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
-    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
-    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
-    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
-  }
-
-  export type UserCreateOrConnectWithoutDeviceTokensInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutDeviceTokensInput, UserUncheckedCreateWithoutDeviceTokensInput>
-  }
-
-  export type UserUpsertWithoutDeviceTokensInput = {
-    update: XOR<UserUpdateWithoutDeviceTokensInput, UserUncheckedUpdateWithoutDeviceTokensInput>
-    create: XOR<UserCreateWithoutDeviceTokensInput, UserUncheckedCreateWithoutDeviceTokensInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutDeviceTokensInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutDeviceTokensInput, UserUncheckedUpdateWithoutDeviceTokensInput>
-  }
-
-  export type UserUpdateWithoutDeviceTokensInput = {
-    nCarnet?: StringFieldUpdateOperationsInput | string
-    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: StringFieldUpdateOperationsInput | string
-    lastName?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    roles?: RoleUpdateManyWithoutUserNestedInput
-    convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
-    respostas?: RespuestaUpdateManyWithoutUserNestedInput
-    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
-    notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
-    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutDeviceTokensInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    nCarnet?: StringFieldUpdateOperationsInput | string
-    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: StringFieldUpdateOperationsInput | string
-    lastName?: NullableStringFieldUpdateOperationsInput | string | null
-    password?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
-    convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
-    respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
-    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
-    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
-    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutNotificationLogsInput = {
@@ -16758,8 +18468,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationLogsInput = {
@@ -16776,8 +18486,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationLogsInput = {
@@ -16809,8 +18519,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationLogsInput = {
@@ -16827,8 +18537,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutAvailabilityWindowsInput = {
@@ -16843,9 +18553,9 @@ export namespace Prisma {
     roles?: RoleCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutAvailabilityWindowsInput = {
@@ -16861,9 +18571,9 @@ export namespace Prisma {
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+    hoursSummary?: UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutAvailabilityWindowsInput = {
@@ -16894,9 +18604,9 @@ export namespace Prisma {
     roles?: RoleUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutAvailabilityWindowsInput = {
@@ -16912,9 +18622,9 @@ export namespace Prisma {
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
     notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+    hoursSummary?: UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateWithoutNotificationAutomationRunsInput = {
@@ -16930,8 +18640,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
     respostas?: RespuestaCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    hoursSummary?: UserHoursSummaryCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutNotificationAutomationRunsInput = {
@@ -16948,8 +18658,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
     respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
     availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
-    deviceTokens?: DeviceTokenUncheckedCreateNestedManyWithoutUserInput
     notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    hoursSummary?: UserHoursSummaryUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutNotificationAutomationRunsInput = {
@@ -17013,8 +18723,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    hoursSummary?: UserHoursSummaryUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutNotificationAutomationRunsInput = {
@@ -17031,8 +18741,8 @@ export namespace Prisma {
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
     respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
     availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
-    deviceTokens?: DeviceTokenUncheckedUpdateManyWithoutUserNestedInput
     notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    hoursSummary?: UserHoursSummaryUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type NotificationAutomationTaskRunUpsertWithWhereUniqueWithoutRunInput = {
@@ -17137,6 +18847,174 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type UserCreateWithoutHoursSummaryInput = {
+    nCarnet: string
+    nIndicatiu?: string | null
+    name: string
+    lastName?: string | null
+    password: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roles?: RoleCreateNestedManyWithoutUserInput
+    convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
+    respostas?: RespuestaCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowCreateNestedManyWithoutUserInput
+    notificationLogs?: NotificationLogCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunCreateNestedManyWithoutActorUserInput
+  }
+
+  export type UserUncheckedCreateWithoutHoursSummaryInput = {
+    id?: number
+    nCarnet: string
+    nIndicatiu?: string | null
+    name: string
+    lastName?: string | null
+    password: string
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    roles?: RoleUncheckedCreateNestedManyWithoutUserInput
+    convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
+    respostas?: RespuestaUncheckedCreateNestedManyWithoutUserInput
+    availabilityWindows?: AvailabilityWindowUncheckedCreateNestedManyWithoutUserInput
+    notificationLogs?: NotificationLogUncheckedCreateNestedManyWithoutSenderUserInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedCreateNestedManyWithoutActorUserInput
+  }
+
+  export type UserCreateOrConnectWithoutHoursSummaryInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutHoursSummaryInput, UserUncheckedCreateWithoutHoursSummaryInput>
+  }
+
+  export type UserUpsertWithoutHoursSummaryInput = {
+    update: XOR<UserUpdateWithoutHoursSummaryInput, UserUncheckedUpdateWithoutHoursSummaryInput>
+    create: XOR<UserCreateWithoutHoursSummaryInput, UserUncheckedCreateWithoutHoursSummaryInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutHoursSummaryInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutHoursSummaryInput, UserUncheckedUpdateWithoutHoursSummaryInput>
+  }
+
+  export type UserUpdateWithoutHoursSummaryInput = {
+    nCarnet?: StringFieldUpdateOperationsInput | string
+    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roles?: RoleUpdateManyWithoutUserNestedInput
+    convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
+    respostas?: RespuestaUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUpdateManyWithoutUserNestedInput
+    notificationLogs?: NotificationLogUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUpdateManyWithoutActorUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutHoursSummaryInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    nCarnet?: StringFieldUpdateOperationsInput | string
+    nIndicatiu?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: StringFieldUpdateOperationsInput | string
+    lastName?: NullableStringFieldUpdateOperationsInput | string | null
+    password?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
+    convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
+    respostas?: RespuestaUncheckedUpdateManyWithoutUserNestedInput
+    availabilityWindows?: AvailabilityWindowUncheckedUpdateManyWithoutUserNestedInput
+    notificationLogs?: NotificationLogUncheckedUpdateManyWithoutSenderUserNestedInput
+    notificationAutomationRuns?: NotificationAutomationRunUncheckedUpdateManyWithoutActorUserNestedInput
+  }
+
+  export type ConvocatoriaCreateWithoutFormularisCampanyaInput = {
+    date: Date | string
+    title: string
+    ubiSortida: string
+    startTime: Date | string
+    finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
+    isActive?: boolean
+    autoAssignResponsable?: boolean
+    sortida?: boolean
+    user?: UserCreateNestedOneWithoutConvocatoriesInput
+    convoType: ConvoTypeCreateNestedOneWithoutConvocatoriesInput
+    respostas?: RespuestaCreateNestedManyWithoutConvocatoriaInput
+  }
+
+  export type ConvocatoriaUncheckedCreateWithoutFormularisCampanyaInput = {
+    id?: number
+    date: Date | string
+    title: string
+    ubiSortida: string
+    responsableId?: number | null
+    convoTypeId: number
+    startTime: Date | string
+    finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
+    isActive?: boolean
+    autoAssignResponsable?: boolean
+    sortida?: boolean
+    respostas?: RespuestaUncheckedCreateNestedManyWithoutConvocatoriaInput
+  }
+
+  export type ConvocatoriaCreateOrConnectWithoutFormularisCampanyaInput = {
+    where: ConvocatoriaWhereUniqueInput
+    create: XOR<ConvocatoriaCreateWithoutFormularisCampanyaInput, ConvocatoriaUncheckedCreateWithoutFormularisCampanyaInput>
+  }
+
+  export type ConvocatoriaUpsertWithoutFormularisCampanyaInput = {
+    update: XOR<ConvocatoriaUpdateWithoutFormularisCampanyaInput, ConvocatoriaUncheckedUpdateWithoutFormularisCampanyaInput>
+    create: XOR<ConvocatoriaCreateWithoutFormularisCampanyaInput, ConvocatoriaUncheckedCreateWithoutFormularisCampanyaInput>
+    where?: ConvocatoriaWhereInput
+  }
+
+  export type ConvocatoriaUpdateToOneWithWhereWithoutFormularisCampanyaInput = {
+    where?: ConvocatoriaWhereInput
+    data: XOR<ConvocatoriaUpdateWithoutFormularisCampanyaInput, ConvocatoriaUncheckedUpdateWithoutFormularisCampanyaInput>
+  }
+
+  export type ConvocatoriaUpdateWithoutFormularisCampanyaInput = {
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    title?: StringFieldUpdateOperationsInput | string
+    ubiSortida?: StringFieldUpdateOperationsInput | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
+    sortida?: BoolFieldUpdateOperationsInput | boolean
+    user?: UserUpdateOneWithoutConvocatoriesNestedInput
+    convoType?: ConvoTypeUpdateOneRequiredWithoutConvocatoriesNestedInput
+    respostas?: RespuestaUpdateManyWithoutConvocatoriaNestedInput
+  }
+
+  export type ConvocatoriaUncheckedUpdateWithoutFormularisCampanyaInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    date?: DateTimeFieldUpdateOperationsInput | Date | string
+    title?: StringFieldUpdateOperationsInput | string
+    ubiSortida?: StringFieldUpdateOperationsInput | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    convoTypeId?: IntFieldUpdateOperationsInput | number
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
+    sortida?: BoolFieldUpdateOperationsInput | boolean
+    respostas?: RespuestaUncheckedUpdateManyWithoutConvocatoriaNestedInput
+  }
+
   export type RoleCreateManyUserInput = {
     id?: number
     isCapOperatiu?: boolean
@@ -17153,6 +19031,8 @@ export namespace Prisma {
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
@@ -17166,6 +19046,7 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
   }
@@ -17177,17 +19058,6 @@ export namespace Prisma {
     availabilityType: string
     source?: string
     notes?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type DeviceTokenCreateManyUserInput = {
-    id?: number
-    token: string
-    platform?: string | null
-    userAgent?: string | null
-    isActive?: boolean
-    lastSeenAt?: Date | string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17248,11 +19118,14 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
     convoType?: ConvoTypeUpdateOneRequiredWithoutConvocatoriesNestedInput
     respostas?: RespuestaUpdateManyWithoutConvocatoriaNestedInput
+    formularisCampanya?: FormulariCampanyaUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type ConvocatoriaUncheckedUpdateWithoutUserInput = {
@@ -17263,10 +19136,13 @@ export namespace Prisma {
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
     respostas?: RespuestaUncheckedUpdateManyWithoutConvocatoriaNestedInput
+    formularisCampanya?: FormulariCampanyaUncheckedUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type ConvocatoriaUncheckedUpdateManyWithoutUserInput = {
@@ -17277,6 +19153,8 @@ export namespace Prisma {
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
@@ -17288,6 +19166,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     convocatoria?: ConvocatoriaUpdateOneRequiredWithoutRespostasNestedInput
@@ -17301,6 +19180,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -17313,6 +19193,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -17345,38 +19226,6 @@ export namespace Prisma {
     availabilityType?: StringFieldUpdateOperationsInput | string
     source?: StringFieldUpdateOperationsInput | string
     notes?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type DeviceTokenUpdateWithoutUserInput = {
-    token?: StringFieldUpdateOperationsInput | string
-    platform?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type DeviceTokenUncheckedUpdateWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    token?: StringFieldUpdateOperationsInput | string
-    platform?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type DeviceTokenUncheckedUpdateManyWithoutUserInput = {
-    id?: IntFieldUpdateOperationsInput | number
-    token?: StringFieldUpdateOperationsInput | string
-    platform?: NullableStringFieldUpdateOperationsInput | string | null
-    userAgent?: NullableStringFieldUpdateOperationsInput | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    lastSeenAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17470,6 +19319,8 @@ export namespace Prisma {
     responsableId?: number | null
     startTime: Date | string
     finalTime?: Date | string | null
+    actualStartTime?: Date | string | null
+    actualEndTime?: Date | string | null
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
@@ -17481,11 +19332,14 @@ export namespace Prisma {
     ubiSortida?: StringFieldUpdateOperationsInput | string
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
     user?: UserUpdateOneWithoutConvocatoriesNestedInput
     respostas?: RespuestaUpdateManyWithoutConvocatoriaNestedInput
+    formularisCampanya?: FormulariCampanyaUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type ConvocatoriaUncheckedUpdateWithoutConvoTypeInput = {
@@ -17496,10 +19350,13 @@ export namespace Prisma {
     responsableId?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
     respostas?: RespuestaUncheckedUpdateManyWithoutConvocatoriaNestedInput
+    formularisCampanya?: FormulariCampanyaUncheckedUpdateManyWithoutConvocatoriaNestedInput
   }
 
   export type ConvocatoriaUncheckedUpdateManyWithoutConvoTypeInput = {
@@ -17510,6 +19367,8 @@ export namespace Prisma {
     responsableId?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualStartTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    actualEndTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
@@ -17523,8 +19382,22 @@ export namespace Prisma {
     fullHorari?: boolean
     response: boolean
     attendanceConfirmed?: boolean
+    attendanceJustified?: boolean
     source?: string
     autoAssignReason?: string | null
+  }
+
+  export type FormulariCampanyaCreateManyConvocatoriaInput = {
+    id?: number
+    dia: Date | string
+    responsableId?: number | null
+    responsableNCarnet?: string | null
+    voluntarisJson: string
+    vehiclesJson: string
+    serviceMoment: string
+    createdByNCarnet?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
   }
 
   export type RespuestaUpdateWithoutConvocatoriaInput = {
@@ -17533,6 +19406,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
     user?: UserUpdateOneRequiredWithoutRespostasNestedInput
@@ -17546,6 +19420,7 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -17558,8 +19433,47 @@ export namespace Prisma {
     fullHorari?: BoolFieldUpdateOperationsInput | boolean
     response?: BoolFieldUpdateOperationsInput | boolean
     attendanceConfirmed?: BoolFieldUpdateOperationsInput | boolean
+    attendanceJustified?: BoolFieldUpdateOperationsInput | boolean
     source?: StringFieldUpdateOperationsInput | string
     autoAssignReason?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type FormulariCampanyaUpdateWithoutConvocatoriaInput = {
+    dia?: DateTimeFieldUpdateOperationsInput | Date | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    responsableNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    voluntarisJson?: StringFieldUpdateOperationsInput | string
+    vehiclesJson?: StringFieldUpdateOperationsInput | string
+    serviceMoment?: StringFieldUpdateOperationsInput | string
+    createdByNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormulariCampanyaUncheckedUpdateWithoutConvocatoriaInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    dia?: DateTimeFieldUpdateOperationsInput | Date | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    responsableNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    voluntarisJson?: StringFieldUpdateOperationsInput | string
+    vehiclesJson?: StringFieldUpdateOperationsInput | string
+    serviceMoment?: StringFieldUpdateOperationsInput | string
+    createdByNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type FormulariCampanyaUncheckedUpdateManyWithoutConvocatoriaInput = {
+    id?: IntFieldUpdateOperationsInput | number
+    dia?: DateTimeFieldUpdateOperationsInput | Date | string
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
+    responsableNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    voluntarisJson?: StringFieldUpdateOperationsInput | string
+    vehiclesJson?: StringFieldUpdateOperationsInput | string
+    serviceMoment?: StringFieldUpdateOperationsInput | string
+    createdByNCarnet?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type NotificationAutomationTaskRunCreateManyRunInput = {
@@ -17651,10 +19565,6 @@ export namespace Prisma {
      */
     export type RespuestaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RespuestaDefaultArgs<ExtArgs>
     /**
-     * @deprecated Use DeviceTokenDefaultArgs instead
-     */
-    export type DeviceTokenArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = DeviceTokenDefaultArgs<ExtArgs>
-    /**
      * @deprecated Use NotificationLogDefaultArgs instead
      */
     export type NotificationLogArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationLogDefaultArgs<ExtArgs>
@@ -17670,6 +19580,14 @@ export namespace Prisma {
      * @deprecated Use NotificationAutomationTaskRunDefaultArgs instead
      */
     export type NotificationAutomationTaskRunArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = NotificationAutomationTaskRunDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use UserHoursSummaryDefaultArgs instead
+     */
+    export type UserHoursSummaryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = UserHoursSummaryDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use FormulariCampanyaDefaultArgs instead
+     */
+    export type FormulariCampanyaArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = FormulariCampanyaDefaultArgs<ExtArgs>
 
   /**
    * Batch Payload for updateMany & deleteMany & createMany

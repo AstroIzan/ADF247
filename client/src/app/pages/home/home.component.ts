@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { DataService, Convocatoria, ConvoType, Respuesta, User } from '../../services/data.service';
+import { CampaignVehicleCatalogItem, DataService, CampaignFormContext, CampaignFormRecord, CampaignFormSubmitPayload, CampaignFormVehicleInput, Convocatoria, ConvoType, Respuesta, User } from '../../services/data.service';
 import { DateFormatService } from '../../services/date-format.service';
 
 @Component({
@@ -14,6 +14,7 @@ import { DateFormatService } from '../../services/date-format.service';
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
+  private readonly maxKmIncreasePerForm = 9999;
   private dateFormatService = inject(DateFormatService);
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
   readonly todayDate = this.toDateInputValue(new Date());
@@ -56,6 +57,38 @@ export class HomeComponent implements OnInit {
   });
   showCustomTextModal = signal(false);
   customTextPreview = signal('');
+  showLifecycleModal = signal(false);
+  lifecycleConvo = signal<Convocatoria | null>(null);
+  lifecycleForm = signal({
+    actualStartTime: '',
+    actualEndTime: '',
+  });
+  showCampaignFormModal = signal(false);
+  campaignFormConvo = signal<Convocatoria | null>(null);
+  campaignFormMode = signal<'start' | 'finish' | null>(null);
+  campaignFormContext = signal<CampaignFormContext | null>(null);
+  campaignFormLoading = signal(false);
+  campaignFormSubmitting = signal(false);
+  showCampaignRecordsModal = signal(false);
+  campaignRecordsConvo = signal<Convocatoria | null>(null);
+  campaignRecords = signal<CampaignFormRecord[]>([]);
+  campaignRecordsLoading = signal(false);
+  campaignRecordsDeletingId = signal<number | null>(null);
+  campaignRecordExpandedIds = signal<number[]>([]);
+  campaignVolunteerMenuOpen = signal(false);
+  campaignVehicleMenuOpen = signal(false);
+  campaignVehicleVolunteerMenuVehicle = signal<string | null>(null);
+  campaignConductorMenuVehicle = signal<string | null>(null);
+  campaignForm = signal({
+    dia: this.toDateTimeLocalValue(new Date().toISOString()),
+    volunteerUserIds: [] as number[],
+    vehicles: [] as Array<{
+      vehicleName: string;
+      kms: number;
+      conductorUserId: number | null;
+      volunteerUserIds: number[];
+    }>,
+  });
   showGuardiaResponsesModal = signal(false);
   guardiaResponsesConvo = signal<Convocatoria | null>(null);
   showRespuestaInfoModal = signal(false);
@@ -392,12 +425,967 @@ export class HomeComponent implements OnInit {
     this.showAdminResponsableMenu.set(false);
   }
 
-  isRunningConvoAdminAction(action: 'sortida' | 'automation', convoId: number) {
+  isRunningConvoAdminAction(action: 'sortida' | 'automation' | 'start' | 'finish' | 'edit', convoId: number) {
     return this.runningConvoAdminActionKey() === `${action}-${convoId}`;
   }
 
+  canManageConvocatoriaLifecycle(convo: Convocatoria) {
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    return Boolean(currentUserId && Number(convo.responsableId) === Number(currentUserId));
+  }
+
+  canStartConvocatoriaLifecycle(convo: Convocatoria) {
+    if (convo.actualStartTime) {
+      return false;
+    }
+
+    const convoDate = new Date(convo.date);
+    if (Number.isNaN(convoDate.getTime())) {
+      return false;
+    }
+
+    return this.toDateInputValue(convoDate) === this.todayDate;
+  }
+
+  getLifecycleAction(convo: Convocatoria): 'start' | 'finish' | 'edit' | null {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
+      return null;
+    }
+
+    if (!convo.actualStartTime) {
+      return this.canStartConvocatoriaLifecycle(convo) ? 'start' : null;
+    }
+
+    if (!convo.actualEndTime) {
+      return 'finish';
+    }
+
+    return 'edit';
+  }
+
+  getLifecycleActionLabel(convo: Convocatoria) {
+    const action = this.getLifecycleAction(convo);
+
+    if (action === 'start') {
+      return 'Iniciar';
+    }
+
+    if (action === 'finish') {
+      return 'Finalitzar';
+    }
+
+    if (action === 'edit') {
+      return 'Editar horari';
+    }
+
+    return '';
+  }
+
+  onLifecycleAction(convo: Convocatoria) {
+    const action = this.getLifecycleAction(convo);
+
+    if (action === 'start') {
+      this.openCampaignFormModal(convo, 'start');
+      return;
+    }
+
+    if (action === 'finish') {
+      this.openCampaignFormModal(convo, 'finish');
+      return;
+    }
+
+    if (action === 'edit') {
+      this.openLifecycleEdition(convo);
+    }
+  }
+
+  startConvocatoriaLifecycle(convo: Convocatoria) {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    if (!this.canStartConvocatoriaLifecycle(convo)) {
+      this.error.set('Nomes pots iniciar la guardia el mateix dia de la convocatoria.');
+      return;
+    }
+
+    if (this.campaignFormSubmitting()) {
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.campaignFormSubmitting.set(true);
+    this.runningConvoAdminActionKey.set(`start-${convo.id}`);
+
+    const payload = this.buildCampaignFormPayload();
+
+    this.dataService.startConvocatoria(convo.id, payload).subscribe({
+      next: (updatedConvo) => {
+        this.campaignFormSubmitting.set(false);
+        this.runningConvoAdminActionKey.set(null);
+        this.replaceConvocatoriaInState(updatedConvo);
+        this.adminActionFeedback.set(`Convocatoria iniciada: ${updatedConvo.title}.`);
+        this.closeCampaignFormModal();
+      },
+      error: (err) => {
+        this.campaignFormSubmitting.set(false);
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut iniciar la convocatòria.');
+      },
+    });
+  }
+
+  finishConvocatoriaLifecycle(convo: Convocatoria) {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    if (this.campaignFormSubmitting()) {
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.campaignFormSubmitting.set(true);
+    this.runningConvoAdminActionKey.set(`finish-${convo.id}`);
+
+    const payload = this.buildCampaignFormPayload();
+
+    this.dataService.finishConvocatoria(convo.id, payload).subscribe({
+      next: (updatedConvo) => {
+        this.campaignFormSubmitting.set(false);
+        this.runningConvoAdminActionKey.set(null);
+        this.replaceConvocatoriaInState(updatedConvo);
+        this.adminActionFeedback.set(`Convocatoria finalitzada: ${updatedConvo.title}.`);
+        this.closeCampaignFormModal();
+      },
+      error: (err) => {
+        this.campaignFormSubmitting.set(false);
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut finalitzar la convocatòria.');
+      },
+    });
+  }
+
+  openCampaignFormModal(convo: Convocatoria, mode: 'start' | 'finish') {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    this.campaignFormConvo.set(convo);
+    this.campaignFormMode.set(mode);
+    this.campaignFormLoading.set(true);
+    this.error.set('');
+
+    this.dataService.getCampaignFormContext(convo.id, mode).subscribe({
+      next: (context) => {
+        this.campaignFormContext.set(context);
+
+        const prefill = mode === 'finish' ? context.prefill : null;
+        const fallbackDia = this.toDateTimeLocalValue(new Date().toISOString());
+        const diaValue = prefill?.dia ? this.toDateTimeLocalValue(prefill.dia) : fallbackDia;
+
+        this.campaignForm.set({
+          dia: diaValue,
+          volunteerUserIds: prefill?.volunteerUserIds?.length
+            ? [...prefill.volunteerUserIds]
+            : context.eligibleUsers.map((user) => user.id),
+          vehicles: prefill?.vehicles?.length
+            ? prefill.vehicles.map((vehicle) => ({
+                vehicleName: vehicle.vehicleName,
+                kms: Number(vehicle.kms || 0),
+                conductorUserId: vehicle.conductorUserId,
+                volunteerUserIds: [...(vehicle.volunteerUserIds || [])],
+              }))
+            : [],
+        });
+        this.campaignFormLoading.set(false);
+        this.showCampaignFormModal.set(true);
+      },
+      error: (err) => {
+        this.campaignFormLoading.set(false);
+        this.error.set(err.message || 'No s\'ha pogut preparar el formulari de campanya.');
+      },
+    });
+  }
+
+  closeCampaignFormModal() {
+    this.showCampaignFormModal.set(false);
+    this.campaignFormConvo.set(null);
+    this.campaignFormMode.set(null);
+    this.campaignFormContext.set(null);
+    this.campaignFormSubmitting.set(false);
+    this.campaignForm.set({
+      dia: this.toDateTimeLocalValue(new Date().toISOString()),
+      volunteerUserIds: [],
+      vehicles: [],
+    });
+    this.campaignVolunteerMenuOpen.set(false);
+    this.campaignVehicleMenuOpen.set(false);
+    this.campaignVehicleVolunteerMenuVehicle.set(null);
+    this.campaignConductorMenuVehicle.set(null);
+  }
+
+  openCampaignRecordsModal(convo: Convocatoria) {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    this.error.set('');
+    this.campaignRecordsConvo.set(convo);
+    this.campaignRecordsLoading.set(true);
+    this.campaignRecordsDeletingId.set(null);
+    this.campaignRecordExpandedIds.set([]);
+    this.campaignRecords.set([]);
+    this.showCampaignRecordsModal.set(true);
+
+    this.dataService.getCampaignForms({ convoId: convo.id }).subscribe({
+      next: (forms) => {
+        this.campaignRecords.set(forms);
+        this.campaignRecordsLoading.set(false);
+      },
+      error: (err) => {
+        this.campaignRecordsLoading.set(false);
+        this.error.set(err.message || 'No s\'han pogut carregar els formularis de la convocatòria.');
+      },
+    });
+  }
+
+  closeCampaignRecordsModal() {
+    this.showCampaignRecordsModal.set(false);
+    this.campaignRecordsConvo.set(null);
+    this.campaignRecordsLoading.set(false);
+    this.campaignRecordsDeletingId.set(null);
+    this.campaignRecordExpandedIds.set([]);
+    this.campaignRecords.set([]);
+  }
+
+  toggleCampaignRecordDetails(formId: number) {
+    const current = new Set(this.campaignRecordExpandedIds());
+
+    if (current.has(formId)) {
+      current.delete(formId);
+    } else {
+      current.add(formId);
+    }
+
+    this.campaignRecordExpandedIds.set(Array.from(current));
+  }
+
+  isCampaignRecordDetailsOpen(formId: number) {
+    return this.campaignRecordExpandedIds().includes(formId);
+  }
+
+  getCampaignFormMomentLabel(serviceMoment: 'START' | 'END') {
+    return serviceMoment === 'START' ? 'Inici de servei' : 'Final de servei';
+  }
+
+  getCampaignFormVolunteersCount(form: CampaignFormRecord) {
+    return Array.isArray(form.voluntaris) ? form.voluntaris.length : 0;
+  }
+
+  getCampaignFormVehiclesCount(form: CampaignFormRecord) {
+    return Array.isArray(form.vehicles) ? form.vehicles.length : 0;
+  }
+
+  getCampaignFormResponsableLabel(form: CampaignFormRecord) {
+    if (form.responsableId) {
+      const user = this.userById().get(form.responsableId);
+      if (user) {
+        return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+      }
+    }
+
+    if (form.responsableNCarnet) {
+      const user = this.userByNCarnet().get(form.responsableNCarnet);
+      if (user) {
+        return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+      }
+
+      return form.responsableNCarnet;
+    }
+
+    return '-';
+  }
+
+  getCampaignFormCreatedByLabel(form: CampaignFormRecord) {
+    if (!form.createdByNCarnet) {
+      return '-';
+    }
+
+    const user = this.userByNCarnet().get(form.createdByNCarnet);
+    if (!user) {
+      return form.createdByNCarnet;
+    }
+
+    return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  getCampaignFormVolunteerLabels(form: CampaignFormRecord) {
+    if (!Array.isArray(form.voluntaris) || form.voluntaris.length === 0) {
+      return [];
+    }
+
+    return form.voluntaris.map((userId) => {
+      const user = this.userById().get(userId);
+      if (!user) {
+        return String(userId);
+      }
+
+      return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+    });
+  }
+
+  getCampaignFormVehicleConductorLabel(vehicle: CampaignFormVehicleInput) {
+    if (vehicle.conductorUserId == null) {
+      return 'Sense conductor';
+    }
+
+    const user = this.userById().get(vehicle.conductorUserId);
+    if (!user) {
+      return String(vehicle.conductorUserId);
+    }
+
+    return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  getCampaignFormVehicleVolunteerLabels(vehicle: CampaignFormVehicleInput) {
+    if (!Array.isArray(vehicle.volunteerUserIds) || vehicle.volunteerUserIds.length === 0) {
+      return [];
+    }
+
+    return vehicle.volunteerUserIds.map((userId) => {
+      const user = this.userById().get(userId);
+      if (!user) {
+        return String(userId);
+      }
+
+      return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+    });
+  }
+
+  deleteCampaignFormRecord(form: CampaignFormRecord) {
+    const convo = this.campaignRecordsConvo();
+    if (!convo || !this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Vols eliminar el formulari de ${this.getCampaignFormMomentLabel(form.serviceMoment)} (${new Date(form.createdAt).toLocaleString('ca-ES')})?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.error.set('');
+    this.campaignRecordsDeletingId.set(form.id);
+
+    this.dataService.deleteCampaignForm(form.id).subscribe({
+      next: () => {
+        this.campaignRecordsDeletingId.set(null);
+        this.campaignRecords.set(this.campaignRecords().filter((item) => item.id !== form.id));
+        this.adminActionFeedback.set('Formulari eliminat correctament.');
+      },
+      error: (err) => {
+        this.campaignRecordsDeletingId.set(null);
+        this.error.set(err.message || 'No s\'ha pogut eliminar el formulari.');
+      },
+    });
+  }
+
+  isCampaignVolunteerSelected(userId: number) {
+    return this.campaignForm().volunteerUserIds.includes(userId);
+  }
+
+  toggleCampaignVolunteer(userId: number, checked?: boolean) {
+    const current = new Set(this.campaignForm().volunteerUserIds);
+    const shouldSelect = checked === undefined ? !current.has(userId) : checked;
+
+    if (shouldSelect) {
+      current.add(userId);
+    } else {
+      current.delete(userId);
+    }
+
+    const nextVolunteerIds = Array.from(current);
+    const nextVehicles = this.campaignForm().vehicles.map((vehicle) => ({
+      ...vehicle,
+      conductorUserId: vehicle.conductorUserId && nextVolunteerIds.includes(vehicle.conductorUserId)
+        ? vehicle.conductorUserId
+        : null,
+      volunteerUserIds: vehicle.volunteerUserIds.filter((id) => nextVolunteerIds.includes(id)),
+    }));
+
+    this.campaignForm.set({
+      ...this.campaignForm(),
+      volunteerUserIds: nextVolunteerIds,
+      vehicles: nextVehicles,
+    });
+  }
+
+  updateCampaignFormDia(value: string) {
+    this.campaignForm.set({
+      ...this.campaignForm(),
+      dia: value,
+    });
+  }
+
+  toggleCampaignVolunteerMenu() {
+    this.campaignVolunteerMenuOpen.set(!this.campaignVolunteerMenuOpen());
+    this.campaignVehicleMenuOpen.set(false);
+    this.campaignVehicleVolunteerMenuVehicle.set(null);
+    this.campaignConductorMenuVehicle.set(null);
+  }
+
+  getCampaignVolunteersSummary() {
+    const selected = this.campaignForm().volunteerUserIds;
+
+    if (selected.length === 0) {
+      return 'Selecciona voluntaris';
+    }
+
+    const labels = selected.map((userId) => this.getCampaignUserLabel(userId));
+    if (labels.length <= 2) {
+      return labels.join(' · ');
+    }
+
+    return `${labels[0]} · +${labels.length - 1} més`;
+  }
+
+  getCampaignVehicleCatalogLabel(vehicle: CampaignVehicleCatalogItem) {
+    const indicativo = String(vehicle?.indicativo || '').trim();
+    const modelo = String(vehicle?.modelo || '').trim();
+    const litros = Number(vehicle?.litros || 0);
+    const kms = Number(vehicle?.kms || 0);
+
+    const parts = [indicativo];
+    if (modelo) {
+      parts.push(modelo);
+    }
+
+    if (litros > 0) {
+      parts.push(`${litros}L`);
+    }
+
+    parts.push(`${Number.isFinite(kms) && kms >= 0 ? kms : 0} km`);
+
+    return parts.filter(Boolean).join(' · ');
+  }
+
+  isCampaignVehicleLocked(indicativo: string) {
+    const locked = this.campaignFormContext()?.lockedVehicleNames || [];
+    return locked.includes(indicativo);
+  }
+
+  getCampaignVehicleDisplayName(indicativo: string) {
+    const vehicleFromCatalog = this.campaignFormContext()?.vehicleCatalog?.find(
+      (item) => item.indicativo === indicativo
+    );
+
+    if (!vehicleFromCatalog) {
+      return indicativo;
+    }
+
+    return this.getCampaignVehicleCatalogLabel(vehicleFromCatalog);
+  }
+
+  toggleCampaignVehicleMenu() {
+    this.campaignVehicleMenuOpen.set(!this.campaignVehicleMenuOpen());
+    this.campaignVolunteerMenuOpen.set(false);
+    this.campaignVehicleVolunteerMenuVehicle.set(null);
+    this.campaignConductorMenuVehicle.set(null);
+  }
+
+  toggleCampaignVehicleSelection(indicativo: string) {
+    if (this.isCampaignVehicleLocked(indicativo)) {
+      return;
+    }
+
+    if (this.isCampaignVehicleSelected(indicativo)) {
+      this.removeCampaignVehicleSection(indicativo);
+      return;
+    }
+
+    this.addCampaignVehicleSection(indicativo);
+  }
+
+  getCampaignVehiclesSummary() {
+    const selected = this.campaignForm().vehicles || [];
+    if (selected.length === 0) {
+      return 'Selecciona vehicles';
+    }
+
+    const labels = selected.map((vehicle) => {
+      const vehicleFromCatalog = this.campaignFormContext()?.vehicleCatalog?.find(
+        (item) => item.indicativo === vehicle.vehicleName
+      );
+
+      if (vehicleFromCatalog) {
+        return this.getCampaignVehicleCatalogLabel(vehicleFromCatalog);
+      }
+
+      return vehicle.vehicleName;
+    });
+
+    if (labels.length <= 2) {
+      return labels.join(' · ');
+    }
+
+    return `${labels[0]} · +${labels.length - 1} més`;
+  }
+
+  addCampaignVehicleSection(vehicleName: string) {
+    const normalizedName = String(vehicleName || '').trim();
+    if (!normalizedName) {
+      return;
+    }
+
+    if (this.campaignForm().vehicles.some((vehicle) => vehicle.vehicleName === normalizedName)) {
+      return;
+    }
+
+    const catalogVehicle = this.campaignFormContext()?.vehicleCatalog?.find(
+      (vehicle) => vehicle.indicativo === normalizedName
+    );
+    const initialKms = Number(catalogVehicle?.kms || 0);
+
+    const nextVehicles = [
+      ...this.campaignForm().vehicles,
+      {
+        vehicleName: normalizedName,
+        kms: Number.isFinite(initialKms) && initialKms >= 0 ? initialKms : 0,
+        conductorUserId: null,
+        volunteerUserIds: [],
+      },
+    ];
+
+    this.updateCampaignVehicles(nextVehicles);
+  }
+
+  removeCampaignVehicleSection(vehicleName: string) {
+    const nextVehicles = this.campaignForm().vehicles.filter((vehicle) => vehicle.vehicleName !== vehicleName);
+    this.updateCampaignVehicles(nextVehicles);
+  }
+
+  updateCampaignVehicleField(vehicleName: string, field: 'kms' | 'conductorUserId', value: string) {
+    const vehicles = this.campaignForm().vehicles.map((vehicle) => {
+      if (vehicle.vehicleName !== vehicleName) {
+        return vehicle;
+      }
+
+      if (field === 'kms') {
+        if (String(value).trim() === '') {
+          return vehicle;
+        }
+
+        const parsed = Number(value);
+        return {
+          ...vehicle,
+          kms: Number.isFinite(parsed) && parsed >= 0 ? parsed : 0,
+        };
+      }
+
+      return {
+        ...vehicle,
+        conductorUserId: value ? Number(value) : null,
+      };
+    });
+
+    this.updateCampaignVehicles(vehicles);
+  }
+
+  toggleCampaignVehicleVolunteer(vehicleName: string, userId: number, checked?: boolean) {
+    const vehicles = this.campaignForm().vehicles.map((vehicle) => {
+      if (vehicle.vehicleName !== vehicleName) {
+        return vehicle;
+      }
+
+      const current = new Set(vehicle.volunteerUserIds);
+      const shouldSelect = checked === undefined ? !current.has(userId) : checked;
+
+      if (shouldSelect && !this.canAssignUserAsVehicleVolunteer(vehicleName, userId)) {
+        return vehicle;
+      }
+
+      if (shouldSelect) {
+        current.add(userId);
+      } else {
+        current.delete(userId);
+      }
+
+      return {
+        ...vehicle,
+        volunteerUserIds: Array.from(current),
+      };
+    });
+
+    this.updateCampaignVehicles(vehicles);
+  }
+
+  isCampaignVehicleVolunteerSelected(vehicleName: string, userId: number) {
+    const vehicle = this.campaignForm().vehicles.find((item) => item.vehicleName === vehicleName);
+    return Boolean(vehicle?.volunteerUserIds.includes(userId));
+  }
+
+  toggleCampaignVehicleVolunteerMenu(vehicleName: string) {
+    this.campaignVehicleVolunteerMenuVehicle.set(
+      this.campaignVehicleVolunteerMenuVehicle() === vehicleName ? null : vehicleName
+    );
+    this.campaignVolunteerMenuOpen.set(false);
+    this.campaignConductorMenuVehicle.set(null);
+  }
+
+  isCampaignVehicleVolunteerMenuOpen(vehicleName: string) {
+    return this.campaignVehicleVolunteerMenuVehicle() === vehicleName;
+  }
+
+  getCampaignVehicleVolunteersSummary(vehicleName: string) {
+    const vehicle = this.campaignForm().vehicles.find((item) => item.vehicleName === vehicleName);
+    const selected = vehicle?.volunteerUserIds || [];
+
+    if (selected.length === 0) {
+      return 'Selecciona voluntaris del vehicle';
+    }
+
+    const labels = selected.map((userId) => this.getCampaignUserLabel(userId));
+    if (labels.length <= 2) {
+      return labels.join(' · ');
+    }
+
+    return `${labels[0]} · +${labels.length - 1} més`;
+  }
+
+  getCampaignAssignableVolunteerIds(vehicleName: string) {
+    return this.campaignForm().volunteerUserIds.filter((userId) => this.canAssignUserAsVehicleVolunteer(vehicleName, userId));
+  }
+
+  canAssignUserAsVehicleVolunteer(vehicleName: string, userId: number) {
+    const vehicles = this.campaignForm().vehicles;
+
+    const assignedAsConductor = vehicles.some((vehicle) => vehicle.conductorUserId === userId);
+    if (assignedAsConductor) {
+      return false;
+    }
+
+    const assignedInOtherVehicle = vehicles.some(
+      (vehicle) => vehicle.vehicleName !== vehicleName && vehicle.volunteerUserIds.includes(userId)
+    );
+
+    return !assignedInOtherVehicle;
+  }
+
+  toggleCampaignConductorMenu(vehicleName: string) {
+    this.campaignConductorMenuVehicle.set(
+      this.campaignConductorMenuVehicle() === vehicleName ? null : vehicleName
+    );
+    this.campaignVolunteerMenuOpen.set(false);
+    this.campaignVehicleVolunteerMenuVehicle.set(null);
+  }
+
+  isCampaignConductorMenuOpen(vehicleName: string) {
+    return this.campaignConductorMenuVehicle() === vehicleName;
+  }
+
+  selectCampaignVehicleConductor(vehicleName: string, userId: number | null) {
+    let vehicles = this.campaignForm().vehicles.map((vehicle) => {
+      if (vehicle.vehicleName !== vehicleName) {
+        return vehicle;
+      }
+
+      const nextConductor = vehicle.conductorUserId === userId ? null : userId;
+      return {
+        ...vehicle,
+        conductorUserId: nextConductor,
+      };
+    });
+
+    if (userId != null) {
+      vehicles = vehicles.map((vehicle) => ({
+        ...vehicle,
+        volunteerUserIds: vehicle.volunteerUserIds.filter((id) => id !== userId),
+      }));
+    }
+
+    this.updateCampaignVehicles(vehicles);
+    this.campaignConductorMenuVehicle.set(null);
+  }
+
+  getCampaignVehicleConductorSummary(vehicleName: string) {
+    const vehicle = this.campaignForm().vehicles.find((item) => item.vehicleName === vehicleName);
+    if (!vehicle || !vehicle.conductorUserId) {
+      return 'Sense conductor';
+    }
+
+    return this.getCampaignUserLabel(vehicle.conductorUserId);
+  }
+
+  getCampaignVehicleCurrentKms(vehicleName: string) {
+    const catalogVehicle = this.campaignFormContext()?.vehicleCatalog?.find((item) => item.indicativo === vehicleName);
+    const catalogKms = Number(catalogVehicle?.kms || 0);
+    if (Number.isFinite(catalogKms) && catalogKms >= 0) {
+      return Number(catalogKms.toFixed(2));
+    }
+
+    const selectedVehicle = this.campaignForm().vehicles.find((item) => item.vehicleName === vehicleName);
+    const selectedKms = Number(selectedVehicle?.kms || 0);
+    return Number.isFinite(selectedKms) && selectedKms >= 0 ? Number(selectedKms.toFixed(2)) : 0;
+  }
+
+  getCampaignVehicleKmsInputValue(vehicleName: string) {
+    if (this.campaignFormMode() === 'finish') {
+      return '';
+    }
+
+    const selectedVehicle = this.campaignForm().vehicles.find((item) => item.vehicleName === vehicleName);
+    return selectedVehicle ? selectedVehicle.kms : 0;
+  }
+
+  getCampaignVehicleKmsPlaceholder(vehicleName: string) {
+    return String(this.getCampaignVehicleCurrentKms(vehicleName));
+  }
+
+  private validateCampaignVehicleKms() {
+    for (const vehicle of this.campaignForm().vehicles) {
+      const currentKms = this.getCampaignVehicleCurrentKms(vehicle.vehicleName);
+      const nextKms = Number(vehicle.kms || 0);
+
+      if (!Number.isFinite(nextKms) || nextKms < 0) {
+        this.error.set(`Els KM del vehicle ${vehicle.vehicleName} no son valids.`);
+        return false;
+      }
+
+      if (nextKms < currentKms) {
+        this.error.set(`Els KM del vehicle ${vehicle.vehicleName} no poden ser inferiors als actuals (${currentKms}).`);
+        return false;
+      }
+
+      if ((nextKms - currentKms) > this.maxKmIncreasePerForm) {
+        this.error.set(`L'increment de KM del vehicle ${vehicle.vehicleName} es massa alt. Revisa si hi ha un zero de mes.`);
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  private updateCampaignVehicles(vehicles: Array<{
+    vehicleName: string;
+    kms: number;
+    conductorUserId: number | null;
+    volunteerUserIds: number[];
+  }>) {
+    const allowedVolunteerIds = new Set(this.campaignForm().volunteerUserIds);
+
+    const normalizedVehicles = vehicles.map((vehicle) => ({
+      ...vehicle,
+      conductorUserId: vehicle.conductorUserId != null && allowedVolunteerIds.has(vehicle.conductorUserId)
+        ? vehicle.conductorUserId
+        : null,
+      volunteerUserIds: Array.from(new Set((vehicle.volunteerUserIds || []).filter((id) => allowedVolunteerIds.has(id)))),
+    }));
+
+    const conductorIds = new Set(
+      normalizedVehicles
+        .map((vehicle) => vehicle.conductorUserId)
+        .filter((id): id is number => id != null)
+    );
+
+    const assignedVolunteerIds = new Set<number>();
+    const resolvedVehicles = normalizedVehicles.map((vehicle) => {
+      const filteredVolunteerIds = vehicle.volunteerUserIds.filter((id) => {
+        if (conductorIds.has(id)) {
+          return false;
+        }
+
+        if (assignedVolunteerIds.has(id)) {
+          return false;
+        }
+
+        assignedVolunteerIds.add(id);
+        return true;
+      });
+
+      return {
+        ...vehicle,
+        volunteerUserIds: filteredVolunteerIds,
+      };
+    });
+
+    this.campaignForm.set({
+      ...this.campaignForm(),
+      vehicles: resolvedVehicles,
+    });
+  }
+
+  isCampaignVehicleSelected(vehicleName: string) {
+    return this.campaignForm().vehicles.some((vehicle) => vehicle.vehicleName === vehicleName);
+  }
+
+  getCampaignUserLabel(userId: number) {
+    const user = this.campaignFormContext()?.eligibleUsers.find((item) => item.id === userId);
+    if (!user) {
+      return String(userId);
+    }
+
+    return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  executeCampaignLifecycleAction() {
+    const convo = this.campaignFormConvo();
+    const mode = this.campaignFormMode();
+
+    if (!convo || !mode) {
+      return;
+    }
+
+    if (!this.validateCampaignVehicleKms()) {
+      return;
+    }
+
+    if (mode === 'start') {
+      this.startConvocatoriaLifecycle(convo);
+      return;
+    }
+
+    this.finishConvocatoriaLifecycle(convo);
+  }
+
+  private buildCampaignFormPayload(): CampaignFormSubmitPayload {
+    const diaValue = this.campaignForm().dia?.trim();
+    const parsedDia = diaValue ? new Date(diaValue) : new Date();
+    const dia = Number.isNaN(parsedDia.getTime()) ? new Date().toISOString() : parsedDia.toISOString();
+
+    return {
+      dia,
+      volunteerUserIds: [...this.campaignForm().volunteerUserIds],
+      vehicles: this.campaignForm().vehicles.map((vehicle) => ({
+        vehicleName: vehicle.vehicleName,
+        kms: Number(vehicle.kms || 0),
+        conductorUserId: vehicle.conductorUserId,
+        volunteerUserIds: [...vehicle.volunteerUserIds],
+      })),
+    };
+  }
+
+  openLifecycleEdition(convo: Convocatoria) {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    this.lifecycleConvo.set(convo);
+    this.lifecycleForm.set({
+      actualStartTime: this.toDateTimeLocalValue(convo.actualStartTime),
+      actualEndTime: this.toDateTimeLocalValue(convo.actualEndTime),
+    });
+    this.showLifecycleModal.set(true);
+  }
+
+  closeLifecycleModal() {
+    this.showLifecycleModal.set(false);
+    this.lifecycleConvo.set(null);
+    this.lifecycleForm.set({
+      actualStartTime: '',
+      actualEndTime: '',
+    });
+  }
+
+  updateLifecycleField(field: 'actualStartTime' | 'actualEndTime', value: string) {
+    this.lifecycleForm.set({
+      ...this.lifecycleForm(),
+      [field]: value,
+    });
+  }
+
+  saveLifecycleEdition() {
+    const convo = this.lifecycleConvo();
+    if (!convo || !this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    const startInput = this.lifecycleForm().actualStartTime.trim();
+    const endInput = this.lifecycleForm().actualEndTime.trim();
+
+    if (!startInput) {
+      this.error.set('La hora real d\'inici és obligatòria per desar.');
+      return;
+    }
+
+    const parsedStart = new Date(startInput);
+    if (Number.isNaN(parsedStart.getTime())) {
+      this.error.set('La hora real d\'inici no té un format vàlid.');
+      return;
+    }
+
+    let parsedEnd: Date | null = null;
+    if (endInput) {
+      parsedEnd = new Date(endInput);
+      if (Number.isNaN(parsedEnd.getTime())) {
+        this.error.set('La hora real de fi no té un format vàlid.');
+        return;
+      }
+
+      if (parsedEnd < parsedStart) {
+        this.error.set('La hora real de fi no pot ser anterior a la d\'inici.');
+        return;
+      }
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.runningConvoAdminActionKey.set(`edit-${convo.id}`);
+
+    this.dataService.updateConvocatoriaLifecycle(convo.id, {
+      actualStartTime: parsedStart.toISOString(),
+      actualEndTime: parsedEnd ? parsedEnd.toISOString() : null,
+    }).subscribe({
+      next: (updatedConvo) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.replaceConvocatoriaInState(updatedConvo);
+        this.adminActionFeedback.set(`Registre d'hores actualitzat: ${updatedConvo.title}.`);
+        this.closeLifecycleModal();
+      },
+      error: (err) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut editar el registre d\'hores.');
+      },
+    });
+  }
+
+  clearLifecycleEdition() {
+    const convo = this.lifecycleConvo();
+    if (!convo || !this.canManageConvocatoriaLifecycle(convo)) {
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.runningConvoAdminActionKey.set(`edit-${convo.id}`);
+
+    this.dataService.updateConvocatoriaLifecycle(convo.id, {
+      actualStartTime: null,
+      actualEndTime: null,
+    }).subscribe({
+      next: (updatedConvo) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.replaceConvocatoriaInState(updatedConvo);
+        this.adminActionFeedback.set(`Registre d'hores eliminat: ${updatedConvo.title}.`);
+        this.closeLifecycleModal();
+      },
+      error: (err) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut eliminar el registre d\'hores.');
+      },
+    });
+  }
+
   toggleConvoSortida(convo: Convocatoria) {
-    if (!this.authService.isAdmin()) {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
       return;
     }
 
@@ -424,7 +1412,7 @@ export class HomeComponent implements OnInit {
   }
 
   runConvoAutomation(convo: Convocatoria) {
-    if (!this.authService.isAdmin()) {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
       return;
     }
 
@@ -701,7 +1689,11 @@ export class HomeComponent implements OnInit {
 
     return this.allRespuestas().reduce(
       (summary, respuesta) => {
-        if (respuesta.convoId !== convoId) {
+        if (
+          respuesta.convoId !== convoId ||
+          respuesta.response !== true ||
+          respuesta.attendanceConfirmed !== true
+        ) {
           return summary;
         }
 
@@ -734,7 +1726,7 @@ export class HomeComponent implements OnInit {
     }
 
     const currentUserId = this.authService.getCurrentUser()?.id;
-    return Boolean(currentUserId && convo.responsableId === currentUserId);
+    return Boolean(currentUserId && Number(convo.responsableId) === Number(currentUserId));
   }
 
   canManageAttendanceForConvo(convo: Convocatoria | null) {
@@ -747,16 +1739,28 @@ export class HomeComponent implements OnInit {
     }
 
     const currentUserId = this.authService.getCurrentUser()?.id;
-    return Boolean(currentUserId && convo.responsableId === currentUserId);
+    return Boolean(currentUserId && Number(convo.responsableId) === Number(currentUserId));
   }
 
-  updateAttendanceConfirmation(respuesta: Respuesta, attendanceConfirmed: boolean) {
+  isAttendanceJustified(respuesta: Respuesta) {
+    return respuesta.attendanceConfirmed === false && respuesta.attendanceJustified === true;
+  }
+
+  getAttendanceBadgeText(respuesta: Respuesta) {
+    if (this.isAttendanceJustified(respuesta)) {
+      return 'No assistit justificat';
+    }
+
+    return respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat';
+  }
+
+  updateAttendanceStatus(respuesta: Respuesta, attendanceConfirmed: boolean, attendanceJustified = false) {
     if (!this.canManageAttendanceForConvo(respuesta.convocatoria || null)) {
       this.error.set('No tens permisos per modificar l\'assistència d\'aquesta convocatòria.');
       return;
     }
 
-    this.dataService.updateRespuesta(respuesta.id, { attendanceConfirmed }).subscribe({
+    this.dataService.updateRespuesta(respuesta.id, { attendanceConfirmed, attendanceJustified }).subscribe({
       next: () => {
         this.loadRespuestas();
       },
@@ -764,6 +1768,18 @@ export class HomeComponent implements OnInit {
         this.error.set(err.message || 'No s\'ha pogut actualitzar l\'assistència.');
       },
     });
+  }
+
+  toggleAttendanceJustification(respuesta: Respuesta) {
+    if (respuesta.attendanceConfirmed) {
+      return;
+    }
+
+    this.updateAttendanceStatus(respuesta, false, !this.isAttendanceJustified(respuesta));
+  }
+
+  updateAttendanceConfirmation(respuesta: Respuesta, attendanceConfirmed: boolean) {
+    this.updateAttendanceStatus(respuesta, attendanceConfirmed, false);
   }
 
   openGuardiaResponsesModal(convo: Convocatoria) {
@@ -893,7 +1909,7 @@ export class HomeComponent implements OnInit {
   }
 
   openAdminConvoModal(convo: Convocatoria) {
-    if (!this.authService.isAdmin()) {
+    if (!this.canManageConvocatoriaLifecycle(convo)) {
       return;
     }
 
@@ -932,6 +1948,10 @@ export class HomeComponent implements OnInit {
         ...current,
         [field]: value ? Number(value) : null,
       };
+
+      if (field === 'responsableId' && next.responsableId !== null) {
+        next.autoAssignResponsable = false;
+      }
 
       if (field === 'convoTypeId') {
         const defaultLocation = this.getConvoTypeDefaultLocation(next.convoTypeId);
@@ -1097,6 +2117,10 @@ export class HomeComponent implements OnInit {
         ...current,
         [field]: value ? Number(value) : null,
       };
+
+      if (field === 'responsableId' && next.responsableId !== null) {
+        next.autoAssignResponsable = false;
+      }
 
       if (field === 'convoTypeId') {
         const forcedTitle = this.getForcedCreateTitleByTypeId(next.convoTypeId);
@@ -1545,6 +2569,37 @@ export class HomeComponent implements OnInit {
     return Date.now() >= startDate.getTime();
   }
 
+  getConvocatoriaElapsedLabel(convo: Convocatoria) {
+    if (!convo.actualStartTime) {
+      return null;
+    }
+
+    const startDate = new Date(convo.actualStartTime);
+    if (Number.isNaN(startDate.getTime())) {
+      return null;
+    }
+
+    const endSource = convo.actualEndTime || new Date().toISOString();
+    const endDate = new Date(endSource);
+    if (Number.isNaN(endDate.getTime()) || endDate.getTime() < startDate.getTime()) {
+      return null;
+    }
+
+    const elapsedMinutes = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60));
+    const hours = Math.floor(elapsedMinutes / 60);
+    const minutes = elapsedMinutes % 60;
+
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+
+  getVisibleConvocatoriaElapsedLabel(convo: Convocatoria) {
+    if (!this.canViewConvocatoriaSummary(convo)) {
+      return null;
+    }
+
+    return this.getConvocatoriaElapsedLabel(convo);
+  }
+
   private getConvocatoriaStartDate(convo: Convocatoria): Date | null {
     if (!convo.startTime) {
       return null;
@@ -1736,6 +2791,25 @@ export class HomeComponent implements OnInit {
 
   private toTimeInputValue(date: Date) {
     return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+  }
+
+  private toDateTimeLocalValue(value?: string | null) {
+    if (!value) {
+      return '';
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return '';
+    }
+
+    const yyyy = parsed.getFullYear();
+    const mm = String(parsed.getMonth() + 1).padStart(2, '0');
+    const dd = String(parsed.getDate()).padStart(2, '0');
+    const hh = String(parsed.getHours()).padStart(2, '0');
+    const min = String(parsed.getMinutes()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
   }
 
   goToDashboard() {

@@ -197,6 +197,123 @@
           </section>
 
           <section class="config-section full-width">
+            <h3>5 bis) Càlcul d'hores i campanya</h3>
+            <p class="section-help">Defineix el període de campanya i les penalitzacions aplicades al còmput d'hores.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Inici campanya</label>
+                <input type="date" [(ngModel)]="form.campaignStartDate" (change)="requestAutoSave()" />
+              </div>
+
+              <div class="form-group">
+                <label>Fi campanya</label>
+                <input type="date" [(ngModel)]="form.campaignEndDate" (change)="requestAutoSave()" />
+              </div>
+
+              <div class="form-group">
+                <label>No respostes mínimes abans de descomptar</label>
+                <input type="number" min="0" max="100" [(ngModel)]="form.unansweredPenaltyThreshold" (change)="requestAutoSave()" />
+              </div>
+
+              <div class="form-group">
+                <label>Hores de penalització per no resposta</label>
+                <input type="number" min="0" max="24" step="0.5" [(ngModel)]="form.unansweredPenaltyHours" (change)="requestAutoSave()" />
+              </div>
+
+              <div class="form-group">
+                <label>Hores de penalització per no assistència</label>
+                <input type="number" min="0" max="24" step="0.5" [(ngModel)]="form.noShowPenaltyHours" (change)="requestAutoSave()" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Vehicles disponibles</label>
+
+                <div class="vehicle-catalog-add-row">
+                  <input
+                    type="text"
+                    [(ngModel)]="newCampaignVehicle.indicativo"
+                    placeholder="Indicatiu (ex. S401)"
+                  />
+                  <input
+                    type="text"
+                    [(ngModel)]="newCampaignVehicle.modelo"
+                    placeholder="Model"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    [(ngModel)]="newCampaignVehicle.litros"
+                    placeholder="Litres"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.1"
+                    [(ngModel)]="newCampaignVehicle.kms"
+                    placeholder="KM totals"
+                  />
+                  <button type="button" class="btn btn-secondary btn-sm" (click)="addCampaignVehicle()">Afegir</button>
+                </div>
+
+                @if ((form.campaignVehicleCatalog || []).length === 0) {
+                  <div class="empty-state">No hi ha vehicles configurats.</div>
+                } @else {
+                  <div class="table-scroll">
+                    <table class="logs-table">
+                      <thead>
+                        <tr>
+                          <th>Indicatiu</th>
+                          <th>Model</th>
+                          <th>Litres</th>
+                          <th>KM</th>
+                          <th></th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (vehicle of form.campaignVehicleCatalog; track vehicle.indicativo) {
+                          <tr>
+                            <td>{{ vehicle.indicativo }}</td>
+                            <td>
+                              <input
+                                type="text"
+                                [ngModel]="vehicle.modelo"
+                                (ngModelChange)="updateCampaignVehicleField(vehicle.indicativo, 'modelo', $event)"
+                                placeholder="Model"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                [ngModel]="vehicle.litros"
+                                (ngModelChange)="updateCampaignVehicleField(vehicle.indicativo, 'litros', $event)"
+                              />
+                            </td>
+                            <td>
+                              <input
+                                type="number"
+                                min="0"
+                                step="0.1"
+                                [ngModel]="vehicle.kms"
+                                (ngModelChange)="updateCampaignVehicleField(vehicle.indicativo, 'kms', $event)"
+                              />
+                            </td>
+                            <td>
+                              <button type="button" class="btn btn-danger btn-sm" (click)="removeCampaignVehicle(vehicle.indicativo)">Eliminar</button>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section full-width">
             <h3>6) Missatgeria configurable per escenari</h3>
             <p class="section-help">Configura per tipus la notificació d'activació de sortida i defineix una notificació general per convocatòries pendents de disponibilitat.</p>
 
@@ -265,6 +382,59 @@
                 </div>
               </article>
             </div>
+          </section>
+
+          <section class="config-section full-width hours-summary-section">
+            <h3>Resum d'hores per usuari</h3>
+            <p class="section-help">Resultat agregat d'hores dins/fora campanya amb penalitzacions aplicades.</p>
+
+            <div class="section-actions">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="loadHoursSummary()" [disabled]="hoursSummaryLoading">
+                {{ hoursSummaryLoading ? 'Actualitzant...' : 'Actualitzar resum' }}
+              </button>
+              @if (hoursSummaryGeneratedAt) {
+                <span class="muted-text">Última generació: {{ hoursSummaryGeneratedAt | date:'short' }}</span>
+              }
+            </div>
+
+            @if (hoursSummaryError) {
+              <div class="error-alert">{{ hoursSummaryError }}</div>
+            } @else if (hoursSummaryLoading) {
+              <div class="loading">Carregant resum d'hores...</div>
+            } @else if (hoursSummaryRows.length === 0) {
+              <div class="empty-state">No hi ha dades d'hores per mostrar.</div>
+            } @else {
+              <div class="table-scroll">
+                <table class="logs-table hours-summary-table">
+                  <thead>
+                    <tr>
+                      <th>Usuari</th>
+                      <th>H campanya</th>
+                      <th>H fora campanya</th>
+                      <th>No respostes</th>
+                      <th>No assistències</th>
+                      <th class="hours-penalty-header"><span>Penalització<br>no resposta</span></th>
+                      <th class="hours-penalty-header"><span>Penalització<br>no assistència</span></th>
+                      <th>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (row of hoursSummaryRows; track row.userId) {
+                      <tr>
+                        <td class="hours-user-cell">{{ row.userName }}</td>
+                        <td>{{ formatRoundedHours(row.campaignHours) }}</td>
+                        <td>{{ formatRoundedHours(row.offCampaignHours) }}</td>
+                        <td>{{ row.unansweredCount }}</td>
+                        <td>{{ row.noShowCount }}</td>
+                        <td class="hours-penalty-cell">-{{ formatRoundedHours(row.unansweredPenaltyHours) }}</td>
+                        <td class="hours-penalty-cell">-{{ formatRoundedHours(row.noShowPenaltyHours) }}</td>
+                        <td class="hours-total-cell"><strong>{{ formatRoundedHours(row.totalHours) }}</strong></td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
           </section>
         </div>
       }

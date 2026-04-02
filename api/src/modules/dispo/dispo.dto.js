@@ -99,6 +99,12 @@ function validateResponseCoherence({ response, fullHorari }) {
   }
 }
 
+function validateAttendanceCoherence({ attendanceConfirmed, attendanceJustified }) {
+  if (attendanceConfirmed === true && attendanceJustified === true) {
+    throw createDispoDtoError('No puedes marcar como justificada una asistencia confirmada.')
+  }
+}
+
 function buildRespuestaCreateDto(payload) {
   ensureObject(payload, 'respuesta')
 
@@ -110,6 +116,7 @@ function buildRespuestaCreateDto(payload) {
     fullHorari: normalizeBoolean(payload.fullHorari, 'fullHorari') ?? false,
     response: normalizeBoolean(payload.response, 'response'),
     attendanceConfirmed: normalizeBoolean(payload.attendanceConfirmed, 'attendanceConfirmed') ?? true,
+    attendanceJustified: normalizeBoolean(payload.attendanceJustified, 'attendanceJustified') ?? false,
   }
 
   if (dto.response === undefined) {
@@ -118,6 +125,7 @@ function buildRespuestaCreateDto(payload) {
 
   validateCustomState(dto)
   validateResponseCoherence(dto)
+  validateAttendanceCoherence(dto)
 
   return dto
 }
@@ -155,6 +163,10 @@ function buildRespuestaUpdateDto(payload) {
     dto.attendanceConfirmed = normalizeBoolean(payload.attendanceConfirmed, 'attendanceConfirmed')
   }
 
+  if (payload.attendanceJustified !== undefined) {
+    dto.attendanceJustified = normalizeBoolean(payload.attendanceJustified, 'attendanceJustified')
+  }
+
   if (Object.keys(dto).length === 0) {
     throw createDispoDtoError('Debes enviar al menos un campo para actualizar la respuesta.')
   }
@@ -174,6 +186,13 @@ function buildRespuestaUpdateDto(payload) {
     })
   }
 
+  if (dto.attendanceConfirmed !== undefined || dto.attendanceJustified !== undefined) {
+    validateAttendanceCoherence({
+      attendanceConfirmed: dto.attendanceConfirmed ?? payload.attendanceConfirmed,
+      attendanceJustified: dto.attendanceJustified ?? payload.attendanceJustified,
+    })
+  }
+
   return dto
 }
 
@@ -186,6 +205,7 @@ function mapRespuestaToDto(respuesta) {
         id: respuesta.convocatoria.id,
         title: respuesta.convocatoria.title,
         date: respuesta.convocatoria.date,
+        responsableId: respuesta.convocatoria.responsableId,
         startTime: respuesta.convocatoria.startTime,
         finalTime: respuesta.convocatoria.finalTime,
         isActive: respuesta.convocatoria.isActive,
@@ -205,6 +225,7 @@ function mapRespuestaToDto(respuesta) {
     fullHorari: respuesta.fullHorari,
     response: respuesta.response,
     attendanceConfirmed: respuesta.attendanceConfirmed,
+    attendanceJustified: respuesta.attendanceJustified ?? false,
     source: respuesta.source ?? 'manual',
     autoAssignReason: respuesta.autoAssignReason ?? null,
   }

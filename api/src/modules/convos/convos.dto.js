@@ -83,6 +83,18 @@ function normalizeInteger(value, { fieldName, required = false, min = 1 } = {}) 
   return parsedValue
 }
 
+function normalizeIntegerList(value, { fieldName } = {}) {
+  if (value === undefined || value === null) {
+    return []
+  }
+
+  if (!Array.isArray(value)) {
+    throw createConvosDtoError(`El campo "${fieldName}" debe ser una lista de numeros enteros.`)
+  }
+
+  return Array.from(new Set(value.map((entry) => normalizeInteger(entry, { fieldName, min: 1 }))))
+}
+
 function normalizeDate(value, { fieldName, required = false, nullable = false } = {}) {
   if (value === undefined) {
     if (required) {
@@ -257,6 +269,99 @@ function buildConvocatoriaUpdateDto(payload) {
   return dto
 }
 
+function buildConvocatoriaLifecycleUpdateDto(payload) {
+  ensureObject(payload, 'actualizacion de ciclo de convocatoria')
+
+  const dto = {}
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'actualStartTime')) {
+    dto.actualStartTime = normalizeDate(payload.actualStartTime, {
+      fieldName: 'actualStartTime',
+      nullable: true,
+    })
+  }
+
+  if (Object.prototype.hasOwnProperty.call(payload, 'actualEndTime')) {
+    dto.actualEndTime = normalizeDate(payload.actualEndTime, {
+      fieldName: 'actualEndTime',
+      nullable: true,
+    })
+  }
+
+  if (Object.keys(dto).length === 0) {
+    throw createConvosDtoError('Debes enviar actualStartTime y/o actualEndTime para editar el ciclo real.')
+  }
+
+  if (dto.actualStartTime === null && dto.actualEndTime !== undefined && dto.actualEndTime !== null) {
+    throw createConvosDtoError('No puedes indicar hora real de fin sin hora real de inicio.')
+  }
+
+  if (
+    dto.actualStartTime instanceof Date &&
+    dto.actualEndTime instanceof Date &&
+    dto.actualEndTime < dto.actualStartTime
+  ) {
+    throw createConvosDtoError('La hora real de fin no puede ser anterior a la hora real de inicio.')
+  }
+
+  return dto
+}
+
+function buildCampaignFormPayloadDto(payload) {
+  ensureObject(payload, 'formulario de campanya')
+
+  const dia = normalizeDate(payload.dia, { fieldName: 'dia' }) || new Date()
+  const volunteerUserIds = normalizeIntegerList(payload.volunteerUserIds, {
+    fieldName: 'volunteerUserIds',
+  })
+
+  const sourceVehicles = payload.vehicles === undefined ? [] : payload.vehicles
+  if (!Array.isArray(sourceVehicles)) {
+    throw createConvosDtoError('El campo "vehicles" debe ser una lista.')
+  }
+
+  const vehicles = sourceVehicles.map((vehicle, index) => {
+    if (!isPlainObject(vehicle)) {
+      throw createConvosDtoError(`El elemento ${index + 1} de "vehicles" no es valido.`)
+    }
+
+    const vehicleName = normalizeText(vehicle.vehicleName, {
+      fieldName: `vehicles[${index}].vehicleName`,
+      required: true,
+    })
+
+    const kmsRaw = vehicle.kms ?? 0
+    const kms = Number(kmsRaw)
+    if (!Number.isFinite(kms) || kms < 0) {
+      throw createConvosDtoError(`El campo "vehicles[${index}].kms" debe ser un numero mayor o igual a 0.`)
+    }
+
+    const conductorUserId = vehicle.conductorUserId == null
+      ? null
+      : normalizeInteger(vehicle.conductorUserId, {
+        fieldName: `vehicles[${index}].conductorUserId`,
+        min: 1,
+      })
+
+    const volunteerIds = normalizeIntegerList(vehicle.volunteerUserIds, {
+      fieldName: `vehicles[${index}].volunteerUserIds`,
+    })
+
+    return {
+      vehicleName,
+      kms: Number(kms.toFixed(2)),
+      conductorUserId,
+      volunteerUserIds: volunteerIds,
+    }
+  })
+
+  return {
+    dia,
+    volunteerUserIds,
+    vehicles,
+  }
+}
+
 function mapConvoTypeToDto(convoType) {
   return {
     id: convoType.id,
@@ -286,6 +391,8 @@ function mapConvocatoriaToDto(convocatoria) {
     convoType: convocatoria.convoType ? mapConvoTypeToDto(convocatoria.convoType) : null,
     startTime: convocatoria.startTime,
     finalTime: convocatoria.finalTime,
+    actualStartTime: convocatoria.actualStartTime,
+    actualEndTime: convocatoria.actualEndTime,
     isActive: convocatoria.isActive,
     autoAssignResponsable: convocatoria.autoAssignResponsable,
     sortida: convocatoria.sortida,
@@ -295,6 +402,8 @@ function mapConvocatoriaToDto(convocatoria) {
 
 module.exports = {
   buildConvocatoriaCreateDto,
+  buildCampaignFormPayloadDto,
+  buildConvocatoriaLifecycleUpdateDto,
   buildConvocatoriaUpdateDto,
   buildConvoTypeCreateDto,
   buildConvoTypeUpdateDto,

@@ -4,12 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, takeUntil } from 'rxjs';
 import {
+  CampaignVehicleCatalogItem,
   ConvoType,
   DataService,
   NotificationAutomationRun,
   NotificationAutomationTaskConfig,
   NotificationLog,
   NotificationSettings,
+  UserHoursSummaryRow,
   User,
 } from '../../services/data.service';
 import { DateFormatService } from '../../services/date-format.service';
@@ -56,6 +58,12 @@ type NotificationSettingsForm = {
   sortidaBodyCancelled: string;
   sortidaTitleReten: string;
   sortidaBodyReten: string;
+  campaignStartDate: string;
+  campaignEndDate: string;
+  unansweredPenaltyThreshold: number;
+  unansweredPenaltyHours: number;
+  noShowPenaltyHours: number;
+  campaignVehicleCatalog: CampaignVehicleCatalogItem[];
   automationRetentionDays: number;
   automationViewerNCarnets: string[];
   automationMonitoringEnabled: boolean;
@@ -82,6 +90,9 @@ export class NotificationsAdminComponent {
     this._config = value;
     if (value) {
       this.form = this.mapConfigToForm(value);
+      if (this.hoursSummaryRows.length === 0 && !this.hoursSummaryLoading) {
+        this.loadHoursSummary();
+      }
     }
   }
 
@@ -145,6 +156,16 @@ export class NotificationsAdminComponent {
   automationTaskFilter = 'all';
   automationDateFrom = '';
   automationDateTo = '';
+  hoursSummaryRows: UserHoursSummaryRow[] = [];
+  hoursSummaryLoading = false;
+  hoursSummaryError = '';
+  hoursSummaryGeneratedAt = '';
+  newCampaignVehicle = {
+    indicativo: '',
+    modelo: '',
+    litros: 0,
+    kms: 0,
+  };
   showAddTaskForm = false;
   newTaskDraft: TaskFormItem = this.createEmptyNewTask();
   newTaskKeyError = '';
@@ -238,6 +259,15 @@ export class NotificationsAdminComponent {
     this.requestAutoSave();
   }
 
+  formatRoundedHours(value: number | null | undefined) {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return 0;
+    }
+
+    return Math.round(parsed);
+  }
+
   ngAfterViewInit() {
     // Trigger initial auto-save setup after view initialization
   }
@@ -259,6 +289,10 @@ export class NotificationsAdminComponent {
 
     if (tab === 'automation' && this.automationRuns.length === 0) {
       this.loadAutomationRuns();
+    }
+
+    if (tab === 'config' && this.hoursSummaryRows.length === 0) {
+      this.loadHoursSummary();
     }
   }
 
@@ -654,6 +688,7 @@ export class NotificationsAdminComponent {
       next: (config) => {
         this.form = this.mapConfigToForm(config);
         this.saveError = '';
+        this.loadHoursSummary();
       },
       error: (err) => {
         this.saveError = err.message || 'No s\'ha pogut desar la configuració.';
@@ -671,6 +706,7 @@ export class NotificationsAdminComponent {
         this.form = this.mapConfigToForm(config);
         this.saving = false;
         this.actionMessage = 'Configuració de notificacions desada.';
+        this.loadHoursSummary();
       },
       error: (err) => {
         this.saveError = err.message;
@@ -714,6 +750,12 @@ export class NotificationsAdminComponent {
       sortidaBodyCancelled: '{title} ({type}) finalment no surt demà {date}.',
       sortidaTitleReten: 'Retén',
       sortidaBodyReten: '{title} ({type}) passa a retén per demà {date}.',
+      campaignStartDate: '',
+      campaignEndDate: '',
+      unansweredPenaltyThreshold: 0,
+      unansweredPenaltyHours: 1,
+      noShowPenaltyHours: 4,
+      campaignVehicleCatalog: [],
       automationRetentionDays: 7,
       automationViewerNCarnets: [],
       automationMonitoringEnabled: false,
@@ -800,6 +842,17 @@ export class NotificationsAdminComponent {
       sortidaBodyCancelled: this.normalizeConvocatoriaBodyTemplate(config.sortidaStatus.bodyCancelled || config.sortidaStatus.bodyNo),
       sortidaTitleReten: this.normalizeConvocatoriaTitleTemplate(config.sortidaStatus.titleReten || config.sortidaStatus.titleNo),
       sortidaBodyReten: this.normalizeConvocatoriaBodyTemplate(config.sortidaStatus.bodyReten || config.sortidaStatus.bodyNo),
+      campaignStartDate: config.hourComputation?.campaignStartDate || '',
+      campaignEndDate: config.hourComputation?.campaignEndDate || '',
+      unansweredPenaltyThreshold: Number(config.hourComputation?.unansweredPenaltyThreshold ?? 0),
+      unansweredPenaltyHours: Number(config.hourComputation?.unansweredPenaltyHours ?? 1),
+      noShowPenaltyHours: Number(config.hourComputation?.noShowPenaltyHours ?? 4),
+      campaignVehicleCatalog: (config.campaignForm?.vehicleCatalog || []).map((vehicle) => ({
+        indicativo: String(vehicle.indicativo || '').trim(),
+        modelo: String(vehicle.modelo || '').trim(),
+        litros: Number(vehicle.litros || 0),
+        kms: Number(vehicle.kms || 0),
+      })),
       automationRetentionDays: config.automation?.retentionDays ?? 7,
       automationViewerNCarnets: [...(config.automation?.viewerNCarnets || [])],
       automationMonitoringEnabled: config.automation?.monitoring?.enabled ?? false,
@@ -901,6 +954,21 @@ export class NotificationsAdminComponent {
         bodyReten: this.form.sortidaBodyReten,
         perTypeTemplates: {},
       },
+      hourComputation: {
+        campaignStartDate: this.form.campaignStartDate || null,
+        campaignEndDate: this.form.campaignEndDate || null,
+        unansweredPenaltyThreshold: Number(this.form.unansweredPenaltyThreshold),
+        unansweredPenaltyHours: Number(this.form.unansweredPenaltyHours),
+        noShowPenaltyHours: Number(this.form.noShowPenaltyHours),
+      },
+      campaignForm: {
+        vehicleCatalog: (this.form.campaignVehicleCatalog || []).map((vehicle) => ({
+          indicativo: String(vehicle.indicativo || '').trim(),
+          modelo: String(vehicle.modelo || '').trim(),
+          litros: Number(vehicle.litros || 0),
+          kms: Number(vehicle.kms || 0),
+        })).filter((vehicle) => Boolean(vehicle.indicativo)),
+      },
       automation: {
         retentionDays: Number(this.form.automationRetentionDays),
         viewerNCarnets: selectedViewerCarnets,
@@ -915,11 +983,102 @@ export class NotificationsAdminComponent {
     };
   }
 
-  private parseCommaSeparated(value: string): string[] {
-    return value
-      .split(',')
-      .map((entry) => entry.trim())
-      .filter(Boolean);
+    loadHoursSummary() {
+      this.hoursSummaryLoading = true;
+      this.hoursSummaryError = '';
+
+      this.dataService.getHoursSummary().subscribe({
+        next: (summary) => {
+          this.hoursSummaryRows = Array.isArray(summary?.users) ? summary.users : [];
+          this.hoursSummaryGeneratedAt = summary?.generatedAt || '';
+          this.hoursSummaryLoading = false;
+        },
+        error: (err) => {
+          this.hoursSummaryRows = [];
+          this.hoursSummaryGeneratedAt = '';
+          this.hoursSummaryLoading = false;
+          this.hoursSummaryError = err.message || 'No s\'ha pogut carregar el resum d\'hores.';
+        },
+      });
+    }
+
+  addCampaignVehicle(): void {
+    const indicativo = this.newCampaignVehicle.indicativo.trim();
+    if (!indicativo) {
+      return;
+    }
+
+    const normalizedIndicativo = indicativo.toLowerCase();
+    if ((this.form.campaignVehicleCatalog || []).some((item) => item.indicativo.trim().toLowerCase() === normalizedIndicativo)) {
+      return;
+    }
+
+    const litros = Number(this.newCampaignVehicle.litros);
+    const kms = Number(this.newCampaignVehicle.kms);
+
+    this.form = {
+      ...this.form,
+      campaignVehicleCatalog: [
+        ...(this.form.campaignVehicleCatalog || []),
+        {
+          indicativo,
+          modelo: this.newCampaignVehicle.modelo.trim(),
+          litros: Number.isFinite(litros) && litros >= 0 ? litros : 0,
+          kms: Number.isFinite(kms) && kms >= 0 ? kms : 0,
+        },
+      ],
+    };
+
+    this.newCampaignVehicle = {
+      indicativo: '',
+      modelo: '',
+      litros: 0,
+      kms: 0,
+    };
+    this.requestAutoSave();
+  }
+
+  removeCampaignVehicle(indicativo: string): void {
+    this.form = {
+      ...this.form,
+      campaignVehicleCatalog: (this.form.campaignVehicleCatalog || []).filter((vehicle) => vehicle.indicativo !== indicativo),
+    };
+    this.requestAutoSave();
+  }
+
+  updateCampaignVehicleField(indicativo: string, field: 'modelo' | 'litros' | 'kms', value: string): void {
+    const nextCatalog = (this.form.campaignVehicleCatalog || []).map((vehicle) => {
+      if (vehicle.indicativo !== indicativo) {
+        return vehicle;
+      }
+
+      if (field === 'modelo') {
+        return {
+          ...vehicle,
+          modelo: value,
+        };
+      }
+
+      if (field === 'litros') {
+        const litros = Number(value);
+        return {
+          ...vehicle,
+          litros: Number.isFinite(litros) && litros >= 0 ? litros : 0,
+        };
+      }
+
+      const kms = Number(value);
+      return {
+        ...vehicle,
+        kms: Number.isFinite(kms) && kms >= 0 ? kms : 0,
+      };
+    });
+
+    this.form = {
+      ...this.form,
+      campaignVehicleCatalog: nextCatalog,
+    };
+    this.requestAutoSave();
   }
 
   addTask() {

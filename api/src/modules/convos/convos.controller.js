@@ -121,15 +121,90 @@ async function deleteConvocatoria(req, res) {
   }
 }
 
+async function startConvocatoria(req, res) {
+  try {
+    const convocatoriaId = parsePositiveInt(req.params.id, 'id')
+    const convocatoria = await convosService.startConvocatoria(convocatoriaId, req.auth, req.body)
+    res.json(convocatoria)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function finishConvocatoria(req, res) {
+  try {
+    const convocatoriaId = parsePositiveInt(req.params.id, 'id')
+    const convocatoria = await convosService.finishConvocatoria(convocatoriaId, req.auth, req.body)
+    res.json(convocatoria)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function getCampaignFormContext(req, res) {
+  try {
+    const convocatoriaId = parsePositiveInt(req.params.id, 'id')
+    const context = await convosService.getCampaignFormContext(convocatoriaId, req.auth, req.query)
+    res.json(context)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function getCampaignForms(req, res) {
+  try {
+    const forms = await convosService.listCampaignForms(req.auth, req.query)
+    res.json(forms)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function deleteCampaignForm(req, res) {
+  try {
+    const formId = parsePositiveInt(req.params.id, 'id')
+    const deletedForm = await convosService.deleteCampaignForm(formId, req.auth)
+    res.json(deletedForm)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function getHoursSummary(req, res) {
+  try {
+    const summary = await convosService.getHoursSummary(req.auth)
+    res.json(summary)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
+async function updateConvocatoriaLifecycle(req, res) {
+  try {
+    const convocatoriaId = parsePositiveInt(req.params.id, 'id')
+    const convocatoria = await convosService.updateConvocatoriaLifecycle(convocatoriaId, req.body, req.auth)
+    res.json(convocatoria)
+  } catch (error) {
+    sendErrorResponse(res, error)
+  }
+}
+
 module.exports = {
   createConvocatoria,
   createConvoType,
   deleteConvocatoria,
+  finishConvocatoria,
   deleteConvoType,
+  getCampaignFormContext,
+  getCampaignForms,
+  deleteCampaignForm,
+  getHoursSummary,
   getConvocatoriaById,
   getConvocatorias,
   getConvoTypeById,
   getConvoTypes,
+  updateConvocatoriaLifecycle,
   updateConvocatoria,
   updateConvoType,
+  startConvocatoria,
 }

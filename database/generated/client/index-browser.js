@@ -157,6 +157,8 @@ exports.Prisma.ConvocatoriaScalarFieldEnum = {
   convoTypeId: 'convoTypeId',
   startTime: 'startTime',
   finalTime: 'finalTime',
+  actualStartTime: 'actualStartTime',
+  actualEndTime: 'actualEndTime',
   isActive: 'isActive',
   autoAssignResponsable: 'autoAssignResponsable',
   sortida: 'sortida'
@@ -171,20 +173,9 @@ exports.Prisma.RespuestaScalarFieldEnum = {
   fullHorari: 'fullHorari',
   response: 'response',
   attendanceConfirmed: 'attendanceConfirmed',
+  attendanceJustified: 'attendanceJustified',
   source: 'source',
   autoAssignReason: 'autoAssignReason'
-};
-
-exports.Prisma.DeviceTokenScalarFieldEnum = {
-  id: 'id',
-  userId: 'userId',
-  token: 'token',
-  platform: 'platform',
-  userAgent: 'userAgent',
-  isActive: 'isActive',
-  lastSeenAt: 'lastSeenAt',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.NotificationLogScalarFieldEnum = {
@@ -241,6 +232,34 @@ exports.Prisma.NotificationAutomationTaskRunScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.UserHoursSummaryScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  campaignHours: 'campaignHours',
+  offCampaignHours: 'offCampaignHours',
+  unansweredCount: 'unansweredCount',
+  noShowCount: 'noShowCount',
+  unansweredPenaltyHours: 'unansweredPenaltyHours',
+  noShowPenaltyHours: 'noShowPenaltyHours',
+  totalHours: 'totalHours',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.FormulariCampanyaScalarFieldEnum = {
+  id: 'id',
+  convocatoriaId: 'convocatoriaId',
+  dia: 'dia',
+  responsableId: 'responsableId',
+  responsableNCarnet: 'responsableNCarnet',
+  voluntarisJson: 'voluntarisJson',
+  vehiclesJson: 'vehiclesJson',
+  serviceMoment: 'serviceMoment',
+  createdByNCarnet: 'createdByNCarnet',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -258,11 +277,12 @@ exports.Prisma.ModelName = {
   ConvoType: 'ConvoType',
   Convocatoria: 'Convocatoria',
   Respuesta: 'Respuesta',
-  DeviceToken: 'DeviceToken',
   NotificationLog: 'NotificationLog',
   AvailabilityWindow: 'AvailabilityWindow',
   NotificationAutomationRun: 'NotificationAutomationRun',
-  NotificationAutomationTaskRun: 'NotificationAutomationTaskRun'
+  NotificationAutomationTaskRun: 'NotificationAutomationTaskRun',
+  UserHoursSummary: 'UserHoursSummary',
+  FormulariCampanya: 'FormulariCampanya'
 };
 
 /**

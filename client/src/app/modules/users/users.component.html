@@ -25,6 +25,7 @@
             <th>Indicatiu</th>
             <th>Nom</th>
             <th>Cognoms</th>
+            <th>HORES</th>
             <th>Rols</th>
             <th>Estat</th>
             <th>Accions</th>
@@ -37,6 +38,14 @@
               <td>{{ user.nIndicatiu || '-' }}</td>
               <td>{{ user.name || '-' }}</td>
               <td>{{ user.lastName || '-' }}</td>
+              <td>
+                <div class="hours-cell">
+                  <span class="hours-split-pill">
+                    <span class="hours-half hours-half-campaign">{{ getUserCampaignHours(user) }}h</span>
+                    <span class="hours-half hours-half-off-campaign">{{ getUserOffCampaignHours(user) }}h</span>
+                  </span>
+                </div>
+              </td>
               <td>
                 <div class="role-chips">
                   @for (label of getRoleLabels(user); track label) {
@@ -80,6 +89,12 @@
               @if (user.nIndicatiu) {
                 <p class="user-indicatiu">{{ user.nIndicatiu }}</p>
               }
+              <div class="hours-cell">
+                <span class="hours-split-pill">
+                  <span class="hours-half hours-half-campaign">{{ getUserCampaignHours(user) }}h</span>
+                  <span class="hours-half hours-half-off-campaign">{{ getUserOffCampaignHours(user) }}h</span>
+                </span>
+              </div>
               <div class="user-detail-badges">
                 <span [class]="'badge ' + (user.isActive ? 'badge-active' : 'badge-inactive')">
                   {{ user.isActive ? 'Actiu' : 'Inactiu' }}

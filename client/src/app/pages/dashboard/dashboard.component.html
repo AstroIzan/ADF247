@@ -5,7 +5,7 @@
       <p>Vista operativa per gestionar tot el flux diari</p>
     </section>
 
-    <section class="quick-stats">
+    <section class="quick-stats" [class.quick-stats-admin]="isAdmin()">
       <article>
         <h3>Usuaris</h3>
         <strong>{{ users().length }}</strong>
@@ -22,6 +22,12 @@
         <h3>Respostes</h3>
         <strong>{{ respuestas().length }}</strong>
       </article>
+      @if (isAdmin()) {
+        <article>
+          <h3>Formularis campanya</h3>
+          <strong>{{ campaignForms().length }}</strong>
+        </article>
+      }
     </section>
 
     @if (isAdmin()) {
@@ -88,13 +94,6 @@
       </button>
       @if (isAdmin()) {
         <button 
-          (click)="activeTab.set('devices')"
-          [class.active]="activeTab() === 'devices'"
-          class="tab-btn"
-        >
-          📱 Dispositius
-        </button>
-        <button 
           (click)="activeTab.set('notifications')"
           [class.active]="activeTab() === 'notifications'"
           class="tab-btn"
@@ -108,6 +107,13 @@
         >
           ⚙️ Orquestrador
         </button>
+        <button
+          (click)="activeTab.set('campaign-forms')"
+          [class.active]="activeTab() === 'campaign-forms'"
+          class="tab-btn"
+        >
+          🧾 Formularis Campanya
+        </button>
       }
     </nav>
 
@@ -115,6 +121,7 @@
       @if (activeTab() === 'users') {
         <app-users 
           [users]="users()"
+          [hoursSummaryRows]="userHoursSummaryRows()"
           [loading]="loadingUsers()"
           [error]="userError()"
           (onChanged)="onUserChanged()"
@@ -150,15 +157,6 @@
         ></app-respuestas>
       }
 
-      @if (activeTab() === 'devices' && isAdmin()) {
-        <app-devices 
-          [devices]="devices()"
-          [loading]="loadingDevices()"
-          [error]="deviceError()"
-          (onRefresh)="loadDevices()"
-        ></app-devices>
-      }
-
       @if (activeTab() === 'notifications' && isAdmin()) {
         <app-notifications-admin
           [config]="notificationConfig()"
@@ -191,6 +189,105 @@
           [visibleTabs]="['automation']"
           (onLogsRefresh)="loadNotificationLogs()"
         ></app-notifications-admin>
+      }
+
+      @if (activeTab() === 'campaign-forms' && isAdmin()) {
+        <section class="content-card">
+          <div class="card-head">
+            <h3>Formularis de campanya</h3>
+            <button class="btn btn-secondary btn-sm" (click)="loadCampaignForms()" [disabled]="loadingCampaignForms()">
+              {{ loadingCampaignForms() ? 'Actualitzant...' : 'Actualitzar' }}
+            </button>
+          </div>
+
+          @if (campaignFormsError()) {
+            <div class="error-alert">{{ campaignFormsError() }}</div>
+          } @else if (loadingCampaignForms()) {
+            <div class="loading">Carregant formularis...</div>
+          } @else if (campaignForms().length === 0) {
+            <div class="empty-state">No hi ha formularis registrats encara.</div>
+          } @else {
+            <div class="table-wrap">
+              <table class="logs-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Moment</th>
+                    <th>Convocatòria</th>
+                    <th>Responsable</th>
+                    <th>Voluntaris</th>
+                    <th>Vehicles</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of campaignForms(); track row.id) {
+                    <tr>
+                      <td>{{ row.dia | date:'short' }}</td>
+                      <td>{{ row.serviceMoment === 'START' ? 'Inici de servei' : 'Final de servei' }}</td>
+                      <td>{{ row.convocatoria?.title || ('#' + row.convocatoriaId) }}</td>
+                      <td>{{ row.responsableNCarnet || '-' }}</td>
+                      <td>{{ row.voluntaris.length }}</td>
+                      <td>{{ row.vehicles.length }}</td>
+                      <td>
+                        <button class="btn btn-secondary btn-sm" (click)="toggleCampaignFormDetails(row.id)">
+                          {{ isCampaignFormDetailsOpen(row.id) ? 'Menys info' : '+ info' }}
+                        </button>
+                      </td>
+                    </tr>
+
+                    @if (isCampaignFormDetailsOpen(row.id)) {
+                      <tr class="campaign-forms-detail-row">
+                        <td colspan="7">
+                          <div class="campaign-forms-detail-grid">
+                            <div>
+                              <strong>Voluntaris assignats</strong>
+                              @if (getCampaignFormVolunteerLabels(row).length === 0) {
+                                <p>Sense voluntaris.</p>
+                              } @else {
+                                <ul>
+                                  @for (label of getCampaignFormVolunteerLabels(row); track label) {
+                                    <li>{{ label }}</li>
+                                  }
+                                </ul>
+                              }
+                            </div>
+
+                            <div>
+                              <strong>Vehicles</strong>
+                              @if (row.vehicles.length === 0) {
+                                <p>Sense vehicles.</p>
+                              } @else {
+                                @for (vehicle of row.vehicles; track vehicle.vehicleName) {
+                                  <details class="campaign-forms-vehicle-item">
+                                    <summary>{{ vehicle.vehicleName }} · {{ vehicle.kms || 0 }} km</summary>
+                                    <div>
+                                      <p><strong>Conductor:</strong> {{ getCampaignFormVehicleConductorLabel(vehicle) }}</p>
+                                      @if (getCampaignFormVehicleVolunteerLabels(vehicle).length === 0) {
+                                        <p><strong>Voluntaris vehicle:</strong> Sense voluntaris.</p>
+                                      } @else {
+                                        <p><strong>Voluntaris vehicle:</strong></p>
+                                        <ul>
+                                          @for (label of getCampaignFormVehicleVolunteerLabels(vehicle); track label) {
+                                            <li>{{ label }}</li>
+                                          }
+                                        </ul>
+                                      }
+                                    </div>
+                                  </details>
+                                }
+                              }
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
       }
     </div>
   </div>

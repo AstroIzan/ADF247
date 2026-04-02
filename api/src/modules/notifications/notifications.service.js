@@ -177,6 +177,18 @@ async function ensureAdmin(authUser) {
   }
 }
 
+async function ensureCanManageConvocatoriaNotifications(authUser, convocatoria) {
+  if (!authUser?.userId || !authUser?.nCarnet) {
+    throw createNotificationsDtoError('Debes iniciar sesion para realizar esta accion.', 401)
+  }
+
+  if (Number(convocatoria?.responsableId) === Number(authUser.userId)) {
+    return
+  }
+
+  await ensureAdmin(authUser)
+}
+
 function normalizeTypeName(value) {
   return String(value || '').trim().toLowerCase()
 }
@@ -998,36 +1010,41 @@ async function sendConvocatoriaSortidaStatus(authUser, convoId) {
 }
 
 async function runConvocatoriaNotificationAutomation(authUser, convoId, referenceDate = new Date()) {
-  await ensureAdmin(authUser)
-
-  const settings = readNotificationSettings()
   const convocatoria = await getConvocatoriaWithContext(convoId)
+  await ensureCanManageConvocatoriaNotifications(authUser, convocatoria)
 
-  const responseSummary = await sendConvocatoriaResponseRequestInternal(
-    convocatoria,
-    authUser.userId,
-    `manual-convo-automation-response:${convocatoria.id}:${Date.now()}`
-  )
+  const missingResponders = await getMissingResponseUsersForConvocatorias([convocatoria])
 
-  const sortidaDecision = shouldSendSortidaStatusForConvocatoria(convocatoria, settings, referenceDate)
+  let responseSummary = {
+    skipped: true,
+    reason: 'no-pending-responders',
+    pendingCount: 0,
+  }
+
+  if (missingResponders.length > 0) {
+    const pendingNotification = await sendConvocatoriaResponseRequestInternal(
+      convocatoria,
+      authUser.userId,
+      `manual-convo-automation-response:${convocatoria.id}:${Date.now()}`,
+      {
+        userIds: missingResponders.map((recipient) => recipient.userId),
+      }
+    )
+
+    responseSummary = {
+      skipped: false,
+      pendingCount: missingResponders.length,
+      notification: pendingNotification,
+    }
+  }
 
   let sortidaSummary = {
     skipped: true,
-    reason: sortidaDecision.reason || 'not-applicable',
-    triggerAt: sortidaDecision.triggerAt || null,
+    reason: missingResponders.length > 0 ? 'pending-responders-exist' : 'no-eligible-responders',
+    triggerAt: null,
   }
 
-  if (sortidaDecision.shouldSend) {
-    convocatoria.sortida = shouldMarkSortida(
-      convocatoria.convoType,
-      (convocatoria.respostas || []).filter((respuesta) => respuesta.response && respuesta.user?.isActive)
-    )
-
-    await database.convocatoria.update({
-      where: { id: convocatoria.id },
-      data: { sortida: convocatoria.sortida },
-    })
-
+  if (missingResponders.length === 0) {
     const notification = await sendConvocatoriaSortidaStatusInternal(
       convocatoria,
       authUser.userId,
@@ -1036,7 +1053,7 @@ async function runConvocatoriaNotificationAutomation(authUser, convoId, referenc
 
     sortidaSummary = {
       skipped: false,
-      triggerAt: sortidaDecision.triggerAt || null,
+      triggerAt: null,
       notification,
     }
   }

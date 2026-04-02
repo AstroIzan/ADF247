@@ -39,6 +39,41 @@
     "autoCreateUnavailableForUsersWithoutWindow": false,
     "notifyOnAutoAvailableResponse": false
   },
+  "hourComputation": {
+    "campaignStartDate": "2026-04-01",
+    "campaignEndDate": "2026-09-01",
+    "unansweredPenaltyThreshold": 7,
+    "unansweredPenaltyHours": 1,
+    "noShowPenaltyHours": 4
+  },
+  "campaignForm": {
+    "vehicleCatalog": [
+      {
+        "indicativo": "S401",
+        "modelo": "Isuzu",
+        "litros": 500,
+        "kms": 130
+      },
+      {
+        "indicativo": "S402",
+        "modelo": "Mitsubishi",
+        "litros": 500,
+        "kms": 0
+      },
+      {
+        "indicativo": "S403",
+        "modelo": "Hilux",
+        "litros": 600,
+        "kms": 27920
+      },
+      {
+        "indicativo": "S200",
+        "modelo": "Camio",
+        "litros": 2500,
+        "kms": 0
+      }
+    ]
+  },
   "weeklyRequest": {
     "enabled": true,
     "requestWeekday": 5,
@@ -57,9 +92,9 @@
     "titleYes": "**Convocatoria**",
     "bodyYes": "Demà a les {horaInici} a {ubicació} per {title}\nResponsable {nºCarnet} {nom + cognom}",
     "titleNo": "Convocatòria cancel·lada",
-    "bodyNo": "{title} ({type}) finalment no surt demà {date}.",
+    "bodyNo": "Demà a les {horaInici} a {ubicació}\nResponsable {nºCarnet} {nom + cognom}",
     "titleCancelled": "Convocatòria cancel·lada",
-    "bodyCancelled": "{title} ({type}) finalment no surt demà {date}.",
+    "bodyCancelled": "Demà a les {horaInici} a {ubicació}\nResponsable {nºCarnet} {nom + cognom}",
     "titleReten": "Retén",
     "bodyReten": "{title} ({type}) passa a retén per demà {date}.",
     "perTypeTemplates": {}

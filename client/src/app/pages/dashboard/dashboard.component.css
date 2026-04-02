@@ -30,6 +30,10 @@
   margin-bottom: 12px;
 }
 
+.quick-stats.quick-stats-admin {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .admin-quick-bar {
   display: grid;
   gap: 10px;
@@ -139,6 +143,75 @@
   animation: fadeIn 0.2s ease;
 }
 
+.content-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.card-head h3 {
+  margin: 0;
+}
+
+.table-wrap {
+  overflow: auto;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.logs-table th,
+.logs-table td {
+  border-bottom: 1px solid #ececec;
+  padding: 8px 6px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.campaign-forms-detail-row td {
+  background: #fafafa;
+}
+
+.campaign-forms-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 8px 6px;
+}
+
+.campaign-forms-detail-grid p {
+  margin: 4px 0;
+}
+
+.campaign-forms-detail-grid ul {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.campaign-forms-vehicle-item {
+  margin-top: 6px;
+  border: 1px solid #dfdfdf;
+  border-radius: 8px;
+  padding: 6px 8px;
+  background: #fff;
+}
+
+.campaign-forms-vehicle-item > summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -170,6 +243,10 @@
 
   .admin-quick-actions {
     gap: 6px;
+  }
+
+  .campaign-forms-detail-grid {
+    grid-template-columns: 1fr;
   }
 }
 

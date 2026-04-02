@@ -458,3 +458,39 @@
     gap: 6px;
   }
 }
+
+.hours-cell {
+  display: flex;
+  align-items: center;
+}
+
+.hours-split-pill {
+  display: inline-flex;
+  align-items: stretch;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 0;
+  background: #cfe9d6;
+  min-width: 92px;
+  box-shadow: none;
+}
+
+.hours-half {
+  padding: 3px 7px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  min-width: 44px;
+  text-align: center;
+}
+
+.hours-half-campaign {
+  background: #ffe08a;
+  color: #7a5605;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.hours-half-off-campaign {
+  background: transparent;
+  color: #245f2f;
+}

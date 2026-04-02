@@ -92,24 +92,8 @@
                 <div class="convo-top">
                   <h3>{{ convo.title }}</h3>
                   <div class="convo-top-right">
-                    @if (authService.isAdmin() || canOpenGuardiaResponses(convo)) {
-                      @if (authService.isAdmin()) {
-                      <button
-                        type="button"
-                        class="admin-convo-btn admin-convo-sortida-toggle"
-                        [class.sortida-action-enable]="!convo.sortida"
-                        [class.sortida-action-disable]="convo.sortida"
-                        [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
-                        (click)="toggleConvoSortida(convo)"
-                        [title]="isConvocatoriaClosed(convo)
-                          ? 'Convocatòria tancada'
-                          : (convo.sortida
-                            ? 'Desactivar sortida (canvi manual)'
-                            : 'Activar sortida (canvi manual)')"
-                        [attr.aria-label]="convo.sortida ? 'Desactivar sortida' : 'Activar sortida'"
-                      >
-                        {{ convo.sortida ? '-' : '+' }}
-                      </button>
+                    @if (canManageConvocatoriaLifecycle(convo) || canOpenGuardiaResponses(convo)) {
+                      @if (canManageConvocatoriaLifecycle(convo)) {
                       <button
                         type="button"
                         class="admin-convo-btn admin-convo-bell"
@@ -131,6 +115,15 @@
                         title="Gestionar convocatòria"
                       >
                         ✎
+                      </button>
+                      <button
+                        type="button"
+                        class="admin-convo-btn admin-convo-forms"
+                        (click)="openCampaignRecordsModal(convo)"
+                        title="Gestionar formularis de campanya"
+                        aria-label="Gestionar formularis de campanya"
+                      >
+                        📝
                       </button>
                       }
 
@@ -172,13 +165,23 @@
                     }
                   </p>
                 </div>
+                @if (getVisibleConvocatoriaElapsedLabel(convo); as elapsedLabel) {
+                  <div class="convo-meta-row convo-meta-row-end">
+                    <p class="convo-time-text">
+                      <strong>Hores totals:</strong>
+                      <span class="convo-time-value">{{ elapsedLabel }} h</span>
+                    </p>
+                  </div>
+                }
                 <p class="convo-sortida-row">
-                  <span class="convo-sortida-label-group">
-                    <strong>Sortida:</strong>
-                    <span class="sortida-pill" [class.sortida-pill-on]="convo.sortida" [class.sortida-pill-off]="!convo.sortida">
-                      {{ getSortidaBadgeLabel(convo.sortida) }}
+                  @if (!canManageConvocatoriaLifecycle(convo)) {
+                    <span class="convo-sortida-label-group">
+                      <strong>Sortida:</strong>
+                      <span class="sortida-pill" [class.sortida-pill-on]="convo.sortida" [class.sortida-pill-off]="!convo.sortida">
+                        {{ getSortidaBadgeLabel(convo.sortida) }}
+                      </span>
                     </span>
-                  </span>
+                  }
 
                   @if (canViewConvocatoriaSummary(convo)) {
                     <div class="convo-response-counters convo-response-counters-mobile" [class.disabled]="isConvocatoriaClosed(convo)">
@@ -205,42 +208,104 @@
                   }
 
                   @if (getMyRespuesta(convo.id); as myRespuesta) {
-                    <div class="answer-actions answer-actions-answered">
-                      <button
-                        type="button"
-                        class="btn btn-edit btn-xs"
-                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
-                        (click)="openCustomModal(convo)"
-                      >
-                        Modificar
-                      </button>
+                    <div class="answer-actions-wrap">
+                      @if (canManageConvocatoriaLifecycle(convo)) {
+                        <div class="convo-management-actions">
+                          @if (getLifecycleAction(convo); as lifecycleAction) {
+                            <button
+                              type="button"
+                              class="admin-convo-btn admin-convo-lifecycle"
+                              [disabled]="isRunningConvoAdminAction(lifecycleAction, convo.id)"
+                              (click)="onLifecycleAction(convo)"
+                              [title]="getLifecycleActionLabel(convo)"
+                            >
+                              {{ getLifecycleActionLabel(convo) }}
+                            </button>
+                          }
+
+                          <button
+                            type="button"
+                            class="admin-convo-btn admin-convo-sortida-toggle"
+                            [class.sortida-action-enable]="!convo.sortida"
+                            [class.sortida-action-disable]="convo.sortida"
+                            [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
+                            (click)="toggleConvoSortida(convo)"
+                            [title]="getSortidaBadgeLabel(convo.sortida)"
+                            [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
+                          >
+                            {{ getSortidaBadgeLabel(convo.sortida) }}
+                          </button>
+                        </div>
+                      }
+
+                      <div class="answer-actions answer-actions-answered">
+                        <button
+                          type="button"
+                          class="btn btn-edit btn-xs"
+                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          (click)="openCustomModal(convo)"
+                        >
+                          Modificar
+                        </button>
+                      </div>
                     </div>
                   } @else {
-                    <div class="answer-actions">
-                      <button
-                        type="button"
-                        class="btn btn-primary btn-sm"
-                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
-                        (click)="respondToConvocatoria(convo.id, true)"
-                      >
-                        ACCEPTAR
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-secondary btn-sm"
-                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
-                        (click)="respondToConvocatoria(convo.id, false)"
-                      >
-                        REBUTJAR
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-edit btn-sm"
-                        [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
-                        (click)="openCustomModal(convo)"
-                      >
-                        PERSONALITZAR
-                      </button>
+                    <div class="answer-actions-wrap">
+                      @if (canManageConvocatoriaLifecycle(convo)) {
+                        <div class="convo-management-actions">
+                          @if (getLifecycleAction(convo); as lifecycleAction) {
+                            <button
+                              type="button"
+                              class="admin-convo-btn admin-convo-lifecycle"
+                              [disabled]="isRunningConvoAdminAction(lifecycleAction, convo.id)"
+                              (click)="onLifecycleAction(convo)"
+                              [title]="getLifecycleActionLabel(convo)"
+                            >
+                              {{ getLifecycleActionLabel(convo) }}
+                            </button>
+                          }
+
+                          <button
+                            type="button"
+                            class="admin-convo-btn admin-convo-sortida-toggle"
+                            [class.sortida-action-enable]="!convo.sortida"
+                            [class.sortida-action-disable]="convo.sortida"
+                            [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
+                            (click)="toggleConvoSortida(convo)"
+                            [title]="getSortidaBadgeLabel(convo.sortida)"
+                            [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
+                          >
+                            {{ getSortidaBadgeLabel(convo.sortida) }}
+                          </button>
+                        </div>
+                      }
+
+                      <div class="answer-actions">
+                        <button
+                          type="button"
+                          class="btn btn-primary btn-sm"
+                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          (click)="respondToConvocatoria(convo.id, true)"
+                        >
+                          ACCEPTAR
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-secondary btn-sm"
+                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          (click)="respondToConvocatoria(convo.id, false)"
+                        >
+                          REBUTJAR
+                        </button>
+                        <button
+                          type="button"
+                          class="btn btn-edit btn-sm"
+                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          (click)="openCustomModal(convo)"
+                        >
+                          PERSONALITZAR
+                        </button>
+                      </div>
                     </div>
                   }
                 </div>
@@ -355,6 +420,341 @@
           }
           <button class="btn btn-secondary" (click)="closeCustomModal()">Cancel·lar</button>
           <button class="btn btn-primary" (click)="saveCustomResponse()">Desar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showCampaignFormModal() && campaignFormConvo()) {
+    <div class="modal-overlay" (click)="closeCampaignFormModal()">
+      <div class="modal modal-wide" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Formulari de campanya - {{ campaignFormMode() === 'start' ? 'Inici de servei' : 'Final de servei' }}</h3>
+          <button class="close-btn" (click)="closeCampaignFormModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          @if (campaignFormLoading()) {
+            <div class="loading">Carregant dades del formulari...</div>
+          } @else if (campaignFormContext(); as context) {
+            <p><strong>Convocatòria:</strong> {{ campaignFormConvo()!.title }}</p>
+            <p><strong>Responsable:</strong> {{ context.responsable ? (context.responsable.nCarnet + ' - ' + context.responsable.name + ' ' + (context.responsable.lastName || '')) : '-' }}</p>
+
+            <div class="form-group">
+              <label>Dia</label>
+              <input
+                type="datetime-local"
+                [value]="campaignForm().dia"
+                (change)="updateCampaignFormDia($any($event.target).value)"
+              />
+            </div>
+
+            <div class="form-group">
+              <label>Voluntaris assistents</label>
+              <div class="responsable-picker campaign-picker">
+                <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVolunteerMenu()">
+                  <span class="responsable-picker-label">{{ getCampaignVolunteersSummary() }}</span>
+                </button>
+
+                @if (campaignVolunteerMenuOpen()) {
+                  <div class="responsable-picker-menu">
+                    @for (user of context.eligibleUsers; track user.id) {
+                      <button
+                        type="button"
+                        class="responsable-picker-option"
+                        [class.active]="isCampaignVolunteerSelected(user.id)"
+                        (click)="toggleCampaignVolunteer(user.id)"
+                      >
+                        <span class="responsable-picker-option-name">{{ user.nCarnet }} - {{ user.name }} {{ user.lastName || '' }}</span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Vehicles disponibles</label>
+              <div class="responsable-picker campaign-picker campaign-picker-dropup">
+                <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVehicleMenu()">
+                  <span class="responsable-picker-label">{{ getCampaignVehiclesSummary() }}</span>
+                </button>
+
+                @if (campaignVehicleMenuOpen()) {
+                  <div class="responsable-picker-menu">
+                    @for (vehicle of context.vehicleCatalog; track vehicle.indicativo) {
+                      <button
+                        type="button"
+                        class="responsable-picker-option"
+                        [class.active]="isCampaignVehicleSelected(vehicle.indicativo)"
+                        [disabled]="isCampaignVehicleLocked(vehicle.indicativo)"
+                        (click)="toggleCampaignVehicleSelection(vehicle.indicativo)"
+                      >
+                        <span class="responsable-picker-option-name">
+                          {{ getCampaignVehicleCatalogLabel(vehicle) }}
+                          @if (isCampaignVehicleLocked(vehicle.indicativo)) {
+                            · En servei
+                          }
+                        </span>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            @if (campaignForm().vehicles.length > 0) {
+              <div class="vehicle-sections">
+                @for (vehicle of campaignForm().vehicles; track vehicle.vehicleName) {
+                  <section class="vehicle-section-card">
+                    <h4>{{ getCampaignVehicleDisplayName(vehicle.vehicleName) }}</h4>
+
+                    <div class="form-grid-2">
+                      <div class="form-group">
+                        <label>KMs</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.1"
+                          [value]="getCampaignVehicleKmsInputValue(vehicle.vehicleName)"
+                          [placeholder]="getCampaignVehicleKmsPlaceholder(vehicle.vehicleName)"
+                          (change)="updateCampaignVehicleField(vehicle.vehicleName, 'kms', $any($event.target).value)"
+                        />
+                      </div>
+
+                      <div class="form-group">
+                        <label>Conductor</label>
+                        <div class="responsable-picker campaign-picker">
+                          <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignConductorMenu(vehicle.vehicleName)">
+                            <span class="responsable-picker-label">{{ getCampaignVehicleConductorSummary(vehicle.vehicleName) }}</span>
+                          </button>
+
+                          @if (isCampaignConductorMenuOpen(vehicle.vehicleName)) {
+                            <div class="responsable-picker-menu">
+                              <button
+                                type="button"
+                                class="responsable-picker-option"
+                                [class.active]="!vehicle.conductorUserId"
+                                (click)="selectCampaignVehicleConductor(vehicle.vehicleName, null)"
+                              >
+                                <span class="responsable-picker-option-name">Sense conductor</span>
+                              </button>
+
+                              @for (userId of campaignForm().volunteerUserIds; track userId) {
+                                <button
+                                  type="button"
+                                  class="responsable-picker-option"
+                                  [class.active]="vehicle.conductorUserId === userId"
+                                  (click)="selectCampaignVehicleConductor(vehicle.vehicleName, userId)"
+                                >
+                                  <span class="responsable-picker-option-name">{{ getCampaignUserLabel(userId) }}</span>
+                                </button>
+                              }
+                            </div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Voluntaris del vehicle</label>
+                      <div class="responsable-picker campaign-picker campaign-picker-dropup">
+                        <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVehicleVolunteerMenu(vehicle.vehicleName)">
+                          <span class="responsable-picker-label">{{ getCampaignVehicleVolunteersSummary(vehicle.vehicleName) }}</span>
+                        </button>
+
+                        @if (isCampaignVehicleVolunteerMenuOpen(vehicle.vehicleName)) {
+                          <div class="responsable-picker-menu">
+                            @if (getCampaignAssignableVolunteerIds(vehicle.vehicleName).length === 0) {
+                              <button type="button" class="responsable-picker-option" disabled>
+                                <span class="responsable-picker-option-name">No hi ha voluntaris disponibles</span>
+                              </button>
+                            } @else {
+                              @for (userId of getCampaignAssignableVolunteerIds(vehicle.vehicleName); track userId) {
+                                <button
+                                  type="button"
+                                  class="responsable-picker-option"
+                                  [class.active]="isCampaignVehicleVolunteerSelected(vehicle.vehicleName, userId)"
+                                  (click)="toggleCampaignVehicleVolunteer(vehicle.vehicleName, userId)"
+                                >
+                                  <span class="responsable-picker-option-name">{{ getCampaignUserLabel(userId) }}</span>
+                                </button>
+                              }
+                            }
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </section>
+                }
+              </div>
+            }
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeCampaignFormModal()" [disabled]="campaignFormSubmitting()">Cancel·lar</button>
+          <button class="btn btn-primary" (click)="executeCampaignLifecycleAction()" [disabled]="campaignFormLoading() || campaignFormSubmitting()">
+            {{ campaignFormSubmitting() ? 'Desant...' : (campaignFormMode() === 'start' ? 'Desar i iniciar' : 'Desar i finalitzar') }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showCampaignRecordsModal() && campaignRecordsConvo()) {
+    <div class="modal-overlay" (click)="closeCampaignRecordsModal()">
+      <div class="modal modal-wide" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Formularis - {{ campaignRecordsConvo()!.title }}</h3>
+          <button class="close-btn" (click)="closeCampaignRecordsModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          @if (campaignRecordsLoading()) {
+            <div class="loading">Carregant formularis...</div>
+          } @else if (campaignRecords().length === 0) {
+            <div class="empty-state">No hi ha formularis registrats en aquesta convocatòria.</div>
+          } @else {
+            <div class="campaign-records-list">
+              @for (form of campaignRecords(); track form.id) {
+                <article class="campaign-record-card">
+                  <div class="campaign-record-head">
+                    <strong>{{ getCampaignFormMomentLabel(form.serviceMoment) }}</strong>
+                    <span>#{{ form.id }}</span>
+                  </div>
+                  <p><strong>Dia:</strong> {{ form.dia | date:'short' }}</p>
+                  <p><strong>Registre:</strong> {{ form.createdAt | date:'short' }}</p>
+                  <p><strong>Voluntaris:</strong> {{ getCampaignFormVolunteersCount(form) }} · <strong>Vehicles:</strong> {{ getCampaignFormVehiclesCount(form) }}</p>
+
+                  @if (isCampaignRecordDetailsOpen(form.id)) {
+                    <div class="campaign-record-details">
+                      <p><strong>Responsable:</strong> {{ getCampaignFormResponsableLabel(form) }}</p>
+                      <p><strong>Creat per:</strong> {{ getCampaignFormCreatedByLabel(form) }}</p>
+
+                      <details class="campaign-record-collapsible">
+                        <summary>Voluntaris assignats ({{ getCampaignFormVolunteerLabels(form).length }})</summary>
+                        <div class="campaign-record-collapsible-body">
+                          @if (getCampaignFormVolunteerLabels(form).length === 0) {
+                            <p>Sense voluntaris.</p>
+                          } @else {
+                            <ul>
+                              @for (label of getCampaignFormVolunteerLabels(form); track label) {
+                                <li>{{ label }}</li>
+                              }
+                            </ul>
+                          }
+                        </div>
+                      </details>
+
+                      <div class="campaign-record-detail-block">
+                        <p class="campaign-record-section-title"><strong>Vehicles</strong> ({{ form.vehicles.length }})</p>
+                        @if (form.vehicles.length === 0) {
+                          <p>Sense vehicles.</p>
+                        } @else {
+                          @for (vehicle of form.vehicles; track vehicle.vehicleName) {
+                            <details class="campaign-record-vehicle-item">
+                              <summary>{{ vehicle.vehicleName }} · {{ vehicle.kms || 0 }} km</summary>
+                              <div class="campaign-record-collapsible-body">
+                                <p><strong>Conductor:</strong> {{ getCampaignFormVehicleConductorLabel(vehicle) }}</p>
+
+                                <details class="campaign-record-collapsible campaign-record-inner-collapsible">
+                                  <summary>Voluntaris del vehicle ({{ getCampaignFormVehicleVolunteerLabels(vehicle).length }})</summary>
+                                  <div class="campaign-record-collapsible-body">
+                                    @if (getCampaignFormVehicleVolunteerLabels(vehicle).length === 0) {
+                                      <p>Sense voluntaris.</p>
+                                    } @else {
+                                      <ul>
+                                        @for (label of getCampaignFormVehicleVolunteerLabels(vehicle); track label) {
+                                          <li>{{ label }}</li>
+                                        }
+                                      </ul>
+                                    }
+                                  </div>
+                                </details>
+                              </div>
+                            </details>
+                          }
+                        }
+                      </div>
+                    </div>
+                  }
+
+                  <div class="campaign-record-actions">
+                    <button
+                      type="button"
+                      class="btn btn-secondary btn-xs"
+                      (click)="toggleCampaignRecordDetails(form.id)"
+                    >
+                      {{ isCampaignRecordDetailsOpen(form.id) ? 'Menys info' : 'Més info' }}
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-danger btn-xs"
+                      [disabled]="campaignRecordsDeletingId() === form.id"
+                      (click)="deleteCampaignFormRecord(form)"
+                    >
+                      {{ campaignRecordsDeletingId() === form.id ? 'Eliminant...' : 'Eliminar' }}
+                    </button>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeCampaignRecordsModal()">Tancar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showLifecycleModal() && lifecycleConvo()) {
+    <div class="modal-overlay" (click)="closeLifecycleModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Editar hores reals</h3>
+          <button class="close-btn" (click)="closeLifecycleModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Convocatòria:</strong> {{ lifecycleConvo()!.title }}</p>
+          <div class="form-group">
+            <label>Hora real d'inici</label>
+            <input
+              type="datetime-local"
+              [value]="lifecycleForm().actualStartTime"
+              (change)="updateLifecycleField('actualStartTime', $any($event.target).value)"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Hora real de fi</label>
+            <input
+              type="datetime-local"
+              [value]="lifecycleForm().actualEndTime"
+              (change)="updateLifecycleField('actualEndTime', $any($event.target).value)"
+            />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button
+            class="btn btn-danger"
+            [disabled]="isRunningConvoAdminAction('edit', lifecycleConvo()!.id)"
+            (click)="clearLifecycleEdition()"
+          >
+            Eliminar
+          </button>
+          <button class="btn btn-secondary" (click)="closeLifecycleModal()">Cancel·lar</button>
+          <button
+            class="btn btn-primary"
+            [disabled]="isRunningConvoAdminAction('edit', lifecycleConvo()!.id)"
+            (click)="saveLifecycleEdition()"
+          >
+            Desar
+          </button>
         </div>
       </div>
     </div>
@@ -582,17 +982,29 @@
                               type="button"
                               class="btn btn-sm attendance-toggle-btn"
                               [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
-                              [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                              [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed && !isAttendanceJustified(respuesta)"
                               [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
                               [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
                               (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
                             >
                               <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
                             </button>
+                            @if (!respuesta.attendanceConfirmed) {
+                              <button
+                                type="button"
+                                class="btn btn-sm attendance-toggle-btn attendance-toggle-btn-justify"
+                                [class.attendance-toggle-btn-justify-active]="isAttendanceJustified(respuesta)"
+                                [attr.title]="isAttendanceJustified(respuesta) ? 'Treure justificació' : 'Marcar no assistit justificat'"
+                                [attr.aria-label]="isAttendanceJustified(respuesta) ? 'Treure justificació' : 'Marcar no assistit justificat'"
+                                (click)="toggleAttendanceJustification(respuesta)"
+                              >
+                                <span class="attendance-toggle-icon" aria-hidden="true">{{ isAttendanceJustified(respuesta) ? 'Justificada' : 'Sense justificar' }}</span>
+                              </button>
+                            }
                           </div>
                         } @else {
                           <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
-                            {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                            {{ getAttendanceBadgeText(respuesta) }}
                           </span>
                         }
                       </td>
@@ -635,16 +1047,28 @@
                         type="button"
                         class="btn btn-sm attendance-toggle-btn"
                         [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
-                        [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                        [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed && !isAttendanceJustified(respuesta)"
                         [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
                         [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
                         (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
                       >
                         <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
                       </button>
+                      @if (!respuesta.attendanceConfirmed) {
+                        <button
+                          type="button"
+                          class="btn btn-sm attendance-toggle-btn attendance-toggle-btn-justify"
+                          [class.attendance-toggle-btn-justify-active]="isAttendanceJustified(respuesta)"
+                          [attr.title]="isAttendanceJustified(respuesta) ? 'Treure justificació' : 'Marcar no assistit justificat'"
+                          [attr.aria-label]="isAttendanceJustified(respuesta) ? 'Treure justificació' : 'Marcar no assistit justificat'"
+                          (click)="toggleAttendanceJustification(respuesta)"
+                        >
+                          <span class="attendance-toggle-icon" aria-hidden="true">{{ isAttendanceJustified(respuesta) ? 'Justificada' : 'Sense justificar' }}</span>
+                        </button>
+                      }
                     } @else {
                       <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
-                        {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                        {{ getAttendanceBadgeText(respuesta) }}
                       </span>
                     }
                   </div>
@@ -713,16 +1137,28 @@
                             type="button"
                             class="btn btn-sm attendance-toggle-btn"
                             [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
-                            [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                            [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed && !isAttendanceJustified(respuesta)"
                             [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
                             [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
                             (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
                           >
                             <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
                           </button>
+                          @if (!respuesta.attendanceConfirmed) {
+                            <button
+                              type="button"
+                              class="btn btn-sm attendance-toggle-btn attendance-toggle-btn-justify"
+                              [class.attendance-toggle-btn-justify-active]="isAttendanceJustified(respuesta)"
+                              [attr.title]="isAttendanceJustified(respuesta) ? 'Treure justificació' : 'Marcar no assistit justificat'"
+                              [attr.aria-label]="isAttendanceJustified(respuesta) ? 'Treure justificació' : 'Marcar no assistit justificat'"
+                              (click)="toggleAttendanceJustification(respuesta)"
+                            >
+                              <span class="attendance-toggle-icon" aria-hidden="true">{{ isAttendanceJustified(respuesta) ? 'Justificada' : 'Sense justificar' }}</span>
+                            </button>
+                          }
                         } @else {
                           <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
-                            {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                            {{ getAttendanceBadgeText(respuesta) }}
                           </span>
                         }
                       </div>

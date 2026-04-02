@@ -33,6 +33,8 @@ CONVOCATORIES
 	- ConvoTypeId [FK ConvoTypes(Id)]
 	- StartTime [DATE (DD-MM-YYYY HH-MM-SS.MS)]
 	- FinalTime [DATE (DD-MM-YYYY HH-MM-SS.MS)] [NULLABLE]
+	- ActualStartTime [DATE (DD-MM-YYYY HH-MM-SS.MS)] [NULLABLE]
+	- ActualEndTime [DATE (DD-MM-YYYY HH-MM-SS.MS)] [NULLABLE]
 	- IsActive [BOOL] [@default(true)]
 	- AutoAssignResponsable [BOOL] [@default(false)]
 	- Sortida [BOOL] [@default(false)]
@@ -46,8 +48,22 @@ RESPOSTES
 	- FullHorari [BOOL] [@default(false)]
 	- Response [BOOL]
 	- AttendanceConfirmed [BOOL] [@default(true)]
+	- AttendanceJustified [BOOL] [@default(false)]
 	- Source [VARCHAR] [@default("manual")]
 	- AutoAssignReason [VARCHAR NULLABLE]
+
+USER_HOURS_SUMMARY
+	- Id [PK | AI]
+	- UserId [FK Users(Id)] [UNIQUE]
+	- CampaignHours [FLOAT] [@default(0)]
+	- OffCampaignHours [FLOAT] [@default(0)]
+	- UnansweredCount [INT] [@default(0)]
+	- NoShowCount [INT] [@default(0)]
+	- UnansweredPenaltyHours [FLOAT] [@default(0)]
+	- NoShowPenaltyHours [FLOAT] [@default(0)]
+	- TotalHours [FLOAT] [@default(0)]
+	- CreatedAt [DATE]
+	- UpdatedAt [DATE]
 
 DEVICETOKENS
 	- Id [PK | AI]
