@@ -429,7 +429,7 @@ export class ConvosComponent implements OnDestroy {
     return Boolean(forcedTitle);
   }
 
-  getUserName(userId?: number): string {
+  getUserName(userId?: number | null): string {
     if (!userId) return '-';
     const user = this.users().find((u) => u.id === userId);
     return user ? `${user.name} ${user.lastName || ''}` : '-';
@@ -577,6 +577,20 @@ export class ConvosComponent implements OnDestroy {
       return '';
     }
 
+    // If it's an ISO datetime string, extract HH:MM directly without timezone conversion
+    if (value.includes('T')) {
+      try {
+        // Extract HH:MM from ISO format (e.g., "2026-03-27T15:30:00.000Z" -> "15:30")
+        const match = value.match(/T(\d{2}):(\d{2})/);
+        if (match) {
+          return `${match[1]}:${match[2]}`;
+        }
+      } catch {
+        // If parsing fails, continue with regex fallback
+      }
+    }
+
+    // If it's already in HH:MM format, return as is
     const match = value.match(/(\d{2}:\d{2})/);
     return match?.[1] || '';
   }

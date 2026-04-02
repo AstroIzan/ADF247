@@ -53,8 +53,8 @@ model Convocatoria {
   date          DateTime
   title         String
   ubiSortida    String
-  responsableId Int
-  user          User      @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
+  responsableId Int?
+  user          User?     @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
   convoTypeId   Int
   convoType     ConvoType @relation(fields: [convoTypeId], references: [id])
 

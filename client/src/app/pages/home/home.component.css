@@ -1,6 +1,5 @@
 :host {
   display: block;
-  min-height: 100vh;
   background: #f5f5f5;
 }
 
@@ -991,7 +990,7 @@
   min-width: 0;
 }
 
-.time-field input[type='time'] {
+.time-field input {
   flex: 1;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -1282,7 +1281,7 @@
     width: 100%;
   }
 
-  .time-field input[type='time'] {
+  .time-field input {
     padding: 6px;
     font-size: 12px;
   }
@@ -1305,16 +1304,6 @@
     justify-content: flex-end;
   }
 
-
-@media (max-aspect-ratio: 3/4) {
-  .admin-responses-table-wrap {
-    display: none;
-  }
-
-  .admin-responses-cards {
-    display: grid;
-  }
-}
   .time-picker-btn {
     width: 32px;
     height: 32px;
@@ -1335,4 +1324,82 @@
     font-size: 10px;
     padding: 3px 6px;
   }
+}
+
+
+@media (max-aspect-ratio: 3/4) {
+  .admin-responses-table-wrap {
+    display: none;
+  }
+
+  .admin-responses-cards {
+    display: grid;
+  }
+}
+
+/* Automation Toggles */
+.automation-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.automation-toggle:hover {
+  border-color: #b0b0b0;
+  background: #fafafa;
+}
+
+.automation-toggle.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.automation-toggle.is-disabled:hover {
+  border-color: #d0d0d0;
+  background: #f9f9f9;
+}
+
+.automation-toggle input {
+  display: none;
+}
+
+.automation-toggle .toggle-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border: 2px solid #d0d0d0;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #999;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.automation-toggle .toggle-indicator::before {
+  content: '✕';
+}
+
+.automation-toggle input:checked + .toggle-indicator {
+  background: #f0b000;
+  border-color: #f0b000;
+  color: #fff;
+}
+
+.automation-toggle input:checked + .toggle-indicator::before {
+  content: '✓';
+}
+
+.automation-toggle .toggle-text {
+  flex: 1;
+  font-size: 14px;
 }

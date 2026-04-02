@@ -278,7 +278,7 @@
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle" [class.is-disabled]="formSubmitting()">
               <input
                 type="checkbox"
                 [ngModel]="formData().autoAssignResponsable || false"
@@ -286,7 +286,8 @@
                 [disabled]="formSubmitting()"
                 name="autoAssignResponsable"
               />
-              Autoassignar responsable segons respostes
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Autoassignar responsable segons respostes</span>
             </label>
           </div>
 
@@ -366,11 +367,12 @@
               <div class="time-field">
                 <input
                   #convoStartTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="formData().startTime || ''"
-                  (change)="updateFormField('startTime', $any($event.target).value)"
+                  (input)="updateFormField('startTime', $any($event.target).value)"
                   [disabled]="formSubmitting()"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button
                   type="button"
@@ -390,11 +392,12 @@
               <div class="time-field">
                 <input
                   #convoEndTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="formData().finalTime || ''"
-                  (change)="updateFormField('finalTime', $any($event.target).value)"
+                  (input)="updateFormField('finalTime', $any($event.target).value)"
                   [disabled]="formSubmitting()"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button
                   type="button"
@@ -411,7 +414,7 @@
           }
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle" [class.is-disabled]="formSubmitting()">
               <input
                 type="checkbox"
                 [ngModel]="formData().sortida || false"
@@ -419,12 +422,13 @@
                 [disabled]="formSubmitting()"
                 name="sortida"
               />
-              Sortida
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Sortida</span>
             </label>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle" [class.is-disabled]="formSubmitting()">
               <input
                 type="checkbox"
                 [ngModel]="formData().isActive"
@@ -432,7 +436,8 @@
                 [disabled]="formSubmitting()"
                 name="isActive"
               />
-              Activa
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Activa</span>
             </label>
           </div>
         </div>

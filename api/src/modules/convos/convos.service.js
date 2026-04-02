@@ -474,7 +474,9 @@ async function getConvocatoriaById(id) {
 async function createConvocatoria(payload) {
   const createDto = buildConvocatoriaCreateDto(payload)
 
-  await ensureUserExists(createDto.responsableId)
+  if (createDto.responsableId != null) {
+    await ensureUserExists(createDto.responsableId)
+  }
   await ensureConvoTypeExists(createDto.convoTypeId)
 
   const convoType = await findConvoTypeOrThrow(createDto.convoTypeId)
@@ -519,7 +521,7 @@ async function updateConvocatoria(id, payload) {
   const existingConvocatoria = await findConvocatoriaOrThrow(id)
   const updateDto = buildConvocatoriaUpdateDto(payload)
 
-  if (updateDto.responsableId !== undefined) {
+  if (updateDto.responsableId !== undefined && updateDto.responsableId !== null) {
     await ensureUserExists(updateDto.responsableId)
   }
 

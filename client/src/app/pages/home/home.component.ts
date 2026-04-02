@@ -363,7 +363,7 @@ export class HomeComponent implements OnInit {
 
   getResponsablePickerName(userId: number | null): string {
     if (!userId) {
-      return 'Selecciona responsable';
+      return 'Sense responsable (auto-assignació)';
     }
 
     const user = this.users().find((item) => item.id === userId);
@@ -382,13 +382,13 @@ export class HomeComponent implements OnInit {
     this.showAdminResponsableMenu.set(!this.showAdminResponsableMenu());
   }
 
-  selectCreateResponsable(userId: number) {
-    this.updateCreateConvoField('responsableId', userId);
+  selectCreateResponsable(userId: number | null) {
+    this.updateCreateConvoField('responsableId', userId as any);
     this.showCreateResponsableMenu.set(false);
   }
 
-  selectAdminResponsable(userId: number) {
-    this.updateAdminConvoField('responsableId', String(userId));
+  selectAdminResponsable(userId: number | null) {
+    this.updateAdminConvoField('responsableId', userId !== null ? String(userId) : '');
     this.showAdminResponsableMenu.set(false);
   }
 
@@ -840,7 +840,7 @@ export class HomeComponent implements OnInit {
       return true;
     }
 
-    const responsableUser = this.userById().get(convo.responsableId);
+    const responsableUser = convo.responsableId ? this.userById().get(convo.responsableId) : null;
     if (!responsableUser?.nCarnet || !currentUser.nCarnet) {
       return false;
     }
@@ -848,7 +848,7 @@ export class HomeComponent implements OnInit {
     return responsableUser.nCarnet === currentUser.nCarnet;
   }
 
-  getResponsableName(responsableId?: number) {
+  getResponsableName(responsableId?: number | null) {
     if (!responsableId) {
       return '-';
     }
@@ -958,8 +958,8 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (!form.title || !form.date || !form.responsableId || !form.convoTypeId || !form.startTime) {
-      this.error.set('Completa titol, data, hora d\'inici, responsable i tipus.');
+    if (!form.title || !form.date || !form.convoTypeId || !form.startTime) {
+      this.error.set('Completa titol, data, hora d\'inici i tipus.');
       return;
     }
 
@@ -1168,8 +1168,8 @@ export class HomeComponent implements OnInit {
     const forcedTitle = this.getForcedCreateTitleByTypeId(form.convoTypeId);
     const titleToUse = forcedTitle || (form.title || '').trim();
 
-    if (!titleToUse || !form.responsableId || !form.convoTypeId) {
-      this.createConvoError.set('Completa responsable i tipus per crear.');
+    if (!titleToUse || !form.convoTypeId) {
+      this.createConvoError.set('Completa el tipus per crear.');
       return;
     }
 
@@ -1590,14 +1590,21 @@ export class HomeComponent implements OnInit {
       return '';
     }
 
-    const match = String(value).match(/(\d{2}:\d{2})/);
-    if (match) {
-      return match[1];
+    const raw = String(value);
+
+    // For ISO datetimes, convert to local time (handles UTC winter/summer offset correctly).
+    if (raw.includes('T')) {
+      const date = new Date(raw);
+      if (!Number.isNaN(date.getTime())) {
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+      }
     }
 
-    const date = new Date(value);
-    if (!Number.isNaN(date.getTime())) {
-      return date.toTimeString().slice(0, 5);
+    const match = raw.match(/(\d{2}:\d{2})/);
+    if (match) {
+      return match[1];
     }
 
     return '';

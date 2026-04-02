@@ -65,7 +65,7 @@
   min-width: 0;
 }
 
-.time-field input[type='time'] {
+.time-field input {
   flex: 1;
   min-width: 0;
 }
@@ -517,7 +517,7 @@
     gap: 4px;
   }
 
-  .time-field input[type='time'] {
+  .time-field input {
     font-size: 12px;
   }
 
@@ -585,7 +585,7 @@
     width: 100%;
   }
 
-  .time-field input[type='time'] {
+  .time-field input {
     width: 100%;
     font-size: 13px;
     padding: 6px;
@@ -664,4 +664,117 @@
   .delete-popover {
     width: 100%;
   }
+}
+
+/* Modal form controls (same visual language as automation toggles) */
+.modal-body .form-group > input:not([type='checkbox']),
+.modal-body .form-group > select,
+.modal-body .form-group > textarea,
+.time-field input,
+.responsable-picker-trigger {
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: #f9f9f9;
+  color: #222;
+  transition: all 0.2s ease;
+}
+
+.modal-body .form-group > input:not([type='checkbox']):hover,
+.modal-body .form-group > select:hover,
+.modal-body .form-group > textarea:hover,
+.time-field input:hover,
+.responsable-picker-trigger:hover {
+  border-color: #b0b0b0;
+  background: #fafafa;
+}
+
+.modal-body .form-group > input:not([type='checkbox']):focus,
+.modal-body .form-group > select:focus,
+.modal-body .form-group > textarea:focus,
+.time-field input:focus,
+.responsable-picker-trigger:focus,
+.responsable-picker-trigger:focus-visible {
+  outline: none;
+  border-color: #f0b000;
+  box-shadow: 0 0 0 2px rgba(240, 176, 0, 0.18);
+  background: #fff;
+}
+
+.modal-body .form-group > input:not([type='checkbox']):disabled,
+.modal-body .form-group > select:disabled,
+.modal-body .form-group > textarea:disabled,
+.time-field input:disabled,
+.responsable-picker-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Automation Toggles */
+.automation-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.automation-toggle:hover {
+  border-color: #b0b0b0;
+  background: #fafafa;
+}
+
+.automation-toggle.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.automation-toggle.is-disabled:hover {
+  border-color: #d0d0d0;
+  background: #f9f9f9;
+}
+
+.automation-toggle input {
+  display: none;
+}
+
+.automation-toggle .toggle-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border: 2px solid #d0d0d0;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #999;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.automation-toggle .toggle-indicator::before {
+  content: '✕';
+}
+
+.automation-toggle input:checked + .toggle-indicator {
+  background: #f0b000;
+  border-color: #f0b000;
+  color: #fff;
+}
+
+.automation-toggle input:checked + .toggle-indicator::before {
+  content: '✓';
+}
+
+.automation-toggle .toggle-text {
+  flex: 1;
+  font-size: 14px;
 }

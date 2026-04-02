@@ -393,10 +393,11 @@
               <div class="time-field">
                 <input
                   #adminStartTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="adminConvoForm().startTime"
-                  (change)="updateAdminConvoField('startTime', $any($event.target).value)"
+                  (input)="updateAdminConvoField('startTime', $any($event.target).value)"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminStartTimeInput, 'adminStartTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
@@ -409,10 +410,11 @@
               <div class="time-field">
                 <input
                   #adminEndTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="adminConvoForm().finalTime"
-                  (change)="updateAdminConvoField('finalTime', $any($event.target).value)"
+                  (input)="updateAdminConvoField('finalTime', $any($event.target).value)"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminEndTimeInput, 'adminEndTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
@@ -464,6 +466,14 @@
 
                 @if (showAdminResponsableMenu()) {
                   <div class="responsable-picker-menu">
+                    <button
+                      type="button"
+                      class="responsable-picker-option"
+                      [class.active]="adminConvoForm().responsableId === null"
+                      (click)="selectAdminResponsable(null)"
+                    >
+                      <span class="responsable-picker-option-name">Sense responsable (auto-assignació)</span>
+                    </button>
                     @for (user of users(); track user.id) {
                       <button
                         type="button"
@@ -490,35 +500,41 @@
             </div>
 
             <div class="form-group">
-              <label class="checkbox-label">
+              <label class="automation-toggle" [class.is-disabled]="adminConvoSaving()">
                 <input
                   type="checkbox"
                   [checked]="adminConvoForm().autoAssignResponsable"
                   (change)="updateAdminConvoField('autoAssignResponsable', $any($event.target).checked)"
+                  [disabled]="adminConvoSaving()"
                 />
-                Autoassignar responsable segons respostes
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Autoassignar responsable segons respostes</span>
               </label>
             </div>
 
             <div class="form-group">
-              <label class="checkbox-label">
+              <label class="automation-toggle" [class.is-disabled]="adminConvoSaving()">
                 <input
                   type="checkbox"
                   [checked]="adminConvoForm().isActive"
                   (change)="updateAdminConvoField('isActive', $any($event.target).checked)"
+                  [disabled]="adminConvoSaving()"
                 />
-                Convocatòria activa
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Convocatòria activa</span>
               </label>
             </div>
 
             <div class="form-group">
-              <label class="checkbox-label">
+              <label class="automation-toggle" [class.is-disabled]="adminConvoSaving()">
                 <input
                   type="checkbox"
                   [checked]="adminConvoForm().sortida"
                   (change)="updateAdminConvoField('sortida', $any($event.target).checked)"
+                  [disabled]="adminConvoSaving()"
                 />
-                Sortida
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Sortida</span>
               </label>
             </div>
           </div>
@@ -1035,6 +1051,14 @@
 
               @if (showCreateResponsableMenu()) {
                 <div class="responsable-picker-menu">
+                  <button
+                    type="button"
+                    class="responsable-picker-option"
+                    [class.active]="createConvoForm().responsableId === null"
+                    (click)="selectCreateResponsable(null)"
+                  >
+                    <span class="responsable-picker-option-name">Sense responsable (auto-assignació)</span>
+                  </button>
                   @for (user of users(); track user.id) {
                     <button
                       type="button"
@@ -1061,35 +1085,38 @@
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle">
               <input
                 type="checkbox"
                 [checked]="createConvoForm().autoAssignResponsable"
                 (change)="updateCreateConvoField('autoAssignResponsable', $any($event.target).checked)"
               />
-              Autoassignar responsable segons respostes
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Autoassignar responsable segons respostes</span>
             </label>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle">
               <input
                 type="checkbox"
                 [checked]="createConvoForm().isActive"
                 (change)="updateCreateConvoField('isActive', $any($event.target).checked)"
               />
-              Convocatòria activa
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Convocatòria activa</span>
             </label>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle">
               <input
                 type="checkbox"
                 [checked]="createConvoForm().sortida"
                 (change)="updateCreateConvoField('sortida', $any($event.target).checked)"
               />
-              Sortida
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Sortida</span>
             </label>
           </div>
         </div>

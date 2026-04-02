@@ -180,7 +180,7 @@ function buildConvocatoriaCreateDto(payload) {
     date: normalizeDate(payload.date, { fieldName: 'date', required: true }),
     title: normalizeText(payload.title, { fieldName: 'title' }),
     ubiSortida: normalizeText(payload.ubiSortida, { fieldName: 'ubiSortida' }),
-    responsableId: normalizeInteger(payload.responsableId, { fieldName: 'responsableId', required: true }),
+    responsableId: payload.responsableId != null ? normalizeInteger(payload.responsableId, { fieldName: 'responsableId' }) : null,
     convoTypeId: normalizeInteger(payload.convoTypeId, { fieldName: 'convoTypeId', required: true }),
     startTime: normalizeDate(payload.startTime, { fieldName: 'startTime', required: true }),
     finalTime: normalizeDate(payload.finalTime, { fieldName: 'finalTime', nullable: true }),

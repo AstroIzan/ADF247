@@ -5145,7 +5145,7 @@ export namespace Prisma {
     date: Date
     title: string
     ubiSortida: string
-    responsableId: number
+    responsableId: number | null
     convoTypeId: number
     startTime: Date
     finalTime: Date | null
@@ -5185,7 +5185,7 @@ export namespace Prisma {
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    user?: boolean | Convocatoria$userArgs<ExtArgs>
     convoType?: boolean | ConvoTypeDefaultArgs<ExtArgs>
     respostas?: boolean | Convocatoria$respostasArgs<ExtArgs>
     _count?: boolean | ConvocatoriaCountOutputTypeDefaultArgs<ExtArgs>
@@ -5203,7 +5203,7 @@ export namespace Prisma {
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    user?: boolean | Convocatoria$userArgs<ExtArgs>
     convoType?: boolean | ConvoTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["convocatoria"]>
 
@@ -5222,20 +5222,20 @@ export namespace Prisma {
   }
 
   export type ConvocatoriaInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    user?: boolean | Convocatoria$userArgs<ExtArgs>
     convoType?: boolean | ConvoTypeDefaultArgs<ExtArgs>
     respostas?: boolean | Convocatoria$respostasArgs<ExtArgs>
     _count?: boolean | ConvocatoriaCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ConvocatoriaIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    user?: boolean | Convocatoria$userArgs<ExtArgs>
     convoType?: boolean | ConvoTypeDefaultArgs<ExtArgs>
   }
 
   export type $ConvocatoriaPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Convocatoria"
     objects: {
-      user: Prisma.$UserPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs> | null
       convoType: Prisma.$ConvoTypePayload<ExtArgs>
       respostas: Prisma.$RespuestaPayload<ExtArgs>[]
     }
@@ -5244,7 +5244,7 @@ export namespace Prisma {
       date: Date
       title: string
       ubiSortida: string
-      responsableId: number
+      responsableId: number | null
       convoTypeId: number
       startTime: Date
       finalTime: Date | null
@@ -5615,7 +5615,7 @@ export namespace Prisma {
    */
   export interface Prisma__ConvocatoriaClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    user<T extends Convocatoria$userArgs<ExtArgs> = {}>(args?: Subset<T, Convocatoria$userArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow"> | null, null, ExtArgs>
     convoType<T extends ConvoTypeDefaultArgs<ExtArgs> = {}>(args?: Subset<T, ConvoTypeDefaultArgs<ExtArgs>>): Prisma__ConvoTypeClient<$Result.GetResult<Prisma.$ConvoTypePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     respostas<T extends Convocatoria$respostasArgs<ExtArgs> = {}>(args?: Subset<T, Convocatoria$respostasArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RespuestaPayload<ExtArgs>, T, "findMany"> | Null>
     /**
@@ -5971,6 +5971,21 @@ export namespace Prisma {
      * Filter which Convocatorias to delete
      */
     where?: ConvocatoriaWhereInput
+  }
+
+  /**
+   * Convocatoria.user
+   */
+  export type Convocatoria$userArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
   }
 
   /**
@@ -12716,14 +12731,14 @@ export namespace Prisma {
     date?: DateTimeFilter<"Convocatoria"> | Date | string
     title?: StringFilter<"Convocatoria"> | string
     ubiSortida?: StringFilter<"Convocatoria"> | string
-    responsableId?: IntFilter<"Convocatoria"> | number
+    responsableId?: IntNullableFilter<"Convocatoria"> | number | null
     convoTypeId?: IntFilter<"Convocatoria"> | number
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
     autoAssignResponsable?: BoolFilter<"Convocatoria"> | boolean
     sortida?: BoolFilter<"Convocatoria"> | boolean
-    user?: XOR<UserRelationFilter, UserWhereInput>
+    user?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     convoType?: XOR<ConvoTypeRelationFilter, ConvoTypeWhereInput>
     respostas?: RespuestaListRelationFilter
   }
@@ -12733,7 +12748,7 @@ export namespace Prisma {
     date?: SortOrder
     title?: SortOrder
     ubiSortida?: SortOrder
-    responsableId?: SortOrder
+    responsableId?: SortOrderInput | SortOrder
     convoTypeId?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrderInput | SortOrder
@@ -12753,14 +12768,14 @@ export namespace Prisma {
     date?: DateTimeFilter<"Convocatoria"> | Date | string
     title?: StringFilter<"Convocatoria"> | string
     ubiSortida?: StringFilter<"Convocatoria"> | string
-    responsableId?: IntFilter<"Convocatoria"> | number
+    responsableId?: IntNullableFilter<"Convocatoria"> | number | null
     convoTypeId?: IntFilter<"Convocatoria"> | number
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
     isActive?: BoolFilter<"Convocatoria"> | boolean
     autoAssignResponsable?: BoolFilter<"Convocatoria"> | boolean
     sortida?: BoolFilter<"Convocatoria"> | boolean
-    user?: XOR<UserRelationFilter, UserWhereInput>
+    user?: XOR<UserNullableRelationFilter, UserWhereInput> | null
     convoType?: XOR<ConvoTypeRelationFilter, ConvoTypeWhereInput>
     respostas?: RespuestaListRelationFilter
   }, "id">
@@ -12770,7 +12785,7 @@ export namespace Prisma {
     date?: SortOrder
     title?: SortOrder
     ubiSortida?: SortOrder
-    responsableId?: SortOrder
+    responsableId?: SortOrderInput | SortOrder
     convoTypeId?: SortOrder
     startTime?: SortOrder
     finalTime?: SortOrderInput | SortOrder
@@ -12792,7 +12807,7 @@ export namespace Prisma {
     date?: DateTimeWithAggregatesFilter<"Convocatoria"> | Date | string
     title?: StringWithAggregatesFilter<"Convocatoria"> | string
     ubiSortida?: StringWithAggregatesFilter<"Convocatoria"> | string
-    responsableId?: IntWithAggregatesFilter<"Convocatoria"> | number
+    responsableId?: IntNullableWithAggregatesFilter<"Convocatoria"> | number | null
     convoTypeId?: IntWithAggregatesFilter<"Convocatoria"> | number
     startTime?: DateTimeWithAggregatesFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableWithAggregatesFilter<"Convocatoria"> | Date | string | null
@@ -13538,7 +13553,7 @@ export namespace Prisma {
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
-    user: UserCreateNestedOneWithoutConvocatoriesInput
+    user?: UserCreateNestedOneWithoutConvocatoriesInput
     convoType: ConvoTypeCreateNestedOneWithoutConvocatoriesInput
     respostas?: RespuestaCreateNestedManyWithoutConvocatoriaInput
   }
@@ -13548,7 +13563,7 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    responsableId: number
+    responsableId?: number | null
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
@@ -13567,7 +13582,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
-    user?: UserUpdateOneRequiredWithoutConvocatoriesNestedInput
+    user?: UserUpdateOneWithoutConvocatoriesNestedInput
     convoType?: ConvoTypeUpdateOneRequiredWithoutConvocatoriesNestedInput
     respostas?: RespuestaUpdateManyWithoutConvocatoriaNestedInput
   }
@@ -13577,7 +13592,7 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    responsableId?: IntFieldUpdateOperationsInput | number
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -13592,7 +13607,7 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    responsableId: number
+    responsableId?: number | null
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
@@ -13617,7 +13632,7 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    responsableId?: IntFieldUpdateOperationsInput | number
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -14480,6 +14495,17 @@ export namespace Prisma {
     minVerdSortida?: SortOrder
   }
 
+  export type IntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
   export type DateTimeNullableFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
     in?: Date[] | string[] | null
@@ -14489,6 +14515,11 @@ export namespace Prisma {
     gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type UserNullableRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
   }
 
   export type ConvoTypeRelationFilter = {
@@ -14548,6 +14579,22 @@ export namespace Prisma {
     id?: SortOrder
     responsableId?: SortOrder
     convoTypeId?: SortOrder
+  }
+
+  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | null
+    notIn?: number[] | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _avg?: NestedFloatNullableFilter<$PrismaModel>
+    _sum?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedIntNullableFilter<$PrismaModel>
+    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
@@ -14664,22 +14711,6 @@ export namespace Prisma {
     userId?: SortOrder
   }
 
-  export type IntNullableFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableFilter<$PrismaModel> | number | null
-  }
-
-  export type UserNullableRelationFilter = {
-    is?: UserWhereInput | null
-    isNot?: UserWhereInput | null
-  }
-
   export type NotificationLogCountOrderByAggregateInput = {
     id?: SortOrder
     senderUserId?: SortOrder
@@ -14739,22 +14770,6 @@ export namespace Prisma {
     requestedCount?: SortOrder
     successCount?: SortOrder
     failureCount?: SortOrder
-  }
-
-  export type IntNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: number | IntFieldRefInput<$PrismaModel> | null
-    in?: number[] | null
-    notIn?: number[] | null
-    lt?: number | IntFieldRefInput<$PrismaModel>
-    lte?: number | IntFieldRefInput<$PrismaModel>
-    gt?: number | IntFieldRefInput<$PrismaModel>
-    gte?: number | IntFieldRefInput<$PrismaModel>
-    not?: NestedIntNullableWithAggregatesFilter<$PrismaModel> | number | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _avg?: NestedFloatNullableFilter<$PrismaModel>
-    _sum?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedIntNullableFilter<$PrismaModel>
-    _max?: NestedIntNullableFilter<$PrismaModel>
   }
 
   export type AvailabilityWindowCountOrderByAggregateInput = {
@@ -15325,10 +15340,12 @@ export namespace Prisma {
     set?: Date | string | null
   }
 
-  export type UserUpdateOneRequiredWithoutConvocatoriesNestedInput = {
+  export type UserUpdateOneWithoutConvocatoriesNestedInput = {
     create?: XOR<UserCreateWithoutConvocatoriesInput, UserUncheckedCreateWithoutConvocatoriesInput>
     connectOrCreate?: UserCreateOrConnectWithoutConvocatoriesInput
     upsert?: UserUpsertWithoutConvocatoriesInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutConvocatoriesInput, UserUpdateWithoutConvocatoriesInput>, UserUncheckedUpdateWithoutConvocatoriesInput>
   }
@@ -15353,6 +15370,14 @@ export namespace Prisma {
     update?: RespuestaUpdateWithWhereUniqueWithoutConvocatoriaInput | RespuestaUpdateWithWhereUniqueWithoutConvocatoriaInput[]
     updateMany?: RespuestaUpdateManyWithWhereWithoutConvocatoriaInput | RespuestaUpdateManyWithWhereWithoutConvocatoriaInput[]
     deleteMany?: RespuestaScalarWhereInput | RespuestaScalarWhereInput[]
+  }
+
+  export type NullableIntFieldUpdateOperationsInput = {
+    set?: number | null
+    increment?: number
+    decrement?: number
+    multiply?: number
+    divide?: number
   }
 
   export type RespuestaUncheckedUpdateManyWithoutConvocatoriaNestedInput = {
@@ -15425,14 +15450,6 @@ export namespace Prisma {
     delete?: UserWhereInput | boolean
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutNotificationLogsInput, UserUpdateWithoutNotificationLogsInput>, UserUncheckedUpdateWithoutNotificationLogsInput>
-  }
-
-  export type NullableIntFieldUpdateOperationsInput = {
-    set?: number | null
-    increment?: number
-    decrement?: number
-    multiply?: number
-    divide?: number
   }
 
   export type UserCreateNestedOneWithoutAvailabilityWindowsInput = {
@@ -15681,20 +15698,6 @@ export namespace Prisma {
     not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
-    in?: Date[] | string[] | null
-    notIn?: Date[] | string[] | null
-    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
-    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedDateTimeNullableFilter<$PrismaModel>
-    _max?: NestedDateTimeNullableFilter<$PrismaModel>
-  }
-
   export type NestedIntNullableWithAggregatesFilter<$PrismaModel = never> = {
     equals?: number | IntFieldRefInput<$PrismaModel> | null
     in?: number[] | null
@@ -15720,6 +15723,20 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | null
+    notIn?: Date[] | string[] | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
   }
 
   export type RoleCreateWithoutUserInput = {
@@ -15998,7 +16015,7 @@ export namespace Prisma {
     date?: DateTimeFilter<"Convocatoria"> | Date | string
     title?: StringFilter<"Convocatoria"> | string
     ubiSortida?: StringFilter<"Convocatoria"> | string
-    responsableId?: IntFilter<"Convocatoria"> | number
+    responsableId?: IntNullableFilter<"Convocatoria"> | number | null
     convoTypeId?: IntFilter<"Convocatoria"> | number
     startTime?: DateTimeFilter<"Convocatoria"> | Date | string
     finalTime?: DateTimeNullableFilter<"Convocatoria"> | Date | string | null
@@ -16263,7 +16280,7 @@ export namespace Prisma {
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
-    user: UserCreateNestedOneWithoutConvocatoriesInput
+    user?: UserCreateNestedOneWithoutConvocatoriesInput
     respostas?: RespuestaCreateNestedManyWithoutConvocatoriaInput
   }
 
@@ -16272,7 +16289,7 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    responsableId: number
+    responsableId?: number | null
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -16495,7 +16512,7 @@ export namespace Prisma {
     isActive?: boolean
     autoAssignResponsable?: boolean
     sortida?: boolean
-    user: UserCreateNestedOneWithoutConvocatoriesInput
+    user?: UserCreateNestedOneWithoutConvocatoriesInput
     convoType: ConvoTypeCreateNestedOneWithoutConvocatoriesInput
   }
 
@@ -16504,7 +16521,7 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    responsableId: number
+    responsableId?: number | null
     convoTypeId: number
     startTime: Date | string
     finalTime?: Date | string | null
@@ -16578,7 +16595,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
-    user?: UserUpdateOneRequiredWithoutConvocatoriesNestedInput
+    user?: UserUpdateOneWithoutConvocatoriesNestedInput
     convoType?: ConvoTypeUpdateOneRequiredWithoutConvocatoriesNestedInput
   }
 
@@ -16587,7 +16604,7 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    responsableId?: IntFieldUpdateOperationsInput | number
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
     convoTypeId?: IntFieldUpdateOperationsInput | number
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -17450,7 +17467,7 @@ export namespace Prisma {
     date: Date | string
     title: string
     ubiSortida: string
-    responsableId: number
+    responsableId?: number | null
     startTime: Date | string
     finalTime?: Date | string | null
     isActive?: boolean
@@ -17467,7 +17484,7 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     autoAssignResponsable?: BoolFieldUpdateOperationsInput | boolean
     sortida?: BoolFieldUpdateOperationsInput | boolean
-    user?: UserUpdateOneRequiredWithoutConvocatoriesNestedInput
+    user?: UserUpdateOneWithoutConvocatoriesNestedInput
     respostas?: RespuestaUpdateManyWithoutConvocatoriaNestedInput
   }
 
@@ -17476,7 +17493,7 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    responsableId?: IntFieldUpdateOperationsInput | number
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
@@ -17490,7 +17507,7 @@ export namespace Prisma {
     date?: DateTimeFieldUpdateOperationsInput | Date | string
     title?: StringFieldUpdateOperationsInput | string
     ubiSortida?: StringFieldUpdateOperationsInput | string
-    responsableId?: IntFieldUpdateOperationsInput | number
+    responsableId?: NullableIntFieldUpdateOperationsInput | number | null
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     finalTime?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean

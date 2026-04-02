@@ -33,7 +33,7 @@ export interface Convocatoria {
   date: string;
   title: string;
   ubiSortida: string;
-  responsableId: number;
+  responsableId: number | null;
   convoTypeId: number;
   startTime: string;
   finalTime?: string;
