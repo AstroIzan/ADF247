@@ -1,5 +1,6 @@
 .notifications-admin {
-  padding: 8px;
+  padding: 0;
+  min-width: 0;
 }
 
 .notifications-header {
@@ -29,13 +30,18 @@
 /* Tab Navigation */
 .tabs-nav {
   display: flex;
-  gap: 0;
+  gap: 8px;
   border-bottom: 2px solid #e1e1e1;
   margin-bottom: 20px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
 }
 
 .tab-btn {
+  flex-shrink: 0;
   padding: 12px 16px;
   background: none;
   border: none;
@@ -60,12 +66,13 @@
 /* Tab Content */
 .tab-content {
   display: block;
+  min-width: 0;
 }
 
 /* Configuration Section */
 .config-sections {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 }
 
@@ -74,6 +81,7 @@
   border-radius: 14px;
   padding: 14px;
   background: #fff;
+  min-width: 0;
 }
 
 .config-section h3 {
@@ -694,6 +702,19 @@
   .config-sections {
     grid-template-columns: 1fr;
   }
+
+  .automation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .automation-run-list,
+  .automation-run-detail,
+  .task-config-grid,
+  .form-grid,
+  .message-config-layout,
+  .checkbox-grid {
+    min-width: 0;
+  }
 }
 
 @media (max-width: 768px) {
@@ -710,12 +731,16 @@
   }
 
   .tabs-nav {
-    flex-wrap: wrap;
+    margin-bottom: 14px;
   }
 
   .tab-btn {
     padding: 10px 12px;
     font-size: 13px;
+  }
+
+  .config-section {
+    padding: 12px;
   }
 
   .notifications-header,
@@ -740,6 +765,14 @@
   .automation-grid {
     grid-template-columns: 1fr;
   }
+
+  .automation-run-list {
+    max-height: 280px;
+  }
+
+  .automation-run-detail {
+    padding: 10px;
+  }
 }
 
 .message-config-card textarea {
@@ -762,6 +795,7 @@
   display: grid;
   gap: 8px;
   transition: opacity 0.2s ease;
+  min-width: 0;
 }
 
 .task-card.task-disabled {
@@ -773,6 +807,7 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .task-card-title {
@@ -945,5 +980,19 @@
 @media (max-width: 860px) {
   .task-config-grid {
     grid-template-columns: 1fr;
+  }
+
+  .task-card-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .task-card-footer {
+    flex-wrap: wrap;
+  }
+
+  .task-card-footer .btn {
+    width: 100%;
   }
 }

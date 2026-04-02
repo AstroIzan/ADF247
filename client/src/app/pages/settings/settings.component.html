@@ -21,6 +21,9 @@
         <button type="button" class="settings-tab" [class.active]="activeTab() === 'orchestrator'" (click)="setActiveTab('orchestrator')">
           Orquestrador
         </button>
+        <button type="button" class="settings-tab" [class.active]="activeTab() === 'pla-alfa'" (click)="setActiveTab('pla-alfa')">
+          Pla Alfa
+        </button>
       }
     </nav>
 
@@ -92,6 +95,7 @@
             [convoTypes]="adminConvoTypes()"
             [users]="adminUsers()"
              [loading]="!adminConvoTypes().length && !adminUsers().length"
+            [compact]="true"
             [loadingLogs]="false"
             [error]="adminConfigError()"
             [logsError]="adminLogsError()"
@@ -109,6 +113,7 @@
             [convoTypes]="adminConvoTypes()"
             [users]="adminUsers()"
              [loading]="!adminConvoTypes().length && !adminUsers().length"
+            [compact]="true"
             [loadingLogs]="false"
             [error]="adminConfigError()"
             [logsError]="adminLogsError()"
@@ -117,6 +122,134 @@
             description="Paràmetres de retencio, delegació de visibilitat i monitorització del pipeline automàtic."
             (onLogsRefresh)="loadNotificationLogs()"
           ></app-notifications-admin>
+        </section>
+      }
+
+      @if (activeTab() === 'pla-alfa' && authService.isAdmin()) {
+        <section class="settings-section admin-section pla-alfa-section">
+          <h3>Pla Alfa municipal</h3>
+          <p class="section-help">Selecciona els municipis a considerar i consulta el nivell Pla Alfa actual (D) i de demà (D+1).</p>
+
+          @if (plaAlfaError()) {
+            <div class="alert alert-danger">{{ plaAlfaError() }}</div>
+          }
+
+          @if (plaAlfaInfo()) {
+            <div class="alert alert-success">{{ plaAlfaInfo() }}</div>
+          }
+
+          @if (plaAlfaLoading()) {
+            <div class="loading-state">Carregant catàleg de municipis...</div>
+          } @else {
+            <div class="pla-alfa-layout">
+              <div class="pla-alfa-selector-panel">
+                <label class="pla-alfa-selector-label" for="plaAlfaSearch">Municipis de Catalunya (Pla Alfa)</label>
+
+                <div class="pla-alfa-filter-row">
+                  <input
+                    id="plaAlfaSearch"
+                    type="search"
+                    class="pla-alfa-search-input"
+                    placeholder="Buscar municipi o comarca..."
+                    (input)="onPlaAlfaSearchInput($event)"
+                  />
+
+                  <select class="pla-alfa-filter-select" (change)="onPlaAlfaComarcaFilterChange($event)">
+                    <option value="all">Totes les comarques</option>
+                    @for (comarca of getPlaAlfaComarcaOptions(); track comarca) {
+                      <option [value]="comarca">{{ comarca }}</option>
+                    }
+                  </select>
+
+                  <div class="pla-alfa-bulk-actions">
+                    <button class="btn" type="button" (click)="toggleSelectAllPlaAlfaMunicipalities()">
+                      {{ areAllPlaAlfaMunicipalitiesSelected() ? 'Deseleccionar todo' : 'Seleccionar todo' }}
+                    </button>
+                    <span class="pla-alfa-selected-count">{{ plaAlfaSelected().length }} seleccionats</span>
+                  </div>
+                </div>
+
+                <div class="pla-alfa-checkbox-list" role="listbox" aria-label="Llista de municipis Pla Alfa">
+                  @for (item of getFilteredPlaAlfaCatalog(); track item.municipality) {
+                    <label class="pla-alfa-checkbox-item">
+                      <input
+                        type="checkbox"
+                        [checked]="isPlaAlfaMunicipalitySelected(item.municipality)"
+                        (change)="togglePlaAlfaMunicipality(item.municipality, $any($event.target).checked)"
+                      />
+                      <span class="municipality-name">{{ item.municipality }}</span>
+                      <span class="municipality-comarca">{{ item.comarca || 'Sense comarca' }}</span>
+                    </label>
+                  }
+                </div>
+                <p class="pla-alfa-help">Els municipis seleccionats es mantenen visibles encara que no compleixin els filtres.</p>
+
+                <div class="settings-actions pla-alfa-actions">
+                  <button class="btn btn-primary" type="button" (click)="savePlaAlfaSelection()" [disabled]="plaAlfaSaving()">
+                    {{ plaAlfaSaving() ? 'Desant...' : 'Desar municipis seleccionats' }}
+                  </button>
+                  <button class="btn" type="button" (click)="refreshPlaAlfaStatus()" [disabled]="plaAlfaRefreshingStatus() || plaAlfaSaving()">
+                    {{ plaAlfaRefreshingStatus() ? 'Actualitzant...' : 'Actualitzar nivells Pla Alfa' }}
+                  </button>
+                </div>
+              </div>
+
+              <div class="pla-alfa-table-panel">
+                <div class="pla-alfa-table-head">
+                  <div>
+                    <h4>Nivells dels municipis seleccionats</h4>
+                    @if (plaAlfaUpdatedAt()) {
+                      <p class="pla-alfa-updated-at">Última actualització general: {{ plaAlfaUpdatedAt() | date: 'dd/MM/yyyy HH:mm:ss' }}</p>
+                    }
+                  </div>
+                  <span>{{ plaAlfaStatus().length }} municipis</span>
+                </div>
+
+                @if (!plaAlfaStatus().length) {
+                  <div class="loading-state">No hi ha municipis seleccionats.</div>
+                } @else {
+                  <div class="pla-alfa-table-wrapper">
+                    <table class="pla-alfa-table">
+                      <thead>
+                        <tr>
+                          <th>Municipi</th>
+                          <th>Comarca</th>
+                          <th>Avui</th>
+                          <th>Demà</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (item of plaAlfaStatus(); track item.municipality) {
+                          <tr>
+                            <td>{{ item.municipality }}</td>
+                            <td>{{ item.comarca || '-' }}</td>
+                            <td>
+                              @if (item.foundToday) {
+                                <span class="pla-alfa-level" [class]="'pla-alfa-level ' + getPlaAlfaLevelClass(item.todayLevel)">
+                                  {{ getPlaAlfaLevelLabel(item.todayLevel) }}
+                                </span>
+                              } @else {
+                                <span class="pla-alfa-level-missing">No trobat</span>
+                              }
+                            </td>
+                            <td>
+                              @if (item.foundTomorrow) {
+                                <span class="pla-alfa-level" [class]="'pla-alfa-level ' + getPlaAlfaLevelClass(item.tomorrowLevel)">
+                                  {{ getPlaAlfaLevelLabel(item.tomorrowLevel) }}
+                                </span>
+                              } @else {
+                                <span class="pla-alfa-level-missing">No trobat</span>
+                              }
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              </div>
+            </div>
+          }
         </section>
       }
     </div>

@@ -275,6 +275,35 @@ export interface UsersCsvImportResult {
   rows: UsersCsvImportRowResult[];
 }
 
+export interface PlaAlfaMunicipalityCatalogItem {
+  municipality: string;
+  comarca: string | null;
+  objectId: number | null;
+  selected: boolean;
+}
+
+export interface PlaAlfaCatalogResponse {
+  updatedAt: string;
+  selectedMunicipalities: string[];
+  municipalities: PlaAlfaMunicipalityCatalogItem[];
+}
+
+export interface PlaAlfaMunicipalityStatusItem {
+  municipality: string;
+  comarca: string | null;
+  todayLevel: number | null;
+  tomorrowLevel: number | null;
+  todayObjectId: number | null;
+  tomorrowObjectId: number | null;
+  foundToday: boolean;
+  foundTomorrow: boolean;
+}
+
+export interface PlaAlfaMunicipalitiesStatusResponse {
+  updatedAt: string;
+  municipalities: PlaAlfaMunicipalityStatusItem[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -470,5 +499,17 @@ export class DataService {
 
   getHealthStatus(): Observable<ApiHealthStatus> {
     return this.http.get<ApiHealthStatus>('/health');
+  }
+
+  getPlaAlfaCatalog(): Observable<PlaAlfaCatalogResponse> {
+    return this.http.get<PlaAlfaCatalogResponse>('/pla-alfa/catalog');
+  }
+
+  updatePlaAlfaMunicipalities(municipalities: string[]): Observable<{ updatedAt: string; municipalities: string[] }> {
+    return this.http.put<{ updatedAt: string; municipalities: string[] }>('/pla-alfa/municipalities', { municipalities });
+  }
+
+  getPlaAlfaMunicipalitiesStatus(): Observable<PlaAlfaMunicipalitiesStatusResponse> {
+    return this.http.get<PlaAlfaMunicipalitiesStatusResponse>('/pla-alfa/municipalities');
   }
 }

@@ -108,6 +108,7 @@ export class NotificationsAdminComponent {
   @Input() users: User[] = [];
   @Input() title = 'Notificacions';
   @Input() description = 'Configura quan, a qui i com es notifica cada escenari.';
+  @Input() compact = false;
   private _visibleTabs: Array<'config' | 'logs' | 'automation' | 'orchestrator-config'> = ['config', 'logs', 'automation'];
 
   @Input()
