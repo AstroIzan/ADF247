@@ -1,0 +1,498 @@
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.52);
+  z-index: 1400;
+}
+
+.settings-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(1120px, calc(100vw - 32px));
+  height: min(900px, calc(100vh - 24px));
+  overflow: hidden;
+  z-index: 1401;
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid #d9d9d9;
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.24);
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid #e7e7e7;
+  background: linear-gradient(180deg, #fbfbfb 0%, #f6f6f6 100%);
+  flex-shrink: 0;
+}
+
+.settings-header h2,
+.settings-header p {
+  margin: 0;
+}
+
+.settings-header p {
+  margin-top: 6px;
+  color: #666;
+  font-size: 13px;
+}
+
+.close-btn {
+  border: 0;
+  background: transparent;
+  color: #666;
+  font-size: 28px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 8px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #ececec;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  flex-shrink: 0;
+}
+
+.settings-tab {
+  flex-shrink: 0;
+  border: 1px solid #d0d0d0;
+  background: #f5f5f5;
+  color: #333;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.settings-tab.active {
+  background: linear-gradient(145deg, #f0b000 0%, #cf8f00 100%);
+  color: #1a1a1a;
+  border-color: transparent;
+}
+
+.settings-body {
+  padding: 16px 20px 20px;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+}
+
+.settings-section h3,
+.settings-section p {
+  margin: 0;
+}
+
+.settings-section {
+  min-width: 0;
+}
+
+.section-help {
+  margin-top: 6px;
+  margin-bottom: 12px;
+  color: #666;
+  font-size: 13px;
+}
+
+.status-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.status-grid article {
+  border: 1px solid #dfdfdf;
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, rgba(240, 176, 0, 0.1), transparent 70%), #fff;
+  display: grid;
+  gap: 4px;
+}
+
+.device-copy {
+  color: #444;
+  font-size: 14px;
+}
+
+.loading-state {
+  padding: 14px;
+  border: 1px dashed #d0d0d0;
+  border-radius: 12px;
+  color: #666;
+  text-align: center;
+  background: #fafafa;
+}
+
+.settings-actions {
+  margin-top: 14px;
+  display: flex;
+  justify-content: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.alert {
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.alert-danger {
+  border: 1px solid #f1c1c1;
+  background: #fdeeee;
+  color: #9a2222;
+}
+
+.alert-success {
+  border: 1px solid #b9e2c6;
+  background: #e9f8ee;
+  color: #195933;
+}
+
+.btn {
+  padding: 10px 14px;
+  border: 1px solid #5a5a5a;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(145deg, #f0b000 0%, #cf8f00 100%);
+  color: #1a1a1a;
+  border-color: transparent;
+}
+
+.btn:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.admin-section {
+  min-height: 220px;
+  min-width: 0;
+}
+
+.pla-alfa-section h4 {
+  margin: 0;
+}
+
+.pla-alfa-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.pla-alfa-selector-panel,
+.pla-alfa-table-panel {
+  border: 1px solid #e1e1e1;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+  min-width: 0;
+}
+
+.pla-alfa-selector-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+}
+
+.pla-alfa-filter-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.pla-alfa-search-input,
+.pla-alfa-filter-select {
+  width: 100%;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-size: 13px;
+  background: #fff;
+  color: #222;
+}
+
+.pla-alfa-checkbox-list {
+  margin-top: 10px;
+  border: 1px solid #e1e1e1;
+  border-radius: 10px;
+  max-height: min(42vh, 400px);
+  overflow: auto;
+  background: #fff;
+}
+
+.pla-alfa-checkbox-item {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-areas:
+    'checkbox name'
+    'checkbox comarca';
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 2px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #f1f1f1;
+  cursor: pointer;
+}
+
+.pla-alfa-checkbox-item:last-child {
+  border-bottom: 0;
+}
+
+.pla-alfa-checkbox-item input {
+  grid-area: checkbox;
+}
+
+.pla-alfa-checkbox-item .municipality-name {
+  grid-area: name;
+  font-size: 13px;
+  font-weight: 700;
+  color: #222;
+}
+
+.pla-alfa-checkbox-item .municipality-comarca {
+  grid-area: comarca;
+  font-size: 12px;
+  color: #666;
+}
+
+.pla-alfa-bulk-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pla-alfa-selected-count {
+  font-size: 12px;
+  color: #555;
+  font-weight: 700;
+}
+
+.pla-alfa-help {
+  margin: 8px 0 0;
+  color: #666;
+  font-size: 12px;
+}
+
+.pla-alfa-actions {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pla-alfa-table-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.pla-alfa-table-head span {
+  font-size: 12px;
+  color: #666;
+}
+
+.pla-alfa-updated-at {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.pla-alfa-table-wrapper {
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  overflow: auto;
+  max-height: min(45vh, 420px);
+}
+
+.pla-alfa-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.pla-alfa-table th,
+.pla-alfa-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid #efefef;
+  text-align: left;
+}
+
+.pla-alfa-table th {
+  position: sticky;
+  top: 0;
+  background: #fafafa;
+  z-index: 1;
+  font-weight: 700;
+}
+
+.pla-alfa-level {
+  display: inline-block;
+  min-width: 80px;
+  text-align: center;
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 1px solid #d0d0d0;
+  font-weight: 700;
+  color: #111;
+}
+
+.pla-alfa-level-0 {
+  background: #ffffff;
+  border-color: #d5d5d5;
+  color: #111111;
+}
+
+.pla-alfa-level-1 {
+  background: #ffff00;
+  border-color: #d4d400;
+  color: #111111;
+}
+
+.pla-alfa-level-2 {
+  background: #ff8b00;
+  border-color: #c16c00;
+  color: #111111;
+}
+
+.pla-alfa-level-3 {
+  background: #fe0000;
+  border-color: #b60000;
+  color: #ffffff;
+}
+
+.pla-alfa-level-4 {
+  background: #880000;
+  border-color: #5d0000;
+  color: #ffffff;
+}
+
+.pla-alfa-level-5 {
+  background: #000000;
+  border-color: #000000;
+  color: #ffffff;
+}
+
+.pla-alfa-level-unknown {
+  background: #f4f4f4;
+  border-color: #d8d8d8;
+  color: #555;
+}
+
+.pla-alfa-level-missing {
+  color: #7e1c1c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+@media (max-width: 840px) {
+  .settings-dialog {
+    width: calc(100vw - 12px);
+    height: calc(100vh - 12px);
+    top: 6px;
+    left: 6px;
+    transform: none;
+    border-radius: 14px;
+  }
+
+  .settings-header {
+    padding: 14px 14px 12px;
+  }
+
+  .settings-header h2 {
+    font-size: 20px;
+  }
+
+  .settings-tabs {
+    padding: 10px 14px;
+  }
+
+  .settings-body {
+    padding: 12px 14px 14px;
+  }
+
+  .status-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .pla-alfa-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pla-alfa-table-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pla-alfa-bulk-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pla-alfa-bulk-actions .btn {
+    width: 100%;
+  }
+
+  .pla-alfa-actions .btn {
+    width: 100%;
+  }
+
+  .pla-alfa-table {
+    font-size: 12px;
+  }
+
+  .pla-alfa-table th,
+  .pla-alfa-table td {
+    padding: 8px;
+  }
+
+  .pla-alfa-level {
+    min-width: 70px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  .settings-dialog {
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+    border: 0;
+  }
+
+  .settings-header {
+    gap: 8px;
+  }
+
+  .settings-header p {
+    font-size: 12px;
+  }
+
+  .settings-tab {
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+}

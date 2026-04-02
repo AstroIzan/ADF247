@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService, User } from '../../services/data.service';
+import { DataService, User, UsersCsvImportResult } from '../../services/data.service';
 
 @Component({
   selector: 'app-users',
@@ -11,6 +11,7 @@ import { DataService, User } from '../../services/data.service';
   styleUrl: './users.component.css'
 })
 export class UsersComponent implements OnDestroy {
+  readonly pageSizeOptions = [10, 25, 50];
   users = input<User[]>([]);
   loading = input(false);
   error = input('');
@@ -22,6 +23,14 @@ export class UsersComponent implements OnDestroy {
   formSubmitting = signal(false);
   deleteConfirming = signal<number | null>(null);
   selectedUser = signal<User | null>(null);
+  changePassword = signal(false);
+  confirmPassword = signal('');
+  showImportModal = signal(false);
+  importCsvName = signal('');
+  importCsvHeaders = signal<string[]>([]);
+  importCsvContent = signal('');
+  importSubmitting = signal(false);
+  importResult = signal<UsersCsvImportResult | null>(null);
 
   filters = signal({
     name: '',
@@ -69,6 +78,21 @@ export class UsersComponent implements OnDestroy {
     });
   });
 
+  pageSize = signal(10);
+  pageIndex = signal(1);
+
+  totalPages = computed(() => {
+    const total = this.filteredUsers().length;
+    return Math.max(1, Math.ceil(total / this.pageSize()));
+  });
+
+  currentPage = computed(() => Math.min(this.pageIndex(), this.totalPages()));
+
+  paginatedUsers = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredUsers().slice(start, start + this.pageSize());
+  });
+
   constructor(private dataService: DataService) {}
 
   openFilters() {
@@ -84,6 +108,7 @@ export class UsersComponent implements OnDestroy {
       ...this.filters(),
       [field]: value,
     });
+    this.pageIndex.set(1);
   }
 
   resetFilters() {
@@ -93,13 +118,32 @@ export class UsersComponent implements OnDestroy {
       nCarnet: '',
       role: 'all',
     });
+    this.pageIndex.set(1);
+  }
+
+  setPageSize(value: string) {
+    const nextSize = Number(value);
+    this.pageSize.set(this.pageSizeOptions.includes(nextSize) ? nextSize : 10);
+    this.pageIndex.set(1);
+  }
+
+  goToPreviousPage() {
+    this.pageIndex.set(Math.max(1, this.currentPage() - 1));
+  }
+
+  goToNextPage() {
+    this.pageIndex.set(Math.min(this.totalPages(), this.currentPage() + 1));
   }
 
   openForm(user?: User) {
+    this.changePassword.set(false);
+    this.confirmPassword.set('');
+
     if (user) {
       this.editingId.set(user.id);
       this.formData.set({
         ...user,
+        password: '',
         roles: {
           isAdmin: Boolean(user.roles?.isAdmin),
           isGroc: Boolean(user.roles?.isGroc),
@@ -133,6 +177,97 @@ export class UsersComponent implements OnDestroy {
     document.body.classList.remove('modal-open');
   }
 
+  openImportCsvModal() {
+    this.showImportModal.set(true);
+    this.importResult.set(null);
+    this.importCsvName.set('');
+    this.importCsvHeaders.set([]);
+    this.importCsvContent.set('');
+    document.body.classList.add('modal-open');
+  }
+
+  closeImportCsvModal() {
+    this.showImportModal.set(false);
+    document.body.classList.remove('modal-open');
+  }
+
+  downloadCsvTemplate() {
+    const template = [
+      'nCarnet,nIndicatiu,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
+      '247001,BR-01,Izan,Admin,Passw0rd!,true,true,false,false,false',
+      '247002,BR-12,Joan,Perez,Passw0rd!,true,false,true,false,false',
+    ].join('\n');
+
+    const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'users-import-template-v1.csv';
+    link.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  async onCsvFileSelected(event: Event) {
+    const inputElement = event.target as HTMLInputElement;
+    const file = inputElement.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('El fitxer supera el límit de 2MB.');
+      inputElement.value = '';
+      return;
+    }
+
+    const name = file.name.toLowerCase();
+
+    if (!name.endsWith('.csv')) {
+      alert('Només es permeten fitxers CSV.');
+      inputElement.value = '';
+      return;
+    }
+
+    const text = await file.text();
+    const [headerLine] = text.split(/\r?\n/).filter((line) => line.trim().length > 0);
+    const headers = (headerLine || '')
+      .split(',')
+      .map((entry) => entry.trim())
+      .filter(Boolean);
+
+    this.importCsvName.set(file.name);
+    this.importCsvHeaders.set(headers);
+    this.importCsvContent.set(text);
+    this.importResult.set(null);
+  }
+
+  submitCsvImport() {
+    const csvContent = this.importCsvContent();
+
+    if (!csvContent.trim()) {
+      alert('Selecciona un fitxer CSV abans de processar.');
+      return;
+    }
+
+    this.importSubmitting.set(true);
+
+    this.dataService.importUsersFromCsv({
+      csvContent,
+      fileName: this.importCsvName() || undefined,
+    }).subscribe({
+      next: (result) => {
+        this.importResult.set(result);
+        this.importSubmitting.set(false);
+        this.onChanged.emit();
+      },
+      error: (err) => {
+        alert('Error en importar CSV: ' + (err?.error?.message || err.message || 'Error desconegut'));
+        this.importSubmitting.set(false);
+      },
+    });
+  }
+
   submitForm() {
     const data = this.formData();
 
@@ -141,10 +276,42 @@ export class UsersComponent implements OnDestroy {
       return;
     }
 
+    const isEditing = Boolean(this.editingId());
+    const password = String(data.password || '').trim();
+    const confirmPassword = this.confirmPassword().trim();
+
+    if (!isEditing && !password) {
+      alert('La contrasenya es obligatoria per crear un usuari.');
+      return;
+    }
+
+    if (!isEditing && password !== confirmPassword) {
+      alert('La confirmacio de contrasenya no coincideix.');
+      return;
+    }
+
+    if (isEditing && this.changePassword()) {
+      if (!password) {
+        alert('Has d\'introduir una nova contrasenya.');
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        alert('La confirmacio de contrasenya no coincideix.');
+        return;
+      }
+    }
+
+    const payload: Partial<User> = { ...data };
+
+    if (isEditing && !this.changePassword()) {
+      delete payload.password;
+    }
+
     this.formSubmitting.set(true);
 
     if (this.editingId()) {
-      this.dataService.updateUser(this.editingId()!, data).subscribe({
+      this.dataService.updateUser(this.editingId()!, payload).subscribe({
         next: () => {
           this.formSubmitting.set(false);
           this.closeForm();
@@ -156,7 +323,7 @@ export class UsersComponent implements OnDestroy {
         }
       });
     } else {
-      this.dataService.createUser(data).subscribe({
+      this.dataService.createUser(payload).subscribe({
         next: () => {
           this.formSubmitting.set(false);
           this.closeForm();

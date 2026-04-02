@@ -30,7 +30,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (respuesta of filteredRespuestas(); track respuesta.id) {
+          @for (respuesta of paginatedRespuestas(); track respuesta.id) {
             <tr>
               <td>{{ getConvoTitle(respuesta.convoId) }}</td>
               <td>{{ getUserName(respuesta.userNCarnet) }}</td>
@@ -73,7 +73,7 @@
 
     <div class="mobile-respuestas-view">
       <div class="respuestas-list">
-        @for (respuesta of filteredRespuestas(); track respuesta.id) {
+        @for (respuesta of paginatedRespuestas(); track respuesta.id) {
           <div class="respuesta-card" (click)="selectedRespuesta.set(respuesta)">
             <div class="respuesta-info">
               <h4>{{ getConvoTitle(respuesta.convoId) }}</h4>
@@ -84,6 +84,9 @@
                 </span>
                 @if (respuesta.isCustom) {
                   <span class="badge badge-custom">Personalitzat</span>
+                }
+                @if (respuesta.source && respuesta.source !== 'manual') {
+                  <span class="badge badge-auto" [title]="respuesta.autoAssignReason || ''">Auto</span>
                 }
               </div>
             </div>
@@ -104,6 +107,23 @@
             </div>
           </div>
         }
+      </div>
+    </div>
+
+    <div class="pagination-controls">
+      <div class="pagination-size">
+        <label for="respuestas-page-size">Per pàgina</label>
+        <select id="respuestas-page-size" [value]="pageSize()" (change)="setPageSize($any($event.target).value)">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="pagination-nav">
+        <button class="btn btn-sm btn-secondary" (click)="goToPreviousPage()" [disabled]="currentPage() <= 1">Anterior</button>
+        <span>Pàgina {{ currentPage() }} de {{ totalPages() }}</span>
+        <button class="btn btn-sm btn-secondary" (click)="goToNextPage()" [disabled]="currentPage() >= totalPages()">Següent</button>
       </div>
     </div>
   } @else {
@@ -316,6 +336,16 @@
               <p class="custom-text">{{ respuestaDetail.customText }}</p>
             </div>
           }
+
+          <div class="detail-group">
+            <label>Origen</label>
+            <p>
+              <span [class]="'badge ' + getSourceBadgeClass(respuestaDetail.source)">{{ getSourceLabel(respuestaDetail.source) }}</span>
+              @if (respuestaDetail.autoAssignReason) {
+                <small class="assign-reason"> — {{ respuestaDetail.autoAssignReason }}</small>
+              }
+            </p>
+          </div>
 
           <div class="detail-group">
             <label>Data de Creació</label>

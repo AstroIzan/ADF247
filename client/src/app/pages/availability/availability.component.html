@@ -1,0 +1,200 @@
+<div class="availability-container">
+  <header class="availability-header">
+    <div>
+      <h1>Finestres de disponibilitat</h1>
+      <p>Defineix trams on estàs disponible encara que no hi hagi convocatòria activa.</p>
+      <small>Usuari: {{ currentUserLabel }}</small>
+    </div>
+  </header>
+
+  @if (error()) {
+    <div class="error-alert">{{ error() }}</div>
+  }
+
+  @if (actionMessage()) {
+    <div class="success-alert">{{ actionMessage() }}</div>
+  }
+
+  <section class="availability-grid">
+    <article class="card calendar-card">
+      <h2>Vista calendari</h2>
+      <div class="calendar-toolbar">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="previousMonth()">&lt;</button>
+        <strong>{{ monthLabel() }}</strong>
+        <button type="button" class="btn btn-secondary btn-sm" (click)="nextMonth()">&gt;</button>
+      </div>
+
+      <div class="calendar-weekdays">
+        @for (label of weekdayLabels; track label) {
+          <span>{{ label }}</span>
+        }
+      </div>
+
+      <div class="calendar-grid">
+        @for (cell of monthDays(); track cell.key) {
+          <button type="button" class="calendar-cell-btn" [class.out-month]="!cell.inCurrentMonth" [class.has-availability]="cell.hasAvailable" (click)="openDateModal(cell)">
+            <small class="date-label">{{ cell.date.getDate() }}</small>
+            @if (cell.hasAvailable) {
+              <div class="availability-indicators">
+                <div class="availability-bar available" [title]="'Disponible: ' + cell.availableRanges.join(', ')"></div>
+              </div>
+              <small class="time-range">
+                @for (range of cell.availableRanges; track range) {
+                  <span class="range-label available-text">{{ range }}</span>
+                }
+              </small>
+            }
+          </button>
+        }
+      </div>
+    </article>
+
+    @if (isDateModalOpen()) {
+      <div class="modal-overlay" (click)="closeDateModal()">
+        <div class="modal-content" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Disponibilitats de {{ selectedDateForModal() | date:'d MMMM':'Europe/Madrid':'ca-ES' }}</h3>
+            <button type="button" class="modal-close-btn" (click)="closeDateModal()">&times;</button>
+          </div>
+          <div class="modal-body">
+            @if (selectedDateWindows().length > 0) {
+              <div class="ranges-list">
+                @for (item of selectedDateWindows(); track item.id) {
+                  <div class="range-item">
+                    <span class="range-time">{{ item.range }}</span>
+                    <div class="range-actions">
+                      <button type="button" class="btn-icon btn-edit" title="Editar" (click)="editWindowFromModal(item.window)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                        </svg>
+                      </button>
+                      <button type="button" class="btn-icon btn-delete" title="Eliminar" (click)="deleteWindowFromModal(item.id)">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="3 6 5 6 21 6"></polyline>
+                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              <p class="empty-state">No hi ha disponibilitats per a aquesta data.</p>
+            }
+          </div>
+        </div>
+      </div>
+    }
+
+    <article class="card">
+      <h2>{{ editingWindowId() ? 'Editar finestra' : 'Nova finestra' }}</h2>
+
+      @if (formError()) {
+        <div class="error-alert form-error-alert">{{ formError() }}</div>
+      }
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Data inici</label>
+          <input type="date" [value]="form().fromDate" (change)="updateFormField('fromDate', $any($event.target).value)" />
+        </div>
+
+        <div class="form-group">
+          <label>Data fi</label>
+          <input type="date" [value]="form().toDate" (change)="updateFormField('toDate', $any($event.target).value)" />
+        </div>
+
+        <div class="form-group">
+          <label>Hora inici</label>
+          <div class="time-inputs">
+            <select [value]="form().fromTime.split(':')[0]" (change)="updateFormField('fromTime', $any($event.target).value + ':' + form().fromTime.split(':')[1])">
+              <option value="">HH</option>
+              @for (hour of hourOptions; track hour) {
+                <option [value]="hour">{{ hour }}</option>
+              }
+            </select>
+            <span class="time-separator">:</span>
+            <select [value]="form().fromTime.split(':')[1]" (change)="updateFormField('fromTime', form().fromTime.split(':')[0] + ':' + $any($event.target).value)">
+              <option value="">MM</option>
+              @for (minute of minuteOptions; track minute) {
+                <option [value]="minute">{{ minute }}</option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Hora fi</label>
+          <div class="time-inputs">
+            <select [value]="form().toTime.split(':')[0]" (change)="updateFormField('toTime', $any($event.target).value + ':' + form().toTime.split(':')[1])">
+              <option value="">HH</option>
+              @for (hour of hourOptions; track hour) {
+                <option [value]="hour">{{ hour }}</option>
+              }
+            </select>
+            <span class="time-separator">:</span>
+            <select [value]="form().toTime.split(':')[1]" (change)="updateFormField('toTime', form().toTime.split(':')[0] + ':' + $any($event.target).value)">
+              <option value="">MM</option>
+              @for (minute of minuteOptions; track minute) {
+                <option [value]="minute">{{ minute }}</option>
+              }
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="button" [disabled]="saving()" (click)="saveWindow()">
+          {{ saving() ? 'Desant...' : (editingWindowId() ? 'Actualitzar finestra' : 'Crear finestra') }}
+        </button>
+        @if (editingWindowId()) {
+          <button class="btn btn-secondary" type="button" [disabled]="saving()" (click)="resetForm()">Cancel·lar edició</button>
+        }
+      </div>
+    </article>
+
+    <article class="card">
+      <h2>Historic propi de {{ monthName() }}</h2>
+
+      @if (loading()) {
+        <div class="loading">Carregant finestres...</div>
+      } @else if (filteredWindows().length === 0) {
+        <div class="empty-state">No hi ha disponibilitats en el mes seleccionat.</div>
+      } @else {
+        <div class="windows-list">
+          @for (item of filteredWindows(); track item.id) {
+            <article class="window-item">
+              <div class="window-top">
+                <strong>Disponible</strong>
+              </div>
+
+              <p>
+                {{ formatDateOnly(item.fromDateTime) }}
+                ->
+                {{ formatDateOnly(item.toDateTime) }}
+              </p>
+
+              <p>
+                {{ formatTimeOnly(item.fromDateTime) }}
+                ->
+                {{ formatTimeOnly(item.toDateTime) }}
+              </p>
+
+              @if (item.notes) {
+                <p class="notes">{{ item.notes }}</p>
+              }
+
+              <div class="window-actions">
+                <button class="btn btn-secondary btn-sm" type="button" (click)="editWindow(item)">Editar</button>
+                <button class="btn btn-danger btn-sm" type="button" (click)="deleteWindow(item)">Eliminar</button>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </article>
+  </section>
+</div>

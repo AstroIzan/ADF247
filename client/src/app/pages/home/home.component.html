@@ -5,13 +5,13 @@
       <p>Selecciona una data i revisa les convocatòries del dia.</p>
     </div>
 
-    @if (authService.isAdmin()) {
-      <div class="home-header-actions">
+    <div class="home-header-actions">
+      @if (authService.isAdmin()) {
         <button type="button" class="btn btn-primary" (click)="openCreateConvoModal()">
           + Crear Convocatòria
         </button>
-      </div>
-    }
+      }
+    </div>
   </header>
 
   <section class="home-grid">
@@ -81,6 +81,9 @@
       } @else if (dayConvos().length === 0) {
         <div class="empty-state">No hi ha convocatòries per a aquest dia.</div>
       } @else {
+        @if (adminActionFeedback()) {
+          <div class="success-alert">{{ adminActionFeedback() }}</div>
+        }
         <div class="convos-list-scroll" [class.scroll-active]="dayConvos().length > 3">
           <ul class="convos-list">
             @for (convo of dayConvos(); track convo.id) {
@@ -89,7 +92,38 @@
                 <div class="convo-top">
                   <h3>{{ convo.title }}</h3>
                   <div class="convo-top-right">
-                    @if (authService.isAdmin()) {
+                    @if (authService.isAdmin() || canOpenGuardiaResponses(convo)) {
+                      @if (authService.isAdmin()) {
+                      <button
+                        type="button"
+                        class="admin-convo-btn admin-convo-sortida-toggle"
+                        [class.sortida-action-enable]="!convo.sortida"
+                        [class.sortida-action-disable]="convo.sortida"
+                        [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
+                        (click)="toggleConvoSortida(convo)"
+                        [title]="isConvocatoriaClosed(convo)
+                          ? 'Convocatòria tancada'
+                          : (convo.sortida
+                            ? 'Desactivar sortida (canvi manual)'
+                            : 'Activar sortida (canvi manual)')"
+                        [attr.aria-label]="convo.sortida ? 'Desactivar sortida' : 'Activar sortida'"
+                      >
+                        {{ convo.sortida ? '-' : '+' }}
+                      </button>
+                      <button
+                        type="button"
+                        class="admin-convo-btn admin-convo-bell"
+                        [disabled]="isRunningConvoAdminAction('automation', convo.id) || isConvocatoriaClosed(convo)"
+                        (click)="runConvoAutomation(convo)"
+                        [title]="isConvocatoriaClosed(convo)
+                          ? 'Convocatòria tancada'
+                          : 'Executar automatització de notificacions'"
+                        [attr.aria-label]="isConvocatoriaClosed(convo)
+                          ? 'Convocatòria tancada'
+                          : 'Executar automatització de notificacions'"
+                      >
+                        🔔
+                      </button>
                       <button
                         type="button"
                         class="admin-convo-btn"
@@ -98,6 +132,19 @@
                       >
                         ✎
                       </button>
+                      }
+
+                      @if (canOpenGuardiaResponses(convo)) {
+                        <button
+                          type="button"
+                          class="admin-convo-btn admin-convo-responses"
+                          (click)="openGuardiaResponsesModal(convo)"
+                          title="Veure respostes positives"
+                          aria-label="Veure respostes positives"
+                        >
+                          👥
+                        </button>
+                      }
                     }
 
                     @if (isConvocatoriaClosed(convo)) {
@@ -113,15 +160,50 @@
                     }
                   </div>
                 </div>
-                <p><strong>Tipus:</strong> {{ convo.convoType?.name || convo.convoTypeId }}</p>
                 <p><strong>Responsable:</strong> {{ getResponsableName(convo.responsableId) }}</p>
                 <p><strong>Ubicació:</strong> {{ convo.ubiSortida }}</p>
-                <p><strong>Inici:</strong> {{ convo.startTime | date:'shortTime' }}</p>
-                @if (convo.finalTime) {
-                  <p><strong>Fi:</strong> {{ convo.finalTime | date:'shortTime' }}</p>
-                }
+                <div class="convo-meta-row convo-meta-row-end">
+                  <p class="convo-time-text">
+                    <strong>Horari:</strong>
+                    <span class="convo-time-value">{{ convo.startTime | date:'shortTime' }}</span>
+                    @if (convo.finalTime) {
+                      <span class="convo-time-separator">a</span>
+                      <span class="convo-time-value">{{ convo.finalTime | date:'shortTime' }}</span>
+                    }
+                  </p>
+                </div>
+                <p class="convo-sortida-row">
+                  <span class="convo-sortida-label-group">
+                    <strong>Sortida:</strong>
+                    <span class="sortida-pill" [class.sortida-pill-on]="convo.sortida" [class.sortida-pill-off]="!convo.sortida">
+                      {{ getSortidaBadgeLabel(convo.sortida) }}
+                    </span>
+                  </span>
+
+                  @if (canViewConvocatoriaSummary(convo)) {
+                    <div class="convo-response-counters convo-response-counters-mobile" [class.disabled]="isConvocatoriaClosed(convo)">
+                      <span class="response-counter response-counter-green" title="No groc">
+                        {{ roleSummary.noGroc }}
+                      </span>
+                      <span class="response-counter response-counter-yellow" title="Groc">
+                        {{ roleSummary.groc }}
+                      </span>
+                    </div>
+                  }
+                </p>
 
                 <div class="convo-bottom-row">
+                  @if (canViewConvocatoriaSummary(convo)) {
+                    <div class="convo-response-counters convo-response-counters-desktop" [class.disabled]="isConvocatoriaClosed(convo)">
+                      <span class="response-counter response-counter-green" title="No groc">
+                        {{ roleSummary.noGroc }}
+                      </span>
+                      <span class="response-counter response-counter-yellow" title="Groc">
+                        {{ roleSummary.groc }}
+                      </span>
+                    </div>
+                  }
+
                   @if (getMyRespuesta(convo.id); as myRespuesta) {
                     <div class="answer-actions answer-actions-answered">
                       <button
@@ -159,17 +241,6 @@
                       >
                         PERSONALITZAR
                       </button>
-                    </div>
-                  }
-
-                  @if (canViewConvocatoriaSummary(convo)) {
-                    <div class="convo-response-counters">
-                      <span class="response-counter response-counter-green" title="No groc">
-                        {{ roleSummary.noGroc }}
-                      </span>
-                      <span class="response-counter response-counter-yellow" title="Groc">
-                        {{ roleSummary.groc }}
-                      </span>
                     </div>
                   }
                 </div>
@@ -291,7 +362,7 @@
 
   @if (showAdminConvoModal() && adminConvo()) {
     <div class="modal-overlay" (click)="closeAdminConvoModal()">
-      <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal modal-wide modal-allow-overflow" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Gestió de Convocatòria</h3>
           <button class="close-btn" (click)="closeAdminConvoModal()">&times;</button>
@@ -322,10 +393,11 @@
               <div class="time-field">
                 <input
                   #adminStartTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="adminConvoForm().startTime"
-                  (change)="updateAdminConvoField('startTime', $any($event.target).value)"
+                  (input)="updateAdminConvoField('startTime', $any($event.target).value)"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminStartTimeInput, 'adminStartTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
@@ -338,10 +410,11 @@
               <div class="time-field">
                 <input
                   #adminEndTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="adminConvoForm().finalTime"
-                  (change)="updateAdminConvoField('finalTime', $any($event.target).value)"
+                  (input)="updateAdminConvoField('finalTime', $any($event.target).value)"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminEndTimeInput, 'adminEndTime')">
                   <span class="time-picker-icon" aria-hidden="true"></span>
@@ -373,85 +446,123 @@
 
             <div class="form-group">
               <label>Responsable</label>
-              <select
-                [value]="adminConvoForm().responsableId || ''"
-                (change)="updateAdminConvoField('responsableId', $any($event.target).value)"
-              >
-                <option value="">Selecciona responsable</option>
-                @for (user of users(); track user.id) {
-                  <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+              <div class="responsable-picker">
+                <button type="button" class="responsable-picker-trigger" (click)="toggleAdminResponsableMenu()">
+                  <span class="responsable-picker-label">{{ getResponsablePickerName(adminConvoForm().responsableId) }}</span>
+                  <span class="responsable-pill-group">
+                    @if (getResponsableLeadershipLabel(adminConvoForm().responsableId) === 'cap-operatiu') {
+                      <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                    } @else if (getResponsableLeadershipLabel(adminConvoForm().responsableId) === 'cap-colla') {
+                      <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                    }
+
+                    @if (getResponsableRoleLabel(adminConvoForm().responsableId) === 'groc') {
+                      <span class="role-pill role-pill-groc">groc</span>
+                    } @else if (getResponsableRoleLabel(adminConvoForm().responsableId) === 'verd') {
+                      <span class="role-pill role-pill-verd">verd</span>
+                    }
+                  </span>
+                </button>
+
+                @if (showAdminResponsableMenu()) {
+                  <div class="responsable-picker-menu">
+                    <button
+                      type="button"
+                      class="responsable-picker-option"
+                      [class.active]="adminConvoForm().responsableId === null"
+                      (click)="selectAdminResponsable(null)"
+                    >
+                      <span class="responsable-picker-option-name">Sense responsable (auto-assignació)</span>
+                    </button>
+                    @for (user of users(); track user.id) {
+                      <button
+                        type="button"
+                        class="responsable-picker-option"
+                        [class.active]="adminConvoForm().responsableId === user.id"
+                        (click)="selectAdminResponsable(user.id)"
+                      >
+                        <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
+                        <span class="responsable-pill-group">
+                          @if (user.roles.isCapOperatiu) {
+                            <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                          } @else if (user.roles.isCapColla) {
+                            <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                          }
+                          <span class="role-pill" [class.role-pill-groc]="user.roles.isGroc" [class.role-pill-verd]="!user.roles.isGroc">
+                            {{ user.roles.isGroc ? 'groc' : 'verd' }}
+                          </span>
+                        </span>
+                      </button>
+                    }
+                  </div>
                 }
-              </select>
+              </div>
             </div>
 
             <div class="form-group">
-              <label class="checkbox-label">
+              <label class="automation-toggle" [class.is-disabled]="adminConvoSaving()">
                 <input
                   type="checkbox"
                   [checked]="adminConvoForm().autoAssignResponsable"
                   (change)="updateAdminConvoField('autoAssignResponsable', $any($event.target).checked)"
+                  [disabled]="adminConvoSaving()"
                 />
-                Autoassignar responsable segons respostes
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Autoassignar responsable segons respostes</span>
               </label>
             </div>
 
             <div class="form-group">
-              <label class="checkbox-label">
+              <label class="automation-toggle" [class.is-disabled]="adminConvoSaving()">
                 <input
                   type="checkbox"
                   [checked]="adminConvoForm().isActive"
                   (change)="updateAdminConvoField('isActive', $any($event.target).checked)"
+                  [disabled]="adminConvoSaving()"
                 />
-                Convocatòria activa
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Convocatòria activa</span>
               </label>
             </div>
 
             <div class="form-group">
-              <label class="checkbox-label">
+              <label class="automation-toggle" [class.is-disabled]="adminConvoSaving()">
                 <input
                   type="checkbox"
                   [checked]="adminConvoForm().sortida"
                   (change)="updateAdminConvoField('sortida', $any($event.target).checked)"
+                  [disabled]="adminConvoSaving()"
                 />
-                Sortida
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Sortida</span>
               </label>
             </div>
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [checked]="adminConvoForm().moreThan2"
-                (change)="updateAdminConvoField('moreThan2', $any($event.target).checked)"
-              />
-              Més de 2 participants
-            </label>
           </div>
 
           <h4 class="responses-title">Respostes d'usuaris</h4>
           @if (getRespuestasForConvocatoria(adminConvo()!.id).length === 0) {
             <p class="empty-state">No hi ha respostes registrades.</p>
           } @else {
-            <div class="table-responsive">
+            <div class="table-responsive admin-responses-table-wrap">
               <table class="respuestas-table">
                 <thead>
                   <tr>
                     <th>Usuari</th>
                     <th>Disponible</th>
                     <th>Personalitzat</th>
+                    <th>Assistència</th>
                   </tr>
                 </thead>
                 <tbody>
                   @for (respuesta of getRespuestasForConvocatoria(adminConvo()!.id); track respuesta.id) {
-                    <tr>
-                      <td>{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</td>
-                      <td>
+                    <tr [class.attendance-unconfirmed-row]="respuesta.attendanceConfirmed === false">
+                      <td class="attendance-muted-cell">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</td>
+                      <td class="attendance-muted-cell">
                         <span [class]="respuesta.response ? 'badge-yes' : 'badge-no'">
                           {{ respuesta.response ? 'Sí' : 'No' }}
                         </span>
                       </td>
-                      <td>
+                      <td class="attendance-muted-cell">
                         @if (respuesta.customText) {
                           <button
                             type="button"
@@ -464,19 +575,198 @@
                           <span>-</span>
                         }
                       </td>
+                      <td class="attendance-cell-end">
+                        @if (canManageAttendanceForConvo(adminConvo())) {
+                          <div class="attendance-actions">
+                            <button
+                              type="button"
+                              class="btn btn-sm attendance-toggle-btn"
+                              [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
+                              [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                              [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                              [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                              (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
+                            >
+                              <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
+                            </button>
+                          </div>
+                        } @else {
+                          <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
+                            {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                          </span>
+                        }
+                      </td>
                     </tr>
                   }
                 </tbody>
               </table>
             </div>
+
+            <div class="admin-responses-cards">
+              @for (respuesta of getRespuestasForConvocatoria(adminConvo()!.id); track respuesta.id) {
+                <article
+                  class="admin-response-card"
+                  [class.admin-response-card-verd]="respuesta.response && !isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.admin-response-card-groc]="respuesta.response && isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.admin-response-card-no]="!respuesta.response"
+                  [class.attendance-unconfirmed]="respuesta.attendanceConfirmed === false"
+                >
+                  <div class="admin-response-card-head">
+                    <strong>{{ respuesta.userNCarnet }}</strong>
+
+                    @if (hasRespuestaInfo(respuesta)) {
+                      <button
+                        type="button"
+                        class="info-icon-btn"
+                        (click)="openRespuestaInfoModal(respuesta)"
+                        title="Veure detall"
+                        aria-label="Veure detall"
+                      >
+                        <span class="info-circle-icon" aria-hidden="true">i</span>
+                      </button>
+                    }
+                  </div>
+
+                  <p class="admin-response-card-name">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</p>
+
+                  <div class="attendance-actions">
+                    @if (canManageAttendanceForConvo(adminConvo())) {
+                      <button
+                        type="button"
+                        class="btn btn-sm attendance-toggle-btn"
+                        [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
+                        [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                        [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                        [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                        (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
+                      >
+                        <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
+                      </button>
+                    } @else {
+                      <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
+                        {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                      </span>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
           }
         </div>
 
         <div class="modal-footer">
+          <button class="btn btn-danger" [disabled]="adminConvoSaving()" (click)="deleteAdminConvocatoria()">Eliminar convocatòria</button>
           <button class="btn btn-secondary" (click)="closeAdminConvoModal()">Tancar</button>
           <button class="btn btn-primary" [disabled]="adminConvoSaving()" (click)="saveAdminConvoChanges()">
             {{ adminConvoSaving() ? 'Desant...' : 'Desar canvis' }}
           </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showGuardiaResponsesModal() && guardiaResponsesConvo()) {
+    <div class="modal-overlay" (click)="closeGuardiaResponsesModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Respostes de la convocatòria</h3>
+          <button class="close-btn" (click)="closeGuardiaResponsesModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          @if (getPositiveRespuestasForConvocatoria(guardiaResponsesConvo()!.id).length === 0) {
+            <p class="empty-state">No hi ha usuaris amb resposta positiva.</p>
+          } @else {
+            <div class="guardia-response-cards">
+              @for (respuesta of getPositiveRespuestasForConvocatoria(guardiaResponsesConvo()!.id); track respuesta.id) {
+                <article
+                  class="guardia-response-card"
+                  [class.guardia-response-card-groc]="isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.guardia-response-card-verd]="!isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.attendance-unconfirmed]="respuesta.attendanceConfirmed === false"
+                >
+                  <div class="guardia-response-card-wrapper">
+                    <div class="guardia-response-card-content">
+                      <div class="guardia-response-card-head">
+                        <strong>{{ respuesta.userNCarnet }}</strong>
+
+                        @if (hasRespuestaInfo(respuesta)) {
+                          <button
+                            type="button"
+                            class="info-icon-btn"
+                            (click)="openRespuestaInfoModal(respuesta)"
+                            title="Veure detall"
+                            aria-label="Veure detall"
+                          >
+                            <span class="info-circle-icon" aria-hidden="true">i</span>
+                          </button>
+                        }
+                      </div>
+
+                      <p class="guardia-response-card-name">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</p>
+                    </div>
+
+                    <div class="guardia-response-card-button">
+                      <div class="attendance-actions">
+                        @if (canManageAttendanceForConvo(guardiaResponsesConvo())) {
+                          <button
+                            type="button"
+                            class="btn btn-sm attendance-toggle-btn"
+                            [class.attendance-toggle-btn-mark-present]="!respuesta.attendanceConfirmed"
+                            [class.attendance-toggle-btn-mark-absent]="respuesta.attendanceConfirmed"
+                            [attr.title]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                            [attr.aria-label]="respuesta.attendanceConfirmed ? 'Marcar no presentat' : 'Marcar presentat'"
+                            (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
+                          >
+                            <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
+                          </button>
+                        } @else {
+                          <span [class]="respuesta.attendanceConfirmed ? 'badge-yes' : 'badge-no'">
+                            {{ respuesta.attendanceConfirmed ? 'Presentat' : 'No presentat' }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeGuardiaResponsesModal()">Tancar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showRespuestaInfoModal() && respuestaInfo()) {
+    <div class="modal-overlay" (click)="closeRespuestaInfoModal()">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Detall resposta</h3>
+          <button class="close-btn" (click)="closeRespuestaInfoModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p><strong>Usuari:</strong> {{ respuestaInfo()!.userName }}</p>
+
+          @if (respuestaInfo()!.fullHorari) {
+            <p><strong>Horari:</strong> Horari complet.</p>
+          } @else if (respuestaInfo()!.customStartTime && respuestaInfo()!.customEndTime) {
+            <p><strong>Horari triat:</strong> {{ respuestaInfo()!.customStartTime }} - {{ respuestaInfo()!.customEndTime }}</p>
+          } @else {
+            <p><strong>Horari triat:</strong> No ha indicat horari concret.</p>
+          }
+
+          @if (respuestaInfo()!.comment) {
+            <p><strong>Comentari:</strong> {{ respuestaInfo()!.comment }}</p>
+          } @else {
+            <p><strong>Comentari:</strong> Sense comentari.</p>
+          }
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-primary" (click)="closeRespuestaInfoModal()">Tancar</button>
         </div>
       </div>
     </div>
@@ -501,7 +791,7 @@
 
   @if (showCreateConvoModal()) {
     <div class="modal-overlay" (click)="closeCreateConvoModal()">
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal modal-allow-overflow" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Nova convocatòria</h3>
           <button class="close-btn" (click)="closeCreateConvoModal()">&times;</button>
@@ -516,13 +806,28 @@
           }
 
           <div class="form-group">
-            <label>Títol</label>
-            <input
-              type="text"
-              [value]="createConvoForm().title"
-              (input)="updateCreateConvoField('title', $any($event.target).value)"
-            />
+            <label>Tipus</label>
+            <select
+              [value]="createConvoForm().convoTypeId || ''"
+              (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
+            >
+              <option value="">Selecciona tipus</option>
+              @for (type of convoTypes(); track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
           </div>
+
+          @if (!shouldHideCreateConvoTitleField()) {
+            <div class="form-group">
+              <label>Títol</label>
+              <input
+                type="text"
+                [value]="createConvoForm().title"
+                (input)="updateCreateConvoField('title', $any($event.target).value)"
+              />
+            </div>
+          }
 
           @if (!isGuardiaTypeSelected() && !isSemanalTypeSelected() && !isIncendiTypeSelected()) {
             <div class="form-group">
@@ -542,19 +847,6 @@
               [value]="createConvoForm().ubiSortida"
               (input)="updateCreateConvoField('ubiSortida', $any($event.target).value)"
             />
-          </div>
-
-          <div class="form-group">
-            <label>Tipus</label>
-            <select
-              [value]="createConvoForm().convoTypeId || ''"
-              (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
-            >
-              <option value="">Selecciona tipus</option>
-              @for (type of convoTypes(); track type.id) {
-                <option [value]="type.id">{{ type.name }}</option>
-              }
-            </select>
           </div>
 
           @if (isGuardiaTypeSelected()) {
@@ -739,47 +1031,92 @@
 
           <div class="form-group">
             <label>Responsable</label>
-            <select
-              [value]="createConvoForm().responsableId || ''"
-              (change)="updateCreateConvoField('responsableId', $any($event.target).value)"
-            >
-              <option value="">Selecciona responsable</option>
-              @for (user of users(); track user.id) {
-                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+            <div class="responsable-picker">
+              <button type="button" class="responsable-picker-trigger" (click)="toggleCreateResponsableMenu()">
+                <span class="responsable-picker-label">{{ getResponsablePickerName(createConvoForm().responsableId) }}</span>
+                <span class="responsable-pill-group">
+                  @if (getResponsableLeadershipLabel(createConvoForm().responsableId) === 'cap-operatiu') {
+                    <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                  } @else if (getResponsableLeadershipLabel(createConvoForm().responsableId) === 'cap-colla') {
+                    <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                  }
+
+                  @if (getResponsableRoleLabel(createConvoForm().responsableId) === 'groc') {
+                    <span class="role-pill role-pill-groc">groc</span>
+                  } @else if (getResponsableRoleLabel(createConvoForm().responsableId) === 'verd') {
+                    <span class="role-pill role-pill-verd">verd</span>
+                  }
+                </span>
+              </button>
+
+              @if (showCreateResponsableMenu()) {
+                <div class="responsable-picker-menu">
+                  <button
+                    type="button"
+                    class="responsable-picker-option"
+                    [class.active]="createConvoForm().responsableId === null"
+                    (click)="selectCreateResponsable(null)"
+                  >
+                    <span class="responsable-picker-option-name">Sense responsable (auto-assignació)</span>
+                  </button>
+                  @for (user of users(); track user.id) {
+                    <button
+                      type="button"
+                      class="responsable-picker-option"
+                      [class.active]="createConvoForm().responsableId === user.id"
+                      (click)="selectCreateResponsable(user.id)"
+                    >
+                      <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
+                      <span class="responsable-pill-group">
+                        @if (user.roles.isCapOperatiu) {
+                          <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                        } @else if (user.roles.isCapColla) {
+                          <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                        }
+                        <span class="role-pill" [class.role-pill-groc]="user.roles.isGroc" [class.role-pill-verd]="!user.roles.isGroc">
+                          {{ user.roles.isGroc ? 'groc' : 'verd' }}
+                        </span>
+                      </span>
+                    </button>
+                  }
+                </div>
               }
-            </select>
+            </div>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle">
               <input
                 type="checkbox"
                 [checked]="createConvoForm().autoAssignResponsable"
                 (change)="updateCreateConvoField('autoAssignResponsable', $any($event.target).checked)"
               />
-              Autoassignar responsable segons respostes
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Autoassignar responsable segons respostes</span>
             </label>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle">
               <input
                 type="checkbox"
                 [checked]="createConvoForm().isActive"
                 (change)="updateCreateConvoField('isActive', $any($event.target).checked)"
               />
-              Convocatòria activa
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Convocatòria activa</span>
             </label>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle">
               <input
                 type="checkbox"
                 [checked]="createConvoForm().sortida"
                 (change)="updateCreateConvoField('sortida', $any($event.target).checked)"
               />
-              Sortida
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Sortida</span>
             </label>
           </div>
         </div>

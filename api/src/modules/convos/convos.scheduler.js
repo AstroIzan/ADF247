@@ -1,16 +1,44 @@
-const { updateSortidaForTomorrow } = require('./convos.service')
+const {
+  ensureConfiguredConvoTypes,
+  runDailyNotificationAutomation,
+  detectAndRecordMissedRun,
+  runRetentionCleanup,
+} = require('../notifications/notifications.service')
+const { readNotificationSettings } = require('../notifications/notifications.config')
 
 let scheduledTimer = null
+let cleanupTimer = null
 
 function getNextRunDate(referenceDate = new Date()) {
+  const settings = readNotificationSettings()
   const nextRun = new Date(referenceDate)
-  nextRun.setHours(8, 0, 0, 0)
+  nextRun.setHours(settings.schedule.dailyRunHour, settings.schedule.dailyRunMinute, 0, 0)
 
   if (nextRun <= referenceDate) {
     nextRun.setDate(nextRun.getDate() + 1)
   }
 
   return nextRun
+}
+
+function scheduleRetentionCleanup() {
+  const now = new Date()
+  const nextCleanup = new Date(now)
+  nextCleanup.setHours(3, 0, 0, 0)
+  if (nextCleanup <= now) {
+    nextCleanup.setDate(nextCleanup.getDate() + 1)
+  }
+
+  const delay = nextCleanup.getTime() - now.getTime()
+  cleanupTimer = setTimeout(async () => {
+    try {
+      await runRetentionCleanup()
+    } catch (error) {
+      console.error('[convos.scheduler] Error en limpieza de histórico:', error)
+    } finally {
+      scheduleRetentionCleanup()
+    }
+  }, delay)
 }
 
 function scheduleNextRun() {
@@ -20,10 +48,14 @@ function scheduleNextRun() {
 
   scheduledTimer = setTimeout(async () => {
     try {
-      await updateSortidaForTomorrow(new Date())
-      console.log('[convos.scheduler] Sortida actualizada para las convocatorias de manana.')
+      // Check for potential missed runs before executing (edge case: server was briefly down)
+      await detectAndRecordMissedRun(new Date()).catch((err) => {
+        console.error('[convos.scheduler] Error al detectar correguda omesa:', err)
+      })
+      const summary = await runDailyNotificationAutomation(null, new Date())
+      console.log('[convos.scheduler] Automatizacion diaria completada.', summary)
     } catch (error) {
-      console.error('[convos.scheduler] Error al actualizar sortida:', error)
+      console.error('[convos.scheduler] Error en automatizacion diaria:', error)
     } finally {
       scheduleNextRun()
     }
@@ -36,11 +68,24 @@ async function startConvoScheduler() {
   }
 
   try {
-    await updateSortidaForTomorrow(new Date())
-    console.log('[convos.scheduler] Estado inicial de sortida sincronizado.')
+    await ensureConfiguredConvoTypes()
+    // Detect missed runs before attempting the initial run
+    await detectAndRecordMissedRun(new Date()).catch((err) => {
+      console.error('[convos.scheduler] Error al detectar correguda omesa en inicio:', err)
+    })
+    await runDailyNotificationAutomation(null, new Date())
+    console.log('[convos.scheduler] Estado inicial de automatizacion sincronizado.')
   } catch (error) {
-    console.error('[convos.scheduler] Error en sincronizacion inicial de sortida:', error)
+    console.error('[convos.scheduler] Error en sincronizacion inicial de automatizacion:', error)
   }
+
+  // Run initial cleanup and schedule daily cleanup at 03:00
+  try {
+    await runRetentionCleanup()
+  } catch (error) {
+    console.error('[convos.scheduler] Error en limpieza inicial de histórico:', error)
+  }
+  scheduleRetentionCleanup()
 
   scheduleNextRun()
 }

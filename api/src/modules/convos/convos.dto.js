@@ -180,9 +180,8 @@ function buildConvocatoriaCreateDto(payload) {
     date: normalizeDate(payload.date, { fieldName: 'date', required: true }),
     title: normalizeText(payload.title, { fieldName: 'title' }),
     ubiSortida: normalizeText(payload.ubiSortida, { fieldName: 'ubiSortida' }),
-    responsableId: normalizeInteger(payload.responsableId, { fieldName: 'responsableId', required: true }),
+    responsableId: payload.responsableId != null ? normalizeInteger(payload.responsableId, { fieldName: 'responsableId' }) : null,
     convoTypeId: normalizeInteger(payload.convoTypeId, { fieldName: 'convoTypeId', required: true }),
-    moreThan2: normalizeBoolean(payload.moreThan2, 'moreThan2') ?? false,
     startTime: normalizeDate(payload.startTime, { fieldName: 'startTime', required: true }),
     finalTime: normalizeDate(payload.finalTime, { fieldName: 'finalTime', nullable: true }),
     isActive: normalizeBoolean(payload.isActive, 'isActive') ?? true,
@@ -226,10 +225,6 @@ function buildConvocatoriaUpdateDto(payload) {
       fieldName: 'convoTypeId',
       min: 1,
     })
-  }
-
-  if (payload.moreThan2 !== undefined) {
-    dto.moreThan2 = normalizeBoolean(payload.moreThan2, 'moreThan2')
   }
 
   if (payload.startTime !== undefined) {
@@ -289,7 +284,6 @@ function mapConvocatoriaToDto(convocatoria) {
       : null,
     convoTypeId: convocatoria.convoTypeId,
     convoType: convocatoria.convoType ? mapConvoTypeToDto(convocatoria.convoType) : null,
-    moreThan2: convocatoria.moreThan2,
     startTime: convocatoria.startTime,
     finalTime: convocatoria.finalTime,
     isActive: convocatoria.isActive,

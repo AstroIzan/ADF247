@@ -19,9 +19,13 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  roles         Role[]
-  convocatories Convocatoria[] @relation("ConvocatoriaResponsable")
-  respostas     Respuesta[]
+  roles                      Role[]
+  convocatories              Convocatoria[]              @relation("ConvocatoriaResponsable")
+  respostas                  Respuesta[]
+  availabilityWindows        AvailabilityWindow[]
+  deviceTokens               DeviceToken[]
+  notificationLogs           NotificationLog[]           @relation("NotificationLogSender")
+  notificationAutomationRuns NotificationAutomationRun[] @relation("NotificationAutomationRunActor")
 }
 
 model Role {
@@ -45,15 +49,15 @@ model ConvoType {
 }
 
 model Convocatoria {
-  id                    Int       @id @default(autoincrement())
-  date                  DateTime
-  title                 String
-  ubiSortida            String
-  responsableId         Int
-  user                  User      @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
-  convoTypeId           Int
-  convoType             ConvoType @relation(fields: [convoTypeId], references: [id])
-  moreThan2             Boolean   @default(false)
+  id            Int       @id @default(autoincrement())
+  date          DateTime
+  title         String
+  ubiSortida    String
+  responsableId Int?
+  user          User?     @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
+  convoTypeId   Int
+  convoType     ConvoType @relation(fields: [convoTypeId], references: [id])
+
   startTime             DateTime
   finalTime             DateTime?
   isActive              Boolean   @default(true)
@@ -64,13 +68,105 @@ model Convocatoria {
 }
 
 model Respuesta {
-  id           Int          @id @default(autoincrement())
-  convoId      Int
-  convocatoria Convocatoria @relation(fields: [convoId], references: [id])
-  userNCarnet  String
-  user         User         @relation(fields: [userNCarnet], references: [nCarnet])
-  isCustom     Boolean      @default(false)
-  customText   String?
-  fullHorari   Boolean      @default(false)
-  response     Boolean
+  id                  Int          @id @default(autoincrement())
+  convoId             Int
+  convocatoria        Convocatoria @relation(fields: [convoId], references: [id])
+  userNCarnet         String
+  user                User         @relation(fields: [userNCarnet], references: [nCarnet])
+  isCustom            Boolean      @default(false)
+  customText          String?
+  fullHorari          Boolean      @default(false)
+  response            Boolean
+  attendanceConfirmed Boolean      @default(true)
+  source              String       @default("manual")
+  autoAssignReason    String?
+
+  @@index([source])
+}
+
+model DeviceToken {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token      String   @unique
+  platform   String?
+  userAgent  String?
+  isActive   Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId, isActive])
+}
+
+model NotificationLog {
+  id             Int      @id @default(autoincrement())
+  senderUserId   Int?
+  senderUser     User?    @relation("NotificationLogSender", fields: [senderUserId], references: [id], onDelete: SetNull)
+  title          String
+  body           String
+  dataJson       String?
+  requestedCount Int      @default(0)
+  successCount   Int      @default(0)
+  failureCount   Int      @default(0)
+  targetScope    String   @default("all-active-devices")
+  status         String   @default("queued")
+  errorMessage   String?
+  createdAt      DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model AvailabilityWindow {
+  id               Int      @id @default(autoincrement())
+  userNCarnet      String
+  user             User     @relation(fields: [userNCarnet], references: [nCarnet])
+  fromDateTime     DateTime
+  toDateTime       DateTime
+  availabilityType String
+  source           String   @default("manual")
+  notes            String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userNCarnet])
+  @@index([fromDateTime, toDateTime])
+}
+
+model NotificationAutomationRun {
+  id            Int       @id @default(autoincrement())
+  trigger       String
+  source        String
+  status        String    @default("running")
+  startedAt     DateTime  @default(now())
+  finishedAt    DateTime?
+  durationMs    Int?
+  actorUserId   Int?
+  actorUser     User?     @relation("NotificationAutomationRunActor", fields: [actorUserId], references: [id], onDelete: SetNull)
+  errorMessage  String?
+  correlationId String
+  createdAt     DateTime  @default(now())
+
+  tasks NotificationAutomationTaskRun[]
+
+  @@index([createdAt])
+  @@index([trigger, status])
+  @@index([correlationId])
+}
+
+model NotificationAutomationTaskRun {
+  id           Int                       @id @default(autoincrement())
+  runId        Int
+  run          NotificationAutomationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  taskKey      String
+  status       String                    @default("running")
+  startedAt    DateTime                  @default(now())
+  finishedAt   DateTime?
+  durationMs   Int?
+  errorMessage String?
+  detailsJson  String?
+  createdAt    DateTime                  @default(now())
+
+  @@index([runId, taskKey])
+  @@index([createdAt])
 }

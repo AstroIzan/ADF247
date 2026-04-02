@@ -1,5 +1,11 @@
 .app-shell {
+	display: flex;
+	flex-direction: column;
+	height: 100vh;
+	height: 100dvh;
 	min-height: 100vh;
+	min-height: 100dvh;
+	overflow: hidden;
 }
 
 .top-nav {
@@ -101,6 +107,51 @@
 	display: inline;
 }
 
+.hamburger-btn {
+	display: none;
+	border: 1px solid #4a4a4a;
+	background: #262626;
+	color: #9a9a9a;
+	border-radius: 10px;
+	width: 36px;
+	height: 36px;
+	padding: 8px;
+	cursor: pointer;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	flex-direction: column;
+	transition: all 0.3s ease;
+}
+
+.hamburger-btn span {
+	display: block;
+	width: 18px;
+	height: 2px;
+	background: #8f8f8f;
+	border-radius: 2px;
+	transition: all 0.3s ease;
+}
+
+.hamburger-btn.open {
+	background: #1f1f1f;
+	border-color: #6f6f6f;
+}
+
+.hamburger-btn.open svg {
+	width: 20px;
+	height: 20px;
+	stroke: #8f8f8f;
+}
+
+.mobile-only {
+	display: none;
+}
+
+.mobile-menu {
+	display: none;
+}
+
 .mini-user {
 	color: #d7d7d7;
 	font-size: 12px;
@@ -132,67 +183,285 @@
 
 @media (max-width: 840px) {
 	.top-nav {
-    flex-wrap: nowrap;
-    gap: 6px;
+		gap: 8px;
   }
 
   .top-nav-left {
-    gap: 4px;
+		width: auto;
   }
 
   .top-nav-right {
-    gap: 4px;
+		display: flex;
+		margin-left: auto;
+	}
+
+	.top-nav-right .mini-user,
+	.top-nav-right .profile-btn,
+	.top-nav-right .logout {
+		display: none;
+	}
+
+	.desktop-nav-btn {
+		display: none;
+	}
+
+	.hamburger-btn.mobile-only {
+		display: inline-flex;
   }
 
   .logo {
-    margin-right: 6px;
-    padding-right: 6px;
-  }
-
-  .nav-btn {
-    padding: 6px 10px;
-    font-size: 12px;
+		margin-right: 8px;
+		padding-right: 0;
+		border-right: 0;
   }
 
   .mini-user {
     display: none;
   }
+
+	.mobile-menu {
+		display: grid;
+		gap: 6px;
+		padding: 10px 12px;
+		background: rgba(24, 24, 24, 0.98);
+		border-bottom: 1px solid rgba(240, 176, 0, 0.25);
+		position: fixed;
+		top: 52px;
+		left: 0;
+		right: 0;
+		z-index: 1300;
+		box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+		animation: slideDown 0.3s ease-out;
+	}
+
+	.mobile-menu-item {
+		border: 1px solid #4f4f4f;
+		background: #2a2a2a;
+		color: #efefef;
+		border-radius: 10px;
+		padding: 10px 12px;
+		font-size: 14px;
+		font-weight: 600;
+		text-align: left;
+		cursor: pointer;
+	}
+
+	.mobile-menu-item.danger {
+		background: #505050;
+		border-color: #1a1f25;
+		color: #f1f1f1;
+		font-weight: 700;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+	}
+
+	.mobile-menu-item.active {
+		background: linear-gradient(145deg, #f0b000 0%, #cf8f00 100%);
+		color: #1a1a1a;
+		border-color: transparent;
+		font-weight: 700;
+	}
 }
 
 @media (max-width: 600px) {
   .top-nav {
-    gap: 4px;
-    padding: 6px 8px;
+		padding: 8px 10px;
   }
 
   .logo {
     font-size: 14px;
-    margin-right: 4px;
+		margin-right: 8px;
     padding-right: 4px;
-  }
-
-  .nav-btn {
-    padding: 6px 8px;
-    font-size: 12px;
-    border-radius: 8px;
-  }
-
-  .nav-btn-text {
-    display: none;
-  }
-
-  .nav-btn.profile-btn,
-  .nav-btn.logout {
-    padding: 6px 6px;
-    gap: 0;
-    min-width: 32px;
-  }
-
-  .mini-user {
-    display: none;
   }
 }
 
 .app-content {
-	min-height: calc(100vh - 56px);
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+}
+
+app-home {
+	display: block;
+	height: auto !important;
+	min-height: 0 !important;
+}
+
+.notification-warning-bar {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	padding: 10px 14px;
+	border-bottom: 1px solid #f0d49d;
+	background: #fff5df;
+	color: #6f4e08;
+	font-size: 13px;
+	flex-wrap: wrap;
+}
+
+.notification-modal-backdrop {
+	position: fixed;
+	inset: 0;
+	z-index: 1400;
+	background: rgba(16, 16, 16, 0.62);
+	backdrop-filter: blur(6px);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+.notification-modal {
+	width: min(720px, 100%);
+	max-height: calc(100vh - 40px);
+	overflow: auto;
+	background: #ffffff;
+	border-radius: 18px;
+	border: 1px solid #d7d7d7;
+	padding: 18px;
+	box-shadow: 0 24px 48px rgba(0, 0, 0, 0.24);
+	display: grid;
+	gap: 14px;
+}
+
+.notification-modal-header {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	align-items: flex-start;
+}
+
+.notification-modal-header h3,
+.notification-modal-header p {
+	margin: 0;
+}
+
+.notification-modal-header p {
+	margin-top: 6px;
+	color: #666;
+}
+
+.notification-close-btn {
+	border: 0;
+	background: transparent;
+	font-size: 28px;
+	line-height: 1;
+	cursor: pointer;
+	color: #444;
+}
+
+.notification-status-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+
+.notification-status-grid article {
+	border: 1px solid #dfdfdf;
+	border-radius: 12px;
+	padding: 12px;
+	background: linear-gradient(135deg, rgba(240, 176, 0, 0.1), transparent 70%), #fff;
+	display: grid;
+	gap: 4px;
+}
+
+.notification-alert {
+	border-radius: 12px;
+	padding: 10px 12px;
+	font-size: 14px;
+}
+
+.notification-alert.error {
+	border: 1px solid #f1c1c1;
+	background: #fdeeee;
+	color: #9a2222;
+}
+
+.notification-alert.success {
+	border: 1px solid #b9e2c6;
+	background: #e9f8ee;
+	color: #195933;
+}
+
+.notification-modal-body {
+	display: grid;
+	gap: 10px;
+}
+
+.notification-modal-body p,
+.registered-devices strong,
+.registered-devices small {
+	margin: 0;
+}
+
+.notification-manual-label {
+	font-size: 13px;
+	font-weight: 700;
+	color: #303030;
+}
+
+.notification-modal textarea {
+	width: 100%;
+	border: 1px solid #d0d0d0;
+	border-radius: 12px;
+	padding: 12px;
+	font: inherit;
+	resize: vertical;
+}
+
+.registered-devices {
+	border: 1px solid #e3e3e3;
+	border-radius: 12px;
+	padding: 12px;
+	background: #fafafa;
+	display: grid;
+	gap: 8px;
+}
+
+.registered-devices ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 8px;
+}
+
+.registered-devices li {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	align-items: center;
+	font-size: 13px;
+}
+
+.notification-modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+@media (max-width: 600px) {
+	.notification-status-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.notification-modal-actions .btn {
+		width: 100%;
+	}
+
+	.registered-devices li {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
+
+@keyframes slideDown {
+	from {
+		opacity: 0;
+		transform: translateY(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
 }

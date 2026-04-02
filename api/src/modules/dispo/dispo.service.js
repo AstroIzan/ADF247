@@ -5,7 +5,10 @@ const {
   createDispoDtoError,
   mapRespuestaToDto,
 } = require('./dispo.dto')
-const { recalculateAutoAssignedResponsable } = require('../convos/convos.service')
+const {
+  recalculateAutoAssignedResponsable,
+  recalculateSortidaForConvocatoria,
+} = require('../convos/convos.service')
 
 const respuestaInclude = {
   convocatoria: true,
@@ -67,6 +70,26 @@ async function ensureUserExistsByNCarnet(userNCarnet) {
   }
 
   return user
+}
+
+async function canManageAttendance(authUser, respuesta) {
+  if (!authUser?.userId || !authUser?.nCarnet) {
+    return false
+  }
+
+  if (respuesta?.convocatoria?.responsableId === authUser.userId) {
+    return true
+  }
+
+  const role = await database.role.findFirst({
+    where: {
+      nCarnet: authUser.nCarnet,
+      isAdmin: true,
+    },
+    select: { id: true },
+  })
+
+  return Boolean(role)
 }
 
 function mapPrismaError(error) {
@@ -175,6 +198,7 @@ async function createRespuesta(payload) {
     })
 
     await recalculateAutoAssignedResponsable(respuesta.convoId)
+    await recalculateSortidaForConvocatoria(respuesta.convoId)
 
     return mapRespuestaToDto(respuesta)
   } catch (error) {
@@ -182,9 +206,17 @@ async function createRespuesta(payload) {
   }
 }
 
-async function updateRespuesta(id, payload) {
+async function updateRespuesta(id, payload, authUser) {
   const existing = await findRespuestaOrThrow(id)
   const updateDto = buildRespuestaUpdateDto(payload)
+
+  if (Object.prototype.hasOwnProperty.call(updateDto, 'attendanceConfirmed')) {
+    const allowed = await canManageAttendance(authUser, existing)
+
+    if (!allowed) {
+      throw createDispoDtoError('Solo el responsable de la convocatoria o un admin puede confirmar asistencia.', 403)
+    }
+  }
 
   const nextConvoId = updateDto.convoId ?? existing.convoId
   const nextUserNCarnet = updateDto.userNCarnet ?? existing.userNCarnet
@@ -221,6 +253,7 @@ async function updateRespuesta(id, payload) {
     })
 
     await recalculateAutoAssignedResponsable(respuesta.convoId)
+    await recalculateSortidaForConvocatoria(respuesta.convoId)
 
     return mapRespuestaToDto(respuesta)
   } catch (error) {
@@ -238,6 +271,7 @@ async function deleteRespuesta(id) {
     })
 
     await recalculateAutoAssignedResponsable(existing.convoId)
+    await recalculateSortidaForConvocatoria(existing.convoId)
 
     return mapRespuestaToDto(respuesta)
   } catch (error) {

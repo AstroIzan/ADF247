@@ -46,6 +46,16 @@
   white-space: nowrap;
   display: flex;
   gap: 6px;
+  flex-wrap: wrap;
+}
+
+.info-alert {
+  margin-bottom: 12px;
+  border: 1px solid #d9d9d9;
+  background: #f7f7f7;
+  color: #333;
+  border-radius: 12px;
+  padding: 10px 12px;
 }
 
 .time-field {
@@ -55,9 +65,132 @@
   min-width: 0;
 }
 
-.time-field input[type='time'] {
+.time-field input {
   flex: 1;
   min-width: 0;
+}
+
+.responsable-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.responsable-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  background: #fff;
+  color: #222;
+  cursor: pointer;
+}
+
+.responsable-picker-trigger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.responsable-picker-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.responsable-picker-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  max-height: 220px;
+  overflow: auto;
+  border: 1px solid #d8d8d8;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 10px 18px rgba(22, 22, 22, 0.14);
+  z-index: 30;
+}
+
+.modal.modal-allow-overflow {
+  overflow: visible;
+}
+
+.responsable-pill-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.responsable-picker-option {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 1px solid #efefef;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+}
+
+.responsable-picker-option:last-child {
+  border-bottom: 0;
+}
+
+.responsable-picker-option:hover,
+.responsable-picker-option.active {
+  background: #fafafa;
+}
+
+.responsable-picker-option-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.role-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.role-pill-groc {
+  background: #fff2c9;
+  border-color: #cf9f2f;
+  color: #7a5605;
+}
+
+.role-pill-verd {
+  background: #ddf3e3;
+  border-color: #4f8f5b;
+  color: #245f2f;
+}
+
+.role-pill-cap-colla {
+  background: #f9dddd;
+  border-color: #b23a3a;
+  color: #7a1f1f;
+}
+
+.role-pill-cap-operatiu {
+  background: #dce9fb;
+  border-color: #3971b9;
+  color: #1e4f90;
 }
 
 .time-picker-btn {
@@ -262,6 +395,38 @@
   flex: 1;
 }
 
+.pagination-controls {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.pagination-size select {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: #fff;
+}
+
+.pagination-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .desktop-convos-view {
@@ -305,8 +470,15 @@
   }
 
   .convo-card {
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
     padding: 12px;
     border-radius: 10px;
+  }
+
+  .convo-info {
+    width: 100%;
   }
 
   .convo-info h4 {
@@ -323,7 +495,12 @@
   }
 
   .convo-actions {
+    width: 100%;
     gap: 4px;
+  }
+
+  .convo-actions button {
+    flex: 1;
   }
 
   .delete-menu {
@@ -333,14 +510,14 @@
   .delete-popover {
     left: 0;
     right: auto;
-    width: min(260px, 100%);
+    width: 100%;
   }
 
   .actions {
     gap: 4px;
   }
 
-  .time-field input[type='time'] {
+  .time-field input {
     font-size: 12px;
   }
 
@@ -408,7 +585,7 @@
     width: 100%;
   }
 
-  .time-field input[type='time'] {
+  .time-field input {
     width: 100%;
     font-size: 13px;
     padding: 6px;
@@ -487,4 +664,117 @@
   .delete-popover {
     width: 100%;
   }
+}
+
+/* Modal form controls (same visual language as automation toggles) */
+.modal-body .form-group > input:not([type='checkbox']),
+.modal-body .form-group > select,
+.modal-body .form-group > textarea,
+.time-field input,
+.responsable-picker-trigger {
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 12px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: #f9f9f9;
+  color: #222;
+  transition: all 0.2s ease;
+}
+
+.modal-body .form-group > input:not([type='checkbox']):hover,
+.modal-body .form-group > select:hover,
+.modal-body .form-group > textarea:hover,
+.time-field input:hover,
+.responsable-picker-trigger:hover {
+  border-color: #b0b0b0;
+  background: #fafafa;
+}
+
+.modal-body .form-group > input:not([type='checkbox']):focus,
+.modal-body .form-group > select:focus,
+.modal-body .form-group > textarea:focus,
+.time-field input:focus,
+.responsable-picker-trigger:focus,
+.responsable-picker-trigger:focus-visible {
+  outline: none;
+  border-color: #f0b000;
+  box-shadow: 0 0 0 2px rgba(240, 176, 0, 0.18);
+  background: #fff;
+}
+
+.modal-body .form-group > input:not([type='checkbox']):disabled,
+.modal-body .form-group > select:disabled,
+.modal-body .form-group > textarea:disabled,
+.time-field input:disabled,
+.responsable-picker-trigger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Automation Toggles */
+.automation-toggle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.automation-toggle:hover {
+  border-color: #b0b0b0;
+  background: #fafafa;
+}
+
+.automation-toggle.is-disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.automation-toggle.is-disabled:hover {
+  border-color: #d0d0d0;
+  background: #f9f9f9;
+}
+
+.automation-toggle input {
+  display: none;
+}
+
+.automation-toggle .toggle-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: #fff;
+  border: 2px solid #d0d0d0;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #999;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.automation-toggle .toggle-indicator::before {
+  content: '✕';
+}
+
+.automation-toggle input:checked + .toggle-indicator {
+  background: #f0b000;
+  border-color: #f0b000;
+  color: #fff;
+}
+
+.automation-toggle input:checked + .toggle-indicator::before {
+  content: '✓';
+}
+
+.automation-toggle .toggle-text {
+  flex: 1;
+  font-size: 14px;
 }

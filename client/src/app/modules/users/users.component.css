@@ -205,6 +205,75 @@
   gap: 8px;
 }
 
+.pagination-controls {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.pagination-size select {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: #fff;
+}
+
+.pagination-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.import-help-text {
+  margin-top: 0;
+  color: #4a4a4a;
+  font-size: 13px;
+}
+
+.import-actions-row {
+  margin-bottom: 12px;
+}
+
+.import-preview {
+  border: 1px solid #dfdfdf;
+  border-radius: 10px;
+  padding: 10px;
+  margin-top: 10px;
+  background: #fafafa;
+  font-size: 13px;
+}
+
+.import-result {
+  margin-top: 14px;
+  border-top: 1px solid #e6e6e6;
+  padding-top: 10px;
+}
+
+.import-result h4 {
+  margin: 0 0 8px 0;
+}
+
+.import-result p {
+  margin: 4px 0;
+}
+
+.import-table {
+  margin-top: 8px;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .desktop-users-view {

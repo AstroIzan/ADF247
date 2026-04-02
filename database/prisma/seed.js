@@ -8,6 +8,9 @@ async function main() {
 
   // Limpiar datos existentes
   console.log('\n\uD83D\uDDD1\uFE0F  Limpiando datos existentes...')
+  await prisma.notificationAutomationTaskRun.deleteMany({})
+  await prisma.notificationAutomationRun.deleteMany({})
+  await prisma.availabilityWindow.deleteMany({})
   await prisma.respuesta.deleteMany({})
   await prisma.convocatoria.deleteMany({})
   await prisma.role.deleteMany({})
@@ -55,7 +58,7 @@ async function main() {
   }
 
   console.log(`\n\uD83D\uDCCB Creando tipos de convocatoria...`)
-  const tipos = ['Guardia', 'Formacion', 'Salida']
+  const tipos = ['Guardia', 'Guardia PVI', 'Semanal', 'Formacion', 'Salida']
   const convoTypeMap = {}
 
   for (let t of tipos) {
@@ -70,14 +73,14 @@ async function main() {
 
   console.log(`\n\uD83D\uDDD3\uFE0F  Creando convocatorias...`)
   const convocatoriasData = [
-    { convoType: 'Guardia',   date: new Date('2026-02-23'), startTime: new Date('2026-02-23T12:00:00'), finalTime: new Date('2026-02-23T16:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/200', moreThan2: true,  isActive: true },
-    { convoType: 'Guardia',   date: new Date('2026-02-23'), startTime: new Date('2026-02-23T16:00:00'), finalTime: new Date('2026-02-23T20:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/239', moreThan2: true,  isActive: true },
-    { convoType: 'Formacion', date: new Date('2026-02-26'), startTime: new Date('2026-02-26T09:00:00'), finalTime: null,                            ubiSortida: 'base',    responsableNC: '247/GI/215', moreThan2: true,  isActive: true },
-    { convoType: 'Salida',    date: new Date('2026-02-21'), startTime: new Date('2026-02-21T17:10:00'), finalTime: null,                            ubiSortida: 'brigadas', responsableNC: '247/GI/225', moreThan2: true,  isActive: true },
-    { convoType: 'Guardia',   date: new Date('2026-03-20'), startTime: new Date('2026-03-20T09:00:00'), finalTime: new Date('2026-03-20T13:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/200', moreThan2: true,  isActive: true },
-    { convoType: 'Formacion', date: new Date('2026-03-20'), startTime: new Date('2026-03-20T15:00:00'), finalTime: new Date('2026-03-20T18:00:00'), ubiSortida: 'base',    responsableNC: '247/GI/215', moreThan2: true,  isActive: true },
-    { convoType: 'Salida',    date: new Date('2026-03-22'), startTime: new Date('2026-03-22T10:00:00'), finalTime: new Date('2026-03-22T14:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/225', moreThan2: false, isActive: true },
-    { convoType: 'Guardia',   date: new Date('2026-03-25'), startTime: new Date('2026-03-25T12:00:00'), finalTime: null,                            ubiSortida: 'brigadas', responsableNC: '247/GI/239', moreThan2: true,  isActive: true },
+    { convoType: 'Guardia',   date: new Date('2026-02-23'), startTime: new Date('2026-02-23T12:00:00'), finalTime: new Date('2026-02-23T16:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/200', isActive: true },
+    { convoType: 'Guardia',   date: new Date('2026-02-23'), startTime: new Date('2026-02-23T16:00:00'), finalTime: new Date('2026-02-23T20:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/239', isActive: true },
+    { convoType: 'Formacion', date: new Date('2026-02-26'), startTime: new Date('2026-02-26T09:00:00'), finalTime: null,                            ubiSortida: 'base',    responsableNC: '247/GI/215', isActive: true },
+    { convoType: 'Salida',    date: new Date('2026-02-21'), startTime: new Date('2026-02-21T17:10:00'), finalTime: null,                            ubiSortida: 'brigadas', responsableNC: '247/GI/225', isActive: true },
+    { convoType: 'Guardia',   date: new Date('2026-03-20'), startTime: new Date('2026-03-20T09:00:00'), finalTime: new Date('2026-03-20T13:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/200', isActive: true },
+    { convoType: 'Formacion', date: new Date('2026-03-20'), startTime: new Date('2026-03-20T15:00:00'), finalTime: new Date('2026-03-20T18:00:00'), ubiSortida: 'base',    responsableNC: '247/GI/215', isActive: true },
+    { convoType: 'Salida',    date: new Date('2026-03-22'), startTime: new Date('2026-03-22T10:00:00'), finalTime: new Date('2026-03-22T14:00:00'), ubiSortida: 'brigadas', responsableNC: '247/GI/225', isActive: true },
+    { convoType: 'Guardia',   date: new Date('2026-03-25'), startTime: new Date('2026-03-25T12:00:00'), finalTime: null,                            ubiSortida: 'brigadas', responsableNC: '247/GI/239', isActive: true },
   ]
 
   for (let c of convocatoriasData) {
@@ -90,12 +93,46 @@ async function main() {
         finalTime: c.finalTime,
         ubiSortida: c.ubiSortida,
         responsableId: userMap[c.responsableNC],
-        moreThan2: c.moreThan2,
         isActive: c.isActive
       }
     })
     console.log(`\u2705 Convocatoria: ${convo.title}`)
   }
+
+  console.log('\n\uD83D\uDD52 Creando ventanas de disponibilidad de ejemplo...')
+  const windowsData = [
+    {
+      userNCarnet: '247/GI/239',
+      fromDateTime: new Date('2026-03-25T11:00:00'),
+      toDateTime: new Date('2026-03-25T14:00:00'),
+      availabilityType: 'available',
+      source: 'manual',
+      notes: 'Disponible para turno de mediodia',
+    },
+    {
+      userNCarnet: '247/GI/230',
+      fromDateTime: new Date('2026-03-25T10:30:00'),
+      toDateTime: new Date('2026-03-25T16:00:00'),
+      availabilityType: 'unavailable',
+      source: 'manual',
+      notes: 'No disponible por trabajo',
+    },
+    {
+      userNCarnet: '247/069',
+      fromDateTime: new Date('2026-03-25T11:30:00'),
+      toDateTime: new Date('2026-03-25T13:30:00'),
+      availabilityType: 'available',
+      source: 'import',
+      notes: 'Importado desde planilla',
+    },
+  ]
+
+  for (const windowData of windowsData) {
+    await prisma.availabilityWindow.create({
+      data: windowData,
+    })
+  }
+  console.log(`\u2705 Ventanas creadas: ${windowsData.length}`)
 
   console.log('\n\uD83C\uDF89 Seed completado correctamente!')
 }

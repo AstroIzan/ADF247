@@ -62,7 +62,7 @@ export interface BasicUserCache {
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:3001/api';
+  private baseUrl = '/api';
   private readonly TOKEN_KEY = 'accessToken';
   private readonly USER_KEY = 'currentUser';
   private readonly BASIC_USER_CACHE_KEY = 'basicUserCache';

@@ -11,25 +11,59 @@
 
   @if (filteredConvoTypes().length > 0) {
     <div class="types-list">
-      @for (type of filteredConvoTypes(); track type.id) {
+      @for (type of paginatedConvoTypes(); track type.id) {
         <div class="type-card">
           <div class="type-info">
-            <h4>{{ type.name }}</h4>
-            <small>ID: {{ type.id }}</small>
-            <small>Mín. groc: {{ type.minGrocSortida || 0 }} | Mín. verd: {{ type.minVerdSortida || 0 }}</small>
-            <small>Ubicació per defecte: {{ type.defaultLocation || '-' }}</small>
+            <div class="type-title-row">
+              <h4>{{ type.name }}</h4>
+              <span class="type-id-badge">{{ type.id }}</span>
+            </div>
+            <div class="type-stats-row">
+              <span class="badge badge-groc">
+                <span class="dot dot-groc"></span>
+                Groc mínim: <strong>{{ type.minGrocSortida || 0 }}</strong>
+              </span>
+              <span class="badge badge-verd">
+                <span class="dot dot-verd"></span>
+                Verd mínim: <strong>{{ type.minVerdSortida || 0 }}</strong>
+              </span>
+            </div>
+            <div class="type-location-row">
+              <span class="location-pin">📍</span>
+              <span class="location-text">{{ type.defaultLocation || 'Sense ubicació per defecte' }}</span>
+            </div>
           </div>
           <div class="type-actions">
-            <button (click)="openForm(type)" class="btn btn-sm btn-edit">Editar</button>
-            @if (deleteConfirming() === type.id) {
-              <button (click)="deleteType(type.id)" class="btn btn-sm btn-danger">Confirmar</button>
-              <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
-            } @else {
+            <div class="type-actions-main">
+              <button (click)="openForm(type)" class="btn btn-sm btn-edit">Editar</button>
               <button (click)="deleteType(type.id)" class="btn btn-sm btn-danger">Eliminar</button>
+            </div>
+            @if (deleteConfirming() === type.id) {
+              <div class="delete-confirm-actions">
+                <button (click)="deleteType(type.id)" class="btn btn-sm btn-danger">Confirmar</button>
+                <button (click)="cancelDelete()" class="btn btn-sm btn-secondary">Cancel·lar</button>
+              </div>
             }
           </div>
         </div>
       }
+    </div>
+
+    <div class="pagination-controls">
+      <div class="pagination-size">
+        <label for="types-page-size">Per pàgina</label>
+        <select id="types-page-size" [value]="pageSize()" (change)="setPageSize($any($event.target).value)">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="pagination-nav">
+        <button class="btn btn-sm btn-secondary" (click)="goToPreviousPage()" [disabled]="currentPage() <= 1">Anterior</button>
+        <span>Pàgina {{ currentPage() }} de {{ totalPages() }}</span>
+        <button class="btn btn-sm btn-secondary" (click)="goToNextPage()" [disabled]="currentPage() >= totalPages()">Següent</button>
+      </div>
     </div>
   } @else {
     <div class="empty-state">No hi ha tipus de convocatòria amb els filtres aplicats</div>

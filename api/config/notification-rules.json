@@ -1,0 +1,138 @@
+{
+  "schedule": {
+    "dailyRunHour": 8,
+    "dailyRunMinute": 0,
+    "weeklyRequestWeekday": 5
+  },
+  "typeGroups": {
+    "weeklyTypeNames": [
+      "Guardia",
+      "Guardia PVI",
+      "Semanal"
+    ],
+    "sortidaTypeNames": [],
+    "availabilityManagerNCarnets": [
+      "247/GI/215",
+      "247/GI/239"
+    ],
+    "guardiaSourceTypeName": "Guardia",
+    "guardiaPviTypeName": "Guardia PVI"
+  },
+  "responseRequest": {
+    "sendOnCreationForNonWeekly": true,
+    "pendingLeadDays": 0,
+    "pendingLeadHours": 24,
+    "link": "/dashboard",
+    "creationTitle": "**Convocatoria**",
+    "creationBody": "Demà a les {horaInici} a {ubicació} per {title}\nResponsable {nºCarnet} {nom + cognom}",
+    "fireTitle": "Incendi",
+    "fireBody": "S'ha creat una convocatòria d'incendi: {title} ({date}).",
+    "weeklyCreatedTitle": "Disponibilitat setmanal",
+    "weeklyCreatedBody": "Aquesta setmana hi ha {count} convocatòries setmanals creades.",
+    "pendingTitle": "**Disponibilitat**",
+    "pendingBody": "Encara tens {count} convocatòries pendents per respondre."
+  },
+  "availabilityMatching": {
+    "conflictPolicy": "unavailable-wins",
+    "createAvailableResponses": true,
+    "createUnavailableResponses": true,
+    "autoCreateUnavailableForUsersWithoutWindow": false,
+    "notifyOnAutoAvailableResponse": false
+  },
+  "weeklyRequest": {
+    "enabled": true,
+    "requestWeekday": 5,
+    "requestHour": 8,
+    "requestMinute": 0,
+    "link": "/dashboard",
+    "title": "Convocatòria: Guardia setmana vinent",
+    "body": "Hi ha convocatòries setmanals per a la setmana vinent pendents de resposta."
+  },
+  "sortidaStatus": {
+    "enabled": true,
+    "confirmDaysBefore": 1,
+    "confirmHour": 8,
+    "confirmMinute": 0,
+    "link": "/dashboard",
+    "titleYes": "**Convocatoria**",
+    "bodyYes": "Demà a les {horaInici} a {ubicació} per {title}\nResponsable {nºCarnet} {nom + cognom}",
+    "titleNo": "Convocatòria cancel·lada",
+    "bodyNo": "{title} ({type}) finalment no surt demà {date}.",
+    "titleCancelled": "Convocatòria cancel·lada",
+    "bodyCancelled": "{title} ({type}) finalment no surt demà {date}.",
+    "titleReten": "Retén",
+    "bodyReten": "{title} ({type}) passa a retén per demà {date}.",
+    "perTypeTemplates": {}
+  },
+  "automation": {
+    "retentionDays": 7,
+    "viewerNCarnets": [],
+    "monitoring": {
+      "enabled": true,
+      "alertRecipientNCarnets": [],
+      "alertOnMissedRun": true,
+      "alertOnTaskFailure": true
+    },
+    "tasks": [
+      {
+        "taskKey": "sortida-d1-confirmed",
+        "notifyKind": "sortida-confirmed",
+        "convoTypeFilter": [],
+        "enabled": true,
+        "schedule": {
+          "kind": "daily"
+        },
+        "timeoutMs": 120000,
+        "retryPolicy": {
+          "maxRetries": 0
+        },
+        "dependsOn": []
+      },
+      {
+        "taskKey": "sortida-d1-cancelled",
+        "notifyKind": "sortida-cancelled",
+        "convoTypeFilter": [],
+        "enabled": true,
+        "schedule": {
+          "kind": "daily"
+        },
+        "timeoutMs": 120000,
+        "retryPolicy": {
+          "maxRetries": 0
+        },
+        "dependsOn": []
+      },
+      {
+        "taskKey": "sortida-d1-reten",
+        "notifyKind": "sortida-reten",
+        "convoTypeFilter": [],
+        "enabled": true,
+        "schedule": {
+          "kind": "daily"
+        },
+        "timeoutMs": 120000,
+        "retryPolicy": {
+          "maxRetries": 0
+        },
+        "dependsOn": []
+      },
+      {
+        "taskKey": "weekly-request-guardia-pvi",
+        "notifyKind": "weekly-digest",
+        "convoTypeFilter": [
+          "Guardia",
+          "Guardia PVI"
+        ],
+        "enabled": true,
+        "schedule": {
+          "kind": "weekly"
+        },
+        "timeoutMs": 120000,
+        "retryPolicy": {
+          "maxRetries": 0
+        },
+        "dependsOn": []
+      }
+    ]
+  }
+}

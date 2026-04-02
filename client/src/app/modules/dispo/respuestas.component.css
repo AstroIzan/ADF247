@@ -133,6 +133,41 @@
   color: #b8860b;
 }
 
+.badge-auto {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(100, 100, 220, 0.15);
+  color: #4444bb;
+}
+
+.badge-auto-source {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(100, 100, 220, 0.15);
+  color: #4444bb;
+}
+
+.badge-neutral {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f0f0f0;
+  color: #666;
+}
+
+.assign-reason {
+  color: #888;
+  font-size: 11px;
+}
+
 .respuesta-actions {
   display: flex;
   gap: 6px;
@@ -184,6 +219,38 @@
 
 .delete-popover-actions button {
   flex: 1;
+}
+
+.pagination-controls {
+  margin-top: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.pagination-size select {
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 5px 8px;
+  background: #fff;
+}
+
+.pagination-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
 }
 
 /* Responsive */

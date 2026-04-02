@@ -13,6 +13,10 @@
     <div class="error-alert">{{ error() }}</div>
   }
 
+  @if (actionFeedback()) {
+    <div class="info-alert">{{ actionFeedback() }}</div>
+  }
+
   @if (loading()) {
     <div class="loading">Carregant convocatòries...</div>
   } @else if (filteredConvocatorias().length > 0) {
@@ -32,7 +36,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (convo of filteredConvocatorias(); track convo.id) {
+          @for (convo of paginatedConvocatorias(); track convo.id) {
             <tr>
               <td>{{ formatDate(convo.date) }}</td>
               <td>{{ convo.title }}</td>
@@ -51,6 +55,14 @@
                 </span>
               </td>
               <td class="actions">
+                @if (isAdmin()) {
+                  <button (click)="sendResponseRequest(convo)" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('response', convo.id)">
+                    Avisar resposta
+                  </button>
+                  <button (click)="sendSortidaStatus(convo)" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
+                    Avisar sortida
+                  </button>
+                }
                 <button (click)="openForm(convo)" class="btn btn-sm btn-edit">Editar</button>
                 <div class="delete-menu">
                   <button (click)="requestDelete(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
@@ -73,7 +85,7 @@
 
     <div class="mobile-convos-view">
       <div class="convos-list">
-        @for (convo of filteredConvocatorias(); track convo.id) {
+        @for (convo of paginatedConvocatorias(); track convo.id) {
           <div class="convo-card" (click)="selectedConvo.set(convo)">
             <div class="convo-info">
               <h4>{{ convo.title }}</h4>
@@ -90,6 +102,14 @@
             </div>
 
             <div class="convo-actions">
+              @if (isAdmin()) {
+                <button (click)="sendResponseRequest(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('response', convo.id)">
+                  Avisar resposta
+                </button>
+                <button (click)="sendSortidaStatus(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
+                  Avisar sortida
+                </button>
+              }
               <button (click)="openForm(convo); $event.stopPropagation();" class="btn btn-sm btn-edit">Editar</button>
               <div class="delete-menu">
                 <button (click)="requestDelete(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
@@ -106,6 +126,23 @@
             </div>
           </div>
         }
+      </div>
+    </div>
+
+    <div class="pagination-controls">
+      <div class="pagination-size">
+        <label for="convos-page-size">Per pàgina</label>
+        <select id="convos-page-size" [value]="pageSize()" (change)="setPageSize($any($event.target).value)">
+          @for (size of pageSizeOptions; track size) {
+            <option [value]="size">{{ size }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="pagination-nav">
+        <button class="btn btn-sm btn-secondary" (click)="goToPreviousPage()" [disabled]="currentPage() <= 1">Anterior</button>
+        <span>Pàgina {{ currentPage() }} de {{ totalPages() }}</span>
+        <button class="btn btn-sm btn-secondary" (click)="goToNextPage()" [disabled]="currentPage() >= totalPages()">Següent</button>
       </div>
     </div>
   } @else {
@@ -176,13 +213,41 @@
 
   @if (showForm()) {
     <div class="modal-overlay" (click)="closeForm()">
-      <div class="modal" (click)="$event.stopPropagation()">
+      <div class="modal modal-allow-overflow" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>{{ editingId() ? 'Editar Convocatòria' : 'Nova Convocatòria' }}</h3>
           <button (click)="closeForm()" class="close-btn">&times;</button>
         </div>
 
         <div class="modal-body">
+          <div class="form-group">
+            <label>Tipus de Convocatòria *</label>
+            <select
+              [(ngModel)]="formData().convoTypeId"
+              (change)="updateFormField('convoTypeId', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+              name="convoType"
+            >
+              <option [value]="undefined">Selecciona un tipus</option>
+              @for (type of convoTypes(); track type.id) {
+                <option [value]="type.id">{{ type.name }}</option>
+              }
+            </select>
+          </div>
+
+          @if (!shouldHideTitleField()) {
+            <div class="form-group">
+              <label>Títol *</label>
+              <input
+                type="text"
+                [value]="formData().title || ''"
+                (change)="updateFormField('title', $any($event.target).value)"
+                [disabled]="formSubmitting()"
+                placeholder="Ex: Formació, Simulacre, Servei preventiu..."
+              />
+            </div>
+          }
+
           <div class="form-group">
             <label>Data *</label>
             @if (isIncendiTypeSelected()) {
@@ -202,42 +267,18 @@
           </div>
 
           <div class="form-group">
-            <label>Títol *</label>
-            <input
-              type="text"
-              [value]="formData().title || ''"
-              (change)="updateFormField('title', $any($event.target).value)"
-              [disabled]="formSubmitting()"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Tipus de Convocatòria *</label>
-            <select
-              [(ngModel)]="formData().convoTypeId"
-              (change)="updateFormField('convoTypeId', $any($event.target).value)"
-              [disabled]="formSubmitting()"
-              name="convoType"
-            >
-              <option [value]="undefined">Selecciona un tipus</option>
-              @for (type of convoTypes(); track type.id) {
-                <option [value]="type.id">{{ type.name }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="form-group">
             <label>Ubicació Sortida</label>
             <input
               type="text"
               [value]="formData().ubiSortida || ''"
               (change)="updateFormField('ubiSortida', $any($event.target).value)"
               [disabled]="formSubmitting()"
+              placeholder="Ex: Brigades"
             />
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle" [class.is-disabled]="formSubmitting()">
               <input
                 type="checkbox"
                 [ngModel]="formData().autoAssignResponsable || false"
@@ -245,23 +286,61 @@
                 [disabled]="formSubmitting()"
                 name="autoAssignResponsable"
               />
-              Autoassignar responsable segons respostes
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Autoassignar responsable segons respostes</span>
             </label>
           </div>
 
           <div class="form-group">
             <label>Responsable *</label>
-            <select
-              [(ngModel)]="formData().responsableId"
-              (change)="updateFormField('responsableId', $any($event.target).value)"
-              [disabled]="formSubmitting()"
-              name="responsable"
-            >
-              <option [value]="undefined">Selecciona un responsable</option>
-              @for (user of users(); track user.id) {
-                <option [value]="user.id">{{ user.name }} {{ user.lastName }}</option>
+            <div class="responsable-picker">
+              <button
+                type="button"
+                class="responsable-picker-trigger"
+                [disabled]="formSubmitting()"
+                (click)="toggleResponsableMenu()"
+              >
+                <span class="responsable-picker-label">{{ getResponsableName(formData().responsableId) }}</span>
+                <span class="responsable-pill-group">
+                  @if (getResponsableLeadershipLabel(formData().responsableId) === 'cap-operatiu') {
+                    <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                  } @else if (getResponsableLeadershipLabel(formData().responsableId) === 'cap-colla') {
+                    <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                  }
+
+                  @if (getResponsableRoleLabel(formData().responsableId) === 'groc') {
+                    <span class="role-pill role-pill-groc">groc</span>
+                  } @else if (getResponsableRoleLabel(formData().responsableId) === 'verd') {
+                    <span class="role-pill role-pill-verd">verd</span>
+                  }
+                </span>
+              </button>
+
+              @if (showResponsableMenu()) {
+                <div class="responsable-picker-menu">
+                  @for (user of users(); track user.id) {
+                    <button
+                      type="button"
+                      class="responsable-picker-option"
+                      [class.active]="formData().responsableId === user.id"
+                      (click)="selectResponsable(user.id)"
+                    >
+                      <span class="responsable-picker-option-name">{{ user.name }} {{ user.lastName }}</span>
+                      <span class="responsable-pill-group">
+                        @if (user.roles.isCapOperatiu) {
+                          <span class="role-pill role-pill-cap-operatiu">Cap Operatiu</span>
+                        } @else if (user.roles.isCapColla) {
+                          <span class="role-pill role-pill-cap-colla">Cap Colla</span>
+                        }
+                        <span class="role-pill" [class.role-pill-groc]="user.roles.isGroc" [class.role-pill-verd]="!user.roles.isGroc">
+                          {{ user.roles.isGroc ? 'groc' : 'verd' }}
+                        </span>
+                      </span>
+                    </button>
+                  }
+                </div>
               }
-            </select>
+            </div>
           </div>
 
           @if (isIncendiTypeSelected()) {
@@ -288,11 +367,12 @@
               <div class="time-field">
                 <input
                   #convoStartTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="formData().startTime || ''"
-                  (change)="updateFormField('startTime', $any($event.target).value)"
+                  (input)="updateFormField('startTime', $any($event.target).value)"
                   [disabled]="formSubmitting()"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button
                   type="button"
@@ -312,11 +392,12 @@
               <div class="time-field">
                 <input
                   #convoEndTimeInput
-                  type="time"
-                  step="60"
+                  type="text"
                   [value]="formData().finalTime || ''"
-                  (change)="updateFormField('finalTime', $any($event.target).value)"
+                  (input)="updateFormField('finalTime', $any($event.target).value)"
                   [disabled]="formSubmitting()"
+                  placeholder="HH:MM"
+                  maxlength="5"
                 />
                 <button
                   type="button"
@@ -333,7 +414,7 @@
           }
 
           <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle" [class.is-disabled]="formSubmitting()">
               <input
                 type="checkbox"
                 [ngModel]="formData().sortida || false"
@@ -341,25 +422,13 @@
                 [disabled]="formSubmitting()"
                 name="sortida"
               />
-              Sortida
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Sortida</span>
             </label>
           </div>
 
           <div class="form-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [ngModel]="formData().moreThan2"
-                (ngModelChange)="updateFormField('moreThan2', $event)"
-                [disabled]="formSubmitting()"
-                name="moreThan2"
-              />
-              Més de 2 participants
-            </label>
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-label">
+            <label class="automation-toggle" [class.is-disabled]="formSubmitting()">
               <input
                 type="checkbox"
                 [ngModel]="formData().isActive"
@@ -367,7 +436,8 @@
                 [disabled]="formSubmitting()"
                 name="isActive"
               />
-              Activa
+              <span class="toggle-indicator"></span>
+              <span class="toggle-text">Activa</span>
             </label>
           </div>
         </div>
@@ -438,13 +508,6 @@
               </span>
             </p>
           </div>
-
-          @if (selectedConvo()?.moreThan2) {
-            <div class="detail-group">
-              <label>Més de 2 Participants</label>
-              <p>Sí</p>
-            </div>
-          }
         </div>
 
         <div class="modal-footer">

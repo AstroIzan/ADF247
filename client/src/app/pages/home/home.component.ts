@@ -1,9 +1,10 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnInit, computed, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { DataService, Convocatoria, ConvoType, Respuesta, User } from '../../services/data.service';
+import { DateFormatService } from '../../services/date-format.service';
 
 @Component({
   selector: 'app-home',
@@ -13,6 +14,7 @@ import { DataService, Convocatoria, ConvoType, Respuesta, User } from '../../ser
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements OnInit {
+  private dateFormatService = inject(DateFormatService);
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
   readonly todayDate = this.toDateInputValue(new Date());
   readonly hourOptions = this.buildHourOptions();
@@ -25,6 +27,8 @@ export class HomeComponent implements OnInit {
   users = signal<User[]>([]);
   loading = signal(false);
   error = signal('');
+  adminActionFeedback = signal('');
+  runningConvoAdminActionKey = signal<string | null>(null);
   respondingConvoId = signal<number | null>(null);
   showCustomModal = signal(false);
   customConvo = signal<Convocatoria | null>(null);
@@ -46,14 +50,25 @@ export class HomeComponent implements OnInit {
     convoTypeId: null as number | null,
     startTime: '',
     finalTime: '',
-    moreThan2: false,
     isActive: true,
     autoAssignResponsable: false,
     sortida: false,
   });
   showCustomTextModal = signal(false);
   customTextPreview = signal('');
+  showGuardiaResponsesModal = signal(false);
+  guardiaResponsesConvo = signal<Convocatoria | null>(null);
+  showRespuestaInfoModal = signal(false);
+  respuestaInfo = signal<{
+    userName: string;
+    customStartTime: string;
+    customEndTime: string;
+    comment: string;
+    fullHorari: boolean;
+  } | null>(null);
   showCreateConvoModal = signal(false);
+  showCreateResponsableMenu = signal(false);
+  showAdminResponsableMenu = signal(false);
   creatingConvo = signal(false);
   createConvoError = signal('');
   showTimeMenu = signal(false);
@@ -76,9 +91,8 @@ export class HomeComponent implements OnInit {
     startTime: '',
     finalTime: '',
     incendiReadyInMinutes: 10,
-    moreThan2: false,
     isActive: true,
-    autoAssignResponsable: false,
+    autoAssignResponsable: true,
     sortida: false,
   });
 
@@ -307,6 +321,135 @@ export class HomeComponent implements OnInit {
 
   getMyRespuesta(convoId: number): Respuesta | null {
     return this.myRespuestas().find((r) => r.convoId === convoId) || null;
+  }
+
+  getSortidaBadgeLabel(sortida?: boolean) {
+    return sortida ? 'Se surt' : 'No se surt';
+  }
+
+  getResponsableRoleLabel(userId: number | null): 'groc' | 'verd' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    return user.roles?.isGroc ? 'groc' : 'verd';
+  }
+
+  getResponsableLeadershipLabel(userId: number | null): 'cap-operatiu' | 'cap-colla' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    if (user.roles?.isCapOperatiu) {
+      return 'cap-operatiu';
+    }
+
+    if (user.roles?.isCapColla) {
+      return 'cap-colla';
+    }
+
+    return '';
+  }
+
+  getResponsablePickerName(userId: number | null): string {
+    if (!userId) {
+      return 'Sense responsable (auto-assignació)';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return 'Selecciona responsable';
+    }
+
+    return `${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  toggleCreateResponsableMenu() {
+    this.showCreateResponsableMenu.set(!this.showCreateResponsableMenu());
+  }
+
+  toggleAdminResponsableMenu() {
+    this.showAdminResponsableMenu.set(!this.showAdminResponsableMenu());
+  }
+
+  selectCreateResponsable(userId: number | null) {
+    this.updateCreateConvoField('responsableId', userId as any);
+    this.showCreateResponsableMenu.set(false);
+  }
+
+  selectAdminResponsable(userId: number | null) {
+    this.updateAdminConvoField('responsableId', userId !== null ? String(userId) : '');
+    this.showAdminResponsableMenu.set(false);
+  }
+
+  isRunningConvoAdminAction(action: 'sortida' | 'automation', convoId: number) {
+    return this.runningConvoAdminActionKey() === `${action}-${convoId}`;
+  }
+
+  toggleConvoSortida(convo: Convocatoria) {
+    if (!this.authService.isAdmin()) {
+      return;
+    }
+
+    if (this.isConvocatoriaClosed(convo)) {
+      this.error.set('La convocatòria està tancada i no permet canviar la sortida manualment.');
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.runningConvoAdminActionKey.set(`sortida-${convo.id}`);
+
+    this.dataService.updateConvocatoria(convo.id, { sortida: !convo.sortida }).subscribe({
+      next: (updatedConvo) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.replaceConvocatoriaInState(updatedConvo);
+        this.adminActionFeedback.set(`Sortida actualitzada per a ${updatedConvo.title}.`);
+      },
+      error: (err) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut actualitzar la sortida.');
+      },
+    });
+  }
+
+  runConvoAutomation(convo: Convocatoria) {
+    if (!this.authService.isAdmin()) {
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.runningConvoAdminActionKey.set(`automation-${convo.id}`);
+
+    this.dataService.runConvocatoriaNotificationAutomation(convo.id).subscribe({
+      next: (result) => {
+        this.runningConvoAdminActionKey.set(null);
+        const sortidaSummary = result?.sortidaSummary;
+        const sortidaSent = sortidaSummary && !sortidaSummary.skipped;
+
+        this.loadConvocatorias();
+        this.adminActionFeedback.set(
+          sortidaSent
+            ? `Automatitzacio enviada per a ${convo.title}: pendents + estat de sortida.`
+            : `Automatitzacio enviada per a ${convo.title}: avís de pendents (sense estat de sortida encara).`
+        );
+      },
+      error: (err) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s\'ha pogut executar l\'automatitzacio de notificacions.');
+      },
+    });
   }
 
   getMyRespuestaLabel(convoId: number): string {
@@ -581,20 +724,131 @@ export class HomeComponent implements OnInit {
     return this.allRespuestas().filter((respuesta) => respuesta.convoId === convoId);
   }
 
-  canViewConvocatoriaSummary(convo: Convocatoria) {
+  canOpenGuardiaResponses(convo: Convocatoria) {
+    if (!this.isGuardiaConvocatoria(convo)) {
+      return false;
+    }
+
     if (this.authService.isAdmin()) {
       return true;
     }
 
     const currentUserId = this.authService.getCurrentUser()?.id;
-    if (!currentUserId) {
+    return Boolean(currentUserId && convo.responsableId === currentUserId);
+  }
+
+  canManageAttendanceForConvo(convo: Convocatoria | null) {
+    if (!convo) {
       return false;
     }
 
-    return convo.responsableId === currentUserId;
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    const currentUserId = this.authService.getCurrentUser()?.id;
+    return Boolean(currentUserId && convo.responsableId === currentUserId);
   }
 
-  getResponsableName(responsableId?: number) {
+  updateAttendanceConfirmation(respuesta: Respuesta, attendanceConfirmed: boolean) {
+    if (!this.canManageAttendanceForConvo(respuesta.convocatoria || null)) {
+      this.error.set('No tens permisos per modificar l\'assistència d\'aquesta convocatòria.');
+      return;
+    }
+
+    this.dataService.updateRespuesta(respuesta.id, { attendanceConfirmed }).subscribe({
+      next: () => {
+        this.loadRespuestas();
+      },
+      error: (err) => {
+        this.error.set(err.message || 'No s\'ha pogut actualitzar l\'assistència.');
+      },
+    });
+  }
+
+  openGuardiaResponsesModal(convo: Convocatoria) {
+    if (!this.canOpenGuardiaResponses(convo)) {
+      return;
+    }
+
+    this.guardiaResponsesConvo.set(convo);
+    this.showGuardiaResponsesModal.set(true);
+  }
+
+  closeGuardiaResponsesModal() {
+    this.showGuardiaResponsesModal.set(false);
+    this.guardiaResponsesConvo.set(null);
+  }
+
+  getPositiveRespuestasForConvocatoria(convoId: number) {
+    const usersByNCarnet = this.userByNCarnet();
+
+    return this.allRespuestas()
+      .filter((respuesta) => respuesta.convoId === convoId && respuesta.response)
+      .sort((left, right) => {
+        const leftCreatedAt = usersByNCarnet.get(left.userNCarnet)?.createdAt;
+        const rightCreatedAt = usersByNCarnet.get(right.userNCarnet)?.createdAt;
+        const leftTime = leftCreatedAt ? new Date(leftCreatedAt).getTime() : Number.MAX_SAFE_INTEGER;
+        const rightTime = rightCreatedAt ? new Date(rightCreatedAt).getTime() : Number.MAX_SAFE_INTEGER;
+
+        if (leftTime !== rightTime) {
+          return leftTime - rightTime;
+        }
+
+        const byName = this.getUserNameByNCarnet(left.userNCarnet).localeCompare(this.getUserNameByNCarnet(right.userNCarnet));
+        if (byName !== 0) {
+          return byName;
+        }
+
+        return String(left.userNCarnet || '').localeCompare(String(right.userNCarnet || ''));
+      });
+  }
+
+  hasRespuestaInfo(respuesta: Respuesta) {
+    const parsed = this.parseCustomText(respuesta.customText || '');
+    return Boolean(parsed.comment || (parsed.customStartTime && parsed.customEndTime));
+  }
+
+  openRespuestaInfoModal(respuesta: Respuesta) {
+    const parsed = this.parseCustomText(respuesta.customText || '');
+    this.respuestaInfo.set({
+      userName: this.getUserNameByNCarnet(respuesta.userNCarnet),
+      customStartTime: parsed.customStartTime,
+      customEndTime: parsed.customEndTime,
+      comment: parsed.comment,
+      fullHorari: Boolean(respuesta.fullHorari),
+    });
+    this.showRespuestaInfoModal.set(true);
+  }
+
+  closeRespuestaInfoModal() {
+    this.showRespuestaInfoModal.set(false);
+    this.respuestaInfo.set(null);
+  }
+
+  canViewConvocatoriaSummary(convo: Convocatoria) {
+    if (this.authService.isAdmin()) {
+      return true;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      return false;
+    }
+
+    if (Number(convo.responsableId) === Number(currentUser.id)) {
+      return true;
+    }
+
+    const responsableUser = convo.responsableId ? this.userById().get(convo.responsableId) : null;
+    if (!responsableUser?.nCarnet || !currentUser.nCarnet) {
+      return false;
+    }
+
+    return responsableUser.nCarnet === currentUser.nCarnet;
+  }
+
+  getResponsableName(responsableId?: number | null) {
     if (!responsableId) {
       return '-';
     }
@@ -604,7 +858,7 @@ export class HomeComponent implements OnInit {
       return '-';
     }
 
-    return `${user.name} ${user.lastName || ''}`.trim();
+    return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
   }
 
   getConvoTypeName(convoTypeId?: number) {
@@ -629,6 +883,15 @@ export class HomeComponent implements OnInit {
     return `${user.name} ${user.lastName || ''}`.trim();
   }
 
+  isUserGrocByNCarnet(nCarnet?: string) {
+    if (!nCarnet) {
+      return false;
+    }
+
+    const user = this.userByNCarnet().get(nCarnet);
+    return Boolean(user?.roles?.isGroc);
+  }
+
   openAdminConvoModal(convo: Convocatoria) {
     if (!this.authService.isAdmin()) {
       return;
@@ -643,21 +906,23 @@ export class HomeComponent implements OnInit {
       convoTypeId: convo.convoTypeId || null,
       startTime: this.extractTimeValue(convo.startTime),
       finalTime: this.extractTimeValue(convo.finalTime),
-      moreThan2: Boolean(convo.moreThan2),
+
       isActive: Boolean(convo.isActive),
       autoAssignResponsable: Boolean(convo.autoAssignResponsable),
       sortida: Boolean(convo.sortida),
     });
+    this.showAdminResponsableMenu.set(false);
     this.showAdminConvoModal.set(true);
   }
 
   closeAdminConvoModal() {
+    this.showAdminResponsableMenu.set(false);
     this.showAdminConvoModal.set(false);
     this.adminConvo.set(null);
   }
 
   updateAdminConvoField(
-    field: 'title' | 'date' | 'ubiSortida' | 'responsableId' | 'convoTypeId' | 'startTime' | 'finalTime' | 'moreThan2' | 'isActive' | 'autoAssignResponsable' | 'sortida',
+    field: 'title' | 'date' | 'ubiSortida' | 'responsableId' | 'convoTypeId' | 'startTime' | 'finalTime' | 'isActive' | 'autoAssignResponsable' | 'sortida',
     value: string | boolean
   ) {
     const current = this.adminConvoForm();
@@ -693,8 +958,8 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (!form.title || !form.date || !form.responsableId || !form.convoTypeId || !form.startTime) {
-      this.error.set('Completa titol, data, hora d\'inici, responsable i tipus.');
+    if (!form.title || !form.date || !form.convoTypeId || !form.startTime) {
+      this.error.set('Completa titol, data, hora d\'inici i tipus.');
       return;
     }
 
@@ -706,7 +971,6 @@ export class HomeComponent implements OnInit {
       convoTypeId: form.convoTypeId,
       startTime: this.composeDateTime(form.date, form.startTime),
       finalTime: form.finalTime ? this.composeDateTime(form.date, form.finalTime) : undefined,
-      moreThan2: form.moreThan2,
       isActive: form.isActive,
       autoAssignResponsable: form.autoAssignResponsable,
       sortida: form.sortida,
@@ -722,6 +986,34 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => {
         this.error.set(err.message || 'No s\'ha pogut actualitzar la convocatòria.');
+        this.adminConvoSaving.set(false);
+      },
+    });
+  }
+
+  deleteAdminConvocatoria() {
+    const convo = this.adminConvo();
+
+    if (!convo) {
+      return;
+    }
+
+    const confirmed = window.confirm(`Vols eliminar la convocatòria "${convo.title}"?`);
+    if (!confirmed) {
+      return;
+    }
+
+    this.adminConvoSaving.set(true);
+
+    this.dataService.deleteConvocatoria(convo.id).subscribe({
+      next: () => {
+        this.adminConvoSaving.set(false);
+        this.closeAdminConvoModal();
+        this.loadConvocatorias();
+        this.loadRespuestas();
+      },
+      error: (err) => {
+        this.error.set(err.message || 'No s\'ha pogut eliminar la convocatòria.');
         this.adminConvoSaving.set(false);
       },
     });
@@ -762,16 +1054,17 @@ export class HomeComponent implements OnInit {
       startTime: '',
       finalTime: '',
       incendiReadyInMinutes: 10,
-      moreThan2: false,
       isActive: true,
-      autoAssignResponsable: false,
+      autoAssignResponsable: true,
       sortida: false,
     });
     this.createConvoError.set('');
+    this.showCreateResponsableMenu.set(false);
     this.showCreateConvoModal.set(true);
   }
 
   closeCreateConvoModal() {
+    this.showCreateResponsableMenu.set(false);
     this.createConvoError.set('');
     this.showCreateConvoModal.set(false);
   }
@@ -792,7 +1085,6 @@ export class HomeComponent implements OnInit {
       | 'startTime'
       | 'finalTime'
       | 'incendiReadyInMinutes'
-      | 'moreThan2'
       | 'isActive'
       | 'autoAssignResponsable'
       | 'sortida',
@@ -805,6 +1097,13 @@ export class HomeComponent implements OnInit {
         ...current,
         [field]: value ? Number(value) : null,
       };
+
+      if (field === 'convoTypeId') {
+        const forcedTitle = this.getForcedCreateTitleByTypeId(next.convoTypeId);
+        if (forcedTitle) {
+          next.title = forcedTitle;
+        }
+      }
 
       if (field === 'convoTypeId' && this.isGuardiaTypeById(next.convoTypeId)) {
         next.guardiaRangeStart = current.date || this.selectedDate();
@@ -866,8 +1165,11 @@ export class HomeComponent implements OnInit {
     const form = this.createConvoForm();
     this.createConvoError.set('');
 
-    if (!form.title || !form.responsableId || !form.convoTypeId) {
-      this.createConvoError.set('Completa titol, responsable i tipus per crear.');
+    const forcedTitle = this.getForcedCreateTitleByTypeId(form.convoTypeId);
+    const titleToUse = forcedTitle || (form.title || '').trim();
+
+    if (!titleToUse || !form.convoTypeId) {
+      this.createConvoError.set('Completa el tipus per crear.');
       return;
     }
 
@@ -887,7 +1189,10 @@ export class HomeComponent implements OnInit {
         return;
       }
 
-      payloads = this.buildGuardiaPayloads(form);
+      payloads = this.buildGuardiaPayloads({
+        ...form,
+        title: titleToUse,
+      });
 
       if (payloads.length === 0) {
         this.createConvoError.set('No hi ha dies laborables al rang seleccionat per crear guardies.');
@@ -912,7 +1217,13 @@ export class HomeComponent implements OnInit {
         return;
       }
 
-      payloads = this.buildSemanalPayloads(form, validSlots);
+      payloads = this.buildSemanalPayloads(
+        {
+          ...form,
+          title: titleToUse,
+        },
+        validSlots
+      );
 
       if (payloads.length === 0) {
         this.createConvoError.set('No s\'han pogut generar convocatories setmanals amb aquest rang.');
@@ -933,14 +1244,13 @@ export class HomeComponent implements OnInit {
 
       payloads = [
         {
-          title: form.title.trim(),
+          title: titleToUse,
           date: `${startDate}T00:00:00`,
           ubiSortida: (form.ubiSortida || '').trim() || 'Brigadas',
           responsableId: form.responsableId,
           convoTypeId: form.convoTypeId,
           startTime: this.composeDateTime(startDate, this.toTimeInputValue(startDateTime)),
           finalTime: this.composeDateTime(finalDate, this.toTimeInputValue(finalDateTime)),
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
@@ -954,14 +1264,13 @@ export class HomeComponent implements OnInit {
 
       payloads = [
         {
-          title: form.title.trim(),
+          title: titleToUse,
           date: `${form.date}T00:00:00`,
           ubiSortida: form.ubiSortida.trim(),
           responsableId: form.responsableId,
           convoTypeId: form.convoTypeId,
           startTime: this.composeDateTime(form.date, form.startTime),
           finalTime: form.finalTime ? this.composeDateTime(form.date, form.finalTime) : undefined,
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
@@ -977,6 +1286,7 @@ export class HomeComponent implements OnInit {
         this.createConvoError.set('');
         this.closeCreateConvoModal();
         this.loadConvocatorias();
+        this.loadRespuestas();
       },
       error: (err) => {
         this.createConvoError.set(err.message || 'No s\'ha pogut crear la convocatòria.');
@@ -995,6 +1305,10 @@ export class HomeComponent implements OnInit {
 
   isIncendiTypeSelected() {
     return this.isIncendiTypeById(this.createConvoForm().convoTypeId);
+  }
+
+  shouldHideCreateConvoTitleField() {
+    return Boolean(this.getForcedCreateTitleByTypeId(this.createConvoForm().convoTypeId));
   }
 
   addSemanalSlot() {
@@ -1040,6 +1354,20 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  private replaceConvocatoriaInState(updatedConvo: Convocatoria) {
+    this.convocatorias.set(
+      this.convocatorias().map((item) => (item.id === updatedConvo.id ? updatedConvo : item))
+    );
+
+    if (this.adminConvo()?.id === updatedConvo.id) {
+      this.adminConvo.set(updatedConvo);
+      this.adminConvoForm.set({
+        ...this.adminConvoForm(),
+        sortida: Boolean(updatedConvo.sortida),
+      });
+    }
+  }
+
   private isGuardiaTypeById(convoTypeId: number | null) {
     if (!convoTypeId) {
       return false;
@@ -1047,6 +1375,11 @@ export class HomeComponent implements OnInit {
 
     const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /guardia/i.test(type.name));
+  }
+
+  private isGuardiaConvocatoria(convo: Convocatoria) {
+    const typeName = convo.convoType?.name || this.getConvoTypeName(convo.convoTypeId);
+    return /guardia/i.test(typeName || '');
   }
 
   private isSemanalTypeById(convoTypeId: number | null) {
@@ -1067,6 +1400,25 @@ export class HomeComponent implements OnInit {
     return Boolean(type?.name && /incendi/i.test(type.name));
   }
 
+  private getForcedCreateTitleByTypeId(convoTypeId: number | null) {
+    if (!convoTypeId) {
+      return null;
+    }
+
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
+    const typeName = type?.name || '';
+
+    if (/pvi/i.test(typeName)) {
+      return 'PVI';
+    }
+
+    if (/guardia/i.test(typeName)) {
+      return 'Guardia';
+    }
+
+    return null;
+  }
+
   private getConvoTypeDefaultLocation(convoTypeId: number | null) {
     if (!convoTypeId) {
       return '';
@@ -1085,7 +1437,6 @@ export class HomeComponent implements OnInit {
     ubiSortida: string;
     responsableId: number | null;
     convoTypeId: number | null;
-    moreThan2: boolean;
     isActive: boolean;
     autoAssignResponsable: boolean;
     sortida: boolean;
@@ -1123,7 +1474,6 @@ export class HomeComponent implements OnInit {
           convoTypeId: form.convoTypeId || undefined,
           startTime: this.composeDateTime(dateValue, shift.start),
           finalTime: this.composeDateTime(dateValue, shift.end),
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
@@ -1144,7 +1494,6 @@ export class HomeComponent implements OnInit {
       ubiSortida: string;
       responsableId: number | null;
       convoTypeId: number | null;
-      moreThan2: boolean;
       isActive: boolean;
       autoAssignResponsable: boolean;
       sortida: boolean;
@@ -1174,7 +1523,6 @@ export class HomeComponent implements OnInit {
           convoTypeId: form.convoTypeId || undefined,
           startTime: this.composeDateTime(dateValue, slot.start),
           finalTime: this.composeDateTime(dateValue, slot.end),
-          moreThan2: form.moreThan2,
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
@@ -1242,14 +1590,21 @@ export class HomeComponent implements OnInit {
       return '';
     }
 
-    const match = String(value).match(/(\d{2}:\d{2})/);
-    if (match) {
-      return match[1];
+    const raw = String(value);
+
+    // For ISO datetimes, convert to local time (handles UTC winter/summer offset correctly).
+    if (raw.includes('T')) {
+      const date = new Date(raw);
+      if (!Number.isNaN(date.getTime())) {
+        const hh = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        return `${hh}:${mm}`;
+      }
     }
 
-    const date = new Date(value);
-    if (!Number.isNaN(date.getTime())) {
-      return date.toTimeString().slice(0, 5);
+    const match = raw.match(/(\d{2}:\d{2})/);
+    if (match) {
+      return match[1];
     }
 
     return '';

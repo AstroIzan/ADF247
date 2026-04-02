@@ -1,7 +1,9 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Convocatoria, ConvoType, User } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
+import { DateFormatService } from '../../services/date-format.service';
 
 type ConvocatoriaFormData = Partial<Convocatoria> & {
   incendiReadyInMinutes?: number;
@@ -15,7 +17,9 @@ type ConvocatoriaFormData = Partial<Convocatoria> & {
   styleUrl: './convos.component.css'
 })
 export class ConvosComponent implements OnDestroy {
+  private dateFormatService = inject(DateFormatService);
   readonly incendiReadyOptions = [10, 15, 20, 25, 30];
+  readonly pageSizeOptions = [10, 25, 50];
   readonly todayDate = this.toDateInputValue(new Date());
   convocatorias = input<Convocatoria[]>([]);
   convoTypes = input<ConvoType[]>([]);
@@ -31,11 +35,14 @@ export class ConvosComponent implements OnDestroy {
   editingId = signal<number | null>(null);
   formSubmitting = signal(false);
   deleteConfirming = signal<number | null>(null);
+  actionFeedback = signal('');
+  sendingNotificationKey = signal<string | null>(null);
   selectedConvo = signal<Convocatoria | null>(null);
   showTimeMenu = signal(false);
   timeMenuHour = signal('');
   timeMenuMinute = signal('');
   timeMenuField = signal<'startTime' | 'finalTime' | null>(null);
+  showResponsableMenu = signal(false);
 
   filters = signal({
     title: '',
@@ -55,9 +62,8 @@ export class ConvosComponent implements OnDestroy {
     startTime: '',
     finalTime: '',
     incendiReadyInMinutes: 10,
-    autoAssignResponsable: false,
+    autoAssignResponsable: true,
     sortida: false,
-    moreThan2: false,
     isActive: true
   });
 
@@ -83,7 +89,29 @@ export class ConvosComponent implements OnDestroy {
     });
   });
 
-  constructor(private dataService: DataService) {}
+  pageSize = signal(10);
+  pageIndex = signal(1);
+
+  totalPages = computed(() => {
+    const total = this.filteredConvocatorias().length;
+    return Math.max(1, Math.ceil(total / this.pageSize()));
+  });
+
+  currentPage = computed(() => Math.min(this.pageIndex(), this.totalPages()));
+
+  paginatedConvocatorias = computed(() => {
+    const start = (this.currentPage() - 1) * this.pageSize();
+    return this.filteredConvocatorias().slice(start, start + this.pageSize());
+  });
+
+  constructor(
+    private dataService: DataService,
+    private authService: AuthService,
+  ) {}
+
+  isAdmin() {
+    return this.authService.isAdmin();
+  }
 
   openFilters() {
     this.showFilters.set(true);
@@ -98,6 +126,7 @@ export class ConvosComponent implements OnDestroy {
       ...this.filters(),
       [field]: value,
     });
+    this.pageIndex.set(1);
   }
 
   resetFilters() {
@@ -109,6 +138,21 @@ export class ConvosComponent implements OnDestroy {
       dateFrom: '',
       dateTo: '',
     });
+    this.pageIndex.set(1);
+  }
+
+  setPageSize(value: string) {
+    const nextSize = Number(value);
+    this.pageSize.set(this.pageSizeOptions.includes(nextSize) ? nextSize : 10);
+    this.pageIndex.set(1);
+  }
+
+  goToPreviousPage() {
+    this.pageIndex.set(Math.max(1, this.currentPage() - 1));
+  }
+
+  goToNextPage() {
+    this.pageIndex.set(Math.min(this.totalPages(), this.currentPage() + 1));
   }
 
   openForm(convo?: Convocatoria) {
@@ -126,9 +170,8 @@ export class ConvosComponent implements OnDestroy {
         startTime: '',
         finalTime: '',
         incendiReadyInMinutes: 10,
-        autoAssignResponsable: false,
+        autoAssignResponsable: true,
         sortida: false,
-        moreThan2: false,
         isActive: true
       });
     }
@@ -138,6 +181,7 @@ export class ConvosComponent implements OnDestroy {
 
   closeForm() {
     this.showForm.set(false);
+    this.showResponsableMenu.set(false);
     document.body.classList.remove('modal-open');
   }
 
@@ -145,9 +189,14 @@ export class ConvosComponent implements OnDestroy {
     const data = { ...this.formData() };
     const isIncendiType = this.isIncendiTypeById(Number(data.convoTypeId));
     const isGuardiaType = this.isGuardiaTypeById(Number(data.convoTypeId));
+    const forcedTitle = this.getForcedTitleForTypeId(Number(data.convoTypeId));
 
-    if (!data.title || !data.responsableId || !data.convoTypeId) {
-      alert('El titol, el responsable i el tipus de convocatòria son obligatoris.');
+    if (forcedTitle) {
+      data.title = forcedTitle;
+    }
+
+    if ((!data.title && !forcedTitle) || !data.responsableId || !data.convoTypeId) {
+      alert('El responsable i el tipus de convocatòria son obligatoris.');
       return;
     }
 
@@ -191,7 +240,6 @@ export class ConvosComponent implements OnDestroy {
       finalTime: data.finalTime || undefined,
       autoAssignResponsable: Boolean(data.autoAssignResponsable),
       sortida: Boolean(data.sortida),
-      moreThan2: Boolean(data.moreThan2),
       isActive: Boolean(data.isActive),
     };
 
@@ -266,6 +314,44 @@ export class ConvosComponent implements OnDestroy {
     this.deleteConfirming.set(null);
   }
 
+  sendResponseRequest(convo: Convocatoria) {
+    const key = `response-${convo.id}`;
+    this.sendingNotificationKey.set(key);
+    this.actionFeedback.set('');
+
+    this.dataService.sendConvocatoriaResponseRequest(convo.id).subscribe({
+      next: () => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`S'ha enviat l'avís de resposta per a ${convo.title}.`);
+      },
+      error: (err) => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`Error enviant avís de resposta: ${err.message}`);
+      }
+    });
+  }
+
+  sendSortidaStatus(convo: Convocatoria) {
+    const key = `sortida-${convo.id}`;
+    this.sendingNotificationKey.set(key);
+    this.actionFeedback.set('');
+
+    this.dataService.sendConvocatoriaSortidaStatus(convo.id).subscribe({
+      next: () => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`S'ha enviat l'estat de sortida per a ${convo.title}.`);
+      },
+      error: (err) => {
+        this.sendingNotificationKey.set(null);
+        this.actionFeedback.set(`Error enviant estat de sortida: ${err.message}`);
+      }
+    });
+  }
+
+  isSendingAction(action: 'response' | 'sortida', convoId: number) {
+    return this.sendingNotificationKey() === `${action}-${convoId}`;
+  }
+
   updateFormField(field: string, value: any) {
     const data = this.formData();
     if (field === 'convoTypeId') {
@@ -273,6 +359,11 @@ export class ConvosComponent implements OnDestroy {
         ...data,
         convoTypeId: Number(value) || undefined,
       };
+
+      const forcedTitle = this.getForcedTitleForTypeId(Number(next.convoTypeId));
+      if (forcedTitle) {
+        next.title = forcedTitle;
+      }
 
       if (this.isGuardiaTypeById(Number(next.convoTypeId))) {
         next.ubiSortida = this.getDefaultLocationForType(Number(next.convoTypeId)) || 'Brigadas';
@@ -320,6 +411,7 @@ export class ConvosComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
+    this.showResponsableMenu.set(false);
     document.body.classList.remove('modal-open');
   }
 
@@ -328,7 +420,16 @@ export class ConvosComponent implements OnDestroy {
     return this.isIncendiTypeById(convoTypeId);
   }
 
-  getUserName(userId?: number): string {
+  shouldHideTitleField(): boolean {
+    if (this.editingId()) {
+      return false;
+    }
+
+    const forcedTitle = this.getForcedTitleForTypeId(Number(this.formData().convoTypeId));
+    return Boolean(forcedTitle);
+  }
+
+  getUserName(userId?: number | null): string {
     if (!userId) return '-';
     const user = this.users().find((u) => u.id === userId);
     return user ? `${user.name} ${user.lastName || ''}` : '-';
@@ -340,8 +441,68 @@ export class ConvosComponent implements OnDestroy {
     return type ? type.name : '-';
   }
 
+  getResponsableRoleLabel(userId?: number | null): 'groc' | 'verd' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    return user.roles?.isGroc ? 'groc' : 'verd';
+  }
+
+  getResponsableLeadershipLabel(userId?: number | null): 'cap-operatiu' | 'cap-colla' | '' {
+    if (!userId) {
+      return '';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return '';
+    }
+
+    if (user.roles?.isCapOperatiu) {
+      return 'cap-operatiu';
+    }
+
+    if (user.roles?.isCapColla) {
+      return 'cap-colla';
+    }
+
+    return '';
+  }
+
+  getResponsableName(userId?: number | null): string {
+    if (!userId) {
+      return 'Selecciona un responsable';
+    }
+
+    const user = this.users().find((item) => item.id === userId);
+    if (!user) {
+      return 'Selecciona un responsable';
+    }
+
+    return `${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  toggleResponsableMenu() {
+    if (this.formSubmitting()) {
+      return;
+    }
+
+    this.showResponsableMenu.set(!this.showResponsableMenu());
+  }
+
+  selectResponsable(userId: number) {
+    this.updateFormField('responsableId', userId);
+    this.showResponsableMenu.set(false);
+  }
+
   formatDate(dateString: string): string {
-    return new Date(dateString).toLocaleDateString('ca-ES');
+    return this.dateFormatService.formatDate(dateString);
   }
 
   getSortidaLabel(sortida?: boolean): string {
@@ -416,6 +577,20 @@ export class ConvosComponent implements OnDestroy {
       return '';
     }
 
+    // If it's an ISO datetime string, extract HH:MM directly without timezone conversion
+    if (value.includes('T')) {
+      try {
+        // Extract HH:MM from ISO format (e.g., "2026-03-27T15:30:00.000Z" -> "15:30")
+        const match = value.match(/T(\d{2}):(\d{2})/);
+        if (match) {
+          return `${match[1]}:${match[2]}`;
+        }
+      } catch {
+        // If parsing fails, continue with regex fallback
+      }
+    }
+
+    // If it's already in HH:MM format, return as is
     const match = value.match(/(\d{2}:\d{2})/);
     return match?.[1] || '';
   }
@@ -460,6 +635,25 @@ export class ConvosComponent implements OnDestroy {
     return Boolean(type?.name && /guardia/i.test(type.name));
   }
 
+  private getForcedTitleForTypeId(convoTypeId?: number): string | null {
+    if (!convoTypeId) {
+      return null;
+    }
+
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
+    const typeName = type?.name || '';
+
+    if (/pvi/i.test(typeName)) {
+      return 'PVI';
+    }
+
+    if (/guardia/i.test(typeName)) {
+      return 'Guardia';
+    }
+
+    return null;
+  }
+
   private getDefaultLocationForType(convoTypeId?: number): string {
     if (!convoTypeId) {
       return '';
@@ -491,7 +685,6 @@ export class ConvosComponent implements OnDestroy {
       incendiReadyInMinutes: 10,
       autoAssignResponsable: Boolean(convo.autoAssignResponsable),
       sortida: Boolean(convo.sortida),
-      moreThan2: Boolean(convo.moreThan2),
       isActive: Boolean(convo.isActive),
     };
   }

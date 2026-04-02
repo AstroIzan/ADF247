@@ -1,0 +1,746 @@
+<div class="notifications-admin">
+  @if (!compact) {
+    <div class="notifications-header">
+      <div>
+        <h2>{{ title }}</h2>
+        <p>{{ description }}</p>
+      </div>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-alert">{{ error }}</div>
+  }
+
+  @if (saveError) {
+    <div class="error-alert">{{ saveError }}</div>
+  }
+
+  @if (actionMessage) {
+    <div class="success-alert">{{ actionMessage }}</div>
+  }
+
+  @if (loading) {
+    <div class="loading">Carregant configuració...</div>
+  } @else {
+    @if (!hasSingleTab) {
+      <nav class="tabs-nav">
+        @if (isTabVisible('config')) {
+          <button
+            [class.active]="activeTab === 'config'"
+            (click)="setActiveTab('config')"
+            class="tab-btn">
+            ⚙️ Configuració
+          </button>
+        }
+        @if (isTabVisible('logs')) {
+          <button
+            [class.active]="activeTab === 'logs'"
+            (click)="setActiveTab('logs')"
+            class="tab-btn">
+            📋 Registre
+          </button>
+        }
+        @if (isTabVisible('automation')) {
+          <button
+            [class.active]="activeTab === 'automation'"
+            (click)="setActiveTab('automation')"
+            class="tab-btn">
+            Orquestrador
+          </button>
+        }
+        @if (isTabVisible('orchestrator-config')) {
+          <button
+            [class.active]="activeTab === 'orchestrator-config'"
+            (click)="setActiveTab('orchestrator-config')"
+            class="tab-btn">
+            ⚙️ Config. Orquestrador
+          </button>
+        }
+      </nav>
+    }
+
+    <div class="tab-content">
+      @if (activeTab === 'config' && isTabVisible('config')) {
+        <div class="config-sections">
+          <section class="config-section">
+            <h3>0) Disponibilitat automàtica</h3>
+            <p class="section-help">Controla com es creen respostes automàtiques a partir del calendari de disponibilitat.</p>
+
+            <div class="automation-toggles">
+              <label class="automation-toggle">
+                <input type="checkbox" [(ngModel)]="form.autoCreateUnavailableForUsersWithoutWindow" />
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Marcar automàticament com a no disponible els usuaris sense cap tram al calendari</span>
+              </label>
+
+              <label class="automation-toggle">
+                <input type="checkbox" [(ngModel)]="form.notifyOnAutoAvailableResponse" />
+                <span class="toggle-indicator"></span>
+                <span class="toggle-text">Avisar l'usuari quan una automatització el marqui com a disponible</span>
+              </label>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>1) Tipus setmanals</h3>
+            <p class="section-help">Selecciona quins tipus es consideren convocatòries setmanals.</p>
+            <div class="automation-toggles">
+              @for (type of convoTypes; track type.id) {
+                <label class="automation-toggle">
+                  <input
+                    type="checkbox"
+                    [checked]="isWeeklyTypeSelected(type.name)"
+                    (change)="toggleWeeklyType(type.name, $any($event.target).checked)"
+                  />
+                  <span class="toggle-indicator"></span>
+                  <span class="toggle-text">{{ type.name }}</span>
+                </label>
+              }
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>2) Sol·licitud setmanal de disponibilitat</h3>
+            <p class="section-help">Defineix quin dia i hora de la setmana anterior es demana disponibilitat.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Dia setmana anterior</label>
+                <select [(ngModel)]="form.weeklyRequestWeekday" (change)="requestAutoSave()">
+                  @for (day of weekdayOptions; track day.value) {
+                    <option [ngValue]="day.value">{{ day.label }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label>Hora de sol·licitud</label>
+                <div class="time-input-group">
+                  <div class="time-input">
+                    <input type="number" min="0" max="23" [(ngModel)]="form.weeklyRequestHour" (change)="requestAutoSave()" placeholder="HH" />
+                  </div>
+                  <span class="time-separator">:</span>
+                  <div class="time-input">
+                    <input type="number" min="0" max="59" [(ngModel)]="form.weeklyRequestMinute" (change)="requestAutoSave()" placeholder="MM" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>3) Responsables de disponibilitat</h3>
+            <p class="section-help">Selecciona un o més admins responsables de disponibilitat.</p>
+
+            @if (getAdminUsers().length === 0) {
+              <div class="empty-state">No hi ha usuaris admin disponibles.</div>
+            } @else {
+              <details class="multi-select-dropdown">
+                <summary class="multi-select-summary">
+                  {{ getAvailabilityManagersSummary() }}
+                </summary>
+
+                <div class="multi-select-options">
+                  @for (user of getAdminUsers(); track user.id) {
+                    <label class="checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="isAvailabilityManagerSelected(user.nCarnet)"
+                        (change)="toggleAvailabilityManager(user.nCarnet, $any($event.target).checked)"
+                      />
+                        <span class="option-text">{{ user.nCarnet }} - {{ user.name }} {{ user.lastName || '' }}</span>
+                    </label>
+                  }
+                </div>
+              </details>
+            }
+          </section>
+
+          <section class="config-section">
+            <h3>4) Sol·licitud normal si no has respost</h3>
+            <p class="section-help">Finestra d'antelació respecte al dia de l'activitat.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Dies d'antelació</label>
+                <input type="number" min="0" max="30" [(ngModel)]="form.pendingLeadDays" />
+              </div>
+
+              <div class="form-group">
+                <label>Hores d'antelació</label>
+                <input type="number" min="0" max="720" [(ngModel)]="form.pendingLeadHours" />
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section">
+            <h3>5) Confirmació de sortida</h3>
+            <p class="section-help">Defineix amb quants dies d'antelació i a quina hora es confirma si finalment se surt.</p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Dies abans de la convocatòria</label>
+                <input type="number" min="0" max="30" [(ngModel)]="form.sortidaConfirmDaysBefore" (change)="requestAutoSave()" />
+              </div>
+
+              <div class="form-group">
+                <label>Hora de confirmació</label>
+                <div class="time-input-group">
+                  <div class="time-input">
+                    <input type="number" min="0" max="23" [(ngModel)]="form.sortidaConfirmHour" (change)="requestAutoSave()" placeholder="HH" />
+                  </div>
+                  <span class="time-separator">:</span>
+                  <div class="time-input">
+                    <input type="number" min="0" max="59" [(ngModel)]="form.sortidaConfirmMinute" (change)="requestAutoSave()" placeholder="MM" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section full-width">
+            <h3>6) Missatgeria configurable per escenari</h3>
+            <p class="section-help">Configura per tipus la notificació d'activació de sortida i defineix una notificació general per convocatòries pendents de disponibilitat.</p>
+
+            <div class="message-config-layout">
+              <article class="message-config-card">
+                <h4>Notificació de convocatòria (general)</h4>
+
+                <div class="form-grid">
+                  <div class="form-group full-width">
+                    <label>Títol</label>
+                    <input type="text" [ngModel]="form.creationTitle" (ngModelChange)="updateConvocatoriaTitle($event)" />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Missatge</label>
+                    <textarea rows="3" [ngModel]="form.creationBody" (ngModelChange)="updateConvocatoriaBody($event)"></textarea>
+                  </div>
+                </div>
+              </article>
+
+              <article class="message-config-card">
+                <h4>Sol·licitud de disponibilitat (general)</h4>
+
+                <div class="form-grid">
+                  <div class="form-group full-width">
+                    <label>Títol</label>
+                    <input type="text" [ngModel]="form.pendingTitle" (ngModelChange)="updatePendingTitle($event)" />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Missatge</label>
+                    <textarea rows="3" [ngModel]="form.pendingBody" (ngModelChange)="updatePendingBody($event)"></textarea>
+                  </div>
+                </div>
+              </article>
+
+              <article class="message-config-card">
+                <h4>Convocatòria cancel·lada (D+1)</h4>
+
+                <div class="form-grid">
+                  <div class="form-group full-width">
+                    <label>Títol</label>
+                    <input type="text" [(ngModel)]="form.sortidaTitleCancelled" (change)="requestAutoSave()" />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Missatge</label>
+                    <textarea rows="3" [(ngModel)]="form.sortidaBodyCancelled" (change)="requestAutoSave()"></textarea>
+                  </div>
+                </div>
+              </article>
+
+              <article class="message-config-card">
+                <h4>Retén (D+1)</h4>
+
+                <div class="form-grid">
+                  <div class="form-group full-width">
+                    <label>Títol</label>
+                    <input type="text" [(ngModel)]="form.sortidaTitleReten" (change)="requestAutoSave()" />
+                  </div>
+
+                  <div class="form-group full-width">
+                    <label>Missatge</label>
+                    <textarea rows="3" [(ngModel)]="form.sortidaBodyReten" (change)="requestAutoSave()"></textarea>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </div>
+      }
+
+      @if (activeTab === 'orchestrator-config' && isTabVisible('orchestrator-config')) {
+        <div class="config-sections">
+          <section class="config-section full-width">
+            <h3>7) Orquestrador - Configuració</h3>
+            <p class="section-help">Retenció, delegació de visibilitat i monitorització bàsica del pipeline automàtic.</p>
+
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Dies de retenció d'històric</label>
+                <input type="number" min="1" max="60" [(ngModel)]="form.automationRetentionDays" />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Visualitzadors delegats</label>
+                @if (getAllActiveUsers().length === 0) {
+                  <div class="empty-state">No hi ha usuaris disponibles.</div>
+                } @else {
+                  <details class="multi-select-dropdown">
+                    <summary class="multi-select-summary">
+                      {{ getAutomationViewersSummary() }}
+                    </summary>
+
+                    <div class="multi-select-options">
+                      @for (user of getAllActiveUsers(); track user.id) {
+                        <label class="checkbox-label">
+                          <input
+                            type="checkbox"
+                            [checked]="isAutomationViewerSelected(user.nCarnet)"
+                            (change)="toggleAutomationViewer(user.nCarnet, $any($event.target).checked)"
+                          />
+                          <span class="option-text">{{ user.nCarnet }} - {{ user.name }} {{ user.lastName || '' }}</span>
+                          @if (user.roles.isAdmin) { <span class="role-badge">admin</span> }
+                        </label>
+                      }
+                    </div>
+                  </details>
+                }
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section full-width">
+            <h3>8) Monitorització</h3>
+            <p class="section-help">Configura l'activació de monitorització i les alertes operatives associades.</p>
+
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label class="automation-toggle">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="form.automationMonitoringEnabled"
+                    (ngModelChange)="onAutomationMonitoringChanged($event)"
+                  />
+                  <span class="toggle-indicator"></span>
+                  <span class="toggle-text">Monitorització activa</span>
+                </label>
+              </div>
+
+              <div class="form-group full-width">
+                <label [class.disabled-label]="!form.automationMonitoringEnabled">Destinataris alerta operativa</label>
+                @if (getAllActiveUsers().length === 0) {
+                  <div class="empty-state">No hi ha usuaris disponibles.</div>
+                } @else {
+                  <details class="multi-select-dropdown" [class.multi-select-disabled]="!form.automationMonitoringEnabled">
+                    <summary class="multi-select-summary">
+                      {{ getAutomationAlertRecipientsSummary() }}
+                    </summary>
+
+                    <div class="multi-select-options">
+                      @for (user of getAllActiveUsers(); track user.id) {
+                        <label class="checkbox-label">
+                          <input
+                            type="checkbox"
+                            [checked]="isAutomationAlertRecipientSelected(user.nCarnet)"
+                            [disabled]="!form.automationMonitoringEnabled"
+                            (change)="toggleAutomationAlertRecipient(user.nCarnet, $any($event.target).checked)"
+                          />
+                          <span class="option-text">{{ user.nCarnet }} - {{ user.name }} {{ user.lastName || '' }}</span>
+                          @if (user.roles.isAdmin) { <span class="role-badge">admin</span> }
+                        </label>
+                      }
+                    </div>
+                  </details>
+                }
+              </div>
+
+              <div class="form-group">
+                <label class="automation-toggle" [class.is-disabled]="!form.automationMonitoringEnabled">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="form.automationAlertOnMissedRun"
+                    [disabled]="!form.automationMonitoringEnabled"
+                    (change)="requestAutoSave()"
+                  />
+                  <span class="toggle-indicator"></span>
+                  <span class="toggle-text">Alertar execucions omitides</span>
+                </label>
+              </div>
+
+              <div class="form-group">
+                <label class="automation-toggle" [class.is-disabled]="!form.automationMonitoringEnabled">
+                  <input
+                    type="checkbox"
+                    [(ngModel)]="form.automationAlertOnTaskFailure"
+                    [disabled]="!form.automationMonitoringEnabled"
+                    (change)="requestAutoSave()"
+                  />
+                  <span class="toggle-indicator"></span>
+                  <span class="toggle-text">Alertar errors de tasca</span>
+                </label>
+              </div>
+            </div>
+          </section>
+
+          <section class="config-section full-width">
+            <h3>9) Tasques configurades</h3>
+            <p class="section-help">Activa, configura el tipus de notificació i filtra per tipus de convocatòria. Pots afegir tasques addicionals o eliminar les existents.</p>
+
+            <div class="task-list">
+              @for (task of form.tasks; track task.taskKey; let i = $index) {
+                <article class="task-card" [class.task-disabled]="!task.enabled">
+                  <div class="task-card-header">
+                    <div class="task-card-title">
+                      <strong>{{ task.taskKey }}</strong>
+                      <span class="schedule-badge">{{ getTaskScheduleLabel(task) }}</span>
+                    </div>
+                    <div class="task-card-actions">
+                      <label class="automation-toggle compact">
+                        <input type="checkbox" [checked]="task.enabled" (change)="toggleTaskEnabled(i, $any($event.target).checked)" />
+                        <span class="toggle-indicator"></span>
+                      </label>
+                      <button type="button" class="btn btn-secondary btn-sm" (click)="toggleTaskExpanded(task.taskKey)">
+                        {{ isTaskExpanded(task.taskKey) ? 'Tancar' : 'Editar' }}
+                      </button>
+                      <button type="button" class="btn-icon-danger" title="Eliminar tasca" (click)="removeTask(i)">✕</button>
+                    </div>
+                  </div>
+
+                  <p class="task-card-desc">{{ getTaskDescription(task) }}</p>
+
+                  @if (isTaskExpanded(task.taskKey)) {
+                    <div class="task-config-grid">
+                      <div class="form-group">
+                        <label>Tipus de notificació</label>
+                        <select [ngModel]="task.notifyKind" (ngModelChange)="updateTaskField(i, 'notifyKind', $event)">
+                          @for (opt of notifyKindOptions; track opt.value) {
+                            <option [value]="opt.value">{{ opt.label }}</option>
+                          }
+                        </select>
+                      </div>
+
+                      <div class="form-group">
+                        <label>Freqüència</label>
+                        <select [ngModel]="task.scheduleKind" (ngModelChange)="updateTaskField(i, 'scheduleKind', $event)">
+                          <option value="daily">Diària</option>
+                          <option value="weekly">Setmanal</option>
+                          <option value="manual">Manual</option>
+                        </select>
+                      </div>
+
+                      <div class="form-group full-width">
+                        <label>Filtre de tipus de convocatòria</label>
+                        <details class="multi-select-dropdown">
+                          <summary class="multi-select-summary">{{ getTaskConvoTypeSummary(i) }}</summary>
+                          <div class="multi-select-options">
+                            @for (type of convoTypes; track type.id) {
+                              <label class="checkbox-label">
+                                <input
+                                  type="checkbox"
+                                  [checked]="isConvoTypeSelectedForTask(i, type.name)"
+                                  (change)="toggleTaskConvoType(i, type.name, $any($event.target).checked)"
+                                />
+                                <span class="option-text">{{ type.name }}</span>
+                              </label>
+                            }
+                          </div>
+                        </details>
+                        <small class="field-hint">Deixa buit per processar tots els tipus de convocatòria.</small>
+                      </div>
+                    </div>
+                  }
+
+                  <div class="task-card-meta">
+                    <span>Propera execució: {{ getTaskNextExecution(task) }}</span>
+                  </div>
+                </article>
+              }
+
+              @if (showAddTaskForm) {
+                <article class="task-card task-card-new">
+                  <h4 class="task-card-new-title">Nova tasca</h4>
+
+                  <div class="task-config-grid">
+                    <div class="form-group">
+                      <label>Nom (identificador únic)</label>
+                      <input
+                        type="text"
+                        [(ngModel)]="newTaskDraft.taskKey"
+                        placeholder="ex: pending-guardies"
+                      />
+                      @if (newTaskKeyError) {
+                        <small class="field-error">{{ newTaskKeyError }}</small>
+                      }
+                    </div>
+
+                    <div class="form-group">
+                      <label>Tipus de notificació</label>
+                      <select [(ngModel)]="newTaskDraft.notifyKind">
+                        @for (opt of notifyKindOptions; track opt.value) {
+                          <option [value]="opt.value">{{ opt.label }}</option>
+                        }
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label>Freqüència</label>
+                      <select [(ngModel)]="newTaskDraft.scheduleKind">
+                        <option value="daily">Diària</option>
+                        <option value="weekly">Setmanal</option>
+                        <option value="manual">Manual</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group full-width">
+                      <label>Filtre de tipus de convocatòria</label>
+                      <details class="multi-select-dropdown">
+                        <summary class="multi-select-summary">{{ getNewTaskConvoTypeSummary() }}</summary>
+                        <div class="multi-select-options">
+                          @for (type of convoTypes; track type.id) {
+                            <label class="checkbox-label">
+                              <input
+                                type="checkbox"
+                                [checked]="isConvoTypeSelectedForNewTask(type.name)"
+                                (change)="toggleNewTaskConvoType(type.name, $any($event.target).checked)"
+                              />
+                              <span class="option-text">{{ type.name }}</span>
+                            </label>
+                          }
+                        </div>
+                      </details>
+                      <small class="field-hint">Deixa buit per processar tots els tipus de convocatòria.</small>
+                    </div>
+                  </div>
+
+                  <div class="task-card-footer">
+                    <button type="button" class="btn btn-primary btn-sm" (click)="confirmAddTask()">Confirmar</button>
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="cancelAddTask()">Cancel·lar</button>
+                  </div>
+                </article>
+              }
+            </div>
+
+            <div class="task-list-footer">
+              <button type="button" class="btn btn-secondary btn-sm" (click)="addTask()" [disabled]="showAddTaskForm">+ Nova tasca</button>
+            </div>
+          </section>
+        </div>
+      }
+
+      @if (activeTab === 'logs' && isTabVisible('logs')) {
+        <section class="card">
+          <div class="card-header">
+            <button class="btn btn-secondary btn-sm" (click)="onLogsRefresh.emit()" [disabled]="loadingLogs">
+              {{ loadingLogs ? 'Actualitzant...' : 'Actualitzar' }}
+            </button>
+          </div>
+
+          @if (logsError) {
+            <div class="error-alert">{{ logsError }}</div>
+          }
+
+          @if (loadingLogs) {
+            <div class="loading">Carregant registre...</div>
+          } @else if (logs.length === 0) {
+            <div class="empty-state">Sense enviaments registrats.</div>
+          } @else {
+            <div class="logs-list">
+              @for (log of paginatedLogs; track log.id) {
+                <article class="log-item">
+                  <div class="log-header">
+                    <strong>{{ log.title }}</strong>
+                    <span class="status-badge" [class]="'status-' + log.status">
+                      {{ log.status }}
+                    </span>
+                  </div>
+                  <p>{{ log.body }}</p>
+                  <div class="log-stats">
+                    <small>✓ {{ log.successCount }} · ✗ {{ log.failureCount }} · Total {{ log.requestedCount }}</small>
+                  </div>
+                  <small class="scope">{{ log.targetScope }}</small>
+                  <small class="date">{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</small>
+                  @if (log.errorMessage) {
+                    <small class="error">{{ log.errorMessage }}</small>
+                  }
+                </article>
+              }
+            </div>
+
+            <div class="pagination-controls">
+              <div class="pagination-size">
+                <label for="logs-page-size">Per pàgina</label>
+                <select id="logs-page-size" [value]="logsPageSize" (change)="setLogsPageSize($any($event.target).value)">
+                  @for (size of pageSizeOptions; track size) {
+                    <option [value]="size">{{ size }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="pagination-nav">
+                <button class="btn btn-sm btn-secondary" (click)="goToPreviousLogsPage()" [disabled]="logsCurrentPage <= 1">Anterior</button>
+                <span>Pàgina {{ logsCurrentPage }} de {{ logsTotalPages }}</span>
+                <button class="btn btn-sm btn-secondary" (click)="goToNextLogsPage()" [disabled]="logsCurrentPage >= logsTotalPages">Següent</button>
+              </div>
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab === 'automation' && isTabVisible('automation')) {
+        <section class="card automation-card">
+          <div class="card-header">
+            <h3>Històric de corrides</h3>
+            <button class="btn btn-secondary btn-sm" (click)="loadAutomationRuns()" [disabled]="automationLoading">
+              {{ automationLoading ? 'Actualitzant...' : 'Actualitzar' }}
+            </button>
+          </div>
+
+          <div class="automation-task-bar">
+            @for (taskKey of orchestratorTaskKeys; track taskKey) {
+              <button
+                class="btn btn-secondary btn-sm"
+                [disabled]="taskActionLoadingKey === taskKey"
+                (click)="runTaskManually(taskKey)">
+                {{ taskActionLoadingKey === taskKey ? 'Executant...' : 'Executar ' + taskKey }}
+              </button>
+            }
+          </div>
+
+          @if (automationStats; as stats) {
+            <div class="automation-stats-strip">
+              <span class="stat-item"><strong>{{ stats.total }}</strong> corrides</span>
+              <span class="stat-item stat-success"><strong>{{ stats.successes }}</strong> OK</span>
+              @if (stats.partial > 0) {
+                <span class="stat-item stat-partial"><strong>{{ stats.partial }}</strong> parcial</span>
+              }
+              @if (stats.failures > 0) {
+                <span class="stat-item stat-failed"><strong>{{ stats.failures }}</strong> error</span>
+              }
+              @if (stats.missedCount > 0) {
+                <span class="stat-item stat-missed"><strong>{{ stats.missedCount }}</strong> omesa</span>
+              }
+              @if (stats.successRate !== null) {
+                <span class="stat-item"><strong>{{ stats.successRate }}%</strong> èxit</span>
+              }
+              @if (stats.avgDurationMs !== null) {
+                <span class="stat-item"><strong>{{ getDurationLabel(stats.avgDurationMs) }}</strong> durada mitja</span>
+              }
+              @if (stats.lastRun) {
+                <span class="stat-item">Última: <strong>{{ stats.lastRun.startedAt | date:'dd/MM HH:mm' }}</strong> <span class="status-badge" [class]="'status-' + stats.lastRun.status">{{ stats.lastRun.status }}</span></span>
+              }
+            </div>
+          }
+
+          <div class="automation-filters">
+            <label>
+              Estat
+              <select [(ngModel)]="automationStatusFilter">
+                <option value="all">Tots</option>
+                <option value="success">success</option>
+                <option value="partial">partial</option>
+                <option value="failed">failed</option>
+                <option value="running">running</option>
+                <option value="skipped">skipped</option>
+              </select>
+            </label>
+            <label>
+              Trigger
+              <select [(ngModel)]="automationTriggerFilter">
+                <option value="all">Tots</option>
+                @for (trigger of automationTriggerOptions; track trigger) {
+                  <option [value]="trigger">{{ trigger }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Tasca
+              <select [(ngModel)]="automationTaskFilter">
+                <option value="all">Totes</option>
+                @for (taskKey of automationTaskOptions; track taskKey) {
+                  <option [value]="taskKey">{{ taskKey }}</option>
+                }
+              </select>
+            </label>
+            <label>
+              Des de
+              <input type="date" [(ngModel)]="automationDateFrom" />
+            </label>
+            <label>
+              Fins a
+              <input type="date" [(ngModel)]="automationDateTo" />
+            </label>
+          </div>
+
+          @if (automationError) {
+            <div class="error-alert">{{ automationError }}</div>
+          }
+
+          @if (automationLoading) {
+            <div class="loading">Carregant historial...</div>
+          } @else if (filteredAutomationRuns.length === 0) {
+            <div class="empty-state">Sense corrides amb els filtres actuals.</div>
+          } @else {
+            <div class="automation-grid">
+              <div class="automation-run-list">
+                @for (run of filteredAutomationRuns; track run.id) {
+                  <button type="button" class="automation-run-item" [class.selected]="selectedAutomationRun?.id === run.id" [class.run-missed]="run.trigger === 'missed-run'" (click)="selectAutomationRun(run)">
+                    <div class="run-item-top">
+                      <strong>#{{ run.id }} · {{ getRunTriggerLabel(run.trigger) }}</strong>
+                      <span class="status-badge" [class]="'status-' + run.status">{{ run.status }}</span>
+                    </div>
+                    <small>{{ run.startedAt | date:'dd/MM/yyyy HH:mm' }} · {{ getDurationLabel(run.durationMs) }}</small>
+                    <small>Origen: {{ run.source }} · Actor: {{ getRunActorLabel(run) }}</small>
+                    @if (run.correlationId) {
+                      <small>CorrId: {{ run.correlationId }}</small>
+                    }
+                  </button>
+                }
+              </div>
+
+              <div class="automation-run-detail">
+                @if (!selectedAutomationRun) {
+                  <div class="empty-state">Selecciona una corrida per veure el detall.</div>
+                } @else {
+                  <h4>Detall run #{{ selectedAutomationRun.id }}</h4>
+                  <p>
+                    <strong>Inici:</strong> {{ selectedAutomationRun.startedAt | date:'dd/MM/yyyy HH:mm' }}
+                    · <strong>Fi:</strong> {{ selectedAutomationRun.finishedAt ? (selectedAutomationRun.finishedAt | date:'dd/MM/yyyy HH:mm') : '-' }}
+                    · <strong>Duració:</strong> {{ getDurationLabel(selectedAutomationRun.durationMs) }}
+                  </p>
+                  @if (selectedAutomationRun.correlationId) {
+                    <p><strong>Correlation ID:</strong> {{ selectedAutomationRun.correlationId }}</p>
+                  }
+                  @if (selectedAutomationRun.errorMessage) {
+                    <p class="error">{{ selectedAutomationRun.errorMessage }}</p>
+                  }
+
+                  <div class="automation-task-list">
+                    @for (task of selectedAutomationRun.tasks; track task.id) {
+                      <article class="automation-task-item">
+                        <div class="run-item-top">
+                          <strong>{{ task.taskKey }}</strong>
+                          <span class="status-badge" [class]="'status-' + task.status">{{ task.status }}</span>
+                        </div>
+                        <small>{{ task.startedAt | date:'dd/MM/yyyy HH:mm' }} · {{ getDurationLabel(task.durationMs) }}</small>
+                        @if (task.details) {
+                          <small>
+                            Destinataris: {{ task.details.targetedUsers ?? '-' }} ·
+                            Notificacions: {{ task.details.notificationCount ?? '-' }}
+                          </small>
+                        }
+                        @if (task.errorMessage) {
+                          <small class="error">{{ task.errorMessage }}</small>
+                        }
+                      </article>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </section>
+      }
+    </div>
+  }
+</div>

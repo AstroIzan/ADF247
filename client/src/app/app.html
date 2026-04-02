@@ -3,13 +3,26 @@
 		<header class="top-nav">
 			<div class="top-nav-left">
 				<div class="logo">ADF247</div>
-				<button class="nav-btn" routerLink="/home" routerLinkActive="active">Inici</button>
+				<button class="nav-btn desktop-nav-btn" routerLink="/home" routerLinkActive="active">Inici</button>
+				<button class="nav-btn desktop-nav-btn" routerLink="/availability" routerLinkActive="active">Disponibilitat</button>
 				@if (authService.isAdmin()) {
-					<button class="nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
+					<button class="nav-btn desktop-nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
 				}
 			</div>
 
 			<div class="top-nav-right">
+				<button class="hamburger-btn mobile-only" type="button" [class.open]="isMobileMenuOpen" aria-label="Obrir menú" (click)="toggleMobileMenu()">
+					@if (!isMobileMenuOpen) {
+						<span></span>
+						<span></span>
+						<span></span>
+					} @else {
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+							<line x1="18" y1="6" x2="6" y2="18"></line>
+							<line x1="6" y1="6" x2="18" y2="18"></line>
+						</svg>
+					}
+				</button>
 				<span class="mini-user">
 					{{ authService.getCachedNCarnet() }}
 					<span class="mini-user-detail">
@@ -19,6 +32,13 @@
 						| {{ authService.getCachedName() }} {{ authService.getCachedLastName() || '' }}
 					</span>
 				</span>
+				<button class="nav-btn profile-btn settings-btn" title="Configuració" aria-label="Configuració" (click)="openSettingsModal(authService.isAdmin() ? 'system' : 'device')">
+					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+						<circle cx="12" cy="12" r="3"></circle>
+						<path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+					</svg>
+					<span class="nav-btn-text">Configuració</span>
+				</button>
 				<button class="nav-btn profile-btn" title="Editar perfil" aria-label="Editar perfil" (click)="openProfileModal()">
 					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
 						<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -36,11 +56,32 @@
 				</button>
 			</div>
 		</header>
+
+		@if (isMobileMenuOpen) {
+			<nav class="mobile-menu">
+				<button class="mobile-menu-item" routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Inici</button>
+				<button class="mobile-menu-item" routerLink="/availability" routerLinkActive="active" (click)="closeMobileMenu()">Disponibilitat</button>
+				@if (authService.isAdmin()) {
+					<button class="mobile-menu-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">Panell</button>
+				}
+				<button class="mobile-menu-item" (click)="openSettingsFromMenu(authService.isAdmin() ? 'system' : 'device')">Configuració</button>
+				<button class="mobile-menu-item" (click)="openProfileFromMenu()">Perfil</button>
+				<button class="mobile-menu-item danger" (click)="logoutFromMenu()">Sortir</button>
+			</nav>
+		}
+
+		@if (isHomeRoute() && notificationWarning) {
+			<div class="notification-warning-bar">
+				<strong>Avís de notificacions:</strong>
+				<span>{{ notificationWarning }}</span>
+			</div>
+		}
 	}
 
 	<main class="app-content">
 		<router-outlet></router-outlet>
 	</main>
 
+	<app-settings></app-settings>
 	<app-profile></app-profile>
 </div>
