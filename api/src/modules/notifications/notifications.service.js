@@ -14,6 +14,15 @@ const {
   updateNotificationSettings,
 } = require('./notifications.config')
 const { getFirebaseMessaging } = require('./notifications.firebase')
+const {
+  deactivateDeviceTokenForUser,
+  deactivateTokensByValue,
+  listActiveDeviceTokens,
+  listAllDeviceTokens,
+  listDeviceTokensByUser,
+  pruneInactiveDeviceTokensForUser: pruneStoredInactiveTokensForUser,
+  upsertDeviceToken,
+} = require('./notifications.device-store')
 const { updateSortidaForTomorrow } = require('../convos/convos.service')
 
 const INACTIVE_DEVICE_TOKEN_RETENTION_DAYS = 30
@@ -349,18 +358,7 @@ async function pruneInactiveDeviceTokensForUser(userId) {
     return
   }
 
-  const cutoff = new Date()
-  cutoff.setDate(cutoff.getDate() - INACTIVE_DEVICE_TOKEN_RETENTION_DAYS)
-
-  await database.deviceToken.deleteMany({
-    where: {
-      userId,
-      isActive: false,
-      createdAt: {
-        lt: cutoff,
-      },
-    },
-  })
+  pruneStoredInactiveTokensForUser(userId, INACTIVE_DEVICE_TOKEN_RETENTION_DAYS)
 }
 
 function countEligibleResponses(positiveResponses = []) {
@@ -530,18 +528,7 @@ async function sendMulticastNotification({
   senderUserId = null,
   userIds,
 }) {
-  const tokenWhere = { isActive: true }
-
-  if (Array.isArray(userIds)) {
-    tokenWhere.userId = { in: userIds }
-  }
-
-  const activeTokens = await database.deviceToken.findMany({
-    where: tokenWhere,
-    select: {
-      token: true,
-    },
-  })
+  const activeTokens = listActiveDeviceTokens(Array.isArray(userIds) ? userIds : undefined)
 
   const tokens = [...new Set(activeTokens.map((item) => item.token))]
 
@@ -602,16 +589,7 @@ async function sendMulticastNotification({
     }
 
     if (tokensToDisable.length > 0) {
-      await database.deviceToken.updateMany({
-        where: {
-          token: {
-            in: tokensToDisable,
-          },
-        },
-        data: {
-          isActive: false,
-        },
-      })
+      deactivateTokensByValue(tokensToDisable)
     }
 
     const log = await database.notificationLog.create({
@@ -657,36 +635,12 @@ async function registerDeviceToken(authUser, payload, userAgent) {
     userAgent,
   })
 
-  const now = new Date()
-  const existing = await database.deviceToken.findUnique({
-    where: { token: dto.token },
+  const tokenRecord = upsertDeviceToken({
+    userId: authUser.userId,
+    token: dto.token,
+    platform: dto.platform,
+    userAgent: dto.userAgent,
   })
-
-  let tokenRecord
-
-  if (existing) {
-    tokenRecord = await database.deviceToken.update({
-      where: { token: dto.token },
-      data: {
-        userId: authUser.userId,
-        platform: dto.platform,
-        userAgent: dto.userAgent,
-        isActive: true,
-        lastSeenAt: now,
-      },
-    })
-  } else {
-    tokenRecord = await database.deviceToken.create({
-      data: {
-        userId: authUser.userId,
-        token: dto.token,
-        platform: dto.platform,
-        userAgent: dto.userAgent,
-        isActive: true,
-        lastSeenAt: now,
-      },
-    })
-  }
 
   // Keep historical table bounded by removing old inactive rows.
   await pruneInactiveDeviceTokensForUser(authUser.userId)
@@ -697,16 +651,9 @@ async function registerDeviceToken(authUser, payload, userAgent) {
 async function deactivateDeviceToken(authUser, payload) {
   const dto = buildDeactivateDeviceTokenDto(payload)
 
-  await database.deviceToken.updateMany({
-    where: {
-      userId: authUser.userId,
-      token: dto.token,
-      isActive: true,
-    },
-    data: {
-      isActive: false,
-      lastSeenAt: new Date(),
-    },
+  deactivateDeviceTokenForUser({
+    userId: authUser.userId,
+    token: dto.token,
   })
 
   await pruneInactiveDeviceTokensForUser(authUser.userId)
@@ -715,14 +662,7 @@ async function deactivateDeviceToken(authUser, payload) {
 }
 
 async function getCurrentUserDeviceTokens(authUser) {
-  const tokens = await database.deviceToken.findMany({
-    where: {
-      userId: authUser.userId,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  })
+  const tokens = listDeviceTokensByUser(authUser.userId)
 
   return tokens.map(mapDeviceTokenToDto)
 }
@@ -730,22 +670,33 @@ async function getCurrentUserDeviceTokens(authUser) {
 async function getAllDeviceTokens(authUser) {
   await ensureAdmin(authUser)
 
-  const tokens = await database.deviceToken.findMany({
-    include: {
-      user: {
-        select: { id: true, nCarnet: true, name: true, lastName: true },
+  const tokens = listAllDeviceTokens()
+  const userIds = Array.from(new Set(tokens.map((token) => token.userId)))
+  const users = await database.user.findMany({
+    where: {
+      id: {
+        in: userIds.length > 0 ? userIds : [-1],
       },
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
+    select: { id: true, nCarnet: true, name: true, lastName: true },
   })
+  const userById = new Map(users.map((user) => [user.id, user]))
 
   return tokens.map((t) => ({
-    ...mapDeviceTokenToDto(t),
-    user: t.user
-      ? { id: t.user.id, nCarnet: t.user.nCarnet, name: t.user.name, lastName: t.user.lastName }
-      : null,
+    ...(mapDeviceTokenToDto(t)),
+    user: (() => {
+      const user = userById.get(t.userId)
+      if (!user) {
+        return null
+      }
+
+      return {
+        id: user.id,
+        nCarnet: user.nCarnet,
+        name: user.name,
+        lastName: user.lastName,
+      }
+    })(),
   }))
 }
 

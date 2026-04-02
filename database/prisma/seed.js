@@ -1,7 +1,10 @@
 ﻿const prisma = require('./prisma')
 const bcrypt = require('bcrypt')
+const fs = require('fs')
+const path = require('path')
 
 const PASSWORD_SALT_ROUNDS = 10
+const DEVICE_TOKEN_STORE_PATH = path.join(__dirname, '../../api/config/device-tokens.json')
 
 async function main() {
   console.log('\ud83c\udf31 Iniciando seed completo de la BBDD...')
@@ -16,6 +19,8 @@ async function main() {
   await prisma.role.deleteMany({})
   await prisma.user.deleteMany({})
   await prisma.convoType.deleteMany({})
+
+  fs.writeFileSync(DEVICE_TOKEN_STORE_PATH, `${JSON.stringify({ tokens: [] }, null, 2)}\n`, 'utf8')
   console.log('\u2705 Datos anteriores eliminados')
 
   const usuariosData = [

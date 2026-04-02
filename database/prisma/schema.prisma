@@ -23,7 +23,6 @@ model User {
   convocatories    Convocatoria[] @relation("ConvocatoriaResponsable")
   respostas        Respuesta[]
   availabilityWindows AvailabilityWindow[]
-  deviceTokens     DeviceToken[]
   notificationLogs NotificationLog[] @relation("NotificationLogSender")
   notificationAutomationRuns NotificationAutomationRun[] @relation("NotificationAutomationRunActor")
 }
@@ -82,21 +81,6 @@ model Respuesta {
   autoAssignReason String?
 
   @@index([source])
-}
-
-model DeviceToken {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  token      String   @unique
-  platform   String?
-  userAgent  String?
-  isActive   Boolean  @default(true)
-  lastSeenAt DateTime @default(now())
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([userId, isActive])
 }
 
 model NotificationLog {

@@ -44,6 +44,7 @@ database/generated/client/query_engine-windows.dll.node.tmp*
 
 # Firebase service account config (should be set via env vars in production)
 api/config/firebase-service-account.json
+api/config/device-tokens.json
 
 # Local technical backlog (private)
 .pending-tasks.md
