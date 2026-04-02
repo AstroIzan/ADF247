@@ -39,6 +39,8 @@ Thumbs.db
 # Generated Prisma client if used outside node_modules
 generated/prisma/
 **/generated/prisma/
+database/generated/client/query_engine-windows.dll.node.tmp*
+**/query_engine-windows.dll.node.tmp*
 
 # Firebase service account config (should be set via env vars in production)
 api/config/firebase-service-account.json
