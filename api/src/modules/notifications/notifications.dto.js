@@ -82,17 +82,6 @@ function buildNotificationConfigUpdateDto(payload = {}) {
   return payload
 }
 
-function mapDeviceTokenToDto(deviceToken) {
-  return {
-    id: deviceToken.id,
-    token: deviceToken.token,
-    platform: deviceToken.platform,
-    isActive: deviceToken.isActive,
-    lastSeenAt: deviceToken.lastSeenAt,
-    createdAt: deviceToken.createdAt,
-  }
-}
-
 function mapNotificationLogToDto(log) {
   let data = null
 
@@ -127,6 +116,5 @@ module.exports = {
   buildRegisterDeviceTokenDto,
   buildSendBroadcastDto,
   createNotificationsDtoError,
-  mapDeviceTokenToDto,
   mapNotificationLogToDto,
 }

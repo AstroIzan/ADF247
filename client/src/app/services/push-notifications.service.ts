@@ -6,15 +6,6 @@ import { HttpService } from './http.service'
 import { AuthService } from './auth.service'
 import { isNotificationsConfigReady, notificationsConfig } from '../config/notifications.config'
 
-type DeviceTokenRecord = {
-  id: number
-  token: string
-  platform?: string
-  isActive: boolean
-  lastSeenAt?: string
-  createdAt?: string
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -29,20 +20,15 @@ export class PushNotificationsService {
   readonly errorMessage = signal('')
   readonly infoMessage = signal('')
   readonly currentToken = signal('')
-  readonly registeredTokens = signal<DeviceTokenRecord[]>([])
+  readonly isTokenLinked = signal(false)
   readonly modalVisible = signal(false)
 
   readonly hasAnyRegisteredToken = computed(() => {
-    return this.registeredTokens().some((device) => device.isActive)
+    return this.isTokenLinked()
   })
 
   readonly hasRegisteredCurrentToken = computed(() => {
-    const token = this.currentToken()
-    if (!token) {
-      return false
-    }
-
-    return this.registeredTokens().some((device) => device.isActive && device.token === token)
+    return Boolean(this.currentToken()) && this.isTokenLinked()
   })
 
   readonly isDeviceReady = computed(() => {
@@ -113,18 +99,11 @@ export class PushNotificationsService {
       this.permission.set(browserPermission)
     }
 
-    // --- Step 3: load registered tokens (wrapped — must not block step 2) ---
-    try {
-      await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
-    } catch {
-      this.registeredTokens.set([])
-    }
-
-    // --- Step 4: check Firebase FCM support (only needed for token) ---
+    // --- Step 3: check Firebase FCM support (only needed for token) ---
     const fcmSupported = await this.detectMessagingSupport()
     this.isSupported.set(fcmSupported)
 
-    // --- Step 5: get + register FCM token if everything is ready ---
+    // --- Step 4: get + register FCM token if everything is ready ---
     if (this.permission() === 'granted' && fcmSupported) {
       try {
         const token = this.currentToken() || await this.withTimeout(this.resolveCurrentToken(), this.syncTimeoutMs)
@@ -132,7 +111,7 @@ export class PushNotificationsService {
           this.currentToken.set(token)
           if (!this.hasRegisteredCurrentToken()) {
             await this.withTimeout(this.registerToken(token), this.syncTimeoutMs)
-            await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
+            this.isTokenLinked.set(true)
             this.infoMessage.set('Dispositiu registrat correctament per rebre notificacions.')
           }
         }
@@ -177,8 +156,6 @@ export class PushNotificationsService {
 
     this.permission.set(Notification.permission)
 
-    await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
-
     const supported = await this.detectMessagingSupport()
     this.isSupported.set(supported)
 
@@ -201,7 +178,7 @@ export class PushNotificationsService {
         // If the browser has permission and token, ensure this session/device is linked in backend.
         if (token && !this.hasRegisteredCurrentToken()) {
           await this.withTimeout(this.registerToken(token), this.syncTimeoutMs)
-          await this.withTimeout(this.refreshRegisteredTokens(), this.syncTimeoutMs)
+          this.isTokenLinked.set(true)
         }
       } catch (error) {
         this.errorMessage.set(error instanceof Error ? error.message : 'No s\'ha pogut obtenir el token del dispositiu.')
@@ -251,7 +228,7 @@ export class PushNotificationsService {
 
       await this.registerToken(token)
       this.currentToken.set(token)
-      await this.refreshRegisteredTokens()
+      this.isTokenLinked.set(true)
       this.modalVisible.set(false)
       this.infoMessage.set('Dispositiu registrat correctament per rebre notificacions.')
     } catch (error) {
@@ -270,16 +247,6 @@ export class PushNotificationsService {
     if (!this.isSupported()) {
       throw new Error('Aquest navegador no suporta notificacions push per a aquesta aplicació.')
     }
-  }
-
-  private async refreshRegisteredTokens() {
-    if (!this.authService.isLoggedIn()) {
-      this.registeredTokens.set([])
-      return
-    }
-
-    const devices = await firstValueFrom(this.httpService.get<DeviceTokenRecord[]>('/notifications/device-tokens'))
-    this.registeredTokens.set(Array.isArray(devices) ? devices : [])
   }
 
   private async registerToken(token: string) {
@@ -354,7 +321,7 @@ export class PushNotificationsService {
     this.errorMessage.set('')
     this.infoMessage.set('')
     this.currentToken.set('')
-    this.registeredTokens.set([])
+    this.isTokenLinked.set(false)
     this.modalVisible.set(false)
   }
 

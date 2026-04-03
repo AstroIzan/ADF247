@@ -6,7 +6,6 @@ const {
   buildRegisterDeviceTokenDto,
   buildSendBroadcastDto,
   createNotificationsDtoError,
-  mapDeviceTokenToDto,
   mapNotificationLogToDto,
 } = require('./notifications.dto')
 const {
@@ -14,18 +13,9 @@ const {
   updateNotificationSettings,
 } = require('./notifications.config')
 const { getFirebaseMessaging } = require('./notifications.firebase')
-const {
-  deactivateDeviceTokenForUser,
-  deactivateTokensByValue,
-  listActiveDeviceTokens,
-  listAllDeviceTokens,
-  listDeviceTokensByUser,
-  pruneInactiveDeviceTokensForUser: pruneStoredInactiveTokensForUser,
-  upsertDeviceToken,
-} = require('./notifications.device-store')
 const { updateSortidaForTomorrow } = require('../convos/convos.service')
 
-const INACTIVE_DEVICE_TOKEN_RETENTION_DAYS = 30
+const GLOBAL_NOTIFICATION_TOPIC = 'adf247-all'
 
 function createServiceError(message, statusCode = 500, details) {
   const error = new Error(message)
@@ -60,6 +50,15 @@ function summarizeTaskResult(result) {
 function generateCorrelationId(prefix = 'run') {
   const random = Math.random().toString(36).slice(2, 8)
   return `${prefix}-${Date.now()}-${random}`
+}
+
+function buildUserNotificationTopic(userId) {
+  const normalized = Number(userId)
+  if (!Number.isInteger(normalized) || normalized <= 0) {
+    return null
+  }
+
+  return `adf247-user-${normalized}`
 }
 
 async function createAutomationRun({ trigger, source, actorUserId }) {
@@ -285,14 +284,6 @@ function applyTemplate(template, context) {
   })
 }
 
-function chunkArray(values, chunkSize) {
-  const chunks = []
-  for (let index = 0; index < values.length; index += chunkSize) {
-    chunks.push(values.slice(index, index + chunkSize))
-  }
-  return chunks
-}
-
 function startOfDay(referenceDate) {
   const value = new Date(referenceDate)
   value.setHours(0, 0, 0, 0)
@@ -363,14 +354,6 @@ function shouldSendSortidaStatusForConvocatoria(convocatoria, settings, referenc
   }
 
   return { shouldSend: true, triggerAt }
-}
-
-async function pruneInactiveDeviceTokensForUser(userId) {
-  if (!userId) {
-    return
-  }
-
-  pruneStoredInactiveTokensForUser(userId, INACTIVE_DEVICE_TOKEN_RETENTION_DAYS)
 }
 
 function countEligibleResponses(positiveResponses = []) {
@@ -540,11 +523,11 @@ async function sendMulticastNotification({
   senderUserId = null,
   userIds,
 }) {
-  const activeTokens = listActiveDeviceTokens(Array.isArray(userIds) ? userIds : undefined)
+  const topics = Array.isArray(userIds) && userIds.length > 0
+    ? [...new Set(userIds.map(buildUserNotificationTopic).filter(Boolean))]
+    : [GLOBAL_NOTIFICATION_TOPIC]
 
-  const tokens = [...new Set(activeTokens.map((item) => item.token))]
-
-  if (tokens.length === 0) {
+  if (topics.length === 0) {
     const log = await database.notificationLog.create({
       data: {
         senderUserId,
@@ -564,44 +547,32 @@ async function sendMulticastNotification({
 
   try {
     const messaging = getFirebaseMessaging()
-    const batches = chunkArray(tokens, 500)
     let successCount = 0
     let failureCount = 0
-    const tokensToDisable = []
 
-    for (const batchTokens of batches) {
-      const response = await messaging.sendEachForMulticast({
-        tokens: batchTokens,
-        notification: {
-          title,
-          body,
-        },
-        data: Object.entries(data).reduce((acc, [key, value]) => {
-          acc[key] = String(value)
-          return acc
-        }, {}),
-        webpush: {
-          fcmOptions: {
-            link,
+    for (const topic of topics) {
+      try {
+        await messaging.send({
+          topic,
+          notification: {
+            title,
+            body,
           },
-        },
-      })
+          data: Object.entries(data).reduce((acc, [key, value]) => {
+            acc[key] = String(value)
+            return acc
+          }, {}),
+          webpush: {
+            fcmOptions: {
+              link,
+            },
+          },
+        })
 
-      successCount += response.successCount
-      failureCount += response.failureCount
-
-      response.responses.forEach((result, index) => {
-        if (!result.success) {
-          const errorCode = result.error?.code || ''
-          if (errorCode === 'messaging/registration-token-not-registered' || errorCode === 'messaging/invalid-registration-token') {
-            tokensToDisable.push(batchTokens[index])
-          }
-        }
-      })
-    }
-
-    if (tokensToDisable.length > 0) {
-      deactivateTokensByValue(tokensToDisable)
+        successCount += 1
+      } catch {
+        failureCount += 1
+      }
     }
 
     const log = await database.notificationLog.create({
@@ -610,7 +581,7 @@ async function sendMulticastNotification({
         title,
         body,
         dataJson: JSON.stringify(data),
-        requestedCount: tokens.length,
+        requestedCount: topics.length,
         successCount,
         failureCount,
         targetScope,
@@ -626,9 +597,9 @@ async function sendMulticastNotification({
         title,
         body,
         dataJson: JSON.stringify(data),
-        requestedCount: tokens.length,
+        requestedCount: topics.length,
         successCount: 0,
-        failureCount: tokens.length,
+        failureCount: topics.length,
         targetScope,
         status: 'failed',
         errorMessage: error.message,
@@ -647,69 +618,35 @@ async function registerDeviceToken(authUser, payload, userAgent) {
     userAgent,
   })
 
-  const tokenRecord = upsertDeviceToken({
-    userId: authUser.userId,
-    token: dto.token,
-    platform: dto.platform,
-    userAgent: dto.userAgent,
-  })
+  const userTopic = buildUserNotificationTopic(authUser?.userId)
+  const topics = [GLOBAL_NOTIFICATION_TOPIC, userTopic].filter(Boolean)
+  const messaging = getFirebaseMessaging()
 
-  // Keep historical table bounded by removing old inactive rows.
-  await pruneInactiveDeviceTokensForUser(authUser.userId)
+  await Promise.all(topics.map((topic) => messaging.subscribeToTopic([dto.token], topic)))
 
-  return mapDeviceTokenToDto(tokenRecord)
+  return { ok: true, topics }
 }
 
 async function deactivateDeviceToken(authUser, payload) {
   const dto = buildDeactivateDeviceTokenDto(payload)
 
-  deactivateDeviceTokenForUser({
-    userId: authUser.userId,
-    token: dto.token,
-  })
+  const userTopic = buildUserNotificationTopic(authUser?.userId)
+  const topics = [GLOBAL_NOTIFICATION_TOPIC, userTopic].filter(Boolean)
+  const messaging = getFirebaseMessaging()
 
-  await pruneInactiveDeviceTokensForUser(authUser.userId)
+  await Promise.all(topics.map((topic) => messaging.unsubscribeFromTopic([dto.token], topic)))
 
   return { ok: true }
 }
 
 async function getCurrentUserDeviceTokens(authUser) {
-  const tokens = listDeviceTokensByUser(authUser.userId)
-
-  return tokens.map(mapDeviceTokenToDto)
+  return []
 }
 
 async function getAllDeviceTokens(authUser) {
   await ensureAdmin(authUser)
 
-  const tokens = listAllDeviceTokens()
-  const userIds = Array.from(new Set(tokens.map((token) => token.userId)))
-  const users = await database.user.findMany({
-    where: {
-      id: {
-        in: userIds.length > 0 ? userIds : [-1],
-      },
-    },
-    select: { id: true, nCarnet: true, name: true, lastName: true },
-  })
-  const userById = new Map(users.map((user) => [user.id, user]))
-
-  return tokens.map((t) => ({
-    ...(mapDeviceTokenToDto(t)),
-    user: (() => {
-      const user = userById.get(t.userId)
-      if (!user) {
-        return null
-      }
-
-      return {
-        id: user.id,
-        nCarnet: user.nCarnet,
-        name: user.name,
-        lastName: user.lastName,
-      }
-    })(),
-  }))
+  return []
 }
 
 async function getNotificationConfig(authUser) {
