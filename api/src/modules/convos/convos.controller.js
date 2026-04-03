@@ -104,7 +104,7 @@ async function createConvocatoria(req, res) {
 async function updateConvocatoria(req, res) {
   try {
     const convocatoriaId = parsePositiveInt(req.params.id, 'id')
-    const convocatoria = await convosService.updateConvocatoria(convocatoriaId, req.body)
+    const convocatoria = await convosService.updateConvocatoria(convocatoriaId, req.body, req.auth)
     res.json(convocatoria)
   } catch (error) {
     sendErrorResponse(res, error)

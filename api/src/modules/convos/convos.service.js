@@ -730,10 +730,9 @@ async function applyAvailabilityWindowsToConvocatoria(convocatoria) {
   })
 
   try {
-    await recalculateSortidaForConvocatoria(convocatoria.id)
     await recalculateAutoAssignedResponsable(convocatoria.id)
   } catch (error) {
-    console.error('[convos.service] Error al recalcular sortida/autoresponsable tras auto-respuestas:', error.message)
+    console.error('[convos.service] Error al recalcular autoresponsable tras auto-respuestas:', error.message)
   }
 
   if (matchingRules.notifyOnAutoAvailableResponse && autoAvailableUserIds.length > 0) {
@@ -752,35 +751,13 @@ async function applyAvailabilityWindowsToConvocatoria(convocatoria) {
 }
 
 async function recalculateSortidaForConvocatoria(convoId) {
+  // Sortida is manual-only (responsable/admin). Keep function for compatibility with existing callers.
   const convocatoria = await database.convocatoria.findUnique({
     where: { id: convoId },
-    include: {
-      convoType: true,
-      respostas: {
-        where: {
-          response: true,
-          user: {
-            isActive: true,
-          },
-        },
-        include: autoAssignCandidateInclude,
-      },
-    },
-  })
-
-  if (!convocatoria) {
-    return null
-  }
-
-  const nextSortida = shouldMarkSortida(convocatoria.convoType, convocatoria.respostas || [])
-
-  return database.convocatoria.update({
-    where: { id: convoId },
-    data: {
-      sortida: nextSortida,
-    },
     include: convocatoriaInclude,
   })
+
+  return convocatoria || null
 }
 
 function mapPrismaError(error) {
@@ -928,9 +905,13 @@ async function createConvocatoria(payload) {
   }
 }
 
-async function updateConvocatoria(id, payload) {
+async function updateConvocatoria(id, payload, authUser = null) {
   const existingConvocatoria = await findConvocatoriaOrThrow(id)
   const updateDto = buildConvocatoriaUpdateDto(payload)
+
+  if (Object.prototype.hasOwnProperty.call(updateDto, 'sortida')) {
+    await ensureCanManageConvocatoria(authUser, existingConvocatoria)
+  }
 
   if (updateDto.responsableId !== undefined && updateDto.responsableId !== null) {
     await ensureUserExists(updateDto.responsableId)
@@ -958,12 +939,28 @@ async function updateConvocatoria(id, payload) {
     throw createConvosDtoError('El campo "finalTime" no puede ser anterior a "startTime".')
   }
 
+  const finalSortida = Object.prototype.hasOwnProperty.call(updateDto, 'sortida')
+    ? Boolean(updateDto.sortida)
+    : Boolean(existingConvocatoria.sortida)
+  const shouldNotifyIncendiSortidaActivation =
+    !Boolean(existingConvocatoria.sortida)
+    && finalSortida
+
   try {
     const convocatoria = await database.convocatoria.update({
       where: { id },
       data: updateDto,
       include: convocatoriaInclude,
     })
+
+    if (shouldNotifyIncendiSortidaActivation) {
+      try {
+        const notificationsService = require('../notifications/notifications.service')
+        await notificationsService.sendIncendiSortidaActivated(convocatoria.id, authUser?.userId || null)
+      } catch (error) {
+        console.error('[convos.service] Error al enviar aviso de sortida per incendi:', error.message)
+      }
+    }
 
     if (convocatoria.autoAssignResponsable) {
       await recalculateAutoAssignedResponsable(convocatoria.id)
@@ -980,9 +977,19 @@ async function deleteConvocatoria(id) {
   await findConvocatoriaOrThrow(id)
 
   try {
-    const convocatoria = await database.convocatoria.delete({
-      where: { id },
-      include: convocatoriaInclude,
+    const convocatoria = await database.$transaction(async (tx) => {
+      await tx.respuesta.deleteMany({
+        where: { convoId: id },
+      })
+
+      await tx.formulariCampanya.deleteMany({
+        where: { convocatoriaId: id },
+      })
+
+      return tx.convocatoria.delete({
+        where: { id },
+        include: convocatoriaInclude,
+      })
     })
 
     return mapConvocatoriaToDto(convocatoria)
@@ -1523,45 +1530,9 @@ async function recalculateAutoAssignedResponsable(convoId) {
 }
 
 async function updateSortidaForTomorrow(referenceDate = new Date()) {
-  const startOfTomorrow = new Date(referenceDate)
-  startOfTomorrow.setHours(0, 0, 0, 0)
-  startOfTomorrow.setDate(startOfTomorrow.getDate() + 1)
-
-  const endOfTomorrow = new Date(startOfTomorrow)
-  endOfTomorrow.setDate(endOfTomorrow.getDate() + 1)
-
-  const convocatorias = await database.convocatoria.findMany({
-    where: {
-      date: {
-        gte: startOfTomorrow,
-        lt: endOfTomorrow,
-      },
-      isActive: true,
-    },
-    include: {
-      convoType: true,
-      respostas: {
-        where: {
-          response: true,
-          user: {
-            isActive: true,
-          },
-        },
-        include: autoAssignCandidateInclude,
-      },
-    },
-  })
-
-  await Promise.all(convocatorias.map((convocatoria) => {
-    const nextSortida = shouldMarkSortida(convocatoria.convoType, convocatoria.respostas || [])
-
-    return database.convocatoria.update({
-      where: { id: convocatoria.id },
-      data: {
-        sortida: nextSortida,
-      },
-    })
-  }))
+  // Kept for compatibility with scheduler/orchestrator call sites.
+  // Sortida is manual-only and no longer auto-updated based on minimum responses.
+  return 0
 }
 
 module.exports = {

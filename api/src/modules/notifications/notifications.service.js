@@ -307,6 +307,7 @@ function buildSortidaStatusManualMessage(convocatoria, settings, referenceDate =
   const ubicacio = String(convocatoria?.ubiSortida || convocatoria?.convoType?.defaultLocation || '-').trim() || '-'
   const responsableNom = `${convocatoria?.user?.name || ''} ${convocatoria?.user?.lastName || ''}`.trim() || '-'
   const typeName = String(convocatoria?.convoType?.name || '').trim().toLowerCase()
+  const isIncendiType = typeName === 'incendi'
   const guardiaSource = String(settings?.typeGroups?.guardiaSourceTypeName || 'guardia').trim().toLowerCase()
   const guardiaPvi = String(settings?.typeGroups?.guardiaPviTypeName || 'guardia pvi').trim().toLowerCase()
   const isGuardiaType = typeName === guardiaSource || typeName === guardiaPvi
@@ -316,6 +317,14 @@ function buildSortidaStatusManualMessage(convocatoria, settings, referenceDate =
       title: 'Convocatoria',
       body: `Sortida ${dayLabel} a les ${horaInici} a ${ubicacio}\nResponsable ${responsableNom}`,
       dataKind: 'sortida-status-confirmed',
+    }
+  }
+
+  if (isIncendiType) {
+    return {
+      title: 'Reten per Incendi a Sabadell',
+      body: `El grocs disponibles queden de reten\nResponsable ${responsableNom}`,
+      dataKind: 'incendi-sortida-reten',
     }
   }
 
@@ -586,6 +595,126 @@ async function getMissingResponseUsersForConvocatorias(convocatorias) {
       pendingCount,
     }
   }).filter((entry) => entry.pendingCount > 0)
+}
+
+async function getPendingGrocResponseUserIdsForConvocatoria(convocatoria) {
+  const pendingRecipients = await getMissingResponseUsersForConvocatorias([convocatoria])
+  if (pendingRecipients.length === 0) {
+    return []
+  }
+
+  const grocRoles = await database.role.findMany({
+    where: {
+      isGroc: true,
+      user: {
+        isActive: true,
+      },
+    },
+    select: {
+      user: {
+        select: {
+          id: true,
+        },
+      },
+    },
+  })
+
+  const grocUserIds = new Set(grocRoles.map((role) => role.user?.id).filter((id) => Number.isInteger(id)))
+  return pendingRecipients
+    .map((recipient) => recipient.userId)
+    .filter((userId) => grocUserIds.has(userId))
+}
+
+function getPositiveGrocResponderUserIds(convocatoria) {
+  return [...new Set(
+    (convocatoria?.respostas || [])
+      .filter((respuesta) => {
+        if (!respuesta?.response || !respuesta?.user?.isActive) {
+          return false
+        }
+
+        const roles = Array.isArray(respuesta.user.roles) ? respuesta.user.roles : []
+        return roles.some((role) => role?.isGroc)
+      })
+      .map((respuesta) => respuesta.user.id)
+      .filter((userId) => Number.isInteger(userId) && userId > 0)
+  )]
+}
+
+function getMinutesUntilConvocatoriaStart(convocatoria, referenceDate = new Date()) {
+  const startAt = new Date(convocatoria?.startTime)
+  if (Number.isNaN(startAt.getTime())) {
+    return 0
+  }
+
+  const diffMs = startAt.getTime() - new Date(referenceDate).getTime()
+  return Math.max(0, Math.ceil(diffMs / 60000))
+}
+
+async function sendIncendiCreationNotification(convocatoria, senderUserId = null, targetScope = null) {
+  const typeName = normalizeTypeName(convocatoria?.convoType?.name)
+  if (typeName !== 'incendi') {
+    return { skipped: true, reason: 'not-incendi' }
+  }
+
+  const targetUserIds = await getPendingGrocResponseUserIdsForConvocatoria(convocatoria)
+  if (targetUserIds.length === 0) {
+    return { skipped: true, reason: 'no-pending-groc-users' }
+  }
+
+  const ubicacio = String(convocatoria?.ubiSortida || convocatoria?.convoType?.defaultLocation || 'ubicacio').trim() || 'ubicacio'
+  const minutesUntilStart = getMinutesUntilConvocatoriaStart(convocatoria)
+
+  return sendMulticastNotification({
+    title: 'Disponibilitat: Incendi a Sabadell',
+    body: `Grocs disponibles per estar a ${ubicacio} en ${minutesUntilStart} minuts`,
+    link: '/dashboard',
+    data: {
+      kind: 'incendi-created-pending-groc',
+      convocatoriaId: convocatoria.id,
+      typeName: convocatoria.convoType?.name || '',
+      minutesUntilStart,
+    },
+    targetScope: targetScope || `auto-incendi-created:${convocatoria.id}`,
+    senderUserId,
+    userIds: targetUserIds,
+  })
+}
+
+async function sendIncendiSortidaActivated(convocatoriaId, senderUserId = null, options = {}) {
+  const convocatoria = await getConvocatoriaWithContext(convocatoriaId)
+  const typeName = normalizeTypeName(convocatoria?.convoType?.name)
+
+  if (typeName !== 'incendi') {
+    return { skipped: true, reason: 'not-incendi' }
+  }
+
+  if (!convocatoria.sortida) {
+    return { skipped: true, reason: 'sortida-not-active' }
+  }
+
+  const targetUserIds = getPositiveGrocResponderUserIds(convocatoria)
+  if (targetUserIds.length === 0) {
+    return { skipped: true, reason: 'no-groc-positive-responders' }
+  }
+
+  const ubicacio = String(convocatoria?.ubiSortida || convocatoria?.convoType?.defaultLocation || 'brigades').trim() || 'brigades'
+  const responsableNom = `${convocatoria?.user?.name || ''} ${convocatoria?.user?.lastName || ''}`.trim() || '-'
+
+  return sendMulticastNotification({
+    title: 'Sortida per Incendi a Sabadell',
+    body: `Grocs disponibles a brigades\nResponsable ${responsableNom}`,
+    link: '/dashboard',
+    data: {
+      kind: 'incendi-sortida-activated',
+      convocatoriaId: convocatoria.id,
+      typeName: convocatoria.convoType?.name || '',
+      sortida: true,
+    },
+    targetScope: options.targetScope || `incendi-sortida-activated:${convocatoria.id}:${Date.now()}`,
+    senderUserId,
+    userIds: targetUserIds,
+  })
 }
 
 async function hasNotificationLogForScope(targetScope, referenceDate = new Date()) {
@@ -929,7 +1058,7 @@ async function handleConvocatoriaCreated(convoId) {
 
   const notifications = []
 
-  if (isFire || isWeekly) {
+  if (isWeekly) {
     const baseNotification = await sendConvocatoriaResponseRequestInternal(
       convocatoria,
       null,
@@ -944,21 +1073,10 @@ async function handleConvocatoriaCreated(convoId) {
   }
 
   if (isFire) {
-    const activeUsers = await database.user.findMany({
-      where: { isActive: true },
-      select: { id: true },
-    })
-
-    const fireNotification = await sendConvocatoriaResponseRequestInternal(
+    const fireNotification = await sendIncendiCreationNotification(
       convocatoria,
       null,
-      `auto-fire-created:${convocatoria.id}`,
-      {
-        titleTemplate: settings.responseRequest.fireTitle,
-        bodyTemplate: settings.responseRequest.fireBody,
-        dataKind: 'incendi-created',
-        userIds: activeUsers.map((u) => u.id),
-      }
+      `auto-fire-created:${convocatoria.id}`
     )
     notifications.push(fireNotification)
   }
@@ -1013,6 +1131,11 @@ async function handleConvocatoriaCreated(convoId) {
 }
 
 async function sendConvocatoriaSortidaStatusInternal(convocatoria, senderUserId, targetScope) {
+  const typeName = normalizeTypeName(convocatoria?.convoType?.name)
+  if (typeName === 'incendi' && convocatoria?.sortida) {
+    return sendIncendiSortidaActivated(convocatoria.id, senderUserId, { targetScope })
+  }
+
   const settings = readNotificationSettings()
   const manualMessage = buildSortidaStatusManualMessage(convocatoria, settings, new Date())
 
@@ -1345,18 +1468,8 @@ async function sendTomorrowSortidaNotifications(authUser, referenceDate = new Da
       continue
     }
 
-    const nextSortida = shouldMarkSortida(convocatoria.convoType, convocatoria.respostas || [])
-
-    if (typeof options.requiredSortida === 'boolean' && nextSortida !== options.requiredSortida) {
+    if (typeof options.requiredSortida === 'boolean' && Boolean(convocatoria.sortida) !== options.requiredSortida) {
       continue
-    }
-
-    if (convocatoria.sortida !== nextSortida) {
-      await database.convocatoria.update({
-        where: { id: convocatoria.id },
-        data: { sortida: nextSortida },
-      })
-      convocatoria.sortida = nextSortida
     }
 
     eligibleConvocatorias.push(convocatoria)
@@ -1939,6 +2052,7 @@ module.exports = {
   runConvocatoriaNotificationAutomation,
   runDailyNotificationAutomation,
   runRetentionCleanup,
+  sendIncendiSortidaActivated,
   sendBroadcastNotification,
   sendConvocatoriaResponseRequest,
   sendConvocatoriaSortidaStatus,

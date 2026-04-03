@@ -19,7 +19,7 @@ router.route('/')
 
 router.route('/:id')
   .get(convosController.getConvocatoriaById)
-  .put(convosController.updateConvocatoria)
+  .put(requireAuth, convosController.updateConvocatoria)
   .delete(convosController.deleteConvocatoria)
 
 router.post('/:id/start', requireAuth, convosController.startConvocatoria)
