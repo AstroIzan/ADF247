@@ -20,7 +20,7 @@
 	--color-gray-900: #202020;
 
 	/* Alias semanticos para toda la app */
-	--bg: #f0f0f0;
+	--bg: #f5f5f5;
 	--panel: #ffffff;
 	--panel-soft: #fafafa;
 	--ink: #202020;
@@ -44,10 +44,14 @@ body {
 	padding: 0;
 	font-family: 'Sora', 'Segoe UI', sans-serif;
 	color: var(--ink);
-	background:
-		radial-gradient(circle at 5% 5%, rgba(240, 176, 0, 0.28), transparent 28%),
-		radial-gradient(circle at 95% 12%, rgba(63, 138, 70, 0.14), transparent 22%),
-		linear-gradient(180deg, #f8f8f8 0%, var(--bg) 60%, #ececec 100%);
+	background: #f5f5f5;
+}
+
+app-root,
+main,
+.app-shell,
+.app-content {
+	background: #f5f5f5;
 }
 
 body.modal-open {
