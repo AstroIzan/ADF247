@@ -313,77 +313,6 @@
             </div>
           </section>
 
-          <section class="config-section full-width">
-            <h3>6) Missatgeria configurable per escenari</h3>
-            <p class="section-help">Configura per tipus la notificació d'activació de sortida i defineix una notificació general per convocatòries pendents de disponibilitat.</p>
-
-            <div class="message-config-layout">
-              <article class="message-config-card">
-                <h4>Notificació de convocatòria (general)</h4>
-
-                <div class="form-grid">
-                  <div class="form-group full-width">
-                    <label>Títol</label>
-                    <input type="text" [ngModel]="form.creationTitle" (ngModelChange)="updateConvocatoriaTitle($event)" />
-                  </div>
-
-                  <div class="form-group full-width">
-                    <label>Missatge</label>
-                    <textarea rows="3" [ngModel]="form.creationBody" (ngModelChange)="updateConvocatoriaBody($event)"></textarea>
-                  </div>
-                </div>
-              </article>
-
-              <article class="message-config-card">
-                <h4>Sol·licitud de disponibilitat (general)</h4>
-
-                <div class="form-grid">
-                  <div class="form-group full-width">
-                    <label>Títol</label>
-                    <input type="text" [ngModel]="form.pendingTitle" (ngModelChange)="updatePendingTitle($event)" />
-                  </div>
-
-                  <div class="form-group full-width">
-                    <label>Missatge</label>
-                    <textarea rows="3" [ngModel]="form.pendingBody" (ngModelChange)="updatePendingBody($event)"></textarea>
-                  </div>
-                </div>
-              </article>
-
-              <article class="message-config-card">
-                <h4>Convocatòria cancel·lada (D+1)</h4>
-
-                <div class="form-grid">
-                  <div class="form-group full-width">
-                    <label>Títol</label>
-                    <input type="text" [(ngModel)]="form.sortidaTitleCancelled" (change)="requestAutoSave()" />
-                  </div>
-
-                  <div class="form-group full-width">
-                    <label>Missatge</label>
-                    <textarea rows="3" [(ngModel)]="form.sortidaBodyCancelled" (change)="requestAutoSave()"></textarea>
-                  </div>
-                </div>
-              </article>
-
-              <article class="message-config-card">
-                <h4>Retén (D+1)</h4>
-
-                <div class="form-grid">
-                  <div class="form-group full-width">
-                    <label>Títol</label>
-                    <input type="text" [(ngModel)]="form.sortidaTitleReten" (change)="requestAutoSave()" />
-                  </div>
-
-                  <div class="form-group full-width">
-                    <label>Missatge</label>
-                    <textarea rows="3" [(ngModel)]="form.sortidaBodyReten" (change)="requestAutoSave()"></textarea>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </section>
-
           <section class="config-section full-width hours-summary-section">
             <h3>Resum d'hores per usuari</h3>
             <p class="section-help">Resultat agregat d'hores dins/fora campanya amb penalitzacions aplicades.</p>
@@ -443,7 +372,7 @@
         <div class="config-sections">
           <section class="config-section full-width">
             <h3>7) Orquestrador - Configuració</h3>
-            <p class="section-help">Retenció, delegació de visibilitat i monitorització bàsica del pipeline automàtic.</p>
+            <p class="section-help">Retenció, delegació de visibilitat i monitorització del pipeline automàtic basat en tasques.</p>
 
             <div class="form-grid">
               <div class="form-group">
@@ -555,7 +484,7 @@
 
           <section class="config-section full-width">
             <h3>9) Tasques configurades</h3>
-            <p class="section-help">Activa, configura el tipus de notificació i filtra per tipus de convocatòria. Pots afegir tasques addicionals o eliminar les existents.</p>
+            <p class="section-help">Activa i configura cada tasca. El contingut de notificació es resol automàticament segons el tipus de tasca i l'escenari processat.</p>
 
             <div class="task-list">
               @for (task of form.tasks; track task.taskKey; let i = $index) {

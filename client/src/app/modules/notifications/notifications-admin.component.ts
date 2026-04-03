@@ -40,10 +40,6 @@ type NotificationSettingsForm = {
   sortidaConfirmHour: number;
   sortidaConfirmMinute: number;
   responseLink: string;
-  creationTitle: string;
-  creationBody: string;
-  pendingTitle: string;
-  pendingBody: string;
   weeklyEnabled: boolean;
   weeklyLink: string;
   weeklyTitle: string;
@@ -54,10 +50,6 @@ type NotificationSettingsForm = {
   sortidaBodyYes: string;
   sortidaTitleNo: string;
   sortidaBodyNo: string;
-  sortidaTitleCancelled: string;
-  sortidaBodyCancelled: string;
-  sortidaTitleReten: string;
-  sortidaBodyReten: string;
   campaignStartDate: string;
   campaignEndDate: string;
   unansweredPenaltyThreshold: number;
@@ -118,7 +110,7 @@ export class NotificationsAdminComponent {
 
   @Input() users: User[] = [];
   @Input() title = 'Notificacions';
-  @Input() description = 'Configura quan, a qui i com es notifica cada escenari.';
+  @Input() description = 'Configura quan i a qui es notifica cada tasca automàtica.';
   @Input() compact = false;
   private _visibleTabs: Array<'config' | 'logs' | 'automation' | 'orchestrator-config'> = ['config', 'logs', 'automation'];
 
@@ -219,44 +211,12 @@ export class NotificationsAdminComponent {
     this.autoSave$.next();
   }
 
-  updateConvocatoriaTitle(value: string) {
-    this.form = {
-      ...this.form,
-      creationTitle: value,
-    };
-    this.requestAutoSave();
-  }
-
-  updateConvocatoriaBody(value: string) {
-    this.form = {
-      ...this.form,
-      creationBody: value,
-    };
-    this.requestAutoSave();
-  }
-
   getConvoTypeNames(): string[] {
     const names = this.convoTypes
       .map((type) => (typeof type.name === 'string' ? type.name.trim() : ''))
       .filter(Boolean);
 
     return Array.from(new Set(names)).sort((a, b) => a.localeCompare(b));
-  }
-
-  updatePendingTitle(value: string) {
-    this.form = {
-      ...this.form,
-      pendingTitle: value,
-    };
-    this.requestAutoSave();
-  }
-
-  updatePendingBody(value: string) {
-    this.form = {
-      ...this.form,
-      pendingBody: value,
-    };
-    this.requestAutoSave();
   }
 
   formatRoundedHours(value: number | null | undefined) {
@@ -732,10 +692,6 @@ export class NotificationsAdminComponent {
       sortidaConfirmHour: 19,
       sortidaConfirmMinute: 0,
       responseLink: '/dashboard',
-      creationTitle: '**Convocatoria** {title}',
-      creationBody: 'Demà a les {horaInici} a {ubicació}\nResponsable {nºCarnet} {nom + cognom}',
-      pendingTitle: 'Tens convocatòries pendents',
-      pendingBody: 'Encara tens {count} convocatòries pendents per respondre.',
       weeklyEnabled: true,
       weeklyLink: '/dashboard',
       weeklyTitle: 'Disponibilitat pendent per convocatòries setmanals',
@@ -746,10 +702,6 @@ export class NotificationsAdminComponent {
       sortidaBodyYes: 'Demà a les {horaInici} a {ubicació}\nResponsable {nºCarnet} {nom + cognom}',
       sortidaTitleNo: 'Convocatòria cancel·lada',
       sortidaBodyNo: '{title} ({type}) finalment no surt demà {date}.',
-      sortidaTitleCancelled: 'Convocatòria cancel·lada',
-      sortidaBodyCancelled: '{title} ({type}) finalment no surt demà {date}.',
-      sortidaTitleReten: 'Retén',
-      sortidaBodyReten: '{title} ({type}) passa a retén per demà {date}.',
       campaignStartDate: '',
       campaignEndDate: '',
       unansweredPenaltyThreshold: 0,
@@ -824,10 +776,6 @@ export class NotificationsAdminComponent {
       sortidaConfirmHour: config.sortidaStatus.confirmHour,
       sortidaConfirmMinute: config.sortidaStatus.confirmMinute,
       responseLink: config.responseRequest.link,
-      creationTitle: this.normalizeConvocatoriaTitleTemplate(config.responseRequest.creationTitle),
-      creationBody: this.normalizeConvocatoriaBodyTemplate(config.responseRequest.creationBody),
-      pendingTitle: config.responseRequest.pendingTitle,
-      pendingBody: config.responseRequest.pendingBody,
       weeklyEnabled: config.weeklyRequest.enabled,
       weeklyLink: config.weeklyRequest.link,
       weeklyTitle: config.weeklyRequest.title,
@@ -838,10 +786,6 @@ export class NotificationsAdminComponent {
       sortidaBodyYes: this.normalizeConvocatoriaBodyTemplate(config.sortidaStatus.bodyYes),
       sortidaTitleNo: this.normalizeConvocatoriaTitleTemplate(config.sortidaStatus.titleNo),
       sortidaBodyNo: this.normalizeConvocatoriaBodyTemplate(config.sortidaStatus.bodyNo),
-      sortidaTitleCancelled: this.normalizeConvocatoriaTitleTemplate(config.sortidaStatus.titleCancelled || config.sortidaStatus.titleNo),
-      sortidaBodyCancelled: this.normalizeConvocatoriaBodyTemplate(config.sortidaStatus.bodyCancelled || config.sortidaStatus.bodyNo),
-      sortidaTitleReten: this.normalizeConvocatoriaTitleTemplate(config.sortidaStatus.titleReten || config.sortidaStatus.titleNo),
-      sortidaBodyReten: this.normalizeConvocatoriaBodyTemplate(config.sortidaStatus.bodyReten || config.sortidaStatus.bodyNo),
       campaignStartDate: config.hourComputation?.campaignStartDate || '',
       campaignEndDate: config.hourComputation?.campaignEndDate || '',
       unansweredPenaltyThreshold: Number(config.hourComputation?.unansweredPenaltyThreshold ?? 0),
@@ -913,14 +857,14 @@ export class NotificationsAdminComponent {
         pendingLeadDays: Number(this.form.pendingLeadDays),
         pendingLeadHours: Number(this.form.pendingLeadHours),
         link: this.form.responseLink,
-        creationTitle: this.form.creationTitle,
-        creationBody: this.form.creationBody,
+        creationTitle: this.config?.responseRequest.creationTitle || this.getDefaultConvocatoriaTitleTemplate(),
+        creationBody: this.config?.responseRequest.creationBody || this.getDefaultConvocatoriaBodyTemplate(),
         fireTitle: this.config?.responseRequest.fireTitle || 'Incendi',
         fireBody: this.config?.responseRequest.fireBody || 'S\'ha creat una convocatòria d\'incendi: {title} ({date}).',
         weeklyCreatedTitle: this.config?.responseRequest.weeklyCreatedTitle || 'Disponibilitat setmanal',
         weeklyCreatedBody: this.config?.responseRequest.weeklyCreatedBody || 'Aquesta setmana hi ha {count} convocatòries setmanals creades.',
-        pendingTitle: this.form.pendingTitle,
-        pendingBody: this.form.pendingBody,
+        pendingTitle: this.config?.responseRequest.pendingTitle || 'Tens convocatòries pendents',
+        pendingBody: this.config?.responseRequest.pendingBody || 'Encara tens {count} convocatòries pendents per respondre.',
       },
       availabilityMatching: {
         conflictPolicy: this.config?.availabilityMatching?.conflictPolicy || 'unavailable-wins',
@@ -948,11 +892,10 @@ export class NotificationsAdminComponent {
         bodyYes: this.form.sortidaBodyYes,
         titleNo: this.form.sortidaTitleNo,
         bodyNo: this.form.sortidaBodyNo,
-        titleCancelled: this.form.sortidaTitleCancelled,
-        bodyCancelled: this.form.sortidaBodyCancelled,
-        titleReten: this.form.sortidaTitleReten,
-        bodyReten: this.form.sortidaBodyReten,
-        perTypeTemplates: {},
+        titleCancelled: this.config?.sortidaStatus.titleCancelled || this.form.sortidaTitleNo,
+        bodyCancelled: this.config?.sortidaStatus.bodyCancelled || this.form.sortidaBodyNo,
+        titleReten: this.config?.sortidaStatus.titleReten || this.form.sortidaTitleNo,
+        bodyReten: this.config?.sortidaStatus.bodyReten || this.form.sortidaBodyNo,
       },
       hourComputation: {
         campaignStartDate: this.form.campaignStartDate || null,

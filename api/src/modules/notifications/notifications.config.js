@@ -70,7 +70,6 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
     bodyCancelled: '{title} ({type}) finalment no surt demà {date}.',
     titleReten: 'Retén',
     bodyReten: '{title} ({type}) passa a retén per demà {date}.',
-    perTypeTemplates: {},
   },
   automation: {
     retentionDays: 7,
@@ -190,28 +189,6 @@ function normalizeVehicleCatalog(value, fallback = []) {
   }
 
   return deduped
-}
-
-function normalizePerTypeTemplates(value, fallbackTitle, fallbackBody) {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) {
-    return {}
-  }
-
-  const normalized = {}
-
-  for (const [rawTypeName, rawTemplate] of Object.entries(value)) {
-    const typeName = typeof rawTypeName === 'string' ? rawTypeName.trim() : ''
-    if (!typeName || !rawTemplate || typeof rawTemplate !== 'object' || Array.isArray(rawTemplate)) {
-      continue
-    }
-
-    normalized[typeName] = {
-      title: normalizeText(rawTemplate.title, fallbackTitle),
-      body: normalizeText(rawTemplate.body, fallbackBody),
-    }
-  }
-
-  return normalized
 }
 
 function normalizeAutomationTask(task, fallbackTask) {
@@ -376,11 +353,6 @@ function normalizeNotificationSettings(input = {}) {
       bodyCancelled: normalizeText(input.sortidaStatus?.bodyCancelled, defaults.sortidaStatus.bodyCancelled),
       titleReten: normalizeText(input.sortidaStatus?.titleReten, defaults.sortidaStatus.titleReten),
       bodyReten: normalizeText(input.sortidaStatus?.bodyReten, defaults.sortidaStatus.bodyReten),
-      perTypeTemplates: normalizePerTypeTemplates(
-        input.sortidaStatus?.perTypeTemplates,
-        defaults.sortidaStatus.titleYes,
-        defaults.sortidaStatus.bodyYes
-      ),
     },
     automation: {
       retentionDays: normalizeInteger(input.automation?.retentionDays, defaults.automation.retentionDays, 1, 60),

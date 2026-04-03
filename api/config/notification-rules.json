@@ -96,8 +96,7 @@
     "titleCancelled": "Convocatòria cancel·lada",
     "bodyCancelled": "Demà a les {horaInici} a {ubicació}\nResponsable {nºCarnet} {nom + cognom}",
     "titleReten": "Retén",
-    "bodyReten": "{title} ({type}) passa a retén per demà {date}.",
-    "perTypeTemplates": {}
+    "bodyReten": "{title} ({type}) passa a retén per demà {date}."
   },
   "automation": {
     "retentionDays": 7,
