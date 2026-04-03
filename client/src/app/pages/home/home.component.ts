@@ -1080,6 +1080,23 @@ export class HomeComponent implements OnInit {
     return !assignedInOtherVehicle;
   }
 
+  getCampaignAssignableConductorIds(vehicleName: string) {
+    return this.campaignForm().volunteerUserIds.filter((userId) => this.canAssignUserAsConductor(vehicleName, userId));
+  }
+
+  canAssignUserAsConductor(vehicleName: string, userId: number) {
+    if (!this.campaignForm().volunteerUserIds.includes(userId)) {
+      return false;
+    }
+
+    const vehicles = this.campaignForm().vehicles;
+    const assignedAsConductorInOtherVehicle = vehicles.some(
+      (vehicle) => vehicle.vehicleName !== vehicleName && vehicle.conductorUserId === userId
+    );
+
+    return !assignedAsConductorInOtherVehicle;
+  }
+
   toggleCampaignConductorMenu(vehicleName: string) {
     this.campaignConductorMenuVehicle.set(
       this.campaignConductorMenuVehicle() === vehicleName ? null : vehicleName
@@ -1093,6 +1110,10 @@ export class HomeComponent implements OnInit {
   }
 
   selectCampaignVehicleConductor(vehicleName: string, userId: number | null) {
+    if (userId != null && !this.canAssignUserAsConductor(vehicleName, userId)) {
+      return;
+    }
+
     let vehicles = this.campaignForm().vehicles.map((vehicle) => {
       if (vehicle.vehicleName !== vehicleName) {
         return vehicle;
@@ -1190,14 +1211,32 @@ export class HomeComponent implements OnInit {
       volunteerUserIds: Array.from(new Set((vehicle.volunteerUserIds || []).filter((id) => allowedVolunteerIds.has(id)))),
     }));
 
+    const assignedConductorIds = new Set<number>();
+    const uniqueConductorVehicles = normalizedVehicles.map((vehicle) => {
+      const conductorId = vehicle.conductorUserId;
+      if (conductorId == null) {
+        return vehicle;
+      }
+
+      if (assignedConductorIds.has(conductorId)) {
+        return {
+          ...vehicle,
+          conductorUserId: null,
+        };
+      }
+
+      assignedConductorIds.add(conductorId);
+      return vehicle;
+    });
+
     const conductorIds = new Set(
-      normalizedVehicles
+      uniqueConductorVehicles
         .map((vehicle) => vehicle.conductorUserId)
         .filter((id): id is number => id != null)
     );
 
     const assignedVolunteerIds = new Set<number>();
-    const resolvedVehicles = normalizedVehicles.map((vehicle) => {
+    const resolvedVehicles = uniqueConductorVehicles.map((vehicle) => {
       const filteredVolunteerIds = vehicle.volunteerUserIds.filter((id) => {
         if (conductorIds.has(id)) {
           return false;

@@ -16,6 +16,8 @@ const { getFirebaseMessaging } = require('./notifications.firebase')
 const { updateSortidaForTomorrow } = require('../convos/convos.service')
 
 const GLOBAL_NOTIFICATION_TOPIC = 'adf247-all'
+const NOTIFICATION_LOGO_URL = process.env.NOTIFICATION_LOGO_URL || '/icons/notification-icon-512.png'
+const NOTIFICATION_BADGE_URL = process.env.NOTIFICATION_BADGE_URL || '/icons/favicon-64.png'
 
 function createServiceError(message, statusCode = 500, details) {
   const error = new Error(message)
@@ -240,6 +242,96 @@ function formatTimeForText(date) {
   const hours = String(d.getHours()).padStart(2, '0')
   const minutes = String(d.getMinutes()).padStart(2, '0')
   return `${hours}:${minutes}`
+}
+
+function getRelativeDayDescriptor(targetDate, referenceDate = new Date()) {
+  const target = startOfDay(targetDate)
+  const reference = startOfDay(referenceDate)
+  const dayDiff = Math.round((target.getTime() - reference.getTime()) / (24 * 60 * 60 * 1000))
+
+  if (dayDiff === 0) {
+    return {
+      key: 'today',
+      label: 'avui',
+      labelCapitalized: 'Avui',
+      dateText: formatDateForText(targetDate),
+    }
+  }
+
+  if (dayDiff === 1) {
+    return {
+      key: 'tomorrow',
+      label: 'demà',
+      labelCapitalized: 'Demà',
+      dateText: formatDateForText(targetDate),
+    }
+  }
+
+  const dateText = formatDateForText(targetDate)
+  return {
+    key: 'date',
+    label: `el dia ${dateText}`,
+    labelCapitalized: `El dia ${dateText}`,
+    dateText,
+  }
+}
+
+function getRelativeDayLabel(targetDate, referenceDate = new Date()) {
+  const descriptor = getRelativeDayDescriptor(targetDate, referenceDate)
+  if (descriptor.key === 'today') {
+    return 'avui'
+  }
+
+  if (descriptor.key === 'tomorrow') {
+    return 'demà'
+  }
+
+  return descriptor.dateText
+}
+
+function buildResponseRequestManualMessage(convocatoria, referenceDate = new Date()) {
+  const dayLabel = getRelativeDayLabel(convocatoria?.date, referenceDate)
+  const horaInici = formatTimeForText(convocatoria?.startTime)
+  const horaFinal = formatTimeForText(convocatoria?.finalTime || convocatoria?.startTime)
+  const title = String(convocatoria?.title || 'convocatòria').trim() || 'convocatòria'
+
+  return {
+    title: 'Disponibilitat',
+    body: `Es solicita disponibilitat per ${title} el dia ${dayLabel} de ${horaInici} a ${horaFinal}`,
+  }
+}
+
+function buildSortidaStatusManualMessage(convocatoria, settings, referenceDate = new Date()) {
+  const dayLabel = getRelativeDayLabel(convocatoria?.date, referenceDate)
+  const horaInici = formatTimeForText(convocatoria?.startTime)
+  const ubicacio = String(convocatoria?.ubiSortida || convocatoria?.convoType?.defaultLocation || '-').trim() || '-'
+  const responsableNom = `${convocatoria?.user?.name || ''} ${convocatoria?.user?.lastName || ''}`.trim() || '-'
+  const typeName = String(convocatoria?.convoType?.name || '').trim().toLowerCase()
+  const guardiaSource = String(settings?.typeGroups?.guardiaSourceTypeName || 'guardia').trim().toLowerCase()
+  const guardiaPvi = String(settings?.typeGroups?.guardiaPviTypeName || 'guardia pvi').trim().toLowerCase()
+  const isGuardiaType = typeName === guardiaSource || typeName === guardiaPvi
+
+  if (convocatoria?.sortida) {
+    return {
+      title: 'Convocatoria',
+      body: `Sortida ${dayLabel} a les ${horaInici} a ${ubicacio}\nResponsable ${responsableNom}`,
+      dataKind: 'sortida-status-confirmed',
+    }
+  }
+
+  if (isGuardiaType) {
+    return {
+      title: 'Convocatoria',
+      body: `No se surt per la convocatoria de ${dayLabel}`,
+      dataKind: 'sortida-status-reten',
+    }
+  }
+
+  return {
+    title: 'Convocatoria',
+    body: `No se surt per la convocatoria de ${dayLabel}`,
+    dataKind: 'sortida-status-cancelled',
+  }
 }
 
 function buildConvocatoriaNotificationTitle(convocatoria) {
@@ -523,9 +615,21 @@ async function sendMulticastNotification({
   senderUserId = null,
   userIds,
 }) {
-  const topics = Array.isArray(userIds) && userIds.length > 0
-    ? [...new Set(userIds.map(buildUserNotificationTopic).filter(Boolean))]
-    : [GLOBAL_NOTIFICATION_TOPIC]
+  const payloadData = {
+    notificationIcon: NOTIFICATION_LOGO_URL,
+    notificationBadge: NOTIFICATION_BADGE_URL,
+    ...Object.entries(data).reduce((acc, [key, value]) => {
+      acc[key] = String(value)
+      return acc
+    }, {}),
+  }
+
+  let topics = []
+  if (Array.isArray(userIds)) {
+    topics = [...new Set(userIds.map(buildUserNotificationTopic).filter(Boolean))]
+  } else {
+    topics = [GLOBAL_NOTIFICATION_TOPIC]
+  }
 
   if (topics.length === 0) {
     const log = await database.notificationLog.create({
@@ -558,11 +662,19 @@ async function sendMulticastNotification({
             title,
             body,
           },
-          data: Object.entries(data).reduce((acc, [key, value]) => {
-            acc[key] = String(value)
-            return acc
-          }, {}),
+          data: payloadData,
           webpush: {
+            headers: {
+              Urgency: 'high',
+              TTL: '3600',
+            },
+            notification: {
+              title,
+              body,
+              icon: NOTIFICATION_LOGO_URL,
+              badge: NOTIFICATION_BADGE_URL,
+              image: NOTIFICATION_LOGO_URL,
+            },
             fcmOptions: {
               link,
             },
@@ -622,6 +734,17 @@ async function registerDeviceToken(authUser, payload, userAgent) {
   const topics = [GLOBAL_NOTIFICATION_TOPIC, userTopic].filter(Boolean)
   const messaging = getFirebaseMessaging()
 
+  // Prevent stale cross-user subscriptions on shared browsers by removing
+  // this token from all user-scoped topics except the current authenticated user.
+  const users = await database.user.findMany({
+    select: { id: true },
+  })
+  const staleUserTopics = users
+    .map((user) => buildUserNotificationTopic(user.id))
+    .filter((topic) => topic && topic !== userTopic)
+
+  await Promise.allSettled(staleUserTopics.map((topic) => messaging.unsubscribeFromTopic([dto.token], topic)))
+
   await Promise.all(topics.map((topic) => messaging.subscribeToTopic([dto.token], topic)))
 
   return { ok: true, topics }
@@ -634,7 +757,15 @@ async function deactivateDeviceToken(authUser, payload) {
   const topics = [GLOBAL_NOTIFICATION_TOPIC, userTopic].filter(Boolean)
   const messaging = getFirebaseMessaging()
 
-  await Promise.all(topics.map((topic) => messaging.unsubscribeFromTopic([dto.token], topic)))
+  const users = await database.user.findMany({
+    select: { id: true },
+  })
+  const allUserTopics = users
+    .map((user) => buildUserNotificationTopic(user.id))
+    .filter(Boolean)
+  const topicsToUnsubscribe = [...new Set([...topics, ...allUserTopics])]
+
+  await Promise.allSettled(topicsToUnsubscribe.map((topic) => messaging.unsubscribeFromTopic([dto.token], topic)))
 
   return { ok: true }
 }
@@ -739,8 +870,11 @@ async function sendConvocatoriaResponseRequestInternal(convocatoria, senderUserI
     ? options.userIds.map((userId) => ({ userId }))
     : await getMissingResponseUsersForConvocatorias([convocatoria])
   const context = buildConvocatoriaTemplateContext(convocatoria)
-  const titleTemplate = options.titleTemplate || settings.responseRequest.creationTitle
-  const bodyTemplate = options.bodyTemplate || settings.responseRequest.creationBody
+  const manualMessage = options.useManualMessage
+    ? buildResponseRequestManualMessage(convocatoria, options.referenceDate)
+    : null
+  const titleTemplate = manualMessage?.title || options.titleTemplate || settings.responseRequest.creationTitle
+  const bodyTemplate = manualMessage?.body || options.bodyTemplate || settings.responseRequest.creationBody
   const dataKind = options.dataKind || 'response-request'
 
   return sendMulticastNotification({
@@ -772,7 +906,11 @@ async function sendConvocatoriaResponseRequest(authUser, convoId) {
   return sendConvocatoriaResponseRequestInternal(
     convocatoria,
     authUser.userId,
-    `manual-response-request:${convocatoria.id}:${Date.now()}`
+    `manual-response-request:${convocatoria.id}:${Date.now()}`,
+    {
+      useManualMessage: true,
+      referenceDate: new Date(),
+    }
   )
 }
 
@@ -876,26 +1014,7 @@ async function handleConvocatoriaCreated(convoId) {
 
 async function sendConvocatoriaSortidaStatusInternal(convocatoria, senderUserId, targetScope) {
   const settings = readNotificationSettings()
-  const context = buildConvocatoriaTemplateContext(convocatoria)
-  const isGuardiaType = isGuardiaOrPviType(convocatoria.convoType?.name, settings)
-
-  const titleTemplate = convocatoria.sortida
-    ? settings.sortidaStatus.titleYes
-    : isGuardiaType
-      ? (settings.sortidaStatus.titleReten || settings.sortidaStatus.titleNo)
-      : (settings.sortidaStatus.titleCancelled || settings.sortidaStatus.titleNo)
-
-  const bodyTemplate = convocatoria.sortida
-    ? settings.sortidaStatus.bodyYes
-    : isGuardiaType
-      ? (settings.sortidaStatus.bodyReten || settings.sortidaStatus.bodyNo)
-      : (settings.sortidaStatus.bodyCancelled || settings.sortidaStatus.bodyNo)
-
-  const dataKind = convocatoria.sortida
-    ? 'sortida-status-confirmed'
-    : isGuardiaType
-      ? 'sortida-status-reten'
-      : 'sortida-status-cancelled'
+  const manualMessage = buildSortidaStatusManualMessage(convocatoria, settings, new Date())
 
   const targetUserIds = [...new Set(
     (convocatoria.respostas || [])
@@ -904,11 +1023,11 @@ async function sendConvocatoriaSortidaStatusInternal(convocatoria, senderUserId,
   )]
 
   return sendMulticastNotification({
-    title: applyTemplate(titleTemplate, context),
-    body: applyTemplate(bodyTemplate, context),
+    title: manualMessage.title,
+    body: manualMessage.body,
     link: settings.sortidaStatus.link,
     data: {
-      kind: dataKind,
+      kind: manualMessage.dataKind,
       convocatoriaId: convocatoria.id,
       sortida: convocatoria.sortida,
       typeName: convocatoria.convoType?.name || '',
@@ -922,15 +1041,6 @@ async function sendConvocatoriaSortidaStatusInternal(convocatoria, senderUserId,
 async function sendConvocatoriaSortidaStatus(authUser, convoId) {
   await ensureAdmin(authUser)
   const convocatoria = await getConvocatoriaWithContext(convoId)
-  convocatoria.sortida = shouldMarkSortida(
-    convocatoria.convoType,
-    (convocatoria.respostas || []).filter((respuesta) => respuesta.response && respuesta.user?.isActive)
-  )
-
-  await database.convocatoria.update({
-    where: { id: convocatoria.id },
-    data: { sortida: convocatoria.sortida },
-  })
 
   await logAdminAuditEvent({
     actorUserId: authUser?.userId,
@@ -965,6 +1075,8 @@ async function runConvocatoriaNotificationAutomation(authUser, convoId, referenc
       `manual-convo-automation-response:${convocatoria.id}:${Date.now()}`,
       {
         userIds: missingResponders.map((recipient) => recipient.userId),
+        useManualMessage: true,
+        referenceDate,
       }
     )
 
@@ -975,24 +1087,16 @@ async function runConvocatoriaNotificationAutomation(authUser, convoId, referenc
     }
   }
 
-  let sortidaSummary = {
-    skipped: true,
-    reason: missingResponders.length > 0 ? 'pending-responders-exist' : 'no-eligible-responders',
+  const sortidaNotification = await sendConvocatoriaSortidaStatusInternal(
+    convocatoria,
+    authUser.userId,
+    `manual-convo-automation-sortida:${convocatoria.id}:${Date.now()}`
+  )
+
+  const sortidaSummary = {
+    skipped: false,
     triggerAt: null,
-  }
-
-  if (missingResponders.length === 0) {
-    const notification = await sendConvocatoriaSortidaStatusInternal(
-      convocatoria,
-      authUser.userId,
-      `manual-convo-automation-sortida:${convocatoria.id}:${Date.now()}`
-    )
-
-    sortidaSummary = {
-      skipped: false,
-      triggerAt: null,
-      notification,
-    }
+    notification: sortidaNotification,
   }
 
   return {
@@ -1079,8 +1183,8 @@ async function sendPendingResponsesReminder(authUser, options = {}) {
     }
 
     const notification = await sendMulticastNotification({
-      title: settings.responseRequest.pendingTitle,
-      body: applyTemplate(settings.responseRequest.pendingBody, { count: pendingCount }),
+      title: 'Disponibilitat',
+      body: `Tens ${pendingCount} convocatories sense respondre la disponibilitat`,
       link: settings.responseRequest.link,
       data: {
         kind: 'pending-responses',
@@ -1226,7 +1330,8 @@ async function sendTomorrowSortidaNotifications(authUser, referenceDate = new Da
     ? options.convoTypeFilter
     : settings.typeGroups.sortidaTypeNames
 
-  const notifications = []
+  const eligibleConvocatorias = []
+
   for (const convocatoria of targetConvocatorias) {
     if (sortidaTypeList.length > 0 && !isTypeListed(convocatoria.convoType?.name, sortidaTypeList)) {
       continue
@@ -1254,23 +1359,70 @@ async function sendTomorrowSortidaNotifications(authUser, referenceDate = new Da
       convocatoria.sortida = nextSortida
     }
 
-    const targetScope = `scheduled-sortida-status:${getDateKey(start)}:${convocatoria.id}`
-    if (options.skipIfAlreadySent && await hasNotificationLogForScope(targetScope, referenceDate)) {
-      continue
+    eligibleConvocatorias.push(convocatoria)
+  }
+
+  if (eligibleConvocatorias.length === 0) {
+    return {
+      notificationCount: 0,
+      notifications: [],
+    }
+  }
+
+  const notifications = []
+  if (eligibleConvocatorias.length > 1) {
+    const userIds = [...new Set(
+      eligibleConvocatorias.flatMap((convocatoria) =>
+        (convocatoria.respostas || [])
+          .filter((respuesta) => respuesta.response && respuesta.user?.isActive)
+          .map((respuesta) => respuesta.user.id)
+      )
+    )]
+
+    const summaryScope = `scheduled-sortida-status-summary:${getDateKey(start)}`
+    if (!options.skipIfAlreadySent || !(await hasNotificationLogForScope(summaryScope, referenceDate))) {
+      const summaryNotification = await sendMulticastNotification({
+        title: 'Convocatoria',
+        body: 'Hi han diferents convocatories programades per aquesta setmana, revisa el teu calendari',
+        link: settings.sortidaStatus.link,
+        data: {
+          kind: 'sortida-status-summary',
+          count: eligibleConvocatorias.length,
+        },
+        targetScope: summaryScope,
+        senderUserId: authUser?.userId ?? null,
+        userIds,
+      })
+      notifications.push(summaryNotification)
     }
 
-    const notification = await sendConvocatoriaSortidaStatusInternal(
-      convocatoria,
-      authUser?.userId ?? null,
-      targetScope
-    )
-    notifications.push(notification)
+    return {
+      notificationCount: notifications.length,
+      notifications,
+    }
   }
+
+  const convocatoria = eligibleConvocatorias[0]
+  const targetScope = `scheduled-sortida-status:${getDateKey(start)}:${convocatoria.id}`
+  if (options.skipIfAlreadySent && await hasNotificationLogForScope(targetScope, referenceDate)) {
+    return {
+      notificationCount: 0,
+      notifications: [],
+    }
+  }
+
+  const notification = await sendConvocatoriaSortidaStatusInternal(
+    convocatoria,
+    authUser?.userId ?? null,
+    targetScope
+  )
+  notifications.push(notification)
 
   return {
     notificationCount: notifications.length,
     notifications,
   }
+
 }
 
 async function runDailyNotificationAutomation(authUser, referenceDate = new Date()) {

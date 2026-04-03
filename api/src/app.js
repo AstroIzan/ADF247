@@ -1,5 +1,6 @@
 require('./config/env')
 
+const path = require('path')
 const cors = require('cors')
 const express = require('express')
 const routes = require('./routes')
@@ -26,6 +27,7 @@ app.use(cors({
 	origin: getCorsOrigins(),
 }))
 app.use(express.json())
+app.use('/api/content', express.static(path.join(__dirname, 'config', 'content')))
 
 function getHealthPayload() {
 	const firebase = getFirebaseHealthStatus()

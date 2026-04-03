@@ -258,7 +258,10 @@ export class PushNotificationsService {
   }
 
   private async resolveCurrentToken() {
-    const serviceWorkerRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js')
+    const serviceWorkerRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+      updateViaCache: 'none',
+    })
+    await serviceWorkerRegistration.update()
 
     const firebaseApp = getApps().length > 0
       ? getApp()
@@ -281,12 +284,14 @@ export class PushNotificationsService {
     onMessage(this.messaging, (payload) => {
       const title = payload.notification?.title || 'ADF247'
       const body = payload.notification?.body || ''
+      const icon = payload.data?.['notificationIcon'] || payload.notification?.image || '/icons/notification-icon-512.png'
+      const badge = payload.data?.['notificationBadge'] || '/icons/favicon-64.png'
 
       this.infoMessage.set(`Notificació rebuda: ${title}`)
 
       if (this.permission() === 'granted' && typeof Notification !== 'undefined') {
         try {
-          new Notification(title, { body })
+          new Notification(title, { body, icon, badge })
         } catch {
           // Ignore display errors in foreground notifications.
         }

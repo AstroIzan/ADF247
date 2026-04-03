@@ -540,7 +540,7 @@
                                 <span class="responsable-picker-option-name">Sense conductor</span>
                               </button>
 
-                              @for (userId of campaignForm().volunteerUserIds; track userId) {
+                              @for (userId of getCampaignAssignableConductorIds(vehicle.vehicleName); track userId) {
                                 <button
                                   type="button"
                                   class="responsable-picker-option"
