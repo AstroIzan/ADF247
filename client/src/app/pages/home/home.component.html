@@ -10,6 +10,15 @@
         <button type="button" class="btn btn-primary" (click)="openCreateConvoModal()">
           + Crear Convocatòria
         </button>
+        <button
+          type="button"
+          class="incendi-shortcut-btn"
+          (click)="openCreateIncendiConvoModal()"
+          title="Crear convocatòria d'incendi/sortida"
+          aria-label="Crear convocatòria d'incendi/sortida"
+        >
+          <img class="incendi-shortcut-icon" src="/icons/fire-button.png" alt="" aria-hidden="true" />
+        </button>
       }
     </div>
   </header>
@@ -427,7 +436,7 @@
 
   @if (showCampaignFormModal() && campaignFormConvo()) {
     <div class="modal-overlay" (click)="closeCampaignFormModal()">
-      <div class="modal modal-wide" (click)="$event.stopPropagation()">
+      <div class="modal modal-wide" (click)="onCampaignFormModalClick($event)">
         <div class="modal-header">
           <h3>Formulari de campanya - {{ campaignFormMode() === 'start' ? 'Inici de servei' : 'Final de servei' }}</h3>
           <button class="close-btn" (click)="closeCampaignFormModal()">&times;</button>
@@ -762,7 +771,7 @@
 
   @if (showAdminConvoModal() && adminConvo()) {
     <div class="modal-overlay" (click)="closeAdminConvoModal()">
-      <div class="modal modal-wide modal-allow-overflow" (click)="$event.stopPropagation()">
+      <div class="modal modal-wide modal-allow-overflow" (click)="onAdminConvoModalClick($event)">
         <div class="modal-header">
           <h3>Gestió de Convocatòria</h3>
           <button class="close-btn" (click)="closeAdminConvoModal()">&times;</button>
@@ -1227,13 +1236,17 @@
 
   @if (showCreateConvoModal()) {
     <div class="modal-overlay" (click)="closeCreateConvoModal()">
-      <div class="modal modal-allow-overflow" (click)="$event.stopPropagation()">
+      <div class="modal modal-allow-overflow" (click)="onCreateConvoModalClick($event)">
         <div class="modal-header">
-          <h3>Nova convocatòria</h3>
+          <h3>{{ createConvoModalKind() === 'incendi-sortida' ? 'Nova convocatòria d\'incendi/sortida' : 'Nova convocatòria' }}</h3>
           <button class="close-btn" (click)="closeCreateConvoModal()">&times;</button>
         </div>
 
         <div class="modal-body">
+          @if (createConvoModalKind() === 'incendi-sortida') {
+            <p class="incendi-modal-hint">Configuració ràpida per crear una convocatòria d'incendi amb sortida activa.</p>
+          }
+
           @if (createConvoError()) {
             <div class="error-alert create-convo-error-banner">
               <strong>Revisa els camps</strong>
@@ -1241,20 +1254,27 @@
             </div>
           }
 
-          <div class="form-group">
-            <label>Tipus</label>
-            <select
-              [value]="createConvoForm().convoTypeId || ''"
-              (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
-            >
-              <option value="">Selecciona tipus</option>
-              @for (type of convoTypes(); track type.id) {
-                <option [value]="type.id">{{ type.name }}</option>
-              }
-            </select>
-          </div>
+          @if (createConvoModalKind() === 'incendi-sortida' && createConvoForm().convoTypeId) {
+            <div class="form-group">
+              <label>Tipus</label>
+              <input type="text" [value]="getConvoTypeName(createConvoForm().convoTypeId || undefined)" disabled />
+            </div>
+          } @else {
+            <div class="form-group">
+              <label>Tipus</label>
+              <select
+                [value]="createConvoForm().convoTypeId || ''"
+                (change)="updateCreateConvoField('convoTypeId', $any($event.target).value)"
+              >
+                <option value="">Selecciona tipus</option>
+                @for (type of convoTypes(); track type.id) {
+                  <option [value]="type.id">{{ type.name }}</option>
+                }
+              </select>
+            </div>
+          }
 
-          @if (!shouldHideCreateConvoTitleField()) {
+          @if (createConvoModalKind() !== 'incendi-sortida' && !shouldHideCreateConvoTitleField()) {
             <div class="form-group">
               <label>Títol</label>
               <input

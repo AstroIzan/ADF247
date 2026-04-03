@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, signal, inject } from '@angular/core';
+import { Component, OnInit, HostListener, computed, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -100,6 +100,7 @@ export class HomeComponent implements OnInit {
     fullHorari: boolean;
   } | null>(null);
   showCreateConvoModal = signal(false);
+  createConvoModalKind = signal<'default' | 'incendi-sortida'>('default');
   showCreateResponsableMenu = signal(false);
   showAdminResponsableMenu = signal(false);
   creatingConvo = signal(false);
@@ -260,6 +261,69 @@ export class HomeComponent implements OnInit {
     private dataService: DataService,
     private router: Router
   ) {}
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    if (!this.showCampaignFormModal()) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    if (target.closest('.campaign-picker')) {
+      return;
+    }
+
+    this.closeCampaignPickerMenus();
+  }
+
+  onCampaignFormModalClick(event: MouseEvent) {
+    event.stopPropagation();
+
+    const target = event.target as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    if (target.closest('.campaign-picker')) {
+      return;
+    }
+
+    this.closeCampaignPickerMenus();
+  }
+
+  onCreateConvoModalClick(event: MouseEvent) {
+    event.stopPropagation();
+
+    const target = event.target as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    if (target.closest('.responsable-picker')) {
+      return;
+    }
+
+    this.showCreateResponsableMenu.set(false);
+  }
+
+  onAdminConvoModalClick(event: MouseEvent) {
+    event.stopPropagation();
+
+    const target = event.target as HTMLElement | null;
+    if (!target) {
+      return;
+    }
+
+    if (target.closest('.responsable-picker')) {
+      return;
+    }
+
+    this.showAdminResponsableMenu.set(false);
+  }
 
   ngOnInit() {
     if (!this.authService.isLoggedIn()) {
@@ -625,6 +689,10 @@ export class HomeComponent implements OnInit {
       volunteerUserIds: [],
       vehicles: [],
     });
+    this.closeCampaignPickerMenus();
+  }
+
+  private closeCampaignPickerMenus() {
     this.campaignVolunteerMenuOpen.set(false);
     this.campaignVehicleMenuOpen.set(false);
     this.campaignVehicleVolunteerMenuVehicle.set(null);
@@ -2118,13 +2186,44 @@ export class HomeComponent implements OnInit {
       sortida: false,
     });
     this.createConvoError.set('');
+    this.createConvoModalKind.set('default');
     this.showCreateResponsableMenu.set(false);
     this.showCreateConvoModal.set(true);
+  }
+
+  openCreateIncendiConvoModal() {
+    if (!this.authService.isAdmin()) {
+      return;
+    }
+
+    this.openCreateConvoModal();
+    this.createConvoModalKind.set('incendi-sortida');
+
+    const incendiTypeId = this.getIncendiTypeId();
+    if (!incendiTypeId) {
+      this.createConvoError.set('No s\'ha trobat un tipus de convocatòria Incendi. Revisa la configuració de tipus.');
+      return;
+    }
+
+    const forcedTitle = this.getForcedCreateTitleByTypeId(incendiTypeId) || 'Incendi';
+
+    this.createConvoForm.set({
+      ...this.createConvoForm(),
+      title: forcedTitle,
+      convoTypeId: incendiTypeId,
+      date: this.todayDate,
+      ubiSortida: this.getConvoTypeDefaultLocation(incendiTypeId) || 'Brigadas',
+      startTime: '',
+      finalTime: '',
+      incendiReadyInMinutes: 10,
+      sortida: false,
+    });
   }
 
   closeCreateConvoModal() {
     this.showCreateResponsableMenu.set(false);
     this.createConvoError.set('');
+    this.createConvoModalKind.set('default');
     this.showCreateConvoModal.set(false);
   }
 
@@ -2461,6 +2560,11 @@ export class HomeComponent implements OnInit {
 
     const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /incendi/i.test(type.name));
+  }
+
+  private getIncendiTypeId() {
+    const type = this.convoTypes().find((item) => Boolean(item?.name && /incendi/i.test(item.name)));
+    return type?.id ?? null;
   }
 
   private getForcedCreateTitleByTypeId(convoTypeId: number | null) {
