@@ -337,6 +337,21 @@ export interface NotificationLog {
   senderUserId?: number | null;
 }
 
+export interface DeviceTokenAdmin {
+  id: number;
+  token: string;
+  platform?: string | null;
+  isActive: boolean;
+  lastSeenAt?: string | null;
+  createdAt: string;
+  user?: {
+    id?: number;
+    nCarnet?: string;
+    name?: string;
+    lastName?: string | null;
+  } | null;
+}
+
 export interface ApiHealthStatus {
   ok: boolean;
   service: string;
