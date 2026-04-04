@@ -31,7 +31,7 @@
         </thead>
         <tbody>
           @for (respuesta of paginatedRespuestas(); track respuesta.id) {
-            <tr>
+            <tr [class.row-with-open-delete]="deleteConfirming() === respuesta.id">
               <td>{{ getConvoTitle(respuesta.convoId) }}</td>
               <td>{{ getUserName(respuesta.userNCarnet) }}</td>
               <td>
@@ -74,7 +74,7 @@
     <div class="mobile-respuestas-view">
       <div class="respuestas-list">
         @for (respuesta of paginatedRespuestas(); track respuesta.id) {
-          <div class="respuesta-card" (click)="selectedRespuesta.set(respuesta)">
+          <div class="respuesta-card" [class.card-with-open-delete]="deleteConfirming() === respuesta.id" (click)="selectedRespuesta.set(respuesta)">
             <div class="respuesta-info">
               <h4>{{ getConvoTitle(respuesta.convoId) }}</h4>
               <p class="user-name">{{ getUserName(respuesta.userNCarnet) }}</p>

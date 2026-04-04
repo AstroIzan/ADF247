@@ -149,7 +149,7 @@
                       }
                     }
 
-                    @if (isConvocatoriaClosed(convo)) {
+                    @if (isResponseWindowClosed(convo) && !getMyRespuesta(convo.id)) {
                       <span class="answer-status unavailable">No disponible</span>
                     } @else {
                       <span
@@ -193,7 +193,7 @@
                   }
 
                   @if (canViewConvocatoriaSummary(convo)) {
-                    <div class="convo-response-counters convo-response-counters-mobile" [class.disabled]="isConvocatoriaClosed(convo)">
+                    <div class="convo-response-counters convo-response-counters-mobile" [class.disabled]="isResponseWindowClosed(convo)">
                       <span class="response-counter response-counter-green" title="No groc">
                         {{ roleSummary.noGroc }}
                       </span>
@@ -206,7 +206,7 @@
 
                 <div class="convo-bottom-row">
                   @if (canViewConvocatoriaSummary(convo)) {
-                    <div class="convo-response-counters convo-response-counters-desktop" [class.disabled]="isConvocatoriaClosed(convo)">
+                    <div class="convo-response-counters convo-response-counters-desktop" [class.disabled]="isResponseWindowClosed(convo)">
                       <span class="response-counter response-counter-green" title="No groc">
                         {{ roleSummary.noGroc }}
                       </span>
@@ -251,7 +251,7 @@
                         <button
                           type="button"
                           class="btn btn-edit btn-xs"
-                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
                           (click)="openCustomModal(convo)"
                         >
                           Modificar
@@ -293,7 +293,7 @@
                         <button
                           type="button"
                           class="btn btn-primary btn-sm"
-                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
                           (click)="respondToConvocatoria(convo.id, true)"
                         >
                           ACCEPTAR
@@ -301,7 +301,7 @@
                         <button
                           type="button"
                           class="btn btn-secondary btn-sm"
-                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
                           (click)="respondToConvocatoria(convo.id, false)"
                         >
                           REBUTJAR
@@ -309,7 +309,7 @@
                         <button
                           type="button"
                           class="btn btn-edit btn-sm"
-                          [disabled]="respondingConvoId() === convo.id || isConvocatoriaClosed(convo)"
+                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
                           (click)="openCustomModal(convo)"
                         >
                           PERSONALITZAR
@@ -436,7 +436,7 @@
 
   @if (showCampaignFormModal() && campaignFormConvo()) {
     <div class="modal-overlay" (click)="closeCampaignFormModal()">
-      <div class="modal modal-wide" (click)="onCampaignFormModalClick($event)">
+      <div class="modal modal-wide modal-allow-overflow" (click)="onCampaignFormModalClick($event)">
         <div class="modal-header">
           <h3>Formulari de campanya - {{ campaignFormMode() === 'start' ? 'Inici de servei' : 'Final de servei' }}</h3>
           <button class="close-btn" (click)="closeCampaignFormModal()">&times;</button>

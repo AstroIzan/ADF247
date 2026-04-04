@@ -37,7 +37,7 @@
         </thead>
         <tbody>
           @for (convo of paginatedConvocatorias(); track convo.id) {
-            <tr>
+            <tr [class.row-with-open-delete]="deleteConfirming() === convo.id">
               <td>{{ formatDate(convo.date) }}</td>
               <td>{{ convo.title }}</td>
               <td>{{ getConvoTypeName(convo.convoTypeId) }}</td>
@@ -86,7 +86,7 @@
     <div class="mobile-convos-view">
       <div class="convos-list">
         @for (convo of paginatedConvocatorias(); track convo.id) {
-          <div class="convo-card" (click)="selectedConvo.set(convo)">
+          <div class="convo-card" [class.card-with-open-delete]="deleteConfirming() === convo.id" (click)="selectedConvo.set(convo)">
             <div class="convo-info">
               <h4>{{ convo.title }}</h4>
               <p>{{ formatDate(convo.date) }}</p>

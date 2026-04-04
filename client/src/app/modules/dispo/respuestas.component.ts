@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
+import { Component, HostListener, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Respuesta, Convocatoria, User } from '../../services/data.service';
@@ -208,6 +208,20 @@ export class RespuestasComponent implements OnDestroy {
 
   cancelDelete() {
     this.deleteConfirming.set(null);
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent) {
+    if (this.deleteConfirming() === null) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.delete-menu')) {
+      return;
+    }
+
+    this.cancelDelete();
   }
 
   updateFormField(field: string, value: any) {

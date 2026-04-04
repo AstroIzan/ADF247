@@ -33,7 +33,7 @@
         </thead>
         <tbody>
           @for (user of paginatedUsers(); track user.id) {
-            <tr>
+            <tr [class.row-with-open-delete]="deleteConfirming() === user.id">
               <td>{{ user.nCarnet || '-' }}</td>
               <td>{{ user.nIndicatiu || '-' }}</td>
               <td>{{ user.name || '-' }}</td>
@@ -82,7 +82,7 @@
     <div class="mobile-users-view">
       <div class="users-list">
         @for (user of paginatedUsers(); track user.id) {
-          <div class="user-card" (click)="selectedUser.set(user)">
+          <div class="user-card" [class.card-with-open-delete]="deleteConfirming() === user.id" (click)="selectedUser.set(user)">
             <div class="user-info">
               <h4>{{ user.name }} {{ user.lastName }}</h4>
               <p class="user-carnet">{{ user.nCarnet }}</p>

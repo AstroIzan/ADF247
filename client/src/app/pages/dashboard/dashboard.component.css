@@ -179,6 +179,13 @@
   font-size: 13px;
 }
 
+.campaign-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .campaign-forms-detail-row td {
   background: #fafafa;
 }

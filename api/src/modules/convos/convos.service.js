@@ -1286,6 +1286,7 @@ async function finishConvocatoria(id, authUser, payload = {}) {
     where: { id },
     data: {
       actualEndTime: now,
+      isActive: false,
     },
     include: convocatoriaInclude,
   })

@@ -45,6 +45,7 @@ async function ensureConvocatoriaExists(convoId) {
     select: {
       id: true,
       isActive: true,
+      startTime: true,
     },
   })
 
@@ -53,6 +54,17 @@ async function ensureConvocatoriaExists(convoId) {
   }
 
   return convocatoria
+}
+
+function ensureResponseWindowOpen(convocatoria, errorMessage) {
+  const startTime = new Date(convocatoria?.startTime)
+  if (Number.isNaN(startTime.getTime())) {
+    return
+  }
+
+  if (Date.now() >= startTime.getTime()) {
+    throw createDispoDtoError(errorMessage, 409)
+  }
 }
 
 async function ensureUserExistsByNCarnet(userNCarnet) {
@@ -72,13 +84,9 @@ async function ensureUserExistsByNCarnet(userNCarnet) {
   return user
 }
 
-async function canManageAttendance(authUser, respuesta) {
-  if (!authUser?.userId || !authUser?.nCarnet) {
+async function isAdminUser(authUser) {
+  if (!authUser?.nCarnet) {
     return false
-  }
-
-  if (Number(respuesta?.convocatoria?.responsableId) === Number(authUser.userId)) {
-    return true
   }
 
   const role = await database.role.findFirst({
@@ -90,6 +98,18 @@ async function canManageAttendance(authUser, respuesta) {
   })
 
   return Boolean(role)
+}
+
+async function canManageAttendance(authUser, respuesta) {
+  if (!authUser?.userId || !authUser?.nCarnet) {
+    return false
+  }
+
+  if (Number(respuesta?.convocatoria?.responsableId) === Number(authUser.userId)) {
+    return true
+  }
+
+  return isAdminUser(authUser)
 }
 
 function mapPrismaError(error) {
@@ -185,6 +205,8 @@ async function createRespuesta(payload) {
     throw createDispoDtoError('No se pueden registrar respuestas en una convocatoria inactiva.', 409)
   }
 
+  ensureResponseWindowOpen(convocatoria, 'No se pueden registrar respuestas una vez iniciada la convocatoria.')
+
   if (!user.isActive) {
     throw createDispoDtoError('No se pueden registrar respuestas para un usuario inactivo.', 409)
   }
@@ -232,6 +254,10 @@ async function updateRespuesta(id, payload, authUser) {
     throw createDispoDtoError('No se pueden guardar cambios en respuestas de convocatorias inactivas.', 409)
   }
 
+  if (!isAttendanceUpdate) {
+    ensureResponseWindowOpen(convocatoria, 'No se pueden modificar respuestas una vez iniciada la convocatoria.')
+  }
+
   if (!user.isActive) {
     throw createDispoDtoError('No se pueden guardar cambios para un usuario inactivo.', 409)
   }
@@ -273,8 +299,14 @@ async function updateRespuesta(id, payload, authUser) {
   }
 }
 
-async function deleteRespuesta(id) {
+async function deleteRespuesta(id, authUser) {
   const existing = await findRespuestaOrThrow(id)
+  const convocatoria = await ensureConvocatoriaExists(existing.convoId)
+  const isAdmin = await isAdminUser(authUser)
+
+  if (!isAdmin) {
+    ensureResponseWindowOpen(convocatoria, 'No se pueden eliminar respuestas una vez iniciada la convocatoria.')
+  }
 
   try {
     const respuesta = await database.respuesta.delete({

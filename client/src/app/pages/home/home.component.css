@@ -104,11 +104,15 @@
   border-radius: 10px;
   background: #fff;
   box-shadow: 0 10px 18px rgba(22, 22, 22, 0.14);
-  z-index: 40;
+  z-index: 1400;
 }
 
 .modal.modal-allow-overflow {
   overflow: visible;
+}
+
+.modal.modal-allow-overflow .modal-body {
+  padding-bottom: 170px;
 }
 
 .responsable-pill-group {

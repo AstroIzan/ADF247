@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, signal, computed, input, OnDestroy, inject } from '@angular/core';
+import { Component, HostListener, Input, Output, EventEmitter, signal, computed, input, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Convocatoria, ConvoType, User } from '../../services/data.service';
@@ -230,6 +230,12 @@ export class ConvosComponent implements OnDestroy {
       data.ubiSortida = 'Brigadas';
     }
 
+    const editingId = this.editingId();
+    const isEditing = Boolean(editingId);
+    const originalConvocatoria = isEditing
+      ? this.convocatorias().find((item) => item.id === editingId)
+      : null;
+
     const payload: Partial<Convocatoria> = {
       date: data.date,
       title: data.title,
@@ -239,9 +245,14 @@ export class ConvosComponent implements OnDestroy {
       startTime: data.startTime,
       finalTime: data.finalTime || undefined,
       autoAssignResponsable: Boolean(data.autoAssignResponsable),
-      sortida: Boolean(data.sortida),
       isActive: Boolean(data.isActive),
     };
+
+    const nextSortida = Boolean(data.sortida);
+    const currentSortida = Boolean(originalConvocatoria?.sortida);
+    if (!isEditing || nextSortida !== currentSortida) {
+      payload.sortida = nextSortida;
+    }
 
     if (!isIncendiType && data.date) {
       const parsedDate = new Date(data.date);
@@ -312,6 +323,20 @@ export class ConvosComponent implements OnDestroy {
 
   cancelDelete() {
     this.deleteConfirming.set(null);
+  }
+
+  @HostListener('document:click', ['$event'])
+  handleDocumentClick(event: MouseEvent) {
+    if (this.deleteConfirming() === null) {
+      return;
+    }
+
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.delete-menu')) {
+      return;
+    }
+
+    this.cancelDelete();
   }
 
   sendResponseRequest(convo: Convocatoria) {

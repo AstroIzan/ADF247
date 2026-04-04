@@ -238,7 +238,7 @@ export class HomeComponent implements OnInit {
 
       summaryMap[dateKey].total += 1;
 
-      if (this.isConvocatoriaClosed(convo)) {
+      if (this.isResponseWindowClosed(convo)) {
         summaryMap[dateKey].closed += 1;
       } else {
         summaryMap[dateKey].open += 1;
@@ -1565,7 +1565,7 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (this.isConvocatoriaClosed(convo)) {
+    if (this.isResponseWindowClosed(convo)) {
       this.error.set('Aquesta convocatòria ja no està disponible per respondre.');
       return;
     }
@@ -1612,7 +1612,7 @@ export class HomeComponent implements OnInit {
   }
 
   openCustomModal(convo: Convocatoria) {
-    if (this.isConvocatoriaClosed(convo)) {
+    if (this.isResponseWindowClosed(convo)) {
       this.error.set('Aquesta convocatòria ja no està disponible per modificar respostes.');
       return;
     }
@@ -1668,7 +1668,7 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (this.isConvocatoriaClosed(convo)) {
+    if (this.isResponseWindowClosed(convo)) {
       this.error.set('Aquesta convocatòria ja no està disponible per respondre.');
       return;
     }
@@ -1741,7 +1741,7 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    if (this.isConvocatoriaClosed(convo)) {
+    if (this.isResponseWindowClosed(convo)) {
       this.error.set('Aquesta convocatòria ja no permet canvis.');
       return;
     }
@@ -2541,7 +2541,7 @@ export class HomeComponent implements OnInit {
 
   private isGuardiaConvocatoria(convo: Convocatoria) {
     const typeName = convo.convoType?.name || this.getConvoTypeName(convo.convoTypeId);
-    return /guardia/i.test(typeName || '');
+    return /(guardia|incendi)/i.test(typeName || '');
   }
 
   private isSemanalTypeById(convoTypeId: number | null) {
@@ -2703,6 +2703,18 @@ export class HomeComponent implements OnInit {
   }
 
   isConvocatoriaClosed(convo: Convocatoria) {
+    if (!convo.isActive) {
+      return true;
+    }
+
+    if (convo.actualEndTime) {
+      return true;
+    }
+
+    return false;
+  }
+
+  isResponseWindowClosed(convo: Convocatoria) {
     const startDate = this.getConvocatoriaStartDate(convo);
 
     if (!startDate) {

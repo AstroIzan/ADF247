@@ -230,9 +230,14 @@
                       <td>{{ row.voluntaris.length }}</td>
                       <td>{{ row.vehicles.length }}</td>
                       <td>
-                        <button class="btn btn-secondary btn-sm" (click)="toggleCampaignFormDetails(row.id)">
-                          {{ isCampaignFormDetailsOpen(row.id) ? 'Menys info' : '+ info' }}
-                        </button>
+                        <div class="campaign-form-actions">
+                          <button class="btn btn-secondary btn-sm" (click)="toggleCampaignFormDetails(row.id)">
+                            {{ isCampaignFormDetailsOpen(row.id) ? 'Menys info' : '+ info' }}
+                          </button>
+                          <button class="btn btn-danger btn-sm" (click)="requestCampaignFormDelete(row)">
+                            Eliminar
+                          </button>
+                        </div>
                       </td>
                     </tr>
 
@@ -290,5 +295,32 @@
         </section>
       }
     </div>
+
+    @if (campaignFormToDelete(); as formToDelete) {
+      <div class="modal-overlay" (click)="cancelCampaignFormDelete()">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Eliminar formulari de campanya</h3>
+            <button class="close-btn" (click)="cancelCampaignFormDelete()" [disabled]="deletingCampaignForm()">&times;</button>
+          </div>
+
+          <div class="modal-body">
+            <p>
+              Vols eliminar el formulari
+              <strong>{{ formToDelete.serviceMoment === 'START' ? 'd\'inici de servei' : 'de final de servei' }}</strong>
+              de la convocatòria <strong>{{ formToDelete.convocatoria?.title || ('#' + formToDelete.convocatoriaId) }}</strong>?
+            </p>
+            <p>Aquesta acció no es pot desfer.</p>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="cancelCampaignFormDelete()" [disabled]="deletingCampaignForm()">Cancel·lar</button>
+            <button class="btn btn-danger" (click)="confirmCampaignFormDelete()" [disabled]="deletingCampaignForm()">
+              {{ deletingCampaignForm() ? 'Eliminant...' : 'Eliminar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
   </div>
 </div>

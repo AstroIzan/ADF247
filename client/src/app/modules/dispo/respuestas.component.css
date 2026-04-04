@@ -44,6 +44,7 @@
 
 .desktop-respuestas-view {
   display: block;
+  overflow: visible;
 }
 
 .mobile-respuestas-view {
@@ -69,6 +70,12 @@
   transition: all 0.2s ease;
   cursor: pointer;
   gap: 12px;
+  position: relative;
+  overflow: visible;
+}
+
+.card-with-open-delete {
+  z-index: 60;
 }
 
 .respuesta-card:hover {
@@ -182,6 +189,19 @@
   overflow: visible;
 }
 
+.respuestas-table {
+  overflow: visible;
+}
+
+.respuestas-table tr.row-with-open-delete {
+  position: relative;
+  z-index: 50;
+}
+
+.respuestas-table td {
+  overflow: visible;
+}
+
 .respuesta-text-cell {
   max-width: 220px;
   white-space: normal;
@@ -190,6 +210,7 @@
 .delete-menu {
   position: relative;
   display: inline-flex;
+  z-index: 30;
 }
 
 .delete-popover {
@@ -202,7 +223,7 @@
   border: 1px solid #d8d8d8;
   background: #fff;
   box-shadow: 0 12px 24px rgba(16, 16, 16, 0.16);
-  z-index: 20;
+  z-index: 1200;
 }
 
 .delete-popover p {

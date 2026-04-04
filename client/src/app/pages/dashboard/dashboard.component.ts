@@ -60,6 +60,8 @@ export class DashboardComponent implements OnInit {
   loadingCampaignForms = signal(false);
   campaignFormsError = signal('');
   campaignFormsExpandedIds = signal<number[]>([]);
+  campaignFormToDelete = signal<CampaignFormRecord | null>(null);
+  deletingCampaignForm = signal(false);
 
   constructor(
     private authService: AuthService,
@@ -108,6 +110,7 @@ export class DashboardComponent implements OnInit {
     this.loadingCampaignForms.set(true);
     this.campaignFormsError.set('');
     this.campaignFormsExpandedIds.set([]);
+    this.campaignFormToDelete.set(null);
 
     this.dataService.getCampaignForms().subscribe({
       next: (rows) => {
@@ -135,6 +138,42 @@ export class DashboardComponent implements OnInit {
 
   isCampaignFormDetailsOpen(formId: number) {
     return this.campaignFormsExpandedIds().includes(formId);
+  }
+
+  requestCampaignFormDelete(form: CampaignFormRecord) {
+    this.campaignFormToDelete.set(form);
+  }
+
+  cancelCampaignFormDelete() {
+    if (this.deletingCampaignForm()) {
+      return;
+    }
+
+    this.campaignFormToDelete.set(null);
+  }
+
+  confirmCampaignFormDelete() {
+    const target = this.campaignFormToDelete();
+    if (!target || this.deletingCampaignForm()) {
+      return;
+    }
+
+    this.deletingCampaignForm.set(true);
+    this.campaignFormsError.set('');
+
+    this.dataService.deleteCampaignForm(target.id).subscribe({
+      next: () => {
+        const nextRows = this.campaignForms().filter((row) => row.id !== target.id);
+        this.campaignForms.set(nextRows);
+        this.campaignFormsExpandedIds.set(this.campaignFormsExpandedIds().filter((id) => id !== target.id));
+        this.deletingCampaignForm.set(false);
+        this.campaignFormToDelete.set(null);
+      },
+      error: (err) => {
+        this.deletingCampaignForm.set(false);
+        this.campaignFormsError.set(err.message || 'No s\'ha pogut eliminar el formulari de campanya.');
+      }
+    });
   }
 
   getUserLabelById(userId: number) {

@@ -11,6 +11,6 @@ router.route('/')
 router.route('/:id')
   .get(dispoController.getRespuestaById)
   .put(requireAuth, dispoController.updateRespuesta)
-  .delete(dispoController.deleteRespuesta)
+  .delete(requireAuth, dispoController.deleteRespuesta)
 
 module.exports = router

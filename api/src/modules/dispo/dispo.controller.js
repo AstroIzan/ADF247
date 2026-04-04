@@ -89,7 +89,7 @@ async function updateRespuesta(req, res) {
 async function deleteRespuesta(req, res) {
   try {
     const respuestaId = parsePositiveInt(req.params.id, 'id')
-    const respuesta = await dispoService.deleteRespuesta(respuestaId)
+    const respuesta = await dispoService.deleteRespuesta(respuestaId, req.auth)
     res.json(respuesta)
   } catch (error) {
     sendErrorResponse(res, error)
