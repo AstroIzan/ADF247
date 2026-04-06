@@ -4,6 +4,8 @@ const path = require('path')
 const cors = require('cors')
 const express = require('express')
 const routes = require('./routes')
+const { apiLogger } = require('./config/logger')
+const { requestLogger } = require('./middlewares/request-logger.middleware')
 const { getFirebaseHealthStatus } = require('./modules/notifications/notifications.firebase')
 
 const DEFAULT_CORS_ORIGINS = ['http://localhost:4200', 'https://localhost:4200']
@@ -27,6 +29,7 @@ app.use(cors({
 	origin: getCorsOrigins(),
 }))
 app.use(express.json())
+app.use(requestLogger)
 app.use('/api/content', express.static(path.join(__dirname, 'config', 'content')))
 
 function getHealthPayload() {
@@ -52,6 +55,13 @@ app.use('/api', routes)
 
 app.use((error, _req, res, _next) => {
 	const statusCode = error.statusCode || 500
+	apiLogger.error('Unhandled API error', {
+		statusCode,
+		message: error.message,
+		stack: error.stack,
+		details: error.details,
+	})
+
 	const payload = {
 		message: error.message || 'Ha ocurrido un error interno en el servidor.',
 	}

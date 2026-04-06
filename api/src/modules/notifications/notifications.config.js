@@ -74,6 +74,7 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
   automation: {
     retentionDays: 7,
     viewerNCarnets: [],
+    developerNCarnets: [],
     monitoring: {
       enabled: false,
       alertRecipientNCarnets: [],
@@ -359,6 +360,9 @@ function normalizeNotificationSettings(input = {}) {
       viewerNCarnets: Array.isArray(input.automation?.viewerNCarnets)
         ? normalizeStringList(input.automation?.viewerNCarnets, [])
         : defaults.automation.viewerNCarnets,
+      developerNCarnets: Array.isArray(input.automation?.developerNCarnets)
+        ? normalizeStringList(input.automation?.developerNCarnets, [])
+        : defaults.automation.developerNCarnets,
       monitoring: {
         enabled: normalizeBoolean(input.automation?.monitoring?.enabled, defaults.automation.monitoring.enabled),
         alertRecipientNCarnets: Array.isArray(input.automation?.monitoring?.alertRecipientNCarnets)

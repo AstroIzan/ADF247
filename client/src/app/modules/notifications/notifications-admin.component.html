@@ -157,6 +157,35 @@
           </section>
 
           <section class="config-section">
+            <h3>3 bis) Developers</h3>
+            <p class="section-help">Usuaris amb accés al panell principal de logs.</p>
+
+            @if (getAllActiveUsers().length === 0) {
+              <div class="empty-state">No hi ha usuaris disponibles.</div>
+            } @else {
+              <details class="multi-select-dropdown">
+                <summary class="multi-select-summary">
+                  {{ getAutomationDevelopersSummary() }}
+                </summary>
+
+                <div class="multi-select-options">
+                  @for (user of getAllActiveUsers(); track user.id) {
+                    <label class="checkbox-label">
+                      <input
+                        type="checkbox"
+                        [checked]="isAutomationDeveloperSelected(user.nCarnet)"
+                        (change)="toggleAutomationDeveloper(user.nCarnet, $any($event.target).checked)"
+                      />
+                      <span class="option-text">{{ user.nCarnet }} - {{ user.name }} {{ user.lastName || '' }}</span>
+                      @if (user.roles.isAdmin) { <span class="role-badge">admin</span> }
+                    </label>
+                  }
+                </div>
+              </details>
+            }
+          </section>
+
+          <section class="config-section">
             <h3>4) Sol·licitud normal si no has respost</h3>
             <p class="section-help">Finestra d'antelació respecte al dia de l'activitat.</p>
             <div class="form-grid">
@@ -406,6 +435,7 @@
                   </details>
                 }
               </div>
+
             </div>
           </section>
 

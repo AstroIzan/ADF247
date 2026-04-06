@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './services/auth.service';
+import { LogsAccessService } from './services/logs-access.service';
 import { PushNotificationsService } from './services/push-notifications.service';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { SettingsComponent } from './pages/settings/settings.component';
@@ -23,6 +24,7 @@ export class App {
 
   constructor(
     public authService: AuthService,
+    public logsAccessService: LogsAccessService,
     private router: Router,
     public pushNotificationsService: PushNotificationsService,
   ) {
@@ -30,8 +32,10 @@ export class App {
 
     effect(() => {
       if (this.authService.isAuthenticated()) {
+        this.logsAccessService.refresh()
         void this.handleHomeNotificationCheck()
       } else {
+        this.logsAccessService.clear()
         this.notificationWarning = ''
       }
     })

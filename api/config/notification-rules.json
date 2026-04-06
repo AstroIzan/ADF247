@@ -8,7 +8,8 @@
     "weeklyTypeNames": [
       "Guardia",
       "Guardia PVI",
-      "Semanal"
+      "Semanal",
+      "PVI"
     ],
     "sortidaTypeNames": [],
     "availabilityManagerNCarnets": [
@@ -101,6 +102,9 @@
   "automation": {
     "retentionDays": 7,
     "viewerNCarnets": [],
+    "developerNCarnets": [
+      "247/GI/239"
+    ],
     "monitoring": {
       "enabled": true,
       "alertRecipientNCarnets": [],

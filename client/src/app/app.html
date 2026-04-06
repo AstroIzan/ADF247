@@ -8,6 +8,9 @@
 				@if (authService.isAdmin()) {
 					<button class="nav-btn desktop-nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
 				}
+				@if (logsAccessService.allowed()) {
+					<button class="nav-btn desktop-nav-btn" routerLink="/logs" routerLinkActive="active">Logs</button>
+				}
 			</div>
 
 			<div class="top-nav-right">
@@ -63,6 +66,9 @@
 				<button class="mobile-menu-item" routerLink="/availability" routerLinkActive="active" (click)="closeMobileMenu()">Disponibilitat</button>
 				@if (authService.isAdmin()) {
 					<button class="mobile-menu-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">Panell</button>
+				}
+				@if (logsAccessService.allowed()) {
+					<button class="mobile-menu-item" routerLink="/logs" routerLinkActive="active" (click)="closeMobileMenu()">Logs</button>
 				}
 				<button class="mobile-menu-item" (click)="openSettingsFromMenu(authService.isAdmin() ? 'system' : 'device')">Configuració</button>
 				<button class="mobile-menu-item" (click)="openProfileFromMenu()">Perfil</button>

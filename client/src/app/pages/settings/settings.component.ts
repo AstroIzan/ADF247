@@ -98,6 +98,7 @@ export class SettingsComponent {
     if (tab === 'pla-alfa' && this.authService.isAdmin() && !this.plaAlfaCatalog().length && !this.plaAlfaLoading()) {
       this.loadPlaAlfaData();
     }
+
   }
 
   async activateNotifications() {

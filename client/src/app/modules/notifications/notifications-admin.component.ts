@@ -58,6 +58,7 @@ type NotificationSettingsForm = {
   campaignVehicleCatalog: CampaignVehicleCatalogItem[];
   automationRetentionDays: number;
   automationViewerNCarnets: string[];
+  automationDeveloperNCarnets: string[];
   automationMonitoringEnabled: boolean;
   automationAlertRecipientNCarnets: string[];
   automationAlertOnMissedRun: boolean;
@@ -368,6 +369,21 @@ export class NotificationsAdminComponent {
     this.autoSave$.next();
   }
 
+  toggleAutomationDeveloper(nCarnet: string, enabled: boolean) {
+    const current = new Set(this.form.automationDeveloperNCarnets);
+    if (enabled) {
+      current.add(nCarnet);
+    } else {
+      current.delete(nCarnet);
+    }
+
+    this.form = {
+      ...this.form,
+      automationDeveloperNCarnets: Array.from(current),
+    };
+    this.autoSave$.next();
+  }
+
   onAutomationMonitoringChanged(enabled: boolean) {
     this.form = {
       ...this.form,
@@ -383,6 +399,10 @@ export class NotificationsAdminComponent {
 
   isAutomationAlertRecipientSelected(nCarnet: string): boolean {
     return this.form.automationAlertRecipientNCarnets.includes(nCarnet);
+  }
+
+  isAutomationDeveloperSelected(nCarnet: string): boolean {
+    return this.form.automationDeveloperNCarnets.includes(nCarnet);
   }
 
   getAllActiveUsers(): User[] {
@@ -639,6 +659,13 @@ export class NotificationsAdminComponent {
     );
   }
 
+  getAutomationDevelopersSummary(): string {
+    return this.getUsersSelectionSummary(
+      this.form.automationDeveloperNCarnets,
+      'Selecciona developers'
+    );
+  }
+
   isWeeklyTypeSelected(typeName: string): boolean {
     return this.form.weeklyTypeNames.includes(typeName);
   }
@@ -710,6 +737,7 @@ export class NotificationsAdminComponent {
       campaignVehicleCatalog: [],
       automationRetentionDays: 7,
       automationViewerNCarnets: [],
+      automationDeveloperNCarnets: [],
       automationMonitoringEnabled: false,
       automationAlertRecipientNCarnets: [],
       automationAlertOnMissedRun: true,
@@ -799,6 +827,7 @@ export class NotificationsAdminComponent {
       })),
       automationRetentionDays: config.automation?.retentionDays ?? 7,
       automationViewerNCarnets: [...(config.automation?.viewerNCarnets || [])],
+      automationDeveloperNCarnets: [...(config.automation?.developerNCarnets || [])],
       automationMonitoringEnabled: config.automation?.monitoring?.enabled ?? false,
       automationAlertRecipientNCarnets: [...(config.automation?.monitoring?.alertRecipientNCarnets || [])],
       automationAlertOnMissedRun: config.automation?.monitoring?.alertOnMissedRun ?? true,
@@ -822,6 +851,7 @@ export class NotificationsAdminComponent {
     const allActiveCarnets = new Set(this.getAllActiveUsers().map((user) => user.nCarnet));
     const selectedManagerCarnets = this.form.availabilityManagerNCarnets.filter((nCarnet) => adminCarnets.has(nCarnet));
     const selectedViewerCarnets = this.form.automationViewerNCarnets.filter((nCarnet) => allActiveCarnets.has(nCarnet));
+    const selectedDeveloperCarnets = this.form.automationDeveloperNCarnets.filter((nCarnet) => allActiveCarnets.has(nCarnet));
     const selectedAlertCarnets = this.form.automationAlertRecipientNCarnets.filter((nCarnet) => allActiveCarnets.has(nCarnet));
 
     const existingTasks = this.config?.automation?.tasks || [];
@@ -915,6 +945,7 @@ export class NotificationsAdminComponent {
       automation: {
         retentionDays: Number(this.form.automationRetentionDays),
         viewerNCarnets: selectedViewerCarnets,
+        developerNCarnets: selectedDeveloperCarnets,
         monitoring: {
           enabled: this.form.automationMonitoringEnabled,
           alertRecipientNCarnets: selectedAlertCarnets,

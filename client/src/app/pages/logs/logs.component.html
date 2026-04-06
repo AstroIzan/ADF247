@@ -1,0 +1,321 @@
+<section class="logs-page">
+  <header class="page-head">
+    <div>
+      <h1>Visor de logs</h1>
+      <p>Consulta actividad de la aplicacion y trafico API de forma rapida.</p>
+    </div>
+    <div class="head-actions">
+      <button class="btn" type="button" (click)="exportJson()" [disabled]="!logs().length">Exportar JSON</button>
+      <button class="btn" type="button" (click)="exportCsv()" [disabled]="!logs().length">Exportar CSV</button>
+      <button class="btn btn-primary" type="button" (click)="loadLogs({ resetOffset: true })" [disabled]="loading()">{{ loading() ? 'Actualizando...' : 'Actualizar' }}</button>
+    </div>
+  </header>
+
+  @if (logsAccessService.loading()) {
+    <div class="card muted">Comprobando permisos de logs...</div>
+  } @else if (!logsAccessService.allowed()) {
+    <div class="card error">No tienes permisos de developer para acceder al visor de logs.</div>
+  } @else {
+    <section class="card filters-card">
+      <div class="filters-grid">
+        <label class="field">
+          Indice
+          <select [ngModel]="index()" (ngModelChange)="onIndexChange($event)">
+            @for (idx of logsAccessService.indexes(); track idx.key) {
+              <option [value]="idx.key">{{ idx.label }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="field grow-2">
+          Busqueda
+          <input #queryInputEl type="text" placeholder="Ejemplo: level:error service:api path:/api/auth" />
+        </label>
+
+        <label class="field">
+          Source
+          <input type="text" [ngModel]="source()" (ngModelChange)="source.set($event || '')" placeholder="console" />
+        </label>
+
+        <label class="field">
+          Nivel
+          <select [ngModel]="level()" (ngModelChange)="onLevelChange($event)">
+            <option value="all">Todos</option>
+            <option value="info">Info</option>
+            <option value="warn">Warn</option>
+            <option value="error">Error</option>
+          </select>
+        </label>
+
+        <label class="field">
+          Agrupacion (min)
+          <select [ngModel]="histogramGroupMinutes()" (ngModelChange)="onHistogramGroupMinutesChange($event)">
+            @for (minutes of availableHistogramGroupOptions(); track minutes) {
+              <option [ngValue]="minutes">{{ minutes }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <div class="filters-bottom">
+        <div class="preset-group">
+          <button type="button" class="preset-btn" [class.active]="timePreset() === '1h'" (click)="setPreset('1h')">1h</button>
+          <button type="button" class="preset-btn" [class.active]="timePreset() === '12h'" (click)="setPreset('12h')">12h</button>
+          <button type="button" class="preset-btn" [class.active]="timePreset() === '24h'" (click)="setPreset('24h')">24h</button>
+          <button type="button" class="preset-btn" [class.active]="timePreset() === '7d'" (click)="setPreset('7d')">7d</button>
+          <button type="button" class="preset-btn" [class.active]="timePreset() === 'custom'" (click)="setPreset('custom')">Custom</button>
+        </div>
+
+        <div class="filters-actions">
+          <button class="btn" type="button" (click)="clearFilters()">Limpiar</button>
+        </div>
+      </div>
+
+      @if (timePreset() === 'custom') {
+        <div class="custom-range-panel">
+          <div class="custom-range-title">Rango personalizado</div>
+          <div class="custom-range-row">
+            <label class="field">
+              Desde
+              <input type="datetime-local" [ngModel]="from()" (ngModelChange)="from.set($event || ''); onCustomDateChanged()" />
+            </label>
+
+            <label class="field">
+              Hasta
+              <input type="datetime-local" [ngModel]="to()" (ngModelChange)="to.set($event || ''); onCustomDateChanged()" />
+            </label>
+          </div>
+        </div>
+      }
+
+      @if (activeFilterChips().length > 0) {
+        <div class="chips-row">
+          @for (chip of activeFilterChips(); track chip.id) {
+            <button type="button" class="active-chip" (click)="removeFilterChip(chip.id)">
+              {{ chip.label }}
+              <span>x</span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="kpi-row">
+      <article class="card kpi-card">
+        <span>Total</span>
+        <strong>{{ total() }}</strong>
+        <small>{{ pageLabel }}</small>
+      </article>
+      <article class="card kpi-card">
+        <span>Info</span>
+        <strong class="tone-info">{{ levelStats()['info'] }}</strong>
+        <small>Eventos informativos</small>
+      </article>
+      <article class="card kpi-card">
+        <span>Warn</span>
+        <strong class="tone-warn">{{ levelStats()['warn'] }}</strong>
+        <small>Alertas operativas</small>
+      </article>
+      <article class="card kpi-card">
+        <span>Error</span>
+        <strong class="tone-error">{{ levelStats()['error'] }}</strong>
+        <small>Errores registrados</small>
+      </article>
+    </section>
+
+    <section class="card histogram-card">
+      <div class="hist-head">
+        <strong>Actividad en la ventana seleccionada</strong>
+        <span>{{ getTimeWindowLabel() }}</span>
+      </div>
+      <div class="histogram-shell">
+        <div class="hist-y-axis" aria-hidden="true">
+          @for (tick of histogramYAxisTicks(); track tick.value) {
+            <span>{{ tick.label }}</span>
+          }
+        </div>
+        <div class="hist-plot">
+          <div class="hist-bars" #histBarsEl>
+            <div class="hist-grid-lines" aria-hidden="true">
+              @for (tick of histogramYAxisTicks(); track tick.value; let i = $index) {
+                <span [style.top.%]="(i * 100) / ((histogramYAxisTicks().length || 1) - 1)"></span>
+              }
+            </div>
+            @for (bucket of histogramBuckets(); track bucket.key) {
+              <div
+                class="hist-col"
+                [attr.title]="null"
+                (mouseenter)="onHistogramBucketEnter(bucket, $event)"
+                (mousemove)="onHistogramBucketMove(bucket, $event)"
+                (mouseleave)="onHistogramBucketLeave($event)"
+                (click)="onHistogramBucketClick(bucket)">
+                <div class="hist-bar-area">
+                  <div class="hist-bar-wrap" [style.height.%]="bucket.heightPct">
+                    @if (bucket.count > 0) {
+                      <div class="hist-count">{{ bucket.count }}</div>
+                    }
+                    <div class="hist-bar"></div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="hist-x-axis" aria-hidden="true">
+            @for (tick of histogramXAxisTicks(); track tick.key; let i = $index) {
+              <span
+                [style.left.%]="tick.leftPct"
+                [class.first]="i === 0"
+                [class.last]="i === histogramXAxisTicks().length - 1">
+                {{ tick.label }}
+              </span>
+            }
+          </div>
+        </div>
+      </div>
+
+      @if (hoveredHistogramBucket() && hoveredHistogramPosition()) {
+        <button
+          type="button"
+          class="hist-mini-pop"
+          [style.left.px]="hoveredHistogramPosition()!.x"
+          [style.top.px]="hoveredHistogramPosition()!.y"
+          (mouseleave)="onHistogramPopoverLeave()"
+          (click)="$event.stopPropagation(); onHistogramBucketClick(hoveredHistogramBucket()!)">
+          <strong>{{ hoveredHistogramBucket()!.label }}</strong>
+          <span>Count of records {{ formatHistogramCount(hoveredHistogramBucket()!.count) }}</span>
+        </button>
+      }
+    </section>
+
+    <section class="content-grid">
+      <aside class="card side-card">
+        <div class="side-head">
+          <h3>Campos</h3>
+          <input type="text" [ngModel]="fieldSearch()" (ngModelChange)="fieldSearch.set($event || '')" placeholder="Buscar campo" />
+        </div>
+
+        <div class="side-block">
+          <h4>Columnas visibles</h4>
+          <div class="pinned-wrap">
+            @if (!pinnedSummaryFields().length) {
+              <span class="muted">Sin columnas fijadas</span>
+            }
+            @for (fieldName of pinnedSummaryFields(); track fieldName) {
+              <button type="button" class="pinned-chip" (click)="togglePinnedField(fieldName)">{{ fieldName }} <span>x</span></button>
+            }
+          </div>
+        </div>
+
+        <div class="side-block">
+          <h4>Populares</h4>
+          <div class="field-list">
+            @for (field of popularFields(); track field.name) {
+              <div class="field-row">
+                <button type="button" class="field-name" (click)="appendFieldToQuery(field.name)">{{ field.name }}</button>
+                <span class="field-tag">{{ field.kind }}</span>
+                <span class="field-count">{{ field.count }}</span>
+                <button type="button" class="mini-btn" (click)="togglePinnedField(field.name)">{{ isPinnedField(field.name) ? 'Quitar' : 'Fijar' }}</button>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="side-block">
+          <h4>Todos los campos</h4>
+          <div class="field-list scrollable">
+            @for (field of filteredFields(); track field.name) {
+              <div class="field-row">
+                <button type="button" class="field-name" (click)="appendFieldToQuery(field.name)">{{ field.name }}</button>
+                <span class="field-tag">{{ field.kind }}</span>
+                <span class="field-count">{{ field.count }}</span>
+                <button type="button" class="mini-btn" (click)="togglePinnedField(field.name)">{{ isPinnedField(field.name) ? 'Quitar' : 'Fijar' }}</button>
+              </div>
+            }
+          </div>
+        </div>
+      </aside>
+
+      <section class="card table-card">
+        <div class="table-head">
+          <div>
+            <strong>Registros ({{ logs().length }})</strong>
+            <span>Columnas: {{ selectedColumnsLabel }}</span>
+          </div>
+          <div class="table-actions">
+            <span>{{ pageLabel }}</span>
+            <button type="button" class="btn" (click)="goToPreviousPage()" [disabled]="loading() || offset() <= 0">Anterior</button>
+            <button type="button" class="btn" (click)="goToNextPage()" [disabled]="loading() || !hasMore()">Siguiente</button>
+          </div>
+        </div>
+
+        @if (error()) {
+          <div class="card error">{{ error() }}</div>
+        }
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="toggle-col"></th>
+                <th class="date-col">Fecha</th>
+                <th>Resumen</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (!logs().length && !loading()) {
+                <tr>
+                  <td colspan="3" class="empty">No hay registros para los filtros actuales.</td>
+                </tr>
+              }
+
+              @for (item of logs(); track getLogId(item)) {
+                <tr [class.active]="selectedLog() === item">
+                  <td class="toggle-cell">
+                    <button type="button" class="expand-btn" (click)="toggleRowDetails(item)">{{ isRowExpanded(item) ? '-' : '+' }}</button>
+                  </td>
+                  <td class="date-cell" (click)="selectLog(item)">{{ getRowTimestampLabel(item) }}</td>
+                  <td class="summary-cell" (click)="selectLog(item)">
+                    <div class="row-summary">
+                      @for (entry of getRowSummaryEntries(item); track entry.label) {
+                        <span class="summary-token" [class.message-token]="entry.label === 'message'">
+                          <strong>{{ entry.label }}</strong>
+                          <span class="summary-value">{{ entry.value }}</span>
+                        </span>
+                      }
+                    </div>
+                  </td>
+                </tr>
+
+                @if (isRowExpanded(item)) {
+                  <tr class="expanded-row">
+                    <td colspan="3">
+                      <div class="expanded-table-wrap">
+                        <table class="expanded-table">
+                          <thead>
+                            <tr>
+                              <th>Field</th>
+                              <th>Value</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (entry of getExpandedEntries(item); track trackExpandedField($index, entry)) {
+                              <tr>
+                                <td class="field-col">{{ entry.field }}</td>
+                                <td class="value-col">{{ entry.value }}</td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
+  }
+</section>
