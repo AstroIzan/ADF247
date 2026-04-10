@@ -74,6 +74,7 @@ Variables principales:
 - `JWT_REFRESH_SECRET`
 - `JWT_REFRESH_EXPIRES_IN`
 - `PASSWORD_SALT_ROUNDS`
+- `AEMET_OPENDATA_API_KEY`
 
 Notas importantes:
 

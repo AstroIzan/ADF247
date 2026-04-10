@@ -13,9 +13,15 @@ function sendErrorResponse(res, error) {
   res.status(statusCode).json(payload)
 }
 
-async function getMunicipalitiesPlaAlfaStatus(_req, res) {
+function parseForceRefreshFlag(value) {
+  const text = String(value || '').trim().toLowerCase()
+  return text === '1' || text === 'true' || text === 'yes'
+}
+
+async function getMunicipalitiesPlaAlfaStatus(req, res) {
   try {
-    const result = await plaAlfaService.getPlaAlfaMunicipalitiesStatus()
+    const forceRefresh = parseForceRefreshFlag(req.query?.refresh) || parseForceRefreshFlag(req.query?.forceRefresh)
+    const result = await plaAlfaService.getPlaAlfaMunicipalitiesStatus({ forceRefresh })
     res.json(result)
   } catch (error) {
     sendErrorResponse(res, error)

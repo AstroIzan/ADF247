@@ -1,4 +1,5 @@
 const authService = require('../modules/auth/auth.service')
+const database = require('../../../database/prisma/prisma')
 
 function extractBearerToken(authorizationHeader) {
   if (!authorizationHeader) {
@@ -31,6 +32,35 @@ async function requireAuth(req, _res, next) {
   }
 }
 
+async function requireAdmin(req, _res, next) {
+  try {
+    if (!req.auth?.userId) {
+      const error = new Error('Debes estar autenticado para realizar esta accion.')
+      error.statusCode = 401
+      throw error
+    }
+
+    const isAdmin = await database.role.findFirst({
+      where: {
+        userId: req.auth.userId,
+        isAdmin: true,
+      },
+      select: { id: true },
+    })
+
+    if (!isAdmin) {
+      const error = new Error('Solo un admin puede realizar esta accion.')
+      error.statusCode = 403
+      throw error
+    }
+
+    next()
+  } catch (error) {
+    next(error)
+  }
+}
+
 module.exports = {
   requireAuth,
+  requireAdmin,
 }

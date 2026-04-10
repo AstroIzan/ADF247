@@ -426,10 +426,30 @@ export interface PlaAlfaMunicipalityStatusItem {
   comarca: string | null;
   todayLevel: number | null;
   tomorrowLevel: number | null;
+  todayForecast: PlaAlfaWeatherForecast | null;
+  todayForecastSource: 'aemet' | 'open-meteo' | null;
+  tomorrowForecast: PlaAlfaWeatherForecast | null;
+  tomorrowForecastSource: 'aemet' | 'open-meteo' | null;
+  forecastSource: 'aemet' | 'open-meteo' | 'mixed' | null;
   todayObjectId: number | null;
   tomorrowObjectId: number | null;
   foundToday: boolean;
   foundTomorrow: boolean;
+}
+
+export interface PlaAlfaWeatherForecast {
+  temperatureC: {
+    min: number | null;
+    max: number | null;
+  };
+  humidityPct: {
+    min: number | null;
+    max: number | null;
+  };
+  wind: {
+    maxSpeedKmh: number | null;
+    direction: string | null;
+  };
 }
 
 export interface PlaAlfaMunicipalitiesStatusResponse {
@@ -732,7 +752,8 @@ export class DataService {
     return this.http.put<{ updatedAt: string; municipalities: string[] }>('/pla-alfa/municipalities', { municipalities });
   }
 
-  getPlaAlfaMunicipalitiesStatus(): Observable<PlaAlfaMunicipalitiesStatusResponse> {
-    return this.http.get<PlaAlfaMunicipalitiesStatusResponse>('/pla-alfa/municipalities');
+  getPlaAlfaMunicipalitiesStatus(forceRefresh = false): Observable<PlaAlfaMunicipalitiesStatusResponse> {
+    const query = forceRefresh ? '?refresh=true' : '';
+    return this.http.get<PlaAlfaMunicipalitiesStatusResponse>(`/pla-alfa/municipalities${query}`);
   }
 }

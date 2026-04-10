@@ -25,15 +25,17 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler
   ): Observable<HttpEvent<any>> {
+    const isAuthEndpoint = request.url.includes('/api/auth/login') || request.url.includes('/api/auth/refresh');
+
     // Añadir token a la petición si existe
-    if (this.authService.getToken()) {
+    if (!isAuthEndpoint && this.authService.getToken()) {
       request = this.addToken(request, this.authService.getToken()!);
     }
 
     return next.handle(request).pipe(
       catchError((error) => {
         // Si es error 401 (token expirado o inválido)
-        if (error instanceof HttpErrorResponse && error.status === 401) {
+        if (error instanceof HttpErrorResponse && error.status === 401 && !isAuthEndpoint) {
           return this.handle401Error(request, next);
         } else {
           return throwError(() => error);

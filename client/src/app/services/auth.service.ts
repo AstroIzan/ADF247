@@ -11,6 +11,7 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   accessToken: string;
+  refreshToken?: string;
   user: {
     id: number;
     nCarnet: string;
@@ -64,6 +65,7 @@ export interface BasicUserCache {
 export class AuthService {
   private baseUrl = '/api';
   private readonly TOKEN_KEY = 'accessToken';
+  private readonly REFRESH_TOKEN_KEY = 'refreshToken';
   private readonly USER_KEY = 'currentUser';
   private readonly BASIC_USER_CACHE_KEY = 'basicUserCache';
   
@@ -98,7 +100,14 @@ export class AuthService {
   }
 
   refreshToken(): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/refresh`, {}).pipe(
+    const refreshToken = this.getRefreshToken();
+
+    if (!refreshToken) {
+      this.logout();
+      return throwError(() => new Error('No hi ha refresh token disponible per renovar la sessio.'));
+    }
+
+    return this.http.post<LoginResponse>(`${this.baseUrl}/auth/refresh`, { refreshToken }).pipe(
       tap(response => {
         this.persistSession(response);
       }),
@@ -111,6 +120,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem(this.TOKEN_KEY);
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
     localStorage.removeItem(this.USER_KEY);
     localStorage.removeItem(this.BASIC_USER_CACHE_KEY);
     this.currentUser.set(null);
@@ -120,6 +130,10 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
   getCurrentUser(): CurrentUser | null {
@@ -197,6 +211,11 @@ export class AuthService {
 
   private persistSession(response: LoginResponse) {
     localStorage.setItem(this.TOKEN_KEY, response.accessToken);
+    if (response.refreshToken) {
+      localStorage.setItem(this.REFRESH_TOKEN_KEY, response.refreshToken);
+    } else {
+      localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+    }
     localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
     this.currentUser.set(response.user);
     this.isAuthenticated.set(true);

@@ -3,7 +3,17 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { DataService, User, Convocatoria, ConvoType, Respuesta, NotificationSettings, NotificationLog, UserHoursSummaryRow, CampaignFormRecord } from '../../services/data.service';
+import {
+  DataService,
+  User,
+  Convocatoria,
+  ConvoType,
+  Respuesta,
+  NotificationSettings,
+  NotificationLog,
+  UserHoursSummaryRow,
+  CampaignFormRecord,
+} from '../../services/data.service';
 import { UsersModule } from '../../modules/users/users.module';
 import { ConvosModule } from '../../modules/convos/convos.module';
 import { DispoModule } from '../../modules/dispo/dispo.module';

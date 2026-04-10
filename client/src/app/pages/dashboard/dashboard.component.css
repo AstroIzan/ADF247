@@ -219,6 +219,7 @@
   font-weight: 600;
 }
 
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -255,6 +256,7 @@
   .campaign-forms-detail-grid {
     grid-template-columns: 1fr;
   }
+
 }
 
 @media (max-width: 768px) {

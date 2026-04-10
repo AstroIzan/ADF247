@@ -5,6 +5,7 @@
 				<div class="logo">ADF247</div>
 				<button class="nav-btn desktop-nav-btn" routerLink="/home" routerLinkActive="active">Inici</button>
 				<button class="nav-btn desktop-nav-btn" routerLink="/availability" routerLinkActive="active">Disponibilitat</button>
+				<button class="nav-btn desktop-nav-btn" routerLink="/pla-alfa" routerLinkActive="active">Pla Alfa</button>
 				@if (authService.isAdmin()) {
 					<button class="nav-btn desktop-nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
 				}
@@ -64,6 +65,7 @@
 			<nav class="mobile-menu">
 				<button class="mobile-menu-item" routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Inici</button>
 				<button class="mobile-menu-item" routerLink="/availability" routerLinkActive="active" (click)="closeMobileMenu()">Disponibilitat</button>
+				<button class="mobile-menu-item" routerLink="/pla-alfa" routerLinkActive="active" (click)="closeMobileMenu()">Pla Alfa</button>
 				@if (authService.isAdmin()) {
 					<button class="mobile-menu-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">Panell</button>
 				}

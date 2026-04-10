@@ -13,6 +13,8 @@ export class PushNotificationsService {
   private messaging: Messaging | null = null
   private foregroundListenerBound = false
   private readonly syncTimeoutMs = 5000
+  private registerInFlight: Promise<void> | null = null
+  private registerInFlightToken = ''
 
   readonly isSupported = signal(false)
   readonly permission = signal<NotificationPermission | 'unsupported'>('default')
@@ -110,8 +112,7 @@ export class PushNotificationsService {
         if (token) {
           this.currentToken.set(token)
           if (!this.hasRegisteredCurrentToken()) {
-            await this.withTimeout(this.registerToken(token), this.syncTimeoutMs)
-            this.isTokenLinked.set(true)
+            await this.withTimeout(this.ensureTokenRegistered(token), this.syncTimeoutMs)
             this.infoMessage.set('Dispositiu registrat correctament per rebre notificacions.')
           }
         }
@@ -177,8 +178,7 @@ export class PushNotificationsService {
 
         // If the browser has permission and token, ensure this session/device is linked in backend.
         if (token && !this.hasRegisteredCurrentToken()) {
-          await this.withTimeout(this.registerToken(token), this.syncTimeoutMs)
-          this.isTokenLinked.set(true)
+          await this.withTimeout(this.ensureTokenRegistered(token), this.syncTimeoutMs)
         }
       } catch (error) {
         this.errorMessage.set(error instanceof Error ? error.message : 'No s\'ha pogut obtenir el token del dispositiu.')
@@ -226,9 +226,8 @@ export class PushNotificationsService {
         throw new Error('No s\'ha pogut generar el token del dispositiu.')
       }
 
-      await this.registerToken(token)
+      await this.ensureTokenRegistered(token)
       this.currentToken.set(token)
-      this.isTokenLinked.set(true)
       this.modalVisible.set(false)
       this.infoMessage.set('Dispositiu registrat correctament per rebre notificacions.')
     } catch (error) {
@@ -255,6 +254,35 @@ export class PushNotificationsService {
       platform: this.resolvePlatform(),
       userAgent: navigator.userAgent,
     }))
+  }
+
+  private async ensureTokenRegistered(token: string) {
+    if (!token) {
+      return
+    }
+
+    if (this.currentToken() === token && this.isTokenLinked()) {
+      return
+    }
+
+    if (this.registerInFlight && this.registerInFlightToken === token) {
+      await this.registerInFlight
+      return
+    }
+
+    this.registerInFlightToken = token
+    this.registerInFlight = this.registerToken(token)
+
+    try {
+      await this.registerInFlight
+      this.currentToken.set(token)
+      this.isTokenLinked.set(true)
+    } finally {
+      if (this.registerInFlightToken === token) {
+        this.registerInFlight = null
+        this.registerInFlightToken = ''
+      }
+    }
   }
 
   private async resolveCurrentToken() {
