@@ -34,7 +34,7 @@ async function requireAuth(req, _res, next) {
 
 async function requireAdmin(req, _res, next) {
   try {
-    if (!req.auth?.userId) {
+    if (!req.auth?.nCarnet) {
       const error = new Error('Debes estar autenticado para realizar esta accion.')
       error.statusCode = 401
       throw error
@@ -42,7 +42,7 @@ async function requireAdmin(req, _res, next) {
 
     const isAdmin = await database.role.findFirst({
       where: {
-        userId: req.auth.userId,
+        nCarnet: req.auth.nCarnet,
         isAdmin: true,
       },
       select: { id: true },
