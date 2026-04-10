@@ -198,14 +198,52 @@ export class PlaAlfaComponent implements OnInit {
     const windSpeed = this.formatSingleValue(forecast.wind.maxSpeedKmh, 'km/h');
     const windDir = (forecast.wind.direction || '').trim();
     const windAngleDeg = this.getWindDirectionAngleDeg(windDir);
+    const windDirectionName = this.getWindDirectionName(windDir);
 
     return {
       temperature: tempText,
       humidity: humidityText,
       windSpeed,
       windDirection: windDir,
+      windDirectionName,
       windAngleDeg,
     };
+  }
+
+  private getWindDirectionName(direction: string) {
+    const normalized = String(direction || '').trim().toUpperCase();
+
+    if (!normalized) {
+      return '';
+    }
+
+    const catalanNameMap: Record<string, string> = {
+      N: 'Tramuntana',
+      NNE: 'Tramuntana-Gregal',
+      NE: 'Gregal',
+      ENE: 'Gregal-Llevant',
+      E: 'Llevant',
+      ESE: 'Llevant-Xaloc',
+      SE: 'Xaloc',
+      SSE: 'Xaloc-Migjorn',
+      S: 'Migjorn',
+      SSO: 'Migjorn-Garbí',
+      SSW: 'Migjorn-Garbí',
+      SO: 'Garbí',
+      SW: 'Garbí',
+      OSO: 'Garbí-Ponent',
+      WSW: 'Garbí-Ponent',
+      O: 'Ponent',
+      W: 'Ponent',
+      ONO: 'Ponent-Mestral',
+      WNW: 'Ponent-Mestral',
+      NO: 'Mestral',
+      NW: 'Mestral',
+      NNO: 'Mestral-Tramuntana',
+      NNW: 'Mestral-Tramuntana',
+    };
+
+    return catalanNameMap[normalized] || '';
   }
 
   private getWindDirectionAngleDeg(direction: string) {

@@ -126,11 +126,14 @@
                             <span class="weather-item weather-wind">
                               <i class="fa-solid fa-wind" aria-hidden="true"></i>
                               <strong>Vent</strong>
-                              <span>
+                              <span class="weather-wind-value">
                                 {{ todayWeather.windSpeed }}
                                 @if (todayWeather.windDirection) {
                                   <i class="fa-solid fa-arrow-down wind-direction-icon" [style.transform]="'rotate(' + (todayWeather.windAngleDeg ?? 0) + 'deg)'" aria-hidden="true"></i>
-                                  {{ todayWeather.windDirection }}
+                                  <span class="wind-direction-code">{{ todayWeather.windDirection }}</span>
+                                  @if (todayWeather.windDirectionName) {
+                                    <span class="wind-direction-name-badge">{{ todayWeather.windDirectionName }}</span>
+                                  }
                                 }
                               </span>
                             </span>
@@ -164,11 +167,14 @@
                             <span class="weather-item weather-wind">
                               <i class="fa-solid fa-wind" aria-hidden="true"></i>
                               <strong>Vent</strong>
-                              <span>
+                              <span class="weather-wind-value">
                                 {{ tomorrowWeather.windSpeed }}
                                 @if (tomorrowWeather.windDirection) {
                                   <i class="fa-solid fa-arrow-down wind-direction-icon" [style.transform]="'rotate(' + (tomorrowWeather.windAngleDeg ?? 0) + 'deg)'" aria-hidden="true"></i>
-                                  {{ tomorrowWeather.windDirection }}
+                                  <span class="wind-direction-code">{{ tomorrowWeather.windDirection }}</span>
+                                  @if (tomorrowWeather.windDirectionName) {
+                                    <span class="wind-direction-name-badge">{{ tomorrowWeather.windDirectionName }}</span>
+                                  }
                                 }
                               </span>
                             </span>
