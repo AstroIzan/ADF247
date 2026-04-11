@@ -13,6 +13,7 @@ const {
   updateNotificationSettings,
 } = require('./notifications.config')
 const { getFirebaseMessaging } = require('./notifications.firebase')
+const { getPlaAlfaMunicipalitiesStatus } = require('../pla-alfa/pla-alfa.service')
 const { updateSortidaForTomorrow } = require('../convos/convos.service')
 
 const GLOBAL_NOTIFICATION_TOPIC = 'adf247-all'
@@ -41,11 +42,34 @@ function summarizeTaskResult(result) {
     return { skipped: false }
   }
 
+  const detailKeys = [
+    'decision',
+    'campaignDate',
+    'maxTomorrowAlfaLevel',
+    'daysProcessed',
+    'daysInCampaign',
+    'weekStart',
+    'weekEnd',
+    'weekHadAlfa2',
+    'updatedSortidaCount',
+    'createdGuardiaCount',
+    'createdPviCount',
+    'createdConvocatoriasCount',
+  ]
+
+  const details = {}
+  for (const key of detailKeys) {
+    if (result[key] !== undefined) {
+      details[key] = result[key]
+    }
+  }
+
   return {
     skipped: Boolean(result.skipped),
     reason: result.reason || null,
     notificationCount: result.notificationCount ?? result.notifications?.length ?? null,
     targetedUsers: result.targetedUsers ?? null,
+    ...details,
   }
 }
 
@@ -426,6 +450,399 @@ function getWeekKey(referenceDate = new Date()) {
 
 function getDateKey(referenceDate = new Date()) {
   return startOfDay(referenceDate).toISOString().slice(0, 10)
+}
+
+const GUARDIA_DAILY_SLOTS = [
+  { startHour: 12, startMinute: 0, endHour: 16, endMinute: 0 },
+  { startHour: 16, startMinute: 0, endHour: 20, endMinute: 0 },
+]
+
+const PVI_DAILY_SLOT = { startHour: 10, startMinute: 0, endHour: 14, endMinute: 0 }
+const PVI_WEEKLY_SLOT = { startHour: 12, startMinute: 0, endHour: 14, endMinute: 0 }
+
+function buildDateWithTime(baseDate, hour, minute = 0) {
+  const value = startOfDay(baseDate)
+  value.setHours(hour, minute, 0, 0)
+  return value
+}
+
+function buildCampaignPeriod(settings) {
+  const startRaw = settings?.hourComputation?.campaignStartDate
+  const endRaw = settings?.hourComputation?.campaignEndDate
+
+  if (!startRaw || !endRaw) {
+    return null
+  }
+
+  const start = startOfDay(new Date(startRaw))
+  const end = endOfDay(new Date(endRaw))
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start >= end) {
+    return null
+  }
+
+  return { start, end }
+}
+
+function isDateInsideCampaign(date, settings) {
+  const period = buildCampaignPeriod(settings)
+  if (!period) {
+    return false
+  }
+
+  const timestamp = new Date(date).getTime()
+  return timestamp >= period.start.getTime() && timestamp < period.end.getTime()
+}
+
+function getGuardiaAndPviTypeNames(settings) {
+  return {
+    guardiaTypeName: String(settings?.typeGroups?.guardiaSourceTypeName || 'Guardia').trim(),
+    pviTypeName: String(settings?.typeGroups?.guardiaPviTypeName || 'PVI').trim(),
+  }
+}
+
+function slotMatchesConvocatoria(convocatoria, slot) {
+  const start = new Date(convocatoria?.startTime)
+  const end = convocatoria?.finalTime ? new Date(convocatoria.finalTime) : null
+
+  if (Number.isNaN(start.getTime()) || !end || Number.isNaN(end.getTime())) {
+    return false
+  }
+
+  return (
+    start.getHours() === slot.startHour
+    && start.getMinutes() === slot.startMinute
+    && end.getHours() === slot.endHour
+    && end.getMinutes() === slot.endMinute
+  )
+}
+
+async function getMaxTomorrowPlaAlfaLevel(forceRefresh = false) {
+  const status = await getPlaAlfaMunicipalitiesStatus({ forceRefresh })
+  const levels = Array.isArray(status?.municipalities)
+    ? status.municipalities
+      .map((item) => Number(item?.tomorrowLevel))
+      .filter((level) => Number.isInteger(level) && level >= 0)
+    : []
+
+  if (levels.length === 0) {
+    return null
+  }
+
+  return Math.max(...levels)
+}
+
+async function findConvoTypesOrSkip(settings) {
+  const { guardiaTypeName, pviTypeName } = getGuardiaAndPviTypeNames(settings)
+
+  const convoTypes = await database.convoType.findMany({
+    where: {
+      name: {
+        in: [guardiaTypeName, pviTypeName],
+      },
+    },
+  })
+
+  const guardiaType = convoTypes.find((item) => item.name === guardiaTypeName) || null
+  const pviType = convoTypes.find((item) => item.name === pviTypeName) || null
+
+  if (!guardiaType || !pviType) {
+    return {
+      skipped: true,
+      reason: 'missing-convo-types',
+      missingTypes: [!guardiaType ? guardiaTypeName : null, !pviType ? pviTypeName : null].filter(Boolean),
+      guardiaType,
+      pviType,
+    }
+  }
+
+  return {
+    skipped: false,
+    guardiaType,
+    pviType,
+  }
+}
+
+async function getGuardiaPviConvocatoriasForDay(targetDate, settings) {
+  const { guardiaTypeName, pviTypeName } = getGuardiaAndPviTypeNames(settings)
+  const dayStart = startOfDay(targetDate)
+  const dayEnd = endOfDay(targetDate)
+
+  return database.convocatoria.findMany({
+    where: {
+      isActive: true,
+      date: {
+        gte: dayStart,
+        lt: dayEnd,
+      },
+      convoType: {
+        name: {
+          in: [guardiaTypeName, pviTypeName],
+        },
+      },
+    },
+    include: {
+      convoType: true,
+    },
+    orderBy: {
+      startTime: 'asc',
+    },
+  })
+}
+
+async function ensureConvocatoriaForSlot({
+  targetDate,
+  slot,
+  convoType,
+  existingConvocatorias,
+  defaultSortida = false,
+  includeDateInTitle = true,
+}) {
+  const alreadyExists = existingConvocatorias.some((convocatoria) => {
+    if (convocatoria.convoTypeId !== convoType.id) {
+      return false
+    }
+
+    return slotMatchesConvocatoria(convocatoria, slot)
+  })
+
+  if (alreadyExists) {
+    return null
+  }
+
+  const created = await database.convocatoria.create({
+    data: {
+      date: startOfDay(targetDate),
+      title: includeDateInTitle
+        ? `${convoType.name} - ${getDateKey(targetDate)}`
+        : `${convoType.name}`,
+      ubiSortida: convoType.defaultLocation || 'Brigadas',
+      convoTypeId: convoType.id,
+      autoAssignResponsable: true,
+      startTime: buildDateWithTime(targetDate, slot.startHour, slot.startMinute),
+      finalTime: buildDateWithTime(targetDate, slot.endHour, slot.endMinute),
+      sortida: defaultSortida,
+    },
+    include: {
+      convoType: true,
+    },
+  })
+
+  existingConvocatorias.push(created)
+  return created
+}
+
+async function applyCampaignD1GuardiaPviPlan(_authUser, referenceDate = new Date(), options = {}) {
+  const settings = readNotificationSettings()
+  const { start: tomorrowStart } = getDateRangeByDaysAhead(referenceDate, 1)
+
+  if (!isDateInsideCampaign(tomorrowStart, settings)) {
+    return {
+      skipped: true,
+      reason: 'outside-campaign',
+      campaignDate: getDateKey(tomorrowStart),
+    }
+  }
+
+  const maxTomorrowAlfaLevel = await getMaxTomorrowPlaAlfaLevel(Boolean(options.forceRefreshPlaAlfa))
+  if (maxTomorrowAlfaLevel === null) {
+    return {
+      skipped: true,
+      reason: 'no-pla-alfa-data',
+      campaignDate: getDateKey(tomorrowStart),
+    }
+  }
+
+  const convoTypesResult = await findConvoTypesOrSkip(settings)
+  if (convoTypesResult.skipped) {
+    return {
+      skipped: true,
+      reason: convoTypesResult.reason,
+      campaignDate: getDateKey(tomorrowStart),
+      maxTomorrowAlfaLevel,
+      missingTypes: convoTypesResult.missingTypes,
+    }
+  }
+
+  const { guardiaType, pviType } = convoTypesResult
+  const existingConvocatorias = await getGuardiaPviConvocatoriasForDay(tomorrowStart, settings)
+
+  let createdGuardiaCount = 0
+  let createdPviCount = 0
+
+  const shouldActivateSortida = maxTomorrowAlfaLevel >= 2
+  if (shouldActivateSortida) {
+    for (const slot of GUARDIA_DAILY_SLOTS) {
+      const created = await ensureConvocatoriaForSlot({
+        targetDate: tomorrowStart,
+        slot,
+        convoType: guardiaType,
+        existingConvocatorias,
+      })
+      if (created) {
+        createdGuardiaCount += 1
+      }
+    }
+
+    const createdPvi = await ensureConvocatoriaForSlot({
+      targetDate: tomorrowStart,
+      slot: PVI_DAILY_SLOT,
+      convoType: pviType,
+      existingConvocatorias,
+    })
+
+    if (createdPvi) {
+      createdPviCount += 1
+    }
+  }
+
+  const updateResult = await database.convocatoria.updateMany({
+    where: {
+      id: {
+        in: existingConvocatorias.map((convocatoria) => convocatoria.id),
+      },
+    },
+    data: {
+      sortida: shouldActivateSortida,
+    },
+  })
+
+  return {
+    skipped: false,
+    decision: shouldActivateSortida ? 'se-surt' : 'no-se-surt',
+    campaignDate: getDateKey(tomorrowStart),
+    maxTomorrowAlfaLevel,
+    updatedSortidaCount: updateResult.count,
+    createdGuardiaCount,
+    createdPviCount,
+    createdConvocatoriasCount: createdGuardiaCount + createdPviCount,
+  }
+}
+
+function getCurrentWeekRange(referenceDate = new Date()) {
+  const start = startOfDay(referenceDate)
+  const day = start.getDay()
+  const daysSinceMonday = (day + 6) % 7
+  start.setDate(start.getDate() - daysSinceMonday)
+
+  const end = new Date(start)
+  end.setDate(end.getDate() + 7)
+  return { start, end }
+}
+
+async function didCurrentWeekReachAlfa2(referenceDate = new Date()) {
+  const { start } = getCurrentWeekRange(referenceDate)
+  const now = new Date(referenceDate)
+
+  const taskRuns = await database.notificationAutomationTaskRun.findMany({
+    where: {
+      taskKey: 'campaign-d1-guardia-pvi',
+      startedAt: {
+        gte: start,
+        lte: now,
+      },
+      detailsJson: {
+        not: null,
+      },
+    },
+    select: {
+      detailsJson: true,
+    },
+  })
+
+  for (const taskRun of taskRuns) {
+    if (!taskRun.detailsJson) {
+      continue
+    }
+
+    try {
+      const details = JSON.parse(taskRun.detailsJson)
+      if (Number(details?.maxTomorrowAlfaLevel) >= 2) {
+        return true
+      }
+    } catch {
+      // Ignore malformed historical task payloads.
+    }
+  }
+
+  const fallbackMaxLevel = await getMaxTomorrowPlaAlfaLevel(false)
+  return Number(fallbackMaxLevel) >= 2
+}
+
+async function seedNextWeekGuardiaPviConvocatorias(_authUser, referenceDate = new Date()) {
+  const settings = readNotificationSettings()
+  const convoTypesResult = await findConvoTypesOrSkip(settings)
+  if (convoTypesResult.skipped) {
+    return {
+      skipped: true,
+      reason: convoTypesResult.reason,
+      missingTypes: convoTypesResult.missingTypes,
+    }
+  }
+
+  const { guardiaType, pviType } = convoTypesResult
+  const nextWeek = getNextWeekRange(referenceDate)
+  const days = []
+  for (let current = new Date(nextWeek.start); current < nextWeek.end; current.setDate(current.getDate() + 1)) {
+    days.push(startOfDay(current))
+  }
+
+  const campaignDays = days.filter((day) => isDateInsideCampaign(day, settings))
+  if (campaignDays.length === 0) {
+    return {
+      skipped: true,
+      reason: 'outside-campaign',
+      weekStart: getDateKey(nextWeek.start),
+      weekEnd: getDateKey(new Date(nextWeek.end.getTime() - (24 * 60 * 60 * 1000))),
+    }
+  }
+
+  const weekHadAlfa2 = await didCurrentWeekReachAlfa2(referenceDate)
+
+  let createdGuardiaCount = 0
+  let createdPviCount = 0
+
+  for (const day of campaignDays) {
+    const existingConvocatorias = await getGuardiaPviConvocatoriasForDay(day, settings)
+
+    for (const slot of GUARDIA_DAILY_SLOTS) {
+      const created = await ensureConvocatoriaForSlot({
+        targetDate: day,
+        slot,
+        convoType: guardiaType,
+        existingConvocatorias,
+        includeDateInTitle: false,
+      })
+      if (created) {
+        createdGuardiaCount += 1
+      }
+    }
+
+    if (weekHadAlfa2) {
+      const createdPvi = await ensureConvocatoriaForSlot({
+        targetDate: day,
+        slot: PVI_WEEKLY_SLOT,
+        convoType: pviType,
+        existingConvocatorias,
+        includeDateInTitle: false,
+      })
+
+      if (createdPvi) {
+        createdPviCount += 1
+      }
+    }
+  }
+
+  return {
+    skipped: false,
+    weekStart: getDateKey(nextWeek.start),
+    weekEnd: getDateKey(new Date(nextWeek.end.getTime() - (24 * 60 * 60 * 1000))),
+    daysInCampaign: campaignDays.length,
+    weekHadAlfa2,
+    createdGuardiaCount,
+    createdPviCount,
+    createdConvocatoriasCount: createdGuardiaCount + createdPviCount,
+  }
 }
 
 function getSortidaTriggerAt(convocatoriaDate, settings) {
@@ -1261,7 +1678,7 @@ async function sendPendingResponsesReminder(authUser, options = {}) {
       actorUserId: authUser?.userId,
       trigger: 'manual-pending-responses',
       source: 'api',
-      message: 'Execucio manual del recordatori de respostes pendents',
+      message: 'Manual execution del recordatori de respostes pendents',
     })
   }
 
@@ -1357,7 +1774,7 @@ async function sendWeeklyResponseDigest(authUser, referenceDate = new Date(), op
       actorUserId: authUser?.userId,
       trigger: 'manual-weekly-digest',
       source: 'api',
-      message: 'Execucio manual del digest setmanal',
+      message: 'Manual execution del digest setmanal',
     })
   }
 
@@ -1430,7 +1847,7 @@ async function sendTomorrowSortidaNotifications(authUser, referenceDate = new Da
       actorUserId: authUser?.userId,
       trigger: 'manual-tomorrow-sortida',
       source: 'api',
-      message: 'Execucio manual de notificacions de sortida de dema',
+      message: 'Manual execution de notificacions de sortida de dema',
     })
   }
 
@@ -1566,6 +1983,24 @@ async function runDailyNotificationAutomation(authUser, referenceDate = new Date
     await ensureAdmin(authUser)
   }
 
+  const settings = readNotificationSettings()
+  const canRunTimedTasks = authUser
+    ? true
+    : referenceDate.getHours() === settings.schedule.dailyRunHour
+      && referenceDate.getMinutes() === settings.schedule.dailyRunMinute
+
+  // Defensive guard: if scheduler invokes this outside the configured minute,
+  // do not create historical run records.
+  if (!authUser && !canRunTimedTasks) {
+    return {
+      skipped: true,
+      reason: 'outside-scheduled-time',
+      expectedHour: settings.schedule.dailyRunHour,
+      expectedMinute: settings.schedule.dailyRunMinute,
+      executedAt: referenceDate.toISOString(),
+    }
+  }
+
   const run = await createAutomationRun({
     trigger: authUser ? 'manual' : 'scheduled',
     source: authUser ? 'api' : 'scheduler',
@@ -1575,19 +2010,14 @@ async function runDailyNotificationAutomation(authUser, referenceDate = new Date
   await ensureConfiguredConvoTypes()
   await updateSortidaForTomorrow(referenceDate)
 
-  const settings = readNotificationSettings()
-
-  const canRunTimedTasks = authUser
-    ? true
-    : referenceDate.getHours() === settings.schedule.dailyRunHour
-      && referenceDate.getMinutes() === settings.schedule.dailyRunMinute
-
   const configuredTasks = Array.isArray(settings.automation?.tasks) && settings.automation.tasks.length > 0
     ? settings.automation.tasks
     : [
+      { taskKey: 'campaign-d1-guardia-pvi', notifyKind: 'campaign-d1-guardia-pvi', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: ['Guardia', 'PVI'] },
       { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [] },
       { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [] },
       { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [] },
+      { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-guardia-pvi-bootstrap', enabled: true, schedule: { kind: 'weekly' }, convoTypeFilter: ['Guardia', 'PVI'] },
       { taskKey: 'weekly-pending-summary', notifyKind: 'weekly-pending', enabled: true, schedule: { kind: 'weekly' }, convoTypeFilter: [] },
     ]
 
@@ -1616,10 +2046,34 @@ async function runDailyNotificationAutomation(authUser, referenceDate = new Date
       : undefined
 
     const taskResult = await executeAutomationTask(run.id, taskConfig.taskKey, async () => {
-      if (notifyKind === 'weekly-digest' || notifyKind === 'weekly-pending') {
+      if (notifyKind === 'weekly-digest' || notifyKind === 'weekly-pending' || notifyKind === 'weekly-guardia-pvi-bootstrap') {
         if (!canRunTimedTasks || referenceDate.getDay() !== settings.schedule.weeklyRequestWeekday) {
           return { skipped: true, reason: 'not-weekly-day' }
         }
+
+        if (notifyKind === 'weekly-guardia-pvi-bootstrap') {
+          const seedResult = await seedNextWeekGuardiaPviConvocatorias(authUser, referenceDate)
+          const digestResult = await sendWeeklyResponseDigest(authUser, referenceDate, {
+            skipIfAlreadySent: !authUser,
+            convoTypeFilter,
+            weekScope: 'next-week',
+          })
+
+          return {
+            skipped: Boolean(seedResult?.skipped) && Boolean(digestResult?.skipped),
+            reason: seedResult?.reason || digestResult?.reason || null,
+            weekStart: seedResult?.weekStart || null,
+            weekEnd: seedResult?.weekEnd || null,
+            weekHadAlfa2: seedResult?.weekHadAlfa2 ?? null,
+            daysInCampaign: seedResult?.daysInCampaign ?? null,
+            createdGuardiaCount: seedResult?.createdGuardiaCount ?? 0,
+            createdPviCount: seedResult?.createdPviCount ?? 0,
+            createdConvocatoriasCount: seedResult?.createdConvocatoriasCount ?? 0,
+            targetedUsers: digestResult?.targetedUsers ?? null,
+            notificationCount: digestResult?.notification ? 1 : 0,
+          }
+        }
+
         return sendWeeklyResponseDigest(authUser, referenceDate, {
           skipIfAlreadySent: !authUser,
           convoTypeFilter,
@@ -1637,6 +2091,10 @@ async function runDailyNotificationAutomation(authUser, referenceDate = new Date
           convoTypeFilter,
           requiredSortida: true,
         })
+      }
+
+      if (notifyKind === 'campaign-d1-guardia-pvi') {
+        return applyCampaignD1GuardiaPviPlan(authUser, referenceDate)
       }
 
       if (notifyKind === 'sortida-cancelled') {
@@ -1778,7 +2236,7 @@ async function getAutomationRunById(authUser, runId) {
 
   const parsedRunId = Number.parseInt(String(runId), 10)
   if (!Number.isInteger(parsedRunId) || parsedRunId < 1) {
-    throw createNotificationsDtoError('El id de run no es valido.')
+    throw createNotificationsDtoError('El id de execution no es valido.')
   }
 
   const run = await database.notificationAutomationRun.findUnique({
@@ -1794,7 +2252,7 @@ async function getAutomationRunById(authUser, runId) {
   })
 
   if (!run) {
-    throw createNotificationsDtoError('No se ha encontrado la corrida solicitada.', 404)
+    throw createNotificationsDtoError('No se ha encontrado la execution solicitada.', 404)
   }
 
   return {
@@ -1861,7 +2319,7 @@ async function sendAutomationAlertPush({ alertType, message, runId, settings }) 
   }
 
   const titleMap = {
-    'missed-run': 'Correguda omesa del automatisme',
+    'missed-run': 'Execution omesa del automatisme',
     'task-failure': 'Error en tasca del automatisme',
   }
   const title = titleMap[alertType] || 'Alerta del automatisme'
@@ -1896,6 +2354,13 @@ async function detectAndRecordMissedRun(referenceDate = new Date()) {
   // Only check if we are past the expected run time by at least 30 minutes
   const gracePeriodMs = 30 * 60 * 1000
   if (now.getTime() < expectedRunTime.getTime() + gracePeriodMs) {
+    return null
+  }
+
+  // Avoid late-night false alerts: only detect a missed execution during
+  // a bounded window after the expected schedule time.
+  const detectionWindowMs = 2 * 60 * 60 * 1000
+  if (now.getTime() > expectedRunTime.getTime() + gracePeriodMs + detectionWindowMs) {
     return null
   }
 
@@ -1939,7 +2404,7 @@ async function detectAndRecordMissedRun(referenceDate = new Date()) {
       startedAt: expectedRunTime,
       finishedAt: now,
       durationMs: 0,
-      errorMessage: `Correguda omesa: l'automatisme no s'ha executat a les ${expectedTimeStr}.`,
+      errorMessage: `Execution omesa: l'automatisme no s'ha executat a les ${expectedTimeStr}.`,
       correlationId: generateCorrelationId('missed-run'),
     },
   })
@@ -1951,7 +2416,7 @@ async function detectAndRecordMissedRun(referenceDate = new Date()) {
     settings,
   })
 
-  console.log(`[notifications.service] Correguda omesa detectada a les ${expectedTimeStr}. Run id: ${missedRun.id}`)
+  console.log(`[notifications.service] Execution omesa detectada a les ${expectedTimeStr}. Execution id: ${missedRun.id}`)
   return missedRun
 }
 
@@ -1966,7 +2431,7 @@ async function runRetentionCleanup() {
   })
 
   if (result.count > 0) {
-    console.log(`[notifications.service] Limpieza de histórico: ${result.count} corridas eliminadas (>${retentionDays} dies).`)
+    console.log(`[notifications.service] Limpieza de histórico: ${result.count} executions eliminades (>${retentionDays} dies).`)
   }
 
   return result.count
@@ -1989,7 +2454,17 @@ async function runNotificationAutomationTask(authUser, taskKey, referenceDate = 
     actorUserId: authUser?.userId || null,
   })
 
-  const allowedKinds = ['pending-responses', 'sortida-status', 'weekly-digest', 'sortida-confirmed', 'sortida-cancelled', 'sortida-reten', 'weekly-pending']
+  const allowedKinds = [
+    'pending-responses',
+    'sortida-status',
+    'weekly-digest',
+    'sortida-confirmed',
+    'sortida-cancelled',
+    'sortida-reten',
+    'weekly-pending',
+    'campaign-d1-guardia-pvi',
+    'weekly-guardia-pvi-bootstrap',
+  ]
   const resolvedKind = allowedKinds.includes(notifyKind) ? notifyKind : null
 
   if (!resolvedKind) {
@@ -2041,6 +2516,31 @@ async function runNotificationAutomationTask(authUser, taskKey, referenceDate = 
       convoTypeFilter,
       weekScope: 'current-week',
     }),
+    'campaign-d1-guardia-pvi': () => applyCampaignD1GuardiaPviPlan(authUser, referenceDate, {
+      forceRefreshPlaAlfa: true,
+    }),
+    'weekly-guardia-pvi-bootstrap': async () => {
+      const seedResult = await seedNextWeekGuardiaPviConvocatorias(authUser, referenceDate)
+      const digestResult = await sendWeeklyResponseDigest(authUser, referenceDate, {
+        skipIfAlreadySent: false,
+        convoTypeFilter,
+        weekScope: 'next-week',
+      })
+
+      return {
+        skipped: Boolean(seedResult?.skipped) && Boolean(digestResult?.skipped),
+        reason: seedResult?.reason || digestResult?.reason || null,
+        weekStart: seedResult?.weekStart || null,
+        weekEnd: seedResult?.weekEnd || null,
+        weekHadAlfa2: seedResult?.weekHadAlfa2 ?? null,
+        daysInCampaign: seedResult?.daysInCampaign ?? null,
+        createdGuardiaCount: seedResult?.createdGuardiaCount ?? 0,
+        createdPviCount: seedResult?.createdPviCount ?? 0,
+        createdConvocatoriasCount: seedResult?.createdConvocatoriasCount ?? 0,
+        targetedUsers: digestResult?.targetedUsers ?? null,
+        notificationCount: digestResult?.notification ? 1 : 0,
+      }
+    },
   }
 
   const taskResult = await executeAutomationTask(run.id, normalizedTaskKey, handlerMap[resolvedKind])

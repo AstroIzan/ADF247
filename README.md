@@ -248,7 +248,7 @@ Endpoints disponibles:
 
 Persistencia de trazabilidad:
 
-- `NotificationAutomationRun` (corrida global)
+- `NotificationAutomationRun` (execution global)
 - `NotificationAutomationTaskRun` (detalle por tarea)
 
 Configuracion versionada (json):

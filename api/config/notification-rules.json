@@ -112,6 +112,23 @@
     },
     "tasks": [
       {
+        "taskKey": "campaign-d1-guardia-pvi",
+        "notifyKind": "campaign-d1-guardia-pvi",
+        "convoTypeFilter": [
+          "Guardia",
+          "PVI"
+        ],
+        "enabled": true,
+        "schedule": {
+          "kind": "daily"
+        },
+        "timeoutMs": 120000,
+        "retryPolicy": {
+          "maxRetries": 0
+        },
+        "dependsOn": []
+      },
+      {
         "taskKey": "sortida-d1-confirmed",
         "notifyKind": "sortida-confirmed",
         "convoTypeFilter": [],
@@ -155,7 +172,7 @@
       },
       {
         "taskKey": "weekly-request-guardia-pvi",
-        "notifyKind": "weekly-digest",
+        "notifyKind": "weekly-guardia-pvi-bootstrap",
         "convoTypeFilter": [
           "Guardia",
           "PVI"

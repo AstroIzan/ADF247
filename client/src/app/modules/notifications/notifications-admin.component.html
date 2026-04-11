@@ -493,7 +493,7 @@
                     (change)="requestAutoSave()"
                   />
                   <span class="toggle-indicator"></span>
-                  <span class="toggle-text">Alertar execucions omitides</span>
+                  <span class="toggle-text">Alertar executions omitides</span>
                 </label>
               </div>
 
@@ -581,7 +581,7 @@
                   }
 
                   <div class="task-card-meta">
-                    <span>Propera execució: {{ getTaskNextExecution(task) }}</span>
+                    <span>Propera execution: {{ getTaskNextExecution(task) }}</span>
                   </div>
                 </article>
               }
@@ -719,8 +719,8 @@
       @if (activeTab === 'automation' && isTabVisible('automation')) {
         <section class="card automation-card">
           <div class="card-header">
-            <h3>Històric de corrides</h3>
-            <button class="btn btn-secondary btn-sm" (click)="loadAutomationRuns()" [disabled]="automationLoading">
+            <h3>Històric d'executions</h3>
+            <button type="button" class="btn btn-secondary btn-sm" (click)="loadAutomationRuns()" [disabled]="automationLoading">
               {{ automationLoading ? 'Actualitzant...' : 'Actualitzar' }}
             </button>
           </div>
@@ -728,35 +728,72 @@
           <div class="automation-task-bar">
             @for (taskKey of orchestratorTaskKeys; track taskKey) {
               <button
-                class="btn btn-secondary btn-sm"
+                type="button"
+                class="btn btn-secondary btn-sm task-run-btn"
                 [disabled]="taskActionLoadingKey === taskKey"
                 (click)="runTaskManually(taskKey)">
-                {{ taskActionLoadingKey === taskKey ? 'Executant...' : 'Executar ' + taskKey }}
+                <span>{{ taskActionLoadingKey === taskKey ? 'Executant...' : 'Executar ' + taskKey }}</span>
+                @if (taskActionLoadingKey !== taskKey) {
+                  <span
+                    class="btn-inline-info"
+                    title="Info de la tasca"
+                    aria-label="Info de la tasca"
+                    (click)="$event.stopPropagation(); openTaskInfoModal(taskKey)">
+                    i
+                  </span>
+                }
               </button>
             }
           </div>
 
           @if (automationStats; as stats) {
             <div class="automation-stats-strip">
-              <span class="stat-item"><strong>{{ stats.total }}</strong> corrides</span>
-              <span class="stat-item stat-success"><strong>{{ stats.successes }}</strong> OK</span>
+              <div class="stat-card">
+                <strong>{{ stats.total }}</strong>
+                <small>Executions</small>
+              </div>
+              <div class="stat-card stat-success">
+                <strong>{{ stats.successes }}</strong>
+                <small>OK</small>
+              </div>
               @if (stats.partial > 0) {
-                <span class="stat-item stat-partial"><strong>{{ stats.partial }}</strong> parcial</span>
+                <div class="stat-card stat-partial">
+                  <strong>{{ stats.partial }}</strong>
+                  <small>Parcial</small>
+                </div>
               }
               @if (stats.failures > 0) {
-                <span class="stat-item stat-failed"><strong>{{ stats.failures }}</strong> error</span>
+                <div class="stat-card stat-failed">
+                  <strong>{{ stats.failures }}</strong>
+                  <small>Error</small>
+                </div>
               }
               @if (stats.missedCount > 0) {
-                <span class="stat-item stat-missed"><strong>{{ stats.missedCount }}</strong> omesa</span>
+                <div class="stat-card stat-missed">
+                  <strong>{{ stats.missedCount }}</strong>
+                  <small>Omesa</small>
+                </div>
               }
               @if (stats.successRate !== null) {
-                <span class="stat-item"><strong>{{ stats.successRate }}%</strong> èxit</span>
+                <div class="stat-card">
+                  <strong>{{ stats.successRate }}%</strong>
+                  <small>Èxit</small>
+                </div>
               }
               @if (stats.avgDurationMs !== null) {
-                <span class="stat-item"><strong>{{ getDurationLabel(stats.avgDurationMs) }}</strong> durada mitja</span>
+                <div class="stat-card">
+                  <strong>{{ getDurationLabel(stats.avgDurationMs) }}</strong>
+                  <small>Durada mitja</small>
+                </div>
               }
               @if (stats.lastRun) {
-                <span class="stat-item">Última: <strong>{{ stats.lastRun.startedAt | date:'dd/MM HH:mm' }}</strong> <span class="status-badge" [class]="'status-' + stats.lastRun.status">{{ stats.lastRun.status }}</span></span>
+                <div class="stat-card stat-last-run">
+                  <small>Última execution</small>
+                  <div class="stat-last-run-row">
+                    <strong>{{ stats.lastRun.startedAt | date:'dd/MM HH:mm' }}</strong>
+                    <span class="status-badge" [class]="'status-' + stats.lastRun.status">{{ stats.lastRun.status }}</span>
+                  </div>
+                </div>
               }
             </div>
           }
@@ -808,7 +845,7 @@
           @if (automationLoading) {
             <div class="loading">Carregant historial...</div>
           } @else if (filteredAutomationRuns.length === 0) {
-            <div class="empty-state">Sense corrides amb els filtres actuals.</div>
+            <div class="empty-state">Sense executions amb els filtres actuals.</div>
           } @else {
             <div class="automation-grid">
               <div class="automation-run-list">
@@ -821,7 +858,7 @@
                     <small>{{ run.startedAt | date:'dd/MM/yyyy HH:mm' }} · {{ getDurationLabel(run.durationMs) }}</small>
                     <small>Origen: {{ run.source }} · Actor: {{ getRunActorLabel(run) }}</small>
                     @if (run.correlationId) {
-                      <small>CorrId: {{ run.correlationId }}</small>
+                      <small>ExecutionId: {{ run.correlationId }}</small>
                     }
                   </button>
                 }
@@ -829,16 +866,16 @@
 
               <div class="automation-run-detail">
                 @if (!selectedAutomationRun) {
-                  <div class="empty-state">Selecciona una corrida per veure el detall.</div>
+                  <div class="empty-state">Selecciona una execution per veure el detall.</div>
                 } @else {
-                  <h4>Detall run #{{ selectedAutomationRun.id }}</h4>
+                  <h4>Detall execution #{{ selectedAutomationRun.id }}</h4>
                   <p>
                     <strong>Inici:</strong> {{ selectedAutomationRun.startedAt | date:'dd/MM/yyyy HH:mm' }}
                     · <strong>Fi:</strong> {{ selectedAutomationRun.finishedAt ? (selectedAutomationRun.finishedAt | date:'dd/MM/yyyy HH:mm') : '-' }}
                     · <strong>Duració:</strong> {{ getDurationLabel(selectedAutomationRun.durationMs) }}
                   </p>
                   @if (selectedAutomationRun.correlationId) {
-                    <p><strong>Correlation ID:</strong> {{ selectedAutomationRun.correlationId }}</p>
+                    <p><strong>ExecutionId:</strong> {{ selectedAutomationRun.correlationId }}</p>
                   }
                   @if (selectedAutomationRun.errorMessage) {
                     <p class="error">{{ selectedAutomationRun.errorMessage }}</p>
@@ -857,6 +894,27 @@
                             Destinataris: {{ task.details.targetedUsers ?? '-' }} ·
                             Notificacions: {{ task.details.notificationCount ?? '-' }}
                           </small>
+                          @if (task.details.createdConvocatoriasCount !== undefined || task.details.updatedSortidaCount !== undefined) {
+                            <small>
+                              Creats: {{ task.details.createdConvocatoriasCount ?? 0 }}
+                              (Guardia {{ task.details.createdGuardiaCount ?? 0 }}, PVI {{ task.details.createdPviCount ?? 0 }}) ·
+                              Sortida actualitzada: {{ task.details.updatedSortidaCount ?? 0 }}
+                            </small>
+                          }
+                          @if (task.details.maxTomorrowAlfaLevel !== undefined || task.details.decision) {
+                            <small>
+                              Alfa D+1: {{ task.details.maxTomorrowAlfaLevel ?? '-' }} ·
+                              Decisió: {{ task.details.decision || '-' }} ·
+                              Dia: {{ task.details.campaignDate || '-' }}
+                            </small>
+                          }
+                          @if (task.details.weekStart || task.details.weekEnd) {
+                            <small>
+                              Setmana: {{ task.details.weekStart || '-' }} → {{ task.details.weekEnd || '-' }} ·
+                              Dies campanya: {{ task.details.daysInCampaign ?? '-' }} ·
+                              Alfa2 setmana: {{ task.details.weekHadAlfa2 ? 'sí' : 'no' }}
+                            </small>
+                          }
                         }
                         @if (task.errorMessage) {
                           <small class="error">{{ task.errorMessage }}</small>
@@ -869,6 +927,24 @@
             </div>
           }
         </section>
+      }
+
+      @if (taskInfoModalTaskKey) {
+        <div class="task-info-modal-backdrop" (click)="closeTaskInfoModal()">
+          <div class="task-info-modal" (click)="$event.stopPropagation()">
+            <div class="task-info-modal-header">
+              <h4>{{ getTaskInternalInfo(taskInfoModalTaskKey).title }}</h4>
+              <button type="button" class="btn-icon-danger" (click)="closeTaskInfoModal()">✕</button>
+            </div>
+            <p class="task-info-modal-key"><strong>Tasca:</strong> {{ taskInfoModalTaskKey }}</p>
+            <p class="task-info-modal-key"><strong>Freqüència:</strong> {{ getTaskScheduleInfo(taskInfoModalTaskKey) }}</p>
+            <div class="task-info-modal-body">
+              @for (step of getTaskInternalInfo(taskInfoModalTaskKey).steps; track step; let idx = $index) {
+                <p><strong>{{ idx + 1 }}.</strong> {{ step }}</p>
+              }
+            </div>
+          </div>
+        </div>
       }
     </div>
   }

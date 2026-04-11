@@ -234,7 +234,16 @@ export interface UserHoursSummaryResponse {
 
 export interface NotificationAutomationTaskConfig {
   taskKey: string;
-  notifyKind: 'pending-responses' | 'sortida-status' | 'weekly-digest' | 'sortida-confirmed' | 'sortida-cancelled' | 'sortida-reten' | 'weekly-pending';
+  notifyKind:
+    | 'pending-responses'
+    | 'sortida-status'
+    | 'weekly-digest'
+    | 'sortida-confirmed'
+    | 'sortida-cancelled'
+    | 'sortida-reten'
+    | 'weekly-pending'
+    | 'campaign-d1-guardia-pvi'
+    | 'weekly-guardia-pvi-bootstrap';
   enabled: boolean;
   schedule: {
     kind: 'daily' | 'weekly' | 'manual';
@@ -273,6 +282,18 @@ export interface NotificationAutomationTaskRun {
     reason?: string | null;
     notificationCount?: number | null;
     targetedUsers?: number | null;
+    decision?: string | null;
+    campaignDate?: string | null;
+    maxTomorrowAlfaLevel?: number | null;
+    daysProcessed?: number | null;
+    daysInCampaign?: number | null;
+    weekStart?: string | null;
+    weekEnd?: string | null;
+    weekHadAlfa2?: boolean | null;
+    updatedSortidaCount?: number | null;
+    createdGuardiaCount?: number | null;
+    createdPviCount?: number | null;
+    createdConvocatoriasCount?: number | null;
   } | null;
 }
 

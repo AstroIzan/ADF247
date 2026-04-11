@@ -26,7 +26,7 @@ describe('NotificationsAdminComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('calcula automationStats incluyendo corridas omitidas', () => {
+  it('calcula automationStats incluyendo executions omitides', () => {
     component.automationRuns = [
       {
         id: 1,

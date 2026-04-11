@@ -82,10 +82,11 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
       alertOnTaskFailure: true,
     },
     tasks: [
+      { taskKey: 'campaign-d1-guardia-pvi', notifyKind: 'campaign-d1-guardia-pvi', convoTypeFilter: ['Guardia', 'PVI'], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
-      { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', convoTypeFilter: ['Guardia', 'PVI'], enabled: true, schedule: { kind: 'weekly' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+      { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-guardia-pvi-bootstrap', convoTypeFilter: ['Guardia', 'PVI'], enabled: true, schedule: { kind: 'weekly' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
     ],
   },
 }
@@ -234,7 +235,17 @@ function normalizeAutomationTask(task, fallbackTask) {
   const source = task && typeof task === 'object' ? task : {}
   const fallback = fallbackTask && typeof fallbackTask === 'object' ? fallbackTask : {}
 
-  const allowedKinds = ['pending-responses', 'sortida-status', 'weekly-digest', 'sortida-confirmed', 'sortida-cancelled', 'sortida-reten', 'weekly-pending']
+  const allowedKinds = [
+    'pending-responses',
+    'sortida-status',
+    'weekly-digest',
+    'sortida-confirmed',
+    'sortida-cancelled',
+    'sortida-reten',
+    'weekly-pending',
+    'campaign-d1-guardia-pvi',
+    'weekly-guardia-pvi-bootstrap',
+  ]
   const rawKind = source.notifyKind || fallback.notifyKind || source.taskKey || fallback.taskKey || ''
   const notifyKind = allowedKinds.includes(rawKind) ? rawKind : 'pending-responses'
 

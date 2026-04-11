@@ -50,7 +50,7 @@ function scheduleNextRun() {
     try {
       // Check for potential missed runs before executing (edge case: server was briefly down)
       await detectAndRecordMissedRun(new Date()).catch((err) => {
-        console.error('[convos.scheduler] Error al detectar correguda omesa:', err)
+        console.error('[convos.scheduler] Error al detectar execution omesa:', err)
       })
       const summary = await runDailyNotificationAutomation(null, new Date())
       console.log('[convos.scheduler] Automatizacion diaria completada.', summary)
@@ -71,10 +71,9 @@ async function startConvoScheduler() {
     await ensureConfiguredConvoTypes()
     // Detect missed runs before attempting the initial run
     await detectAndRecordMissedRun(new Date()).catch((err) => {
-      console.error('[convos.scheduler] Error al detectar correguda omesa en inicio:', err)
+      console.error('[convos.scheduler] Error al detectar execution omesa en inicio:', err)
     })
-    await runDailyNotificationAutomation(null, new Date())
-    console.log('[convos.scheduler] Estado inicial de automatizacion sincronizado.')
+    console.log('[convos.scheduler] Scheduler inicializado. Esperando siguiente franja programada.')
   } catch (error) {
     console.error('[convos.scheduler] Error en sincronizacion inicial de automatizacion:', error)
   }

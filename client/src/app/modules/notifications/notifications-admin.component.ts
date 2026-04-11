@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, inject, NgZone, OnInit, OnDestroy, DestroyRef } from '@angular/core';
+import { Component, Input, Output, EventEmitter, inject, NgZone, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -18,7 +18,16 @@ import { DateFormatService } from '../../services/date-format.service';
 
 type TaskFormItem = {
   taskKey: string;
-  notifyKind: 'pending-responses' | 'sortida-status' | 'weekly-digest' | 'sortida-confirmed' | 'sortida-cancelled' | 'sortida-reten' | 'weekly-pending';
+  notifyKind:
+    | 'pending-responses'
+    | 'sortida-status'
+    | 'weekly-digest'
+    | 'sortida-confirmed'
+    | 'sortida-cancelled'
+    | 'sortida-reten'
+    | 'weekly-pending'
+    | 'campaign-d1-guardia-pvi'
+    | 'weekly-guardia-pvi-bootstrap';
   enabled: boolean;
   scheduleKind: 'daily' | 'weekly' | 'manual';
   convoTypeFilter: string[];
@@ -76,6 +85,7 @@ type NotificationSettingsForm = {
 export class NotificationsAdminComponent {
   readonly pageSizeOptions = [10, 25, 50];
   private dateFormatService = inject(DateFormatService);
+  private cdr = inject(ChangeDetectorRef);
   private _config: NotificationSettings | null = null;
 
   @Input()
@@ -149,6 +159,7 @@ export class NotificationsAdminComponent {
   automationTaskFilter = 'all';
   automationDateFrom = '';
   automationDateTo = '';
+  taskInfoModalTaskKey: string | null = null;
   hoursSummaryRows: UserHoursSummaryRow[] = [];
   hoursSummaryLoading = false;
   hoursSummaryError = '';
@@ -166,6 +177,7 @@ export class NotificationsAdminComponent {
   form: NotificationSettingsForm = this.createEmptyForm();
 
   readonly notifyKindOptions: { value: TaskFormItem['notifyKind']; label: string }[] = [
+    { value: 'campaign-d1-guardia-pvi', label: 'Planificació campanya D+1 (Guardia/PVI)' },
     { value: 'pending-responses', label: 'Recordatori disponibilitat' },
     { value: 'sortida-confirmed', label: 'Sortida confirmada (D+1)' },
     { value: 'sortida-cancelled', label: 'Convocatòria cancel·lada (D+1)' },
@@ -173,6 +185,7 @@ export class NotificationsAdminComponent {
     { value: 'sortida-status', label: 'Sortida genèrica' },
     { value: 'weekly-pending', label: 'Resum setmanal pendents' },
     { value: 'weekly-digest', label: 'Digest setmanal' },
+    { value: 'weekly-guardia-pvi-bootstrap', label: 'Creació setmanal Guardia/PVI + sol·licitud' },
   ];
 
   get orchestratorTaskKeys(): string[] {
@@ -191,8 +204,13 @@ export class NotificationsAdminComponent {
 
   private autoSave$ = new Subject<void>();
   private destroy$ = new Subject<void>();
+  private automationPollTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly automationPollIntervalMs = 4000;
 
-  constructor(private dataService: DataService) {
+  constructor(
+    private dataService: DataService,
+    private ngZone: NgZone,
+  ) {
     this.autoSave$
       .pipe(
         debounceTime(1500),
@@ -204,8 +222,15 @@ export class NotificationsAdminComponent {
   }
 
   ngOnDestroy() {
+    this.clearAutomationRunsRefresh();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngOnInit() {
+    if (this.activeTab === 'automation') {
+      this.loadAutomationRuns();
+    }
   }
 
   requestAutoSave() {
@@ -248,8 +273,10 @@ export class NotificationsAdminComponent {
 
     this.activeTab = tab;
 
-    if (tab === 'automation' && this.automationRuns.length === 0) {
+    if (tab === 'automation') {
       this.loadAutomationRuns();
+    } else {
+      this.clearAutomationRunsRefresh();
     }
 
     if (tab === 'config' && this.hoursSummaryRows.length === 0) {
@@ -451,6 +478,7 @@ export class NotificationsAdminComponent {
 
   getTaskDescription(task: TaskFormItem): string {
     const map: Record<string, string> = {
+      'campaign-d1-guardia-pvi': 'Revisa Pla Alfa D+1, crea guardies/PVI si cal i marca se surt/no se surt segons la programació de la tasca.',
       'pending-responses': 'Recorda als usuaris que tenen convocatòries pendents de resposta.',
       'sortida-status': 'Informa si se surt o no a les convocatòries de l\'endemà.',
       'sortida-confirmed': 'Envia notificació de sortida confirmada per D+1 als que han respost que sí.',
@@ -458,8 +486,104 @@ export class NotificationsAdminComponent {
       'sortida-reten': 'Envia notificació de Retén per D+1 en Guardia/PVI amb sortida = false.',
       'weekly-pending': 'Cada dilluns envia el resum de pendents de disponibilitat de la setmana en curs.',
       'weekly-digest': 'Envia un resum setmanal per a convocatòries de tipus setmanal.',
+      'weekly-guardia-pvi-bootstrap': 'Cada divendres a les 08:00 crea Guardia/PVI de la setmana següent i envia la sol·licitud de disponibilitat.',
     };
     return map[task.notifyKind] || '';
+  }
+
+  openTaskInfoModal(taskKey: string) {
+    this.taskInfoModalTaskKey = taskKey;
+  }
+
+  closeTaskInfoModal() {
+    this.taskInfoModalTaskKey = null;
+  }
+
+  getTaskInternalInfo(taskKey: string) {
+    const notifyKind = this.resolveTaskNotifyKind(taskKey);
+    const infoByKind: Record<string, { title: string; steps: string[] }> = {
+      'campaign-d1-guardia-pvi': {
+        title: 'Planificació D+1 de campanya',
+        steps: [
+          'Llegeix el nivell màxim Pla Alfa de D+1 per municipis seleccionats.',
+          'Si D+1 està fora de campanya, no aplica canvis.',
+          'Amb Alfa <= 1: marca sortida = false a Guardia/PVI de D+1.',
+          'Amb Alfa >= 2: crea Guardia 12-16 i 16-20 si falten.',
+          'Amb Alfa >= 2: crea PVI 10-14 si falta.',
+          'Amb Alfa >= 2: marca sortida = true a totes les Guardia/PVI de D+1.',
+          'Registra resum d\'execution a l\'execution del orquestrador.',
+        ],
+      },
+      'weekly-guardia-pvi-bootstrap': {
+        title: 'Bootstrap setmanal Guardia/PVI',
+        steps: [
+          'Executa segons la freqüència setmanal configurada.',
+          'Calcula la setmana següent i filtra dies dins campanya.',
+          'Crea Guardia 12-16 i 16-20 per cada dia si no existeixen.',
+          'Si aquesta setmana hi ha hagut Alfa >= 2, crea també PVI 12-14 per cada dia.',
+          'Llança el digest setmanal perquè es respongui disponibilitat.',
+          'Registra resum d\'execution a l\'execution del orquestrador.',
+        ],
+      },
+      'sortida-confirmed': {
+        title: 'Notificació sortida confirmada',
+        steps: ['Filtra convocatòries D+1 amb sortida = true.', 'Envia notificació a usuaris amb resposta positiva.'],
+      },
+      'sortida-cancelled': {
+        title: 'Notificació convocatòria cancel·lada',
+        steps: ['Filtra convocatòries D+1 no Guardia/PVI amb sortida = false.', 'Envia notificació d\'anul·lació.'],
+      },
+      'sortida-reten': {
+        title: 'Notificació Retén',
+        steps: ['Filtra convocatòries D+1 de Guardia/PVI amb sortida = false.', 'Envia notificació de retén.'],
+      },
+      'pending-responses': {
+        title: 'Recordatori de respostes pendents',
+        steps: ['Calcula pendents segons finestra configurada.', 'Agrupa per nombre de pendents i envia recordatoris.'],
+      },
+      'weekly-digest': {
+        title: 'Digest setmanal',
+        steps: ['Filtra convocatòries setmanals de la setmana objectiu.', 'Envia resum a usuaris amb pendents.'],
+      },
+      'weekly-pending': {
+        title: 'Resum setmanal de pendents',
+        steps: ['Analitza la setmana actual.', 'Envia resum de pendents setmanals.'],
+      },
+      'sortida-status': {
+        title: 'Sortida genèrica',
+        steps: ['Executa la lògica de notificació de sortida per D+1 segons configuració.'],
+      },
+    };
+
+    return infoByKind[notifyKind] || {
+      title: taskKey,
+      steps: ['Tasca personalitzada. Revisa notifyKind, filtre i freqüència configurats.'],
+    };
+  }
+
+  private resolveTaskNotifyKind(taskKey: string): TaskFormItem['notifyKind'] | string {
+    const task = (this.form.tasks || []).find((item) => item.taskKey === taskKey);
+    return task?.notifyKind || 'pending-responses';
+  }
+
+  getTaskScheduleInfo(taskKey: string): string {
+    const task = (this.form.tasks || []).find((item) => item.taskKey === taskKey);
+    if (!task) {
+      return 'Freqüència no disponible';
+    }
+
+    const pad = (n: number) => String(Number(n) || 0).padStart(2, '0');
+
+    if (task.scheduleKind === 'daily') {
+      return `Diària a les ${pad(this.form.dailyRunHour)}:${pad(this.form.dailyRunMinute)}`;
+    }
+
+    if (task.scheduleKind === 'weekly') {
+      const weekday = this.weekdayOptions.find((day) => day.value === this.form.weeklyRequestWeekday)?.label || 'dia configurat';
+      return `Setmanal (${weekday}) a les ${pad(this.form.weeklyRequestHour)}:${pad(this.form.weeklyRequestMinute)}`;
+    }
+
+    return 'Manual (només quan es prem Executar)';
   }
 
   isTaskExpanded(taskKey: string): boolean {
@@ -506,23 +630,42 @@ export class NotificationsAdminComponent {
   }
 
   loadAutomationRuns() {
+    if (this.automationLoading) {
+      return;
+    }
+
     this.automationLoading = true;
     this.automationError = '';
+    this.triggerViewUpdate();
 
     this.dataService.getNotificationAutomationRuns(100).subscribe({
       next: (runs) => {
-        this.automationRuns = runs;
-        this.automationLoading = false;
+        this.ngZone.run(() => {
+          this.automationRuns = runs;
+          this.automationLoading = false;
 
-        if (this.selectedAutomationRun) {
-          const refreshSelected = runs.find((item) => item.id === this.selectedAutomationRun?.id);
-          this.selectedAutomationRun = refreshSelected || null;
-        }
+          if (this.selectedAutomationRun) {
+            const refreshSelected = runs.find((item) => item.id === this.selectedAutomationRun?.id);
+            this.selectedAutomationRun = refreshSelected || null;
+          }
+
+          if (!this.selectedAutomationRun && runs.length > 0) {
+            this.selectAutomationRun(runs[0]);
+          }
+
+          this.syncAutomationPolling(runs);
+          this.triggerViewUpdate();
+        });
       },
       error: (err) => {
-        this.automationRuns = [];
-        this.automationLoading = false;
-        this.automationError = err.message || 'No s\'ha pogut carregar l\'historial de corrides.';
+        this.ngZone.run(() => {
+          this.automationRuns = [];
+          this.selectedAutomationRun = null;
+          this.automationLoading = false;
+          this.automationError = err.message || 'No s\'ha pogut carregar l\'historial d\'executions.';
+          this.clearAutomationRunsRefresh();
+          this.triggerViewUpdate();
+        });
       },
     });
   }
@@ -533,10 +676,16 @@ export class NotificationsAdminComponent {
 
     this.dataService.getNotificationAutomationRunById(run.id).subscribe({
       next: (detail) => {
-        this.selectedAutomationRun = detail;
+        this.ngZone.run(() => {
+          this.selectedAutomationRun = detail;
+          this.triggerViewUpdate();
+        });
       },
       error: (err) => {
-        this.automationError = err.message || 'No s\'ha pogut carregar el detall de la corrida.';
+        this.ngZone.run(() => {
+          this.automationError = err.message || 'No s\'ha pogut carregar el detall de l\'execution.';
+          this.triggerViewUpdate();
+        });
       },
     });
   }
@@ -551,12 +700,41 @@ export class NotificationsAdminComponent {
         this.taskActionLoadingKey = '';
         this.actionMessage = `Tasca ${result.taskKey} executada (${result.status}).`;
         this.loadAutomationRuns();
+        this.triggerViewUpdate();
       },
       error: (err) => {
         this.taskActionLoadingKey = '';
         this.saveError = err.message || 'No s\'ha pogut executar la tasca.';
+        this.triggerViewUpdate();
       },
     });
+  }
+
+  private syncAutomationPolling(runs: NotificationAutomationRun[]) {
+    const hasRunning = (runs || []).some((run) => run.status === 'running');
+
+    if (!hasRunning || this.activeTab !== 'automation') {
+      this.clearAutomationRunsRefresh();
+      return;
+    }
+
+    this.clearAutomationRunsRefresh();
+    this.automationPollTimer = setTimeout(() => {
+      this.loadAutomationRuns();
+    }, this.automationPollIntervalMs);
+  }
+
+  private clearAutomationRunsRefresh() {
+    if (!this.automationPollTimer) {
+      return;
+    }
+
+    clearTimeout(this.automationPollTimer);
+    this.automationPollTimer = null;
+  }
+
+  private triggerViewUpdate() {
+    this.cdr.detectChanges();
   }
 
   getTaskConfig(taskKey: string): NotificationAutomationTaskConfig | null {
@@ -743,10 +921,11 @@ export class NotificationsAdminComponent {
       automationAlertOnMissedRun: true,
       automationAlertOnTaskFailure: true,
       tasks: [
+        { taskKey: 'campaign-d1-guardia-pvi', notifyKind: 'campaign-d1-guardia-pvi', enabled: true, scheduleKind: 'daily', convoTypeFilter: ['Guardia', 'PVI'] },
         { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', enabled: true, scheduleKind: 'daily', convoTypeFilter: [] },
         { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', enabled: true, scheduleKind: 'daily', convoTypeFilter: [] },
         { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', enabled: true, scheduleKind: 'daily', convoTypeFilter: [] },
-        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', enabled: true, scheduleKind: 'weekly', convoTypeFilter: ['Guardia', 'PVI'] },
+        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-guardia-pvi-bootstrap', enabled: true, scheduleKind: 'weekly', convoTypeFilter: ['Guardia', 'PVI'] },
       ],
     };
   }
@@ -782,10 +961,11 @@ export class NotificationsAdminComponent {
     const automationTasks = (config.automation?.tasks && config.automation.tasks.length > 0)
       ? config.automation.tasks
       : [
+        { taskKey: 'campaign-d1-guardia-pvi', notifyKind: 'campaign-d1-guardia-pvi', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: ['Guardia', 'PVI'], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
         { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
         { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
         { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
-        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', enabled: true, schedule: { kind: 'weekly' }, convoTypeFilter: ['Guardia', 'PVI'], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-guardia-pvi-bootstrap', enabled: true, schedule: { kind: 'weekly' }, convoTypeFilter: ['Guardia', 'PVI'], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       ];
 
     return {
