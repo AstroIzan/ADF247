@@ -10,11 +10,11 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
     weeklyRequestWeekday: 5,
   },
   typeGroups: {
-    weeklyTypeNames: ['Guardia', 'Guardia PVI', 'Semanal'],
+    weeklyTypeNames: ['Guardia', 'PVI', 'Semanal'],
     sortidaTypeNames: [],
     availabilityManagerNCarnets: [],
     guardiaSourceTypeName: 'Guardia',
-    guardiaPviTypeName: 'Guardia PVI',
+    guardiaPviTypeName: 'PVI',
   },
   responseRequest: {
     sendOnCreationForNonWeekly: true,
@@ -85,7 +85,7 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
       { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
-      { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', convoTypeFilter: ['Guardia', 'Guardia PVI'], enabled: true, schedule: { kind: 'weekly' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+      { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', convoTypeFilter: ['Guardia', 'PVI'], enabled: true, schedule: { kind: 'weekly' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
     ],
   },
 }
@@ -126,6 +126,44 @@ function normalizeStringList(value, fallback) {
     .filter(Boolean)
 
   return normalized.length > 0 ? normalized : fallback
+}
+
+function canonicalizePviTypeName(value) {
+  const normalized = String(value || '').trim()
+  if (!normalized) {
+    return normalized
+  }
+
+  if (normalized.toLowerCase() === 'guardia pvi') {
+    return 'PVI'
+  }
+
+  if (normalized.toLowerCase() === 'pvi') {
+    return 'PVI'
+  }
+
+  return normalized
+}
+
+function canonicalizePviTypeNames(list = []) {
+  const canonicalized = Array.isArray(list)
+    ? list.map((entry) => canonicalizePviTypeName(entry)).filter(Boolean)
+    : []
+
+  const deduped = []
+  const seen = new Set()
+
+  for (const item of canonicalized) {
+    const key = item.toLowerCase()
+    if (seen.has(key)) {
+      continue
+    }
+
+    seen.add(key)
+    deduped.push(item)
+  }
+
+  return deduped
 }
 
 function normalizeVehicleCatalog(value, fallback = []) {
@@ -204,10 +242,12 @@ function normalizeAutomationTask(task, fallbackTask) {
     ? (source.convoTypeFilter.map((v) => (typeof v === 'string' ? v.trim() : '')).filter(Boolean))
     : (Array.isArray(fallback.convoTypeFilter) ? fallback.convoTypeFilter : [])
 
+  const canonicalConvoTypeFilter = canonicalizePviTypeNames(convoTypeFilter)
+
   return {
     taskKey: normalizeText(source.taskKey, fallback.taskKey || ''),
     notifyKind,
-    convoTypeFilter,
+    convoTypeFilter: canonicalConvoTypeFilter,
     enabled: normalizeBoolean(source.enabled, fallback.enabled ?? true),
     schedule: {
       kind: ['daily', 'weekly', 'manual'].includes(source.schedule?.kind)
@@ -239,15 +279,19 @@ function normalizeNotificationSettings(input = {}) {
       weeklyRequestWeekday,
     },
     typeGroups: {
-      weeklyTypeNames: normalizeStringList(input.typeGroups?.weeklyTypeNames, defaults.typeGroups.weeklyTypeNames),
+      weeklyTypeNames: canonicalizePviTypeNames(
+        normalizeStringList(input.typeGroups?.weeklyTypeNames, defaults.typeGroups.weeklyTypeNames)
+      ),
       sortidaTypeNames: Array.isArray(input.typeGroups?.sortidaTypeNames)
-        ? normalizeStringList(input.typeGroups?.sortidaTypeNames, [])
+        ? canonicalizePviTypeNames(normalizeStringList(input.typeGroups?.sortidaTypeNames, []))
         : defaults.typeGroups.sortidaTypeNames,
       availabilityManagerNCarnets: Array.isArray(input.typeGroups?.availabilityManagerNCarnets)
         ? normalizeStringList(input.typeGroups?.availabilityManagerNCarnets, [])
         : defaults.typeGroups.availabilityManagerNCarnets,
       guardiaSourceTypeName: normalizeText(input.typeGroups?.guardiaSourceTypeName, defaults.typeGroups.guardiaSourceTypeName),
-      guardiaPviTypeName: normalizeText(input.typeGroups?.guardiaPviTypeName, defaults.typeGroups.guardiaPviTypeName),
+      guardiaPviTypeName: canonicalizePviTypeName(
+        normalizeText(input.typeGroups?.guardiaPviTypeName, defaults.typeGroups.guardiaPviTypeName)
+      ),
     },
     responseRequest: {
       sendOnCreationForNonWeekly: normalizeBoolean(

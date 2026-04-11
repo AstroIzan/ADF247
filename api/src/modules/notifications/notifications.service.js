@@ -309,7 +309,7 @@ function buildSortidaStatusManualMessage(convocatoria, settings, referenceDate =
   const typeName = String(convocatoria?.convoType?.name || '').trim().toLowerCase()
   const isIncendiType = typeName === 'incendi'
   const guardiaSource = String(settings?.typeGroups?.guardiaSourceTypeName || 'guardia').trim().toLowerCase()
-  const guardiaPvi = String(settings?.typeGroups?.guardiaPviTypeName || 'guardia pvi').trim().toLowerCase()
+  const guardiaPvi = String(settings?.typeGroups?.guardiaPviTypeName || 'pvi').trim().toLowerCase()
   const isGuardiaType = typeName === guardiaSource || typeName === guardiaPvi
 
   if (convocatoria?.sortida) {
@@ -479,6 +479,7 @@ function shouldMarkSortida(convoType, positiveResponses) {
 }
 
 async function ensureConfiguredConvoTypes() {
+  const legacyGuardiaPviName = 'Guardia PVI'
   const settings = readNotificationSettings()
   const sourceName = settings.typeGroups.guardiaSourceTypeName
   const targetName = settings.typeGroups.guardiaPviTypeName
@@ -491,9 +492,31 @@ async function ensureConfiguredConvoTypes() {
     return null
   }
 
-  const existing = await database.convoType.findFirst({
+  let existing = await database.convoType.findFirst({
     where: { name: targetName },
   })
+
+  const hasLegacyAlias = legacyGuardiaPviName.toLowerCase() !== String(targetName).trim().toLowerCase()
+  const legacyType = hasLegacyAlias
+    ? await database.convoType.findFirst({ where: { name: legacyGuardiaPviName } })
+    : null
+
+  if (legacyType && !existing) {
+    existing = await database.convoType.update({
+      where: { id: legacyType.id },
+      data: { name: targetName },
+    })
+  } else if (legacyType && existing && legacyType.id !== existing.id) {
+    await database.$transaction([
+      database.convocatoria.updateMany({
+        where: { convoTypeId: legacyType.id },
+        data: { convoTypeId: existing.id },
+      }),
+      database.convoType.delete({
+        where: { id: legacyType.id },
+      }),
+    ])
+  }
 
   if (!existing) {
     return database.convoType.create({

@@ -454,8 +454,8 @@ export class NotificationsAdminComponent {
       'pending-responses': 'Recorda als usuaris que tenen convocatòries pendents de resposta.',
       'sortida-status': 'Informa si se surt o no a les convocatòries de l\'endemà.',
       'sortida-confirmed': 'Envia notificació de sortida confirmada per D+1 als que han respost que sí.',
-      'sortida-cancelled': 'Envia notificació de convocatòria cancel·lada per D+1 (excepte Guardia/Guardia PVI).',
-      'sortida-reten': 'Envia notificació de Retén per D+1 en Guardia/Guardia PVI amb sortida = false.',
+      'sortida-cancelled': 'Envia notificació de convocatòria cancel·lada per D+1 (excepte Guardia/PVI).',
+      'sortida-reten': 'Envia notificació de Retén per D+1 en Guardia/PVI amb sortida = false.',
       'weekly-pending': 'Cada dilluns envia el resum de pendents de disponibilitat de la setmana en curs.',
       'weekly-digest': 'Envia un resum setmanal per a convocatòries de tipus setmanal.',
     };
@@ -711,7 +711,7 @@ export class NotificationsAdminComponent {
       weeklyRequestWeekday: 5,
       weeklyRequestHour: 19,
       weeklyRequestMinute: 0,
-      weeklyTypeNames: ['Guardia', 'Guardia PVI', 'Semanal'],
+      weeklyTypeNames: ['Guardia', 'PVI', 'Semanal'],
       availabilityManagerNCarnets: [],
       pendingLeadDays: 0,
       pendingLeadHours: 24,
@@ -746,7 +746,7 @@ export class NotificationsAdminComponent {
         { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', enabled: true, scheduleKind: 'daily', convoTypeFilter: [] },
         { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', enabled: true, scheduleKind: 'daily', convoTypeFilter: [] },
         { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', enabled: true, scheduleKind: 'daily', convoTypeFilter: [] },
-        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', enabled: true, scheduleKind: 'weekly', convoTypeFilter: ['Guardia', 'Guardia PVI'] },
+        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', enabled: true, scheduleKind: 'weekly', convoTypeFilter: ['Guardia', 'PVI'] },
       ],
     };
   }
@@ -785,7 +785,7 @@ export class NotificationsAdminComponent {
         { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
         { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
         { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
-        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', enabled: true, schedule: { kind: 'weekly' }, convoTypeFilter: ['Guardia', 'Guardia PVI'], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+        { taskKey: 'weekly-request-guardia-pvi', notifyKind: 'weekly-digest', enabled: true, schedule: { kind: 'weekly' }, convoTypeFilter: ['Guardia', 'PVI'], timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       ];
 
     return {
@@ -844,7 +844,7 @@ export class NotificationsAdminComponent {
 
   private buildPayload(): NotificationSettings {
     const guardiaSourceTypeName = this.config?.typeGroups.guardiaSourceTypeName || 'Guardia';
-    const guardiaPviTypeName = this.config?.typeGroups.guardiaPviTypeName || 'Guardia PVI';
+    const guardiaPviTypeName = this.config?.typeGroups.guardiaPviTypeName || 'PVI';
     const sendOnCreationForNonWeekly = this.config?.responseRequest.sendOnCreationForNonWeekly ?? true;
 
     const adminCarnets = new Set(this.getAdminUsers().map((user) => user.nCarnet));

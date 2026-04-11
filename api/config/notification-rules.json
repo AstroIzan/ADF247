@@ -7,9 +7,8 @@
   "typeGroups": {
     "weeklyTypeNames": [
       "Guardia",
-      "Guardia PVI",
-      "Semanal",
-      "PVI"
+      "PVI",
+      "Semanal"
     ],
     "sortidaTypeNames": [],
     "availabilityManagerNCarnets": [
@@ -17,7 +16,7 @@
       "247/GI/239"
     ],
     "guardiaSourceTypeName": "Guardia",
-    "guardiaPviTypeName": "Guardia PVI"
+    "guardiaPviTypeName": "PVI"
   },
   "responseRequest": {
     "sendOnCreationForNonWeekly": true,
@@ -159,7 +158,7 @@
         "notifyKind": "weekly-digest",
         "convoTypeFilter": [
           "Guardia",
-          "Guardia PVI"
+          "PVI"
         ],
         "enabled": true,
         "schedule": {
