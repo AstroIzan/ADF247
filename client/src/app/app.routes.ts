@@ -8,6 +8,7 @@ import { PlaAlfaComponent } from './pages/pla-alfa/pla-alfa.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { developerGuard } from './guards/developer.guard';
+import { desktopOnlyGuard } from './guards/desktop-only.guard';
 
 export const routes: Routes = [
   {
@@ -37,7 +38,7 @@ export const routes: Routes = [
   {
     path: 'logs',
     component: LogsComponent,
-    canActivate: [authGuard, developerGuard]
+    canActivate: [authGuard, desktopOnlyGuard, developerGuard]
   },
   {
     path: 'pla-alfa',
