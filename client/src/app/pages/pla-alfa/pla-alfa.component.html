@@ -102,10 +102,10 @@
                   @for (item of plaAlfaStatus(); track item.municipality) {
                     @let todayWeather = formatPlaAlfaWeatherSummary(item.todayForecast);
                     @let tomorrowWeather = formatPlaAlfaWeatherSummary(item.tomorrowForecast);
-                    <tr>
-                      <td>{{ item.municipality }}</td>
-                      <td>{{ item.comarca || '-' }}</td>
-                      <td>
+                    <tr class="pla-alfa-row">
+                      <td class="pla-col-municipality" data-label="Municipi">{{ item.municipality }}</td>
+                      <td class="pla-col-comarca" data-label="Comarca">{{ item.comarca || '-' }}</td>
+                      <td class="pla-col-day" data-label="Avui">
                         <div class="pla-alfa-day-cell">
                         @if (item.foundToday) {
                           <span class="pla-alfa-level" [class]="'pla-alfa-level ' + getPlaAlfaLevelClass(item.todayLevel)">
@@ -146,7 +146,7 @@
                         }
                         </div>
                       </td>
-                      <td>
+                      <td class="pla-col-day" data-label="Demà">
                         <div class="pla-alfa-day-cell">
                         @if (item.foundTomorrow) {
                           <span class="pla-alfa-level" [class]="'pla-alfa-level ' + getPlaAlfaLevelClass(item.tomorrowLevel)">

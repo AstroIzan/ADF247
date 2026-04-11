@@ -354,6 +354,77 @@
   .pla-alfa-layout {
     grid-template-columns: 1fr;
   }
+
+  .pla-alfa-selector-panel,
+  .pla-alfa-table-panel {
+    padding: 10px;
+  }
+
+  .pla-alfa-table th,
+  .pla-alfa-table td {
+    padding: 8px;
+  }
+
+  .pla-alfa-weather-block {
+    padding: 7px;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 768px) {
+  .pla-alfa-page {
+    padding: 10px 12px 16px;
+  }
+
+  .pla-alfa-layout {
+    gap: 10px;
+  }
+
+  .pla-alfa-selector-panel,
+  .pla-alfa-table-panel {
+    padding: 10px;
+  }
+
+  .pla-alfa-filter-row {
+    grid-template-columns: minmax(0, 1fr) minmax(180px, 220px);
+    align-items: start;
+  }
+
+  .pla-alfa-bulk-actions {
+    grid-column: 1 / -1;
+  }
+
+  .pla-alfa-table {
+    font-size: 12px;
+  }
+
+  .pla-alfa-table th,
+  .pla-alfa-table td {
+    padding: 7px;
+  }
+
+  .pla-alfa-level {
+    min-width: 72px;
+    font-size: 12px;
+  }
+
+  .pla-alfa-weather-block {
+    padding: 6px;
+    gap: 5px;
+    font-size: 11px;
+  }
+
+  .weather-item {
+    gap: 5px;
+  }
+
+  .weather-item > strong {
+    font-size: 10px;
+  }
+
+  .wind-direction-name-badge {
+    font-size: 10px;
+    padding: 2px 6px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -367,6 +438,130 @@
 
   .pla-alfa-header p {
     font-size: 12px;
+  }
+
+  .pla-alfa-filter-row {
+    gap: 6px;
+  }
+
+  .pla-alfa-bulk-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pla-alfa-selected-count {
+    width: 100%;
+    text-align: left;
+  }
+
+  .pla-alfa-table-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .pla-alfa-table-wrapper {
+    border: 0;
+    overflow: visible;
+    background: transparent;
+  }
+
+  .pla-alfa-table {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .pla-alfa-table thead {
+    display: none;
+  }
+
+  .pla-alfa-table tbody {
+    display: grid;
+    gap: 10px;
+  }
+
+  .pla-alfa-table .pla-alfa-row {
+    display: block;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .pla-alfa-table td {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    align-items: start;
+    gap: 8px;
+    border-bottom: 1px solid #f0f0f0;
+    text-align: left;
+    word-break: break-word;
+  }
+
+  .pla-alfa-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .pla-alfa-table td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 800;
+    color: #575757;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding-top: 2px;
+  }
+
+  .pla-col-municipality,
+  .pla-col-comarca {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pla-col-day .pla-alfa-level,
+  .pla-col-day .pla-alfa-level-missing {
+    justify-self: stretch;
+  }
+
+  .pla-col-day .pla-alfa-level {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .pla-alfa-table td.pla-col-day {
+    grid-template-columns: min-content minmax(0, 1fr);
+    align-items: stretch;
+    gap: 6px;
+  }
+
+  .pla-alfa-table td.pla-col-day::before {
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    letter-spacing: 0.06em;
+    justify-self: center;
+    align-self: stretch;
+    width: 1ch;
+    min-width: 1ch;
+    padding-top: 0;
+  }
+
+  .pla-col-day .pla-alfa-day-cell,
+  .pla-col-day .pla-alfa-weather-block {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .weather-item > span {
+    justify-self: start;
+  }
+
+  .weather-wind-value {
+    justify-content: flex-start;
   }
 
   .pla-alfa-actions .btn {

@@ -500,6 +500,10 @@ function getDefaultConvocatoriaTitle(convoTypeName, date) {
   return `${convoTypeName} - ${date.toISOString().slice(0, 10)}`
 }
 
+function isIncendiConvoTypeName(convoTypeName) {
+  return /incendi/i.test(convoTypeName || '')
+}
+
 function getDefaultLocationForConvoType(convoType) {
   if (convoType?.defaultLocation) {
     return convoType.defaultLocation
@@ -1333,6 +1337,11 @@ async function getHoursSummary(authUser) {
       finalTime: true,
       actualStartTime: true,
       actualEndTime: true,
+      convoType: {
+        select: {
+          name: true,
+        },
+      },
     },
   })
 
@@ -1367,10 +1376,11 @@ async function getHoursSummary(authUser) {
       const responseKey = `${convo.id}:${user.nCarnet}`
       const respuesta = responseByConvoAndUser.get(responseKey)
       const inCampaign = isWithinCampaign(convo.date, settings)
+      const isIncendiConvo = isIncendiConvoTypeName(convo.convoType?.name)
       const durationHours = getConvocatoriaDurationHours(convo)
 
       if (!respuesta) {
-        if (inCampaign) {
+        if (inCampaign && !isIncendiConvo) {
           unansweredCount += 1
         }
         continue
