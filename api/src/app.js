@@ -67,7 +67,23 @@ app.get('/api/health', (_req, res) => {
 app.use('/api', routes)
 
 if (IS_PRODUCTION) {
-	app.use(express.static(FRONTEND_DIST_PATH))
+	app.use((req, res, next) => {
+		if (!isApiHostname(req)) {
+			return next()
+		}
+
+		if (req.path === '/health' || req.path === '/api/health' || req.path.startsWith('/api')) {
+			return next()
+		}
+
+		return res.status(404).json({
+			message: 'Ruta no encontrada.',
+		})
+	})
+
+	app.use(express.static(FRONTEND_DIST_PATH, {
+		index: false,
+	}))
 
 	// Express 5 no longer accepts '*' as a string path pattern.
 	app.get(/.*/, (req, res, next) => {
