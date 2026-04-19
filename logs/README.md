@@ -1,21 +1,44 @@
 # Logs
 
-Este directorio centraliza los logs de API y cliente.
+Este directorio centraliza los logs operativos en formato JSONL (una linea JSON por evento).
 
-- `logs/api`: eventos de aplicacion de la API (indice `applogs`).
-- `logs/client`: eventos de aplicacion del cliente Angular (indice `applogs`).
-- `logs/accesslogs`: trazas de peticiones HTTP API+cliente (indice `accesslogs`).
+## Archivos actuales
 
-## Rotacion y retencion
+- `logs/api/app.log`: eventos de aplicacion de la API.
+- `logs/api/requests.log`: trazas de peticiones HTTP de la API.
 
-- Rotacion diaria por fecha (`YYYY-MM-DD`).
-- Retencion de los ultimos 30 dias.
-- Los archivos antiguos se comprimen automaticamente (`.gz`).
+Las rutas se configuran con variables de entorno:
 
-## Patrones de archivo
+- `APP_LOG_FILE`
+- `REQUESTS_LOG_FILE`
 
-- `applogs` (API): `applogs-YYYY-MM-DD.log` y `applogs-error-YYYY-MM-DD.log`
-- `applogs` (Client): `applogs-YYYY-MM-DD.log` y `applogs-error-YYYY-MM-DD.log`
-- `accesslogs` (API+Client): `accesslogs-YYYY-MM-DD.log` y `accesslogs-error-YYYY-MM-DD.log`
+## Formato JSONL
+
+`app.log`:
+
+- `timestamp`
+- `level`
+- `service`
+- `module`
+- `message`
+- `error` (opcional)
+- `env`
+
+`requests.log`:
+
+- `timestamp`
+- `method`
+- `route`
+- `status`
+- `duration_ms`
+- `ip`
+- `userId` (opcional)
+- `userAgent`
+- `query`
+- `body`
+
+## Nota de operacion
+
+La rotacion y retencion ya no las hace la aplicacion. Se recomienda gestionarlas con el sistema de logs del servidor o el pipeline de observabilidad (Promtail/Loki/Grafana).
 
 Los archivos `*.log` estan ignorados por git.

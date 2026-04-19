@@ -2,7 +2,7 @@
 
 Monorepo con 3 partes:
 
-- `database`: Prisma + SQLite
+- `database`: Prisma + PostgreSQL
 - `api`: Express
 - `client`: Angular
 
@@ -12,6 +12,7 @@ Este README esta pensado para que cualquier persona pueda clonar el repo y levan
 
 - Node.js 20 o superior
 - npm 10 o superior
+- PostgreSQL 14+ (o Docker)
 
 Comprobacion rapida:
 
@@ -49,13 +50,15 @@ Que hace esto:
 
 ### Base de datos (Prisma)
 
-Archivo ya presente:
+Archivos de entorno disponibles:
 
-- `database/.env`
+- `database/.env.development`
+- `database/.env.pro`
+- `database/.env` (fallback)
 
 Variable usada:
 
-- `DATABASE_URL="file:./dev.db"`
+- `DATABASE_URL="postgresql://..."`
 
 ### API
 
@@ -75,20 +78,30 @@ Variables principales:
 - `JWT_REFRESH_EXPIRES_IN`
 - `PASSWORD_SALT_ROUNDS`
 - `AEMET_OPENDATA_API_KEY`
+- `NOTIFICATION_DEV_ALLOWED_NCARNETS` (solo en desarrollo)
 
 Notas importantes:
 
 - En desarrollo, la API carga `api/.env.development`.
 - En produccion (`NODE_ENV=pro` o `production`), carga `api/.env.pro`.
+- La API tambien carga automaticamente `database/.env.development` o `database/.env.pro` segun entorno.
+- AEMET y Firebase pueden compartirse entre dev y pro si ambos apuntan al mismo proyecto operativo.
+- En desarrollo, las push notifications solo se envian a usuarios activos cuyo `nCarnet` este en `NOTIFICATION_DEV_ALLOWED_NCARNETS` (y/o en `automation.developerNCarnets`).
 - Si faltan secretos JWT en produccion, la API falla al iniciar auth (esperado).
 
 ## 5) Preparar la base de datos
+
+### Arranque rapido de PostgreSQL con Docker (opcional)
+
+```bash
+docker compose -f docker-compose.postgres.yml up -d
+```
 
 Desde `database`:
 
 ```bash
 npm run prisma:generate
-npx prisma migrate dev --name adf_schema
+npm run prisma:db:push
 npm run prisma:seed
 ```
 
@@ -109,10 +122,10 @@ npm run prisma:studio
 Desde la raiz:
 
 ```bash
-npm run dev
+npm start
 ```
 
-`npm run dev` aplica automaticamente migraciones pendientes antes de iniciar API + cliente.
+`npm start` (equivale a `npm run start:dev`) sincroniza esquema y levanta API + cliente.
 
 Esto levanta:
 
@@ -138,21 +151,32 @@ Ejemplos:
 
 - `npm run install:all`: instala dependencias en `database`, `api` y `client`
 - `npm run db:migrate:deploy`: aplica migraciones pendientes sobre la DB actual
-- `npm run db:prepare`: genera cliente Prisma y aplica migraciones
-- `npm run dev`: arranca API + cliente en paralelo
-- `npm run pro`: arranca API en modo pro y ejecuta build del cliente
+- `npm run db:migrate:deploy:dev`: aplica migraciones en DB de desarrollo (`database/.env.development`)
+- `npm run db:migrate:deploy:pro`: aplica migraciones en DB de produccion (`database/.env.pro`)
+- `npm run db:sync`: sincroniza schema Prisma contra la DB (`prisma db push`)
+- `npm run db:prepare`: genera cliente Prisma y aplica migraciones (`prisma migrate deploy`)
+- `npm run db:prepare:dev`: genera cliente y aplica migraciones en desarrollo
+- `npm run db:prepare:pro`: genera cliente y aplica migraciones en produccion
+- `npm start`: arranca entorno de desarrollo completo (API + cliente)
+- `npm run start:dev`: igual que `npm start`
+- `npm run start:pro`: arranca API + cliente en modo produccion
+- `npm run start:pro`: aplica DB, compila Angular y arranca API (sirviendo frontend estatico)
+- `npm run dev`: alias de `npm run start:dev`
+- `npm run pro`: alias de `npm run start:pro`
 - `npm run test`: ejecuta tests API + cliente en modo no interactivo
 
 ### API (`api/package.json`)
 
 - `npm run dev`: nodemon con `NODE_ENV=development`
-- `npm run start`: inicio simple
-- `npm run start:pro`: inicio con `NODE_ENV=pro`
+- `npm run start`: inicio simple (usar con `NODE_ENV` desde PM2)
+- `npm run start:dev`: inicio con `NODE_ENV=development`
+- `npm run start:pro`: inicio con `NODE_ENV=production`
 - `npm run test`: ejecuta runner de tests de Node
 
 ### Cliente (`client/package.json`)
 
-- `npm run start`: servidor Angular
+- `npm run start`: servidor Angular en desarrollo
+- `npm run start:pro`: servidor Angular en configuracion produccion
 - `npm run build`: build produccion
 - `npm run build:dev`: build desarrollo
 - `npm run test`: tests en modo interactivo
@@ -161,8 +185,13 @@ Ejemplos:
 ### Database (`database/package.json`)
 
 - `npm run prisma:generate`
+- `npm run prisma:generate:dev`
+- `npm run prisma:generate:pro`
 - `npm run prisma:migrate`
 - `npm run prisma:migrate:deploy`
+- `npm run prisma:migrate:deploy:dev`
+- `npm run prisma:migrate:deploy:pro`
+- `npm run prisma:baseline:pg` (genera SQL baseline PostgreSQL desde schema)
 - `npm run prisma:seed`
 - `npm run prisma:studio`
 
@@ -290,8 +319,26 @@ Configuracion versionada (json):
 
 Si aparece un error tipo `The table main.AvailabilityWindow does not exist`:
 
-- Ejecuta `npm run db:migrate:deploy` desde la raiz.
-- Si es primera instalacion, usa `npm run db:prepare`.
+- Ejecuta `npm run db:prepare` desde la raiz.
+
+### Migracion a PostgreSQL (estado actual)
+
+- El proyecto ya esta preparado para usar `DATABASE_URL` de PostgreSQL.
+- El historico de migraciones se ha reseteado para PostgreSQL y queda una migracion inicial limpia desde cero.
+- El flujo recomendado actual es `prisma migrate deploy` (`npm run db:prepare`) para crear/actualizar esquema en despliegues.
+- Puedes generar baseline SQL PostgreSQL con `npm run prisma:baseline:pg --prefix database`.
+
+### PM2 en Raspberry
+
+Se incluye `pm2.ecosystem.config.cjs` con perfiles `adf247-dev` y `adf247-pro`.
+
+Ejemplos:
+
+```bash
+pm2 start pm2.ecosystem.config.cjs --only adf247-dev
+pm2 start pm2.ecosystem.config.cjs --only adf247-pro
+pm2 save
+```
 
 Importante:
 

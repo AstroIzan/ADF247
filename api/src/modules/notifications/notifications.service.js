@@ -20,6 +20,53 @@ const GLOBAL_NOTIFICATION_TOPIC = 'adf247-all'
 const NOTIFICATION_LOGO_URL = process.env.NOTIFICATION_LOGO_URL || '/icons/notification-icon-512.png'
 const NOTIFICATION_BADGE_URL = process.env.NOTIFICATION_BADGE_URL || '/icons/favicon-64.png'
 
+function isProductionEnvironment() {
+  const nodeEnv = String(process.env.NODE_ENV || 'development').trim().toLowerCase()
+  return nodeEnv === 'production' || nodeEnv === 'pro'
+}
+
+function parseNCarnetList(rawValue) {
+  if (!rawValue) {
+    return []
+  }
+
+  return String(rawValue)
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean)
+}
+
+async function resolveAllowedDevNotificationUserIds() {
+  if (isProductionEnvironment()) {
+    return null
+  }
+
+  const envList = parseNCarnetList(process.env.NOTIFICATION_DEV_ALLOWED_NCARNETS)
+  const settings = readNotificationSettings()
+  const settingsList = Array.isArray(settings?.automation?.developerNCarnets)
+    ? settings.automation.developerNCarnets
+    : []
+  const targetNCarnets = [...new Set([...envList, ...settingsList])]
+
+  if (targetNCarnets.length === 0) {
+    return []
+  }
+
+  const users = await database.user.findMany({
+    where: {
+      nCarnet: {
+        in: targetNCarnets,
+      },
+      isActive: true,
+    },
+    select: {
+      id: true,
+    },
+  })
+
+  return users.map((user) => user.id)
+}
+
 function createServiceError(message, statusCode = 500, details) {
   const error = new Error(message)
   error.statusCode = statusCode
@@ -1193,9 +1240,22 @@ async function sendMulticastNotification({
     }, {}),
   }
 
-  let topics = []
+  const allowedDevUserIds = await resolveAllowedDevNotificationUserIds()
+
+  let targetUserIds = null
   if (Array.isArray(userIds)) {
-    topics = [...new Set(userIds.map(buildUserNotificationTopic).filter(Boolean))]
+    targetUserIds = [...new Set(userIds.map((value) => Number(value)).filter((value) => Number.isInteger(value) && value > 0))]
+    if (Array.isArray(allowedDevUserIds)) {
+      const allowedSet = new Set(allowedDevUserIds)
+      targetUserIds = targetUserIds.filter((userId) => allowedSet.has(userId))
+    }
+  } else if (Array.isArray(allowedDevUserIds)) {
+    targetUserIds = allowedDevUserIds
+  }
+
+  let topics = []
+  if (Array.isArray(targetUserIds)) {
+    topics = [...new Set(targetUserIds.map(buildUserNotificationTopic).filter(Boolean))]
   } else {
     topics = [GLOBAL_NOTIFICATION_TOPIC]
   }

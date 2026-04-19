@@ -1,30 +1,50 @@
-const { apiAccessLogger } = require('../config/logger')
+const fs = require('fs')
+const path = require('path')
+
+const REQUESTS_LOG_FILE = process.env.REQUESTS_LOG_FILE || '/home/pi/logs/api/requests.log'
+
+function ensureDirectory(filePath) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true })
+}
+
+function safeJsonStringify(value) {
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return '{}'
+  }
+}
+
+function appendRequestLog(payload) {
+  try {
+    ensureDirectory(REQUESTS_LOG_FILE)
+    fs.appendFileSync(REQUESTS_LOG_FILE, `${safeJsonStringify(payload)}\n`)
+  } catch {
+    // Ignore file logging errors to avoid breaking request handling.
+  }
+}
 
 function requestLogger(req, res, next) {
   const startedAt = Date.now()
 
   res.on('finish', () => {
-    const durationMs = Date.now() - startedAt
     const payload = {
+      timestamp: new Date().toISOString(),
       method: req.method,
-      path: req.originalUrl,
-      statusCode: res.statusCode,
-      durationMs,
+      route: req.originalUrl,
+      status: res.statusCode,
+      duration_ms: Date.now() - startedAt,
       ip: req.ip,
       userAgent: req.get('user-agent') || 'unknown',
+      query: req.query || {},
+      body: req.body || {},
     }
 
-    if (res.statusCode >= 500) {
-      apiAccessLogger.error('HTTP request completed with server error', payload)
-      return
+    if (req.auth?.userId) {
+      payload.userId = String(req.auth.userId)
     }
 
-    if (res.statusCode >= 400) {
-      apiAccessLogger.warn('HTTP request completed with client error', payload)
-      return
-    }
-
-    apiAccessLogger.info('HTTP request completed', payload)
+    appendRequestLog(payload)
   })
 
   next()

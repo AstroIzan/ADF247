@@ -5,10 +5,20 @@
   "main": "index.js",
   "scripts": {
     "prisma:generate": "prisma generate",
+    "prisma:generate:dev": "dotenv -e .env.development -- prisma generate",
+    "prisma:generate:pro": "dotenv -e .env.pro -- prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy --schema prisma/schema.prisma",
+    "prisma:migrate:deploy:dev": "dotenv -e .env.development -- prisma migrate deploy --schema prisma/schema.prisma",
+    "prisma:migrate:deploy:pro": "dotenv -e .env.pro -- prisma migrate deploy --schema prisma/schema.prisma",
+    "prisma:db:push": "prisma db push --schema prisma/schema.prisma",
+    "prisma:db:push:dev": "dotenv -e .env.development -- prisma db push --schema prisma/schema.prisma",
+    "prisma:db:push:pro": "dotenv -e .env.pro -- prisma db push --schema prisma/schema.prisma",
+    "prisma:baseline:pg": "powershell -ExecutionPolicy Bypass -File ./scripts/generate-postgres-baseline.ps1",
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js",
+    "prisma:seed:dev": "dotenv -e .env.development -- node prisma/seed.js",
+    "prisma:seed:pro": "dotenv -e .env.pro -- node prisma/seed.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "prisma": {
@@ -19,6 +29,7 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
+    "dotenv-cli": "^8.0.0",
     "prisma": "^5.22.0"
   },
   "dependencies": {

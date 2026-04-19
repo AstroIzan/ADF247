@@ -6,9 +6,19 @@
   "scripts": {
     "install:all": "npm install --prefix database && npm install --prefix api && npm install --prefix client",
     "db:migrate:deploy": "npm run prisma:migrate:deploy --prefix database",
-    "db:prepare": "npm run prisma:generate --prefix database && npm run db:migrate:deploy",
-    "dev": "npm run db:migrate:deploy && concurrently -n api,client \"npm run dev --prefix api\" \"npm run start --prefix client\"",
-    "pro": "concurrently -n api,client \"npm run start:pro --prefix api\" \"npm run build --prefix client\"",
+    "db:migrate:deploy:dev": "npm run prisma:migrate:deploy:dev --prefix database",
+    "db:migrate:deploy:pro": "npm run prisma:migrate:deploy:pro --prefix database",
+    "db:seed:dev": "npm run prisma:seed:dev --prefix database",
+    "db:seed:pro": "npm run prisma:seed:pro --prefix database",
+    "db:sync": "npm run prisma:db:push --prefix database",
+    "db:prepare": "npm run db:prepare:dev",
+    "db:prepare:dev": "npm run prisma:generate:dev --prefix database && npm run db:migrate:deploy:dev",
+    "db:prepare:pro": "npm run prisma:generate:pro --prefix database && npm run db:migrate:deploy:pro",
+    "start": "npm run start:dev",
+    "start:dev": "npm run db:prepare:dev && concurrently -n api,client \"npm run dev --prefix api\" \"npm run start --prefix client\"",
+    "start:pro": "npm run db:prepare:pro && npm run build --prefix client && npm run start:pro --prefix api",
+    "dev": "npm run start:dev",
+    "pro": "npm run start:pro",
     "test": "npm run test --prefix api && npm run test:ci --prefix client"
   },
   "repository": {

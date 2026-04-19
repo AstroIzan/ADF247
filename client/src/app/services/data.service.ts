@@ -359,46 +359,6 @@ export interface NotificationLog {
   senderUserId?: number | null;
 }
 
-export interface LogsIndexInfo {
-  key: 'applogs' | 'accesslogs';
-  label: string;
-  description: string;
-}
-
-export interface LogsAccessResponse {
-  allowed: boolean;
-  indexes: LogsIndexInfo[];
-}
-
-export interface LogSearchItem {
-  index: 'applogs' | 'accesslogs';
-  level: 'info' | 'warn' | 'error';
-  message: string;
-  service: string;
-  environment?: 'dev' | 'pro' | string | null;
-  source?: string | null;
-  timestamp?: string | null;
-  clientTimestamp?: string | null;
-  serverTimestamp?: string | null;
-  method?: string | null;
-  path?: string | null;
-  statusCode?: number | null;
-  durationMs?: number | null;
-  context?: Record<string, unknown> | null;
-  ip?: string | null;
-  userAgent?: string | null;
-}
-
-export interface LogSearchResponse {
-  index: 'applogs' | 'accesslogs';
-  total: number;
-  offset: number;
-  limit: number;
-  hasMore: boolean;
-  nextOffset: number | null;
-  items: LogSearchItem[];
-}
-
 export interface ApiHealthStatus {
   ok: boolean;
   service: string;
@@ -670,54 +630,6 @@ export class DataService {
 
   getNotificationAutomationRunById(id: number): Observable<NotificationAutomationRun> {
     return this.http.get<NotificationAutomationRun>(`/notifications/automation/runs/${id}`);
-  }
-
-  getLogsAccess(): Observable<LogsAccessResponse> {
-    return this.http.get<LogsAccessResponse>('/logs/access');
-  }
-
-  searchLogs(filters: {
-    index: 'applogs' | 'accesslogs';
-    level?: 'info' | 'warn' | 'error' | 'all';
-    source?: string;
-    q?: string;
-    from?: string;
-    to?: string;
-    offset?: number;
-    limit?: number;
-  }): Observable<LogSearchResponse> {
-    const search = new URLSearchParams();
-    search.set('index', filters.index);
-
-    if (filters.level && filters.level !== 'all') {
-      search.set('level', filters.level);
-    }
-
-    if (filters.source?.trim()) {
-      search.set('source', filters.source.trim());
-    }
-
-    if (filters.q?.trim()) {
-      search.set('q', filters.q.trim());
-    }
-
-    if (filters.from?.trim()) {
-      search.set('from', filters.from.trim());
-    }
-
-    if (filters.to?.trim()) {
-      search.set('to', filters.to.trim());
-    }
-
-    if (Number.isInteger(filters.offset) && (filters.offset || 0) >= 0) {
-      search.set('offset', String(filters.offset));
-    }
-
-    if (Number.isInteger(filters.limit) && (filters.limit || 0) > 0) {
-      search.set('limit', String(filters.limit));
-    }
-
-    return this.http.get<LogSearchResponse>(`/logs/search?${search.toString()}`);
   }
 
   // === AVAILABILITY WINDOWS ===

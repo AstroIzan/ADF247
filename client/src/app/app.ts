@@ -1,9 +1,8 @@
-import { Component, HostListener, ViewChild, effect } from '@angular/core';
+import { Component, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './services/auth.service';
-import { LogsAccessService } from './services/logs-access.service';
 import { PushNotificationsService } from './services/push-notifications.service';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { SettingsComponent } from './pages/settings/settings.component';
@@ -16,17 +15,14 @@ import { SettingsComponent } from './pages/settings/settings.component';
   styleUrl: './app.css'
 })
 export class App {
-  private readonly minDesktopWidthPx = 1024;
   @ViewChild(ProfileComponent) profileComponent?: ProfileComponent;
   @ViewChild(SettingsComponent) settingsComponent?: SettingsComponent;
   currentPath = '';
   notificationWarning = '';
   isMobileMenuOpen = false;
-  isDesktopViewport = typeof window !== 'undefined' ? window.innerWidth >= this.minDesktopWidthPx : true;
 
   constructor(
     public authService: AuthService,
-    public logsAccessService: LogsAccessService,
     private router: Router,
     public pushNotificationsService: PushNotificationsService,
   ) {
@@ -34,10 +30,8 @@ export class App {
 
     effect(() => {
       if (this.authService.isAuthenticated()) {
-        this.logsAccessService.refresh()
         void this.handleHomeNotificationCheck()
       } else {
-        this.logsAccessService.clear()
         this.notificationWarning = ''
       }
     })
@@ -48,26 +42,10 @@ export class App {
         const navEvent = event as NavigationEnd
         this.currentPath = navEvent.urlAfterRedirects
         this.isMobileMenuOpen = false
-        this.enforceLogsDesktopAccess()
         void this.handleHomeNotificationCheck()
       })
 
       void this.handleHomeNotificationCheck()
-  }
-
-  @HostListener('window:resize')
-  onWindowResize() {
-    const nextIsDesktop = window.innerWidth >= this.minDesktopWidthPx
-    if (this.isDesktopViewport === nextIsDesktop) {
-      return
-    }
-
-    this.isDesktopViewport = nextIsDesktop
-    this.enforceLogsDesktopAccess()
-  }
-
-  canShowLogsNavigation() {
-    return this.logsAccessService.allowed() && this.isDesktopViewport
   }
 
   goTo(path: string) {
@@ -107,18 +85,6 @@ export class App {
 
   isHomeRoute() {
     return this.currentPath.startsWith('/home');
-  }
-
-  private enforceLogsDesktopAccess() {
-    if (!this.currentPath.startsWith('/logs')) {
-      return
-    }
-
-    if (this.isDesktopViewport) {
-      return
-    }
-
-    this.router.navigate(['/home'])
   }
 
   private async handleHomeNotificationCheck() {

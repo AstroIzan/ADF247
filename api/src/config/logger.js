@@ -1,94 +1,97 @@
 const fs = require('fs')
 const path = require('path')
 const util = require('util')
-const winston = require('winston')
-const DailyRotateFile = require('winston-daily-rotate-file')
 
-const { combine, errors, json, timestamp } = winston.format
+const APP_LOG_FILE = process.env.APP_LOG_FILE || '/home/pi/logs/api/app.log'
 
-const LOG_ROOT_DIR = process.env.LOGS_DIR || path.resolve(__dirname, '..', '..', '..', 'logs')
-const API_LOG_DIR = path.join(LOG_ROOT_DIR, 'api')
-const CLIENT_LOG_DIR = path.join(LOG_ROOT_DIR, 'client')
-const ACCESS_LOG_DIR = path.join(LOG_ROOT_DIR, 'accesslogs')
-
-const LOG_INDEX_APP = 'applogs'
-const LOG_INDEX_ACCESS = 'accesslogs'
-
-function resolveEnvironmentTag(rawNodeEnv) {
-  const value = String(rawNodeEnv || 'development').trim().toLowerCase()
-  return value === 'production' || value === 'pro' ? 'pro' : 'dev'
+function resolveEnvironment() {
+  const raw = String(process.env.NODE_ENV || 'development').trim().toLowerCase()
+  return raw === 'production' || raw === 'pro' ? 'production' : 'development'
 }
 
-const LOG_ENVIRONMENT = resolveEnvironmentTag(process.env.NODE_ENV)
-
-fs.mkdirSync(API_LOG_DIR, { recursive: true })
-fs.mkdirSync(CLIENT_LOG_DIR, { recursive: true })
-fs.mkdirSync(ACCESS_LOG_DIR, { recursive: true })
-
-function buildBaseTransports(dirPath, appPrefix) {
-  return [
-    new DailyRotateFile({
-      filename: path.join(dirPath, `${appPrefix}-%DATE%.log`),
-      datePattern: 'YYYY-MM-DD',
-      maxFiles: '30d',
-      zippedArchive: true,
-      level: 'info',
-    }),
-    new DailyRotateFile({
-      filename: path.join(dirPath, `${appPrefix}-error-%DATE%.log`),
-      datePattern: 'YYYY-MM-DD',
-      maxFiles: '30d',
-      zippedArchive: true,
-      level: 'error',
-    }),
-  ]
+function ensureDirectory(filePath) {
+  fs.mkdirSync(path.dirname(filePath), { recursive: true })
 }
 
-const loggerFormat = combine(
-  timestamp(),
-  errors({ stack: true }),
-  json(),
-)
+function safeStringify(value) {
+  try {
+    return JSON.stringify(value)
+  } catch {
+    return '{}'
+  }
+}
 
-const apiLogger = winston.createLogger({
-  level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
-  defaultMeta: { service: 'api', index: LOG_INDEX_APP, environment: LOG_ENVIRONMENT },
-  format: loggerFormat,
-  transports: [
-    ...buildBaseTransports(API_LOG_DIR, LOG_INDEX_APP),
-    new winston.transports.Console({
-      level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.timestamp(),
-        winston.format.printf(({ level, message, timestamp: ts, stack }) => {
-          return `${ts} [${level.toUpperCase()}] ${stack || message}`
-        }),
-      ),
-    }),
-  ],
-})
+function writeJsonLogLine(filePath, payload) {
+  try {
+    ensureDirectory(filePath)
+    fs.appendFileSync(filePath, `${safeStringify(payload)}\n`)
+  } catch {
+    // Ignore file logging errors to avoid taking down the API process.
+  }
+}
 
-const clientLogger = winston.createLogger({
-  level: 'info',
-  defaultMeta: { service: 'client', index: LOG_INDEX_APP, environment: LOG_ENVIRONMENT },
-  format: loggerFormat,
-  transports: buildBaseTransports(CLIENT_LOG_DIR, LOG_INDEX_APP),
-})
+function normalizeError(errorValue) {
+  if (!errorValue) {
+    return undefined
+  }
 
-const apiAccessLogger = winston.createLogger({
-  level: 'info',
-  defaultMeta: { service: 'api', index: LOG_INDEX_ACCESS, environment: LOG_ENVIRONMENT },
-  format: loggerFormat,
-  transports: buildBaseTransports(ACCESS_LOG_DIR, LOG_INDEX_ACCESS),
-})
+  if (errorValue instanceof Error) {
+    return errorValue.stack || errorValue.message
+  }
 
-const clientAccessLogger = winston.createLogger({
-  level: 'info',
-  defaultMeta: { service: 'client', index: LOG_INDEX_ACCESS, environment: LOG_ENVIRONMENT },
-  format: loggerFormat,
-  transports: buildBaseTransports(ACCESS_LOG_DIR, LOG_INDEX_ACCESS),
-})
+  return String(errorValue)
+}
+
+function normalizeModule(moduleName) {
+  const value = String(moduleName || '').trim().toLowerCase()
+  if (!value) {
+    return 'app'
+  }
+
+  return value
+}
+
+function logApp({ level, module, message, error, service = 'api' }) {
+  const payload = {
+    timestamp: new Date().toISOString(),
+    level,
+    service,
+    module: normalizeModule(module),
+    message: String(message || ''),
+    env: resolveEnvironment(),
+  }
+
+  const normalizedError = normalizeError(error)
+  if (normalizedError) {
+    payload.error = normalizedError
+  }
+
+  writeJsonLogLine(APP_LOG_FILE, payload)
+}
+
+function buildApiLogger(moduleName = 'app') {
+  return {
+    info(message, meta = {}) {
+      logApp({ level: 'info', module: meta.module || moduleName, message, error: meta.error })
+    },
+    warn(message, meta = {}) {
+      logApp({ level: 'warn', module: meta.module || moduleName, message, error: meta.error })
+    },
+    error(message, meta = {}) {
+      logApp({
+        level: 'error',
+        module: meta.module || moduleName,
+        message,
+        error: meta.error || meta.stack || meta.details,
+      })
+    },
+    debug(message, meta = {}) {
+      logApp({ level: 'debug', module: meta.module || moduleName, message, error: meta.error })
+    },
+  }
+}
+
+const apiLogger = buildApiLogger('api')
 
 function toLogMessage(args) {
   if (!Array.isArray(args) || args.length === 0) {
@@ -121,70 +124,32 @@ function patchGlobalConsole() {
   }
 
   console.log = (...args) => {
-    apiLogger.info(toLogMessage(args))
+    apiLogger.info(toLogMessage(args), { module: 'console' })
   }
 
   console.info = (...args) => {
-    apiLogger.info(toLogMessage(args))
+    apiLogger.info(toLogMessage(args), { module: 'console' })
   }
 
   console.warn = (...args) => {
-    apiLogger.warn(toLogMessage(args))
+    apiLogger.warn(toLogMessage(args), { module: 'console' })
   }
 
   console.error = (...args) => {
-    apiLogger.error(toLogMessage(args))
+    apiLogger.error(toLogMessage(args), { module: 'console' })
   }
 
   console.debug = (...args) => {
-    apiLogger.debug(toLogMessage(args))
+    apiLogger.debug(toLogMessage(args), { module: 'console' })
   }
 
   consolePatched = true
 }
 
-function normalizeClientLevel(level) {
-  const rawLevel = String(level || '').toLowerCase()
-
-  if (rawLevel === 'error') {
-    return 'error'
-  }
-
-  if (rawLevel === 'warn' || rawLevel === 'warning') {
-    return 'warn'
-  }
-
-  return 'info'
-}
-
-function normalizeLogIndex(rawIndex) {
-  const index = String(rawIndex || '').trim().toLowerCase()
-  if (index === LOG_INDEX_ACCESS || index === 'issserverlogs') {
-    return LOG_INDEX_ACCESS
-  }
-
-  return LOG_INDEX_APP
-}
-
-function getClientLoggerForIndex(index) {
-  const normalized = normalizeLogIndex(index)
-  if (normalized === LOG_INDEX_ACCESS) {
-    return clientAccessLogger
-  }
-
-  return clientLogger
-}
-
 module.exports = {
-  LOG_INDEX_APP,
-  LOG_INDEX_ACCESS,
-  LOG_ROOT_DIR,
+  APP_LOG_FILE,
   apiLogger,
-  apiAccessLogger,
-  clientAccessLogger,
-  clientLogger,
-  getClientLoggerForIndex,
-  normalizeLogIndex,
-  normalizeClientLevel,
+  buildApiLogger,
+  logApp,
   patchGlobalConsole,
 }

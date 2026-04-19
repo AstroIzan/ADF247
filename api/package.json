@@ -5,7 +5,8 @@
   "main": "src/server.js",
   "scripts": {
     "dev": "cross-env NODE_ENV=development nodemon src/server.js",
-    "start:pro": "cross-env NODE_ENV=pro node src/server.js",
+    "start:dev": "cross-env NODE_ENV=development node src/server.js",
+    "start:pro": "cross-env NODE_ENV=production node src/server.js",
     "start": "node src/server.js",
     "test": "node --test"
   },
@@ -19,9 +20,7 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "firebase-admin": "^13.7.0",
-    "jsonwebtoken": "^9.0.3",
-    "winston": "^3.19.0",
-    "winston-daily-rotate-file": "^5.0.0"
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
     "@ljharb/tsconfig": "^0.3.2",
