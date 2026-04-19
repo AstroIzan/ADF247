@@ -15,8 +15,10 @@ const FRONTEND_DIST_PATH = process.env.FRONTEND_DIST_PATH
 	: path.resolve(__dirname, '..', '..', 'client', 'dist', 'client-app', 'browser')
 
 function isApiHostname(req) {
+	const forwardedHost = String(req.get('x-forwarded-host') || '')
 	const hostHeader = String(req.get('host') || '')
-	const hostname = hostHeader.split(':')[0].trim().toLowerCase()
+	const source = forwardedHost || hostHeader
+	const hostname = source.split(',')[0].split(':')[0].trim().toLowerCase()
 
 	return hostname.startsWith('api.')
 }
