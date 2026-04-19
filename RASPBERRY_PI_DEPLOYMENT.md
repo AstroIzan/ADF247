@@ -15,12 +15,15 @@ sudo apt install -y nodejs
 sudo npm install -g pm2
 ```
 
-## 3) PostgreSQL local (opcion A: Docker)
+## 3) PostgreSQL del sistema
 
-Instala Docker y levanta PostgreSQL del proyecto:
+Instala y habilita PostgreSQL en Raspberry:
 
 ```bash
-docker compose -f docker-compose.postgres.yml up -d
+sudo apt install -y postgresql postgresql-contrib
+sudo systemctl enable postgresql
+sudo systemctl restart postgresql
+sudo systemctl status postgresql --no-pager
 ```
 
 ## 4) Clonar y preparar
@@ -51,7 +54,8 @@ Valores minimos:
 
 ```bash
 npm run db:prepare:pro
-npm run start:pro
+npm run build --prefix client
+npm run start:pro --prefix api
 ```
 
 Comprobacion:
@@ -61,7 +65,7 @@ Comprobacion:
 
 ## 7) PM2 (persistente)
 
-Arranque app pro:
+Arranque app pro (solo API; el frontend se sirve estatico desde API):
 
 ```bash
 pm2 start pm2.ecosystem.config.cjs --only adf247-pro
@@ -81,6 +85,8 @@ pm2 save
 git pull
 npm install
 npm run install:all
+npm run db:prepare:pro
+npm run build --prefix client
 pm2 restart adf247-pro --update-env
 ```
 

@@ -12,7 +12,7 @@ Este README esta pensado para que cualquier persona pueda clonar el repo y levan
 
 - Node.js 20 o superior
 - npm 10 o superior
-- PostgreSQL 14+ (o Docker)
+- PostgreSQL 14+
 
 Comprobacion rapida:
 
@@ -91,12 +91,6 @@ Notas importantes:
 
 ## 5) Preparar la base de datos
 
-### Arranque rapido de PostgreSQL con Docker (opcional)
-
-```bash
-docker compose -f docker-compose.postgres.yml up -d
-```
-
 Desde `database`:
 
 ```bash
@@ -118,6 +112,13 @@ npm run prisma:studio
 ```
 
 ## 6) Arranque en desarrollo
+
+Antes de arrancar, asegura PostgreSQL del sistema en ejecucion:
+
+```bash
+sudo systemctl enable postgresql
+sudo systemctl restart postgresql
+```
 
 Desde la raiz:
 

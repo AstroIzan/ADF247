@@ -39,7 +39,7 @@ Estado actualizado: 2026-04-19
 Desde raiz:
 
 ```bash
-docker compose -f docker-compose.postgres.yml up -d
+sudo systemctl restart postgresql
 npm run install:all
 npm run db:prepare
 npm start

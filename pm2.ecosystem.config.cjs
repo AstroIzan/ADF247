@@ -13,7 +13,7 @@ module.exports = {
       name: 'adf247-pro',
       cwd: '.',
       script: 'npm',
-      args: 'run start:pro',
+      args: 'run start:pro --prefix api',
       env: {
         NODE_ENV: 'production',
         PORT: '3001',

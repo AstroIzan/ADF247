@@ -16,7 +16,7 @@ Incluye:
 
 - Node.js 20+
 - npm 10+
-- PostgreSQL 14+ (o Docker)
+- PostgreSQL 14+
 
 Comprobacion:
 
@@ -86,12 +86,12 @@ npm run install:all
 
 ## 5. Levantar PostgreSQL local
 
-### Opcion rapida con Docker
-
-Desde raiz:
+En Raspberry/Linux con PostgreSQL del sistema:
 
 ```bash
-docker compose -f docker-compose.postgres.yml up -d
+sudo systemctl enable postgresql
+sudo systemctl restart postgresql
+sudo systemctl status postgresql --no-pager
 ```
 
 ## 6. Arranque en DEV (paso a paso)
@@ -197,7 +197,7 @@ Causa:
 
 Solucion:
 
-- Levantar Docker de PostgreSQL o arrancar servicio PostgreSQL local.
+- Arrancar servicio PostgreSQL local (`sudo systemctl restart postgresql`).
 
 ### 10.2 Seed falla por tablas/relaciones
 
