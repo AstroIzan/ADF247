@@ -14,6 +14,13 @@ const FRONTEND_DIST_PATH = process.env.FRONTEND_DIST_PATH
 	? path.resolve(__dirname, '..', process.env.FRONTEND_DIST_PATH)
 	: path.resolve(__dirname, '..', '..', 'client', 'dist', 'client-app', 'browser')
 
+function isApiHostname(req) {
+	const hostHeader = String(req.get('host') || '')
+	const hostname = hostHeader.split(':')[0].trim().toLowerCase()
+
+	return hostname.startsWith('api.')
+}
+
 function getCorsOrigins() {
 	const rawOrigins = process.env.CORS_ORIGIN
 
@@ -64,6 +71,12 @@ if (IS_PRODUCTION) {
 	app.get(/.*/, (req, res, next) => {
 		if (req.path.startsWith('/api')) {
 			return next()
+		}
+
+		if (isApiHostname(req)) {
+			return res.status(404).json({
+				message: 'Ruta no encontrada.',
+			})
 		}
 
 		return res.sendFile(path.join(FRONTEND_DIST_PATH, 'index.html'))
