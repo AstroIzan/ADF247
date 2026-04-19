@@ -60,7 +60,8 @@ app.use('/api', routes)
 if (IS_PRODUCTION) {
 	app.use(express.static(FRONTEND_DIST_PATH))
 
-	app.get('*', (req, res, next) => {
+	// Express 5 no longer accepts '*' as a string path pattern.
+	app.get(/.*/, (req, res, next) => {
 		if (req.path.startsWith('/api')) {
 			return next()
 		}
