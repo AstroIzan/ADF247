@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
 import { AuthService } from './services/auth.service';
+import { AppRequestsTrackerService } from './services/app-requests-tracker.service';
 import { PushNotificationsService } from './services/push-notifications.service';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { SettingsComponent } from './pages/settings/settings.component';
@@ -24,6 +25,7 @@ export class App {
   constructor(
     public authService: AuthService,
     private router: Router,
+    private appRequestsTracker: AppRequestsTrackerService,
     public pushNotificationsService: PushNotificationsService,
   ) {
     this.currentPath = this.router.url || '/'
@@ -42,9 +44,11 @@ export class App {
         const navEvent = event as NavigationEnd
         this.currentPath = navEvent.urlAfterRedirects
         this.isMobileMenuOpen = false
+        this.trackRouteAccess(this.currentPath)
         void this.handleHomeNotificationCheck()
       })
 
+      this.trackRouteAccess(this.currentPath)
       void this.handleHomeNotificationCheck()
   }
 
@@ -157,5 +161,13 @@ export class App {
     setTimeout(() => {
       this.settingsComponent?.openModal('device')
     }, 0)
+  }
+
+  private trackRouteAccess(route: string) {
+    if (!this.authService.isLoggedIn()) {
+      return
+    }
+
+    this.appRequestsTracker.trackRoute(route)
   }
 }

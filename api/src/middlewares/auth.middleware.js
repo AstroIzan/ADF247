@@ -32,6 +32,22 @@ async function requireAuth(req, _res, next) {
   }
 }
 
+async function attachAuthIfPresent(req, _res, next) {
+  try {
+    const token = extractBearerToken(req.headers.authorization)
+
+    if (!token) {
+      return next()
+    }
+
+    req.auth = await authService.verifyAccessToken(token)
+    return next()
+  } catch {
+    // Ignore invalid token in optional auth scenarios.
+    return next()
+  }
+}
+
 async function requireAdmin(req, _res, next) {
   try {
     if (!req.auth?.nCarnet) {
@@ -63,4 +79,5 @@ async function requireAdmin(req, _res, next) {
 module.exports = {
   requireAuth,
   requireAdmin,
+  attachAuthIfPresent,
 }

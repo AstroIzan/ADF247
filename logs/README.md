@@ -6,11 +6,13 @@ Este directorio centraliza los logs operativos en formato JSONL (una linea JSON 
 
 - `logs/api/app.log`: eventos de aplicacion de la API.
 - `logs/api/requests.log`: trazas de peticiones HTTP de la API.
+- `logs/api/app-requests.log`: navegacion de usuarios en la app (rutas/sections).
 
 Las rutas se configuran con variables de entorno:
 
 - `APP_LOG_FILE`
 - `REQUESTS_LOG_FILE`
+- `APP_REQUESTS_LOG_FILE`
 
 ## Formato JSONL
 
@@ -36,6 +38,17 @@ Las rutas se configuran con variables de entorno:
 - `userAgent`
 - `query`
 - `body`
+
+`app-requests.log`:
+
+- `timestamp`
+- `route`
+- `section`
+- `source`
+- `ip`
+- `userAgent`
+- `userId` (opcional)
+- `nCarnet` (opcional)
 
 ## Nota de operacion
 

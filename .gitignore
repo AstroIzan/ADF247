@@ -50,3 +50,4 @@ api/config/device-tokens.json
 
 # Local technical backlog (private)
 .pending-tasks.md
+.error-tasks.md

@@ -1,0 +1,161 @@
+name: Deploy Raspberry
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+    inputs:
+      full_deploy:
+        description: "Force full deploy (db prepare + frontend build + backend restart)"
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-raspberry-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      database: ${{ steps.filter.outputs.database }}
+      api: ${{ steps.filter.outputs.api }}
+      client: ${{ steps.filter.outputs.client }}
+      deploy: ${{ steps.filter.outputs.deploy }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect changed areas
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            database:
+              - 'database/prisma/**'
+              - 'database/prisma.js'
+              - 'database/package.json'
+              - 'database/package-lock.json'
+            api:
+              - 'api/**'
+              - 'pm2.ecosystem.config.cjs'
+            client:
+              - 'client/**'
+            deploy:
+              - 'api/**'
+              - 'client/**'
+              - 'database/**'
+              - 'pm2.ecosystem.config.cjs'
+              - 'package.json'
+              - 'package-lock.json'
+
+  pr-summary:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    needs: changes
+    steps:
+      - name: Deployment plan preview
+        run: |
+          echo "PR deployment preview"
+          echo "database changed: ${{ needs.changes.outputs.database }}"
+          echo "api changed:      ${{ needs.changes.outputs.api }}"
+          echo "client changed:   ${{ needs.changes.outputs.client }}"
+          echo "deploy relevant:  ${{ needs.changes.outputs.deploy }}"
+
+  deploy:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: changes
+    steps:
+      - name: Validate required secrets
+        run: |
+          test -n "${{ secrets.RPI_SSH_HOST }}"
+          test -n "${{ secrets.RPI_SSH_USER }}"
+          test -n "${{ secrets.RPI_SSH_PRIVATE_KEY }}"
+          test -n "${{ secrets.RPI_APP_DIR }}"
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v1.2.0
+        env:
+          DB_CHANGED: ${{ needs.changes.outputs.database }}
+          API_CHANGED: ${{ needs.changes.outputs.api }}
+          CLIENT_CHANGED: ${{ needs.changes.outputs.client }}
+          DEPLOY_CHANGED: ${{ needs.changes.outputs.deploy }}
+          FORCE_FULL_DEPLOY: ${{ github.event.inputs.full_deploy || 'false' }}
+        with:
+          host: ${{ secrets.RPI_SSH_HOST }}
+          username: ${{ secrets.RPI_SSH_USER }}
+          key: ${{ secrets.RPI_SSH_PRIVATE_KEY }}
+          port: ${{ secrets.RPI_SSH_PORT || '22' }}
+          script_stop: true
+          command_timeout: 30m
+          script: |
+            set -euo pipefail
+
+            BRANCH="${{ github.ref_name }}"
+            TARGET_DIR="${{ secrets.RPI_APP_DIR }}"
+            DB_CHANGED="${DB_CHANGED}"
+            API_CHANGED="${API_CHANGED}"
+            CLIENT_CHANGED="${CLIENT_CHANGED}"
+            DEPLOY_CHANGED="${DEPLOY_CHANGED}"
+            FORCE_FULL_DEPLOY="${FORCE_FULL_DEPLOY}"
+
+            if [ "${FORCE_FULL_DEPLOY}" = "true" ]; then
+              DEPLOY_CHANGED="true"
+              DB_CHANGED="true"
+              API_CHANGED="true"
+              CLIENT_CHANGED="true"
+            fi
+
+            if [ "${DEPLOY_CHANGED}" != "true" ]; then
+              echo "No deploy-relevant changes detected. Skipping remote deploy."
+              exit 0
+            fi
+
+            if [ ! -d "${TARGET_DIR}" ]; then
+              echo "Error: deploy directory not found: ${TARGET_DIR}"
+              exit 1
+            fi
+
+            cd "${TARGET_DIR}"
+
+            git fetch origin "${BRANCH}" --prune
+            git checkout "${BRANCH}"
+            git pull --ff-only origin "${BRANCH}"
+
+            npm install
+            npm run install:all
+
+            if [ "${DB_CHANGED}" = "true" ]; then
+              echo "Applying DB changes..."
+              npm run db:prepare:pro
+            else
+              echo "No DB changes detected. Skipping db:prepare:pro"
+            fi
+
+            if [ "${CLIENT_CHANGED}" = "true" ]; then
+              echo "Building frontend..."
+              npm run build --prefix client
+            else
+              echo "No client changes detected. Skipping frontend build"
+            fi
+
+            if pm2 describe adf247-pro >/dev/null 2>&1; then
+              if [ "${API_CHANGED}" = "true" ] || [ "${DB_CHANGED}" = "true" ]; then
+                echo "Restarting API process..."
+                pm2 restart adf247-pro --update-env
+              else
+                echo "No API/DB changes requiring restart. Keeping current process running"
+              fi
+            else
+              echo "Starting API process..."
+              pm2 start pm2.ecosystem.config.cjs --only adf247-pro
+            fi
+
+            pm2 save
