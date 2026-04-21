@@ -28,188 +28,83 @@ jobs:
       client: ${{ steps.filter.outputs.client }}
       deploy: ${{ steps.filter.outputs.deploy }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Detect changed areas
-        id: filter
+      - id: filter
         uses: dorny/paths-filter@v3
         with:
           filters: |
             database:
-              - 'database/prisma/**'
-              - 'database/prisma.js'
-              - 'database/package.json'
-              - 'database/package-lock.json'
+              - 'database/**'
             api:
               - 'api/**'
               - 'pm2.ecosystem.config.cjs'
             client:
               - 'client/**'
             deploy:
-              - 'api/**'
-              - 'client/**'
-              - 'database/**'
-              - 'pm2.ecosystem.config.cjs'
-              - 'package.json'
-              - 'package-lock.json'
-
-  pr-summary:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    needs: changes
-    steps:
-      - name: Deployment plan preview
-        run: |
-          echo "PR deployment preview"
-          echo "database changed: ${{ needs.changes.outputs.database }}"
-          echo "api changed:      ${{ needs.changes.outputs.api }}"
-          echo "client changed:   ${{ needs.changes.outputs.client }}"
-          echo "deploy relevant:  ${{ needs.changes.outputs.deploy }}"
+              - '**'
 
   deploy:
     if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: self-hosted
     needs: changes
     steps:
-      - name: Validate required secrets
-        run: |
-          set -euo pipefail
-          missing=0
+      - uses: actions/checkout@v4
 
-          check_secret() {
-            local value="$1"
-            local name="$2"
-            if [ -z "$value" ]; then
-              echo "::error::Missing required secret: ${name}"
-              missing=1
-            fi
-          }
-
-          check_secret "${{ secrets.RPI_SSH_HOST }}" "RPI_SSH_HOST"
-          check_secret "${{ secrets.RPI_SSH_USER }}" "RPI_SSH_USER"
-          check_secret "${{ secrets.RPI_SSH_PRIVATE_KEY }}" "RPI_SSH_PRIVATE_KEY"
-          check_secret "${{ secrets.RPI_APP_DIR }}" "RPI_APP_DIR"
-
-          if [ "$missing" -ne 0 ]; then
-            echo "::error::Deployment aborted due to missing required secrets."
-            exit 1
-          fi
-
-      - name: Print deployment flags
-        run: |
-          echo "database changed: ${{ needs.changes.outputs.database }}"
-          echo "api changed:      ${{ needs.changes.outputs.api }}"
-          echo "client changed:   ${{ needs.changes.outputs.client }}"
-          echo "deploy relevant:  ${{ needs.changes.outputs.deploy }}"
-          echo "force full deploy:${{ github.event.inputs.full_deploy || 'false' }}"
-
-      - name: Deploy over SSH
-        uses: appleboy/ssh-action@v1.2.0
+      - name: Deploy locally on Raspberry
         env:
           DB_CHANGED: ${{ needs.changes.outputs.database }}
           API_CHANGED: ${{ needs.changes.outputs.api }}
           CLIENT_CHANGED: ${{ needs.changes.outputs.client }}
           DEPLOY_CHANGED: ${{ needs.changes.outputs.deploy }}
           FORCE_FULL_DEPLOY: ${{ github.event.inputs.full_deploy || 'false' }}
-        with:
-          host: ${{ secrets.RPI_SSH_HOST }}
-          username: ${{ secrets.RPI_SSH_USER }}
-          key: ${{ secrets.RPI_SSH_PRIVATE_KEY }}
-          port: ${{ secrets.RPI_SSH_PORT || '22' }}
-          script_stop: true
-          command_timeout: 30m
-          script: |
-            set -euo pipefail
-            trap 'echo "Error on remote deploy at line ${LINENO}" >&2' ERR
+        run: |
+          set -euo pipefail
 
-            BRANCH="${{ github.ref_name }}"
-            TARGET_DIR="${{ secrets.RPI_APP_DIR }}"
-            DB_CHANGED="${DB_CHANGED}"
-            API_CHANGED="${API_CHANGED}"
-            CLIENT_CHANGED="${CLIENT_CHANGED}"
-            DEPLOY_CHANGED="${DEPLOY_CHANGED}"
-            FORCE_FULL_DEPLOY="${FORCE_FULL_DEPLOY}"
+          BRANCH="${{ github.ref_name }}"
+          TARGET_DIR="/opt/ADF247"
 
-            if [ "${FORCE_FULL_DEPLOY}" = "true" ]; then
-              DEPLOY_CHANGED="true"
-              DB_CHANGED="true"
-              API_CHANGED="true"
-              CLIENT_CHANGED="true"
-            fi
+          if [ "${FORCE_FULL_DEPLOY}" = "true" ]; then
+            DEPLOY_CHANGED="true"
+            DB_CHANGED="true"
+            API_CHANGED="true"
+            CLIENT_CHANGED="true"
+          fi
 
-            if [ "${DEPLOY_CHANGED}" != "true" ]; then
-              echo "No deploy-relevant changes detected. Skipping remote deploy."
-              exit 0
-            fi
+          if [ "${DEPLOY_CHANGED}" != "true" ]; then
+            echo "No changes. Skipping deploy."
+            exit 0
+          fi
 
-            if [ ! -d "${TARGET_DIR}" ]; then
-              echo "Error: deploy directory not found: ${TARGET_DIR}"
-              exit 1
-            fi
+          cd "${TARGET_DIR}"
 
-            cd "${TARGET_DIR}"
+          git fetch origin "${BRANCH}"
+          git checkout "${BRANCH}"
+          git pull --ff-only origin "${BRANCH}"
 
-            for cmd in git npm node pm2; do
-              if ! command -v "$cmd" >/dev/null 2>&1; then
-                echo "Error: required command not found on Raspberry Pi: ${cmd}"
-                exit 1
-              fi
-            done
+          npm ci
+          npm run install:all
 
-            echo "Remote versions:"
-            node -v
-            npm -v
-            pm2 -v
+          if [ "${DB_CHANGED}" = "true" ]; then
+            echo "Applying DB changes..."
+            npm run db:prepare:pro
+          fi
 
-            git fetch origin "${BRANCH}" --prune
-            git checkout "${BRANCH}"
-            git pull --ff-only origin "${BRANCH}"
-
+          if [ "${CLIENT_CHANGED}" = "true" ]; then
+            echo "Building frontend (clean)..."
+            cd client
             npm ci
-            npm run install:all
+            rm -rf dist
+            npm run build
+            cd ..
+          fi
 
-            if [ "${DB_CHANGED}" = "true" ]; then
-              echo "Applying DB changes..."
-              if [ ! -f "database/.env.pro" ]; then
-                echo "Error: database/.env.pro not found in ${TARGET_DIR}"
-                exit 1
-              fi
-              npm run db:prepare:pro
-            else
-              echo "No DB changes detected. Skipping db:prepare:pro"
+          if pm2 describe adf247-pro >/dev/null 2>&1; then
+            if [ "${API_CHANGED}" = "true" ] || [ "${DB_CHANGED}" = "true" ]; then
+              pm2 restart adf247-pro --update-env
             fi
+          else
+            pm2 start pm2.ecosystem.config.cjs --only adf247-pro
+          fi
 
-            if [ "${CLIENT_CHANGED}" = "true" ]; then
-              echo "Building frontend (clean)..."
-
-              cd client
-
-              echo "Installing dependencies (clean)..."
-              npm ci
-
-              echo "Cleaning previous build..."
-              rm -rf dist
-
-              echo "Building..."
-              npm run build
-
-              cd ..
-            else
-              echo "No client changes detected. Skipping frontend build"
-            fi
-
-            if pm2 describe adf247-pro >/dev/null 2>&1; then
-              if [ "${API_CHANGED}" = "true" ] || [ "${DB_CHANGED}" = "true" ]; then
-                echo "Restarting API process..."
-                pm2 restart adf247-pro --update-env
-              else
-                echo "No API/DB changes requiring restart. Keeping current process running"
-              fi
-            else
-              echo "Starting API process..."
-              pm2 start pm2.ecosystem.config.cjs --only adf247-pro
-            fi
-
-            pm2 save
+          pm2 save
