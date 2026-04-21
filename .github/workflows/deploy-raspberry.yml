@@ -75,10 +75,35 @@ jobs:
     steps:
       - name: Validate required secrets
         run: |
-          test -n "${{ secrets.RPI_SSH_HOST }}"
-          test -n "${{ secrets.RPI_SSH_USER }}"
-          test -n "${{ secrets.RPI_SSH_PRIVATE_KEY }}"
-          test -n "${{ secrets.RPI_APP_DIR }}"
+          set -euo pipefail
+          missing=0
+
+          check_secret() {
+            local value="$1"
+            local name="$2"
+            if [ -z "$value" ]; then
+              echo "::error::Missing required secret: ${name}"
+              missing=1
+            fi
+          }
+
+          check_secret "${{ secrets.RPI_SSH_HOST }}" "RPI_SSH_HOST"
+          check_secret "${{ secrets.RPI_SSH_USER }}" "RPI_SSH_USER"
+          check_secret "${{ secrets.RPI_SSH_PRIVATE_KEY }}" "RPI_SSH_PRIVATE_KEY"
+          check_secret "${{ secrets.RPI_APP_DIR }}" "RPI_APP_DIR"
+
+          if [ "$missing" -ne 0 ]; then
+            echo "::error::Deployment aborted due to missing required secrets."
+            exit 1
+          fi
+
+      - name: Print deployment flags
+        run: |
+          echo "database changed: ${{ needs.changes.outputs.database }}"
+          echo "api changed:      ${{ needs.changes.outputs.api }}"
+          echo "client changed:   ${{ needs.changes.outputs.client }}"
+          echo "deploy relevant:  ${{ needs.changes.outputs.deploy }}"
+          echo "force full deploy:${{ github.event.inputs.full_deploy || 'false' }}"
 
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v1.2.0
@@ -97,6 +122,7 @@ jobs:
           command_timeout: 30m
           script: |
             set -euo pipefail
+            trap 'echo "Error on remote deploy at line ${LINENO}" >&2' ERR
 
             BRANCH="${{ github.ref_name }}"
             TARGET_DIR="${{ secrets.RPI_APP_DIR }}"
@@ -125,6 +151,18 @@ jobs:
 
             cd "${TARGET_DIR}"
 
+            for cmd in git npm node pm2; do
+              if ! command -v "$cmd" >/dev/null 2>&1; then
+                echo "Error: required command not found on Raspberry Pi: ${cmd}"
+                exit 1
+              fi
+            done
+
+            echo "Remote versions:"
+            node -v
+            npm -v
+            pm2 -v
+
             git fetch origin "${BRANCH}" --prune
             git checkout "${BRANCH}"
             git pull --ff-only origin "${BRANCH}"
@@ -134,6 +172,10 @@ jobs:
 
             if [ "${DB_CHANGED}" = "true" ]; then
               echo "Applying DB changes..."
+              if [ ! -f "database/.env.pro" ]; then
+                echo "Error: database/.env.pro not found in ${TARGET_DIR}"
+                exit 1
+              fi
               npm run db:prepare:pro
             else
               echo "No DB changes detected. Skipping db:prepare:pro"
