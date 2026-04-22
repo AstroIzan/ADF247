@@ -82,18 +82,61 @@ jobs:
           git checkout "${BRANCH}"
           git pull --ff-only origin "${BRANCH}"
 
-          npm ci
-          npm run install:all
+          CACHE_DIR="${TARGET_DIR}/.deploy-cache"
+          mkdir -p "${CACHE_DIR}"
+
+          ensure_npm_ci() {
+            local project_dir="$1"
+            local project_path="${TARGET_DIR}/${project_dir}"
+            local lock_file="${project_path}/package-lock.json"
+            local cache_key
+            local current_lock_hash
+            local previous_lock_hash=""
+
+            if [ ! -d "${project_path}" ]; then
+              echo "[deps] Skipping ${project_dir}: directory not found"
+              return 0
+            fi
+
+            if [ ! -f "${lock_file}" ]; then
+              echo "[deps] Skipping ${project_dir}: package-lock.json not found"
+              return 0
+            fi
+
+            cache_key="$(echo "${project_dir}" | tr '/.' '__')"
+            current_lock_hash="$(sha256sum "${lock_file}" | awk '{print $1}')"
+
+            if [ -f "${CACHE_DIR}/${cache_key}.sha256" ]; then
+              previous_lock_hash="$(cat "${CACHE_DIR}/${cache_key}.sha256")"
+            fi
+
+            if [ -d "${project_path}/node_modules" ] && [ "${current_lock_hash}" = "${previous_lock_hash}" ]; then
+              echo "[deps] ${project_dir}: lockfile unchanged, reusing existing node_modules"
+              return 0
+            fi
+
+            echo "[deps] ${project_dir}: running npm ci"
+            (
+              cd "${project_path}"
+              npm ci --no-audit --no-fund
+            )
+            echo "${current_lock_hash}" > "${CACHE_DIR}/${cache_key}.sha256"
+          }
 
           if [ "${DB_CHANGED}" = "true" ]; then
             echo "Applying DB changes..."
+            ensure_npm_ci "database"
             npm run db:prepare:pro
+          fi
+
+          if [ "${API_CHANGED}" = "true" ]; then
+            ensure_npm_ci "api"
           fi
 
           if [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "Building frontend (clean)..."
+            ensure_npm_ci "client"
             cd client
-            npm ci
             rm -rf dist
             npm run build
             cd ..
