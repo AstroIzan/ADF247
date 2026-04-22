@@ -1,4 +1,5 @@
 .app-shell {
+	--top-nav-height: 58px;
 	display: flex;
 	flex-direction: column;
 	height: 100vh;
@@ -9,13 +10,17 @@
 }
 
 .top-nav {
-	position: sticky;
+	position: fixed;
 	top: 0;
+	left: 0;
+	right: 0;
 	z-index: 1200;
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	gap: 10px;
+	min-height: var(--top-nav-height);
+	box-sizing: border-box;
 	padding: 10px 16px;
 	background: rgba(32, 32, 32, 0.96);
 	border-bottom: 1px solid rgba(240, 176, 0, 0.28);
@@ -226,7 +231,7 @@
 		background: rgba(24, 24, 24, 0.98);
 		border-bottom: 1px solid rgba(240, 176, 0, 0.25);
 		position: fixed;
-		top: 52px;
+		top: var(--top-nav-height);
 		left: 0;
 		right: 0;
 		z-index: 1300;
@@ -263,6 +268,10 @@
 }
 
 @media (max-width: 600px) {
+	.app-shell {
+		--top-nav-height: 52px;
+	}
+
   .top-nav {
 		padding: 8px 10px;
   }
@@ -277,6 +286,7 @@
 .app-content {
 	flex: 1 1 auto;
 	min-height: 0;
+	padding-top: var(--top-nav-height);
 	overflow-y: auto;
 }
 
@@ -290,6 +300,7 @@ app-home {
 	display: flex;
 	gap: 8px;
 	align-items: center;
+	margin-top: var(--top-nav-height);
 	padding: 10px 14px;
 	border-bottom: 1px solid #f0d49d;
 	background: #fff5df;

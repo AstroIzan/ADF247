@@ -83,6 +83,7 @@
   min-height: 56px;
   border: 1px solid #e0e0e0;
   background: #fff;
+  color: #1f1f1f;
   border-radius: 8px;
   padding: 6px;
   display: flex;
@@ -94,6 +95,9 @@
   font-family: inherit;
   text-align: left;
   transition: all 0.2s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .calendar-cell-btn:hover {
@@ -372,6 +376,16 @@
   gap: 8px;
 }
 
+.time-input-mobile {
+  display: none;
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+}
+
 .time-inputs select {
   flex: 1;
   max-width: 100px;
@@ -391,6 +405,16 @@
   font-weight: 600;
   font-size: 16px;
   color: #666;
+}
+
+@media (max-width: 900px) {
+  .time-inputs-desktop {
+    display: none;
+  }
+
+  .time-input-mobile {
+    display: block;
+  }
 }
 
 .modal-overlay {

@@ -1472,6 +1472,10 @@
     align-items: stretch;
   }
 
+  .answer-actions .btn {
+    width: 100%;
+  }
+
   .convo-meta-row {
     align-items: center;
   }

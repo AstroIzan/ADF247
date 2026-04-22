@@ -166,7 +166,7 @@ export class PlaAlfaComponent implements OnInit {
 
   getPlaAlfaLevelLabel(level: number | null | undefined) {
     if (!Number.isInteger(level) || level === null || level === undefined) {
-      return 'Sense nivell';
+      return 'N/D';
     }
 
     return `Alfa ${level}`;
@@ -182,7 +182,7 @@ export class PlaAlfaComponent implements OnInit {
     }
 
     if (level > 5) {
-      return 'pla-alfa-level-5';
+      return 'pla-alfa-level-unknown';
     }
 
     return `pla-alfa-level-${level}`;

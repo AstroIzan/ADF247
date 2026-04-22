@@ -46,6 +46,17 @@
               </button>
               <span class="pla-alfa-selected-count">{{ plaAlfaSelected().length }} seleccionats</span>
             </div>
+
+            @if (plaAlfaSelected().length) {
+              <div class="pla-alfa-selected-preview" aria-label="Municipis seleccionats">
+                @for (municipality of plaAlfaSelected().slice(0, 20); track municipality) {
+                  <span class="pla-alfa-selected-pill">{{ municipality }}</span>
+                }
+                @if (plaAlfaSelected().length > 20) {
+                  <span class="pla-alfa-selected-pill pla-alfa-selected-pill-more">+{{ plaAlfaSelected().length - 20 }} més</span>
+                }
+              </div>
+            }
           </div>
 
           <div class="pla-alfa-checkbox-list" role="listbox" aria-label="Llista de municipis Pla Alfa">
