@@ -1472,7 +1472,17 @@
     align-items: stretch;
   }
 
+  .answer-actions-wrap {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .answer-actions {
+    width: 100%;
+  }
+
   .answer-actions .btn {
+    display: block;
     width: 100%;
   }
 
