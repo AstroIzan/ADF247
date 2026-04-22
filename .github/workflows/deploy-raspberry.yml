@@ -85,8 +85,9 @@ jobs:
           CACHE_DIR="${TARGET_DIR}/.deploy-cache"
           mkdir -p "${CACHE_DIR}"
 
-          ensure_npm_ci() {
+          ensure_npm_deps() {
             local project_dir="$1"
+            local install_mode="${2:-ci}"
             local project_path="${TARGET_DIR}/${project_dir}"
             local lock_file="${project_path}/package-lock.json"
             local cache_key
@@ -115,27 +116,32 @@ jobs:
               return 0
             fi
 
-            echo "[deps] ${project_dir}: running npm ci"
+            echo "[deps] ${project_dir}: installing dependencies (${install_mode})"
             (
               cd "${project_path}"
-              npm ci --no-audit --no-fund
+
+              if [ "${install_mode}" = "install" ]; then
+                npm install --prefer-offline --no-audit --no-fund || npm ci --no-audit --no-fund
+              else
+                npm ci --no-audit --no-fund
+              fi
             )
             echo "${current_lock_hash}" > "${CACHE_DIR}/${cache_key}.sha256"
           }
 
           if [ "${DB_CHANGED}" = "true" ]; then
             echo "Applying DB changes..."
-            ensure_npm_ci "database"
+            ensure_npm_deps "database" "ci"
             npm run db:prepare:pro
           fi
 
           if [ "${API_CHANGED}" = "true" ]; then
-            ensure_npm_ci "api"
+            ensure_npm_deps "api" "ci"
           fi
 
           if [ "${CLIENT_CHANGED}" = "true" ]; then
             echo "Building frontend (clean)..."
-            ensure_npm_ci "client"
+            ensure_npm_deps "client" "install"
             cd client
             rm -rf dist
             npm run build
