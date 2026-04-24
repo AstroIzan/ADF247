@@ -226,10 +226,10 @@ function buildConvocatoriaUpdateDto(payload) {
   }
 
   if (payload.responsableId !== undefined) {
-    dto.responsableId = normalizeInteger(payload.responsableId, {
+    dto.responsableId = payload.responsableId == null ? null : normalizeInteger(payload.responsableId, {
       fieldName: 'responsableId',
       min: 1,
-    })
+    });
   }
 
   if (payload.convoTypeId !== undefined) {
