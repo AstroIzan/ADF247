@@ -250,7 +250,8 @@ export class ConvosComponent implements OnDestroy {
 
     const nextSortida = Boolean(data.sortida);
     const currentSortida = Boolean(originalConvocatoria?.sortida);
-    if (!isEditing || nextSortida !== currentSortida) {
+    const sortidaChanged = !isEditing || nextSortida !== currentSortida;
+    if (sortidaChanged) {
       payload.sortida = nextSortida;
     }
 
@@ -281,6 +282,16 @@ export class ConvosComponent implements OnDestroy {
     if (this.editingId()) {
       this.dataService.updateConvocatoria(this.editingId()!, payload).subscribe({
         next: (updatedConvo) => {
+          if (sortidaChanged) {
+            this.dataService.sendConvocatoriaSortidaStatus(updatedConvo.id).subscribe({
+              next: () => {
+                this.actionFeedback.set(`S'ha actualitzat la convocatòria i enviat l'estat de sortida per a ${updatedConvo.title}.`);
+              },
+              error: () => {
+                // Keep save successful even if notification dispatch fails.
+              },
+            });
+          }
           this.formSubmitting.set(false);
           this.closeForm();
           this.onChanged.emit(updatedConvo);
@@ -316,7 +327,8 @@ export class ConvosComponent implements OnDestroy {
         this.onChanged.emit(null as any);
       },
       error: (err) => {
-        alert('Error en eliminar: ' + err.message);
+        this.deleteConfirming.set(null);
+        this.onChanged.emit(null as any);
       }
     });
   }

@@ -50,7 +50,7 @@
     </article>
 
     @if (isDateModalOpen()) {
-      <div class="modal-overlay" (click)="closeDateModal()">
+      <div class="modal-overlay">
         <div class="modal-content" (click)="$event.stopPropagation()">
           <div class="modal-header">
             <h3>Disponibilitats de {{ selectedDateForModal() | date:'d MMMM':'Europe/Madrid':'ca-ES' }}</h3>
@@ -103,11 +103,6 @@
         </div>
 
         <div class="form-group">
-          <label>Data fi</label>
-          <input type="date" [value]="form().toDate" (change)="updateFormField('toDate', $any($event.target).value)" />
-        </div>
-
-        <div class="form-group">
           <label>Hora inici</label>
           <div class="time-inputs time-inputs-desktop">
             <select [value]="form().fromTime.split(':')[0]" (change)="updateFormField('fromTime', $any($event.target).value + ':' + form().fromTime.split(':')[1])">
@@ -130,6 +125,11 @@
             [value]="form().fromTime"
             (change)="updateFormField('fromTime', $any($event.target).value)"
           />
+        </div>
+
+        <div class="form-group">
+          <label>Data fi</label>
+          <input type="date" [value]="form().toDate" (change)="updateFormField('toDate', $any($event.target).value)" />
         </div>
 
         <div class="form-group">

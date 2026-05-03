@@ -43,6 +43,7 @@ export class UsersComponent implements OnDestroy {
   formData = signal<Partial<User>>({
     nCarnet: '',
     nIndicatiu: '',
+    phone: '',
     name: '',
     lastName: '',
     password: '',
@@ -165,6 +166,7 @@ export class UsersComponent implements OnDestroy {
       this.formData.set({
         nCarnet: '',
         nIndicatiu: '',
+        phone: '',
         name: '',
         lastName: '',
         password: '',
@@ -202,9 +204,9 @@ export class UsersComponent implements OnDestroy {
 
   downloadCsvTemplate() {
     const template = [
-      'nCarnet,nIndicatiu,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
-      '247001,BR-01,Izan,Admin,Passw0rd!,true,true,false,false,false',
-      '247002,BR-12,Joan,Perez,Passw0rd!,true,false,true,false,false',
+      'nCarnet,nIndicatiu,phone,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
+      '247001,BR-01,600000001,Izan,Admin,Passw0rd!,true,true,false,false,false',
+      '247002,BR-12,600000002,Joan,Perez,Passw0rd!,true,false,true,false,false',
     ].join('\n');
 
     const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });

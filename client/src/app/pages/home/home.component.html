@@ -327,7 +327,7 @@
   </section>
 
   @if (showCustomModal() && customConvo()) {
-    <div class="modal-overlay" (click)="closeCustomModal()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Resposta personalitzada</h3>
@@ -435,7 +435,7 @@
   }
 
   @if (showCampaignFormModal() && campaignFormConvo()) {
-    <div class="modal-overlay" (click)="closeCampaignFormModal()">
+    <div class="modal-overlay">
       <div class="modal modal-wide modal-allow-overflow" (click)="onCampaignFormModalClick($event)">
         <div class="modal-header">
           <h3>Formulari de campanya - {{ campaignFormMode() === 'start' ? 'Inici de servei' : 'Final de servei' }}</h3>
@@ -612,7 +612,7 @@
   }
 
   @if (showCampaignRecordsModal() && campaignRecordsConvo()) {
-    <div class="modal-overlay" (click)="closeCampaignRecordsModal()">
+    <div class="modal-overlay">
       <div class="modal modal-wide" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Formularis - {{ campaignRecordsConvo()!.title }}</h3>
@@ -720,7 +720,7 @@
   }
 
   @if (showLifecycleModal() && lifecycleConvo()) {
-    <div class="modal-overlay" (click)="closeLifecycleModal()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Editar hores reals</h3>
@@ -770,7 +770,7 @@
   }
 
   @if (showAdminConvoModal() && adminConvo()) {
-    <div class="modal-overlay" (click)="closeAdminConvoModal()">
+    <div class="modal-overlay">
       <div class="modal modal-wide modal-allow-overflow" (click)="onAdminConvoModalClick($event)">
         <div class="modal-header">
           <h3>Gestió de Convocatòria</h3>
@@ -1099,7 +1099,7 @@
   }
 
   @if (showGuardiaResponsesModal() && guardiaResponsesConvo()) {
-    <div class="modal-overlay" (click)="closeGuardiaResponsesModal()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Respostes de la convocatòria</h3>
@@ -1187,7 +1187,7 @@
   }
 
   @if (showRespuestaInfoModal() && respuestaInfo()) {
-    <div class="modal-overlay" (click)="closeRespuestaInfoModal()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Detall resposta</h3>
@@ -1218,7 +1218,7 @@
   }
 
   @if (showCustomTextModal()) {
-    <div class="modal-overlay" (click)="closeCustomTextModal()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Text personalitzat</h3>
@@ -1235,7 +1235,7 @@
   }
 
   @if (showCreateConvoModal()) {
-    <div class="modal-overlay" (click)="closeCreateConvoModal()">
+    <div class="modal-overlay">
       <div class="modal modal-allow-overflow" (click)="onCreateConvoModalClick($event)">
         <div class="modal-header">
           <h3>{{ createConvoModalKind() === 'incendi-sortida' ? 'Nova convocatòria d\'incendi/sortida' : 'Nova convocatòria' }}</h3>
@@ -1588,7 +1588,7 @@
   }
 
   @if (showTimeMenu()) {
-    <div class="modal-overlay" (click)="closeTimeMenu()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Seleccionar hora</h3>

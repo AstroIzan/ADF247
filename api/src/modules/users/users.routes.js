@@ -1,4 +1,5 @@
 const express = require('express')
+const { requireAuth } = require('../../middlewares/auth.middleware')
 const { createSimpleRateLimit } = require('../../middlewares/rate-limit.middleware')
 const usersController = require('./users.controller')
 
@@ -10,14 +11,14 @@ const importUsersRateLimit = createSimpleRateLimit({
 })
 
 router.route('/')
-  .get(usersController.getUsers)
-  .post(usersController.createUser)
+  .get(requireAuth, usersController.getUsers)
+  .post(requireAuth, usersController.createUser)
 
-router.post('/import', importUsersRateLimit, usersController.importUsers)
+router.post('/import', requireAuth, importUsersRateLimit, usersController.importUsers)
 
 router.route('/:id')
-  .get(usersController.getUserById)
-  .put(usersController.updateUser)
-  .delete(usersController.deleteUser)
+  .get(requireAuth, usersController.getUserById)
+  .put(requireAuth, usersController.updateUser)
+  .delete(requireAuth, usersController.deleteUser)
 
 module.exports = router

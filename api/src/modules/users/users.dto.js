@@ -7,6 +7,7 @@ const USER_TEXT_FIELDS = {
   nCarnet: { requiredOnCreate: true },
   nIndicatiu: { nullable: true },
   password: { requiredOnCreate: true },
+  phone: { nullable: true },
 }
 
 // Valores por defecto para roles cuando no llegan informados o no existen aun.
@@ -188,6 +189,7 @@ function mapUserToDto(user) {
     id: user.id,
     nCarnet: user.nCarnet,
     nIndicatiu: user.nIndicatiu,
+    phone: user.phone,
     name: user.name,
     lastName: user.lastName,
     isActive: user.isActive,

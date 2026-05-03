@@ -12,6 +12,14 @@ function parsePositiveInt(rawValue, fieldName) {
   return parsedValue
 }
 
+function parseOptionalPositiveInt(rawValue, fieldName) {
+  if (rawValue === undefined) {
+    return undefined
+  }
+
+  return parsePositiveInt(rawValue, fieldName)
+}
+
 function sendErrorResponse(res, error) {
   const statusCode = error.statusCode || 500
   const payload = {
@@ -50,6 +58,21 @@ function buildListFilters(query) {
 async function getRespuestas(req, res) {
   try {
     const filters = buildListFilters(req.query)
+    const page = parseOptionalPositiveInt(req.query.page, 'page')
+    const pageSize = parseOptionalPositiveInt(req.query.pageSize, 'pageSize')
+
+    if ((page && !pageSize) || (!page && pageSize)) {
+      const error = new Error('Debes enviar "page" y "pageSize" juntos para usar paginacion.')
+      error.statusCode = 400
+      throw error
+    }
+
+    if (page && pageSize) {
+      const result = await dispoService.getRespuestasPage(filters, { page, pageSize })
+      res.json(result)
+      return
+    }
+
     const respuestas = await dispoService.getAllRespuestas(filters)
     res.json(respuestas)
   } catch (error) {

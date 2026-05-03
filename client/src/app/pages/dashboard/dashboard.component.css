@@ -236,6 +236,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .quick-stats.quick-stats-admin {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .dashboard-content {
     padding: 12px 16px 20px;
   }
@@ -323,6 +327,10 @@
   .quick-stats {
     grid-template-columns: 1fr;
     gap: 8px;
+  }
+
+  .quick-stats.quick-stats-admin {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .quick-stats article {

@@ -7,6 +7,7 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 24px;
+  overflow-x: clip;
 }
 
 .home-header {
@@ -29,6 +30,7 @@
 .home-header-actions {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .incendi-shortcut-btn {

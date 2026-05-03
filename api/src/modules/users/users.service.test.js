@@ -5,8 +5,8 @@ const { importUsersFromCsv, __csvInternals } = require('./users.service')
 
 test('parseCsvRows valida cabecera correcta', () => {
   const csv = [
-    'nCarnet,nIndicatiu,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
-    '247001,BR-01,Ana,Perez,Password1,true,false,true,false,false',
+    'nCarnet,nIndicatiu,phone,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
+    '247001,BR-01,666111222,Ana,Perez,Password1,true,false,true,false,false',
   ].join('\n')
 
   const rows = __csvInternals.parseCsvRows(csv)
@@ -26,9 +26,9 @@ test('parseCsvRows rechaza cabecera invalida', () => {
 
 test('importUsersFromCsv procesa inserciones y rechazos por fila', async () => {
   const csv = [
-    'nCarnet,nIndicatiu,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
-    '247001,BR-01,Ana,Perez,Password1,true,false,true,false,false',
-    '247002,BR-02,Joan,Roca,Password2,true,false,false,false,false',
+    'nCarnet,nIndicatiu,phone,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
+    '247001,BR-01,666111222,Ana,Perez,Password1,true,false,true,false,false',
+    '247002,BR-02,666333444,Joan,Roca,Password2,true,false,false,false,false',
   ].join('\n')
 
   const inserted = []
@@ -55,8 +55,8 @@ test('importUsersFromCsv procesa inserciones y rechazos por fila', async () => {
 
 test('importUsersFromCsv rechaza nombre de fichero no csv', async () => {
   const csv = [
-    'nCarnet,nIndicatiu,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
-    '247001,BR-01,Ana,Perez,Password1,true,false,true,false,false',
+    'nCarnet,nIndicatiu,phone,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla',
+    '247001,BR-01,666111222,Ana,Perez,Password1,true,false,true,false,false',
   ].join('\n')
 
   await assert.rejects(

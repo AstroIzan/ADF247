@@ -150,7 +150,7 @@
   }
 
   @if (showFilters()) {
-    <div class="modal-overlay" (click)="closeFilters()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Filtres de Convocatòries</h3>
@@ -212,7 +212,7 @@
   }
 
   @if (showForm()) {
-    <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-overlay">
       <div class="modal modal-allow-overflow" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>{{ editingId() ? 'Editar Convocatòria' : 'Nova Convocatòria' }}</h3>
@@ -453,7 +453,7 @@
   }
 
   @if (selectedConvo()) {
-    <div class="modal-overlay" (click)="selectedConvo.set(null)">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Detalls de la Convocatòria</h3>
@@ -518,7 +518,7 @@
   }
 
   @if (showTimeMenu()) {
-    <div class="modal-overlay" (click)="closeTimeMenu()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Seleccionar hora</h3>

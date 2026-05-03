@@ -131,7 +131,7 @@
   }
 
   @if (showFilters()) {
-    <div class="modal-overlay" (click)="closeFilters()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Filtres de Respostes</h3>
@@ -196,7 +196,7 @@
   }
 
   @if (showForm()) {
-    <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>{{ editingId() ? 'Editar Resposta' : 'Nova Resposta' }}</h3>
@@ -295,7 +295,7 @@
 
   <!-- Detail Modal -->
     @if (selectedRespuesta(); as respuestaDetail) {
-    <div class="modal-overlay" (click)="selectedRespuesta.set(null)">
+    <div class="modal-overlay">
       <div class="modal modal-detail" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Detalls de la Resposta</h3>

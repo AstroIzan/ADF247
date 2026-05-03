@@ -70,7 +70,7 @@
   }
 
   @if (showFilters()) {
-    <div class="modal-overlay" (click)="closeFilters()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Filtres de Tipus</h3>
@@ -98,7 +98,7 @@
   }
 
   @if (showForm()) {
-    <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>{{ editingId() ? 'Editar Tipus de Convocatòria' : 'Nou Tipus de Convocatòria' }}</h3>

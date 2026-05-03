@@ -11,6 +11,7 @@ const { hashPassword } = require('../auth/auth.password')
 const CSV_HEADERS = [
   'nCarnet',
   'nIndicatiu',
+  'phone',
   'name',
   'lastName',
   'password',
@@ -30,7 +31,7 @@ const userInclude = {
 }
 
 // Campos escalares directos del modelo User que se pueden copiar al data de Prisma
-const USER_SCALAR_FIELDS = ['name', 'lastName', 'nCarnet', 'nIndicatiu', 'password', 'isActive']
+const USER_SCALAR_FIELDS = ['name', 'lastName', 'nCarnet', 'nIndicatiu', 'phone', 'password', 'isActive']
 
 // Igual que en DTO, estandarizamos errores para que controller pueda responder sin
 // conocer detalles de Prisma ni de la logica de negocio interna.
@@ -283,6 +284,7 @@ function mapCsvRowToUserPayload(row) {
   return {
     nCarnet,
     nIndicatiu: String(row.nIndicatiu || '').trim() || undefined,
+    phone: String(row.phone || '').trim() || undefined,
     name,
     lastName: String(row.lastName || '').trim() || undefined,
     password,
@@ -339,6 +341,7 @@ async function importUsersFromCsv(payload, options = {}) {
       await createUserFn({
         nCarnet: userPayload.nCarnet,
         nIndicatiu: userPayload.nIndicatiu,
+        phone: userPayload.phone,
         name: userPayload.name,
         lastName: userPayload.lastName,
         password: userPayload.password,
@@ -383,6 +386,32 @@ async function getAllUsers() {
   })
 
   return users.map(mapUserToDto)
+}
+
+async function getUsersPage({ page, pageSize }) {
+  const skip = (page - 1) * pageSize
+
+  const [total, users] = await Promise.all([
+    database.user.count(),
+    database.user.findMany({
+      include: userInclude,
+      orderBy: {
+        id: 'asc',
+      },
+      skip,
+      take: pageSize,
+    }),
+  ])
+
+  return {
+    items: users.map(mapUserToDto),
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    },
+  }
 }
 
 // Recupera un solo usuario y lo transforma al formato expuesto por la API.
@@ -456,6 +485,7 @@ module.exports = {
   createServiceError,
   deleteUser,
   getAllUsers,
+  getUsersPage,
   getUserById,
   importUsersFromCsv,
   __csvInternals: {

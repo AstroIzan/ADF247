@@ -23,6 +23,7 @@
           <tr>
             <th>Carnet</th>
             <th>Indicatiu</th>
+            <th>Telèfon</th>
             <th>Nom</th>
             <th>Cognoms</th>
             <th>HORES</th>
@@ -36,6 +37,7 @@
             <tr [class.row-with-open-delete]="deleteConfirming() === user.id">
               <td>{{ user.nCarnet || '-' }}</td>
               <td>{{ user.nIndicatiu || '-' }}</td>
+              <td>{{ user.phone || '-' }}</td>
               <td>{{ user.name || '-' }}</td>
               <td>{{ user.lastName || '-' }}</td>
               <td>
@@ -88,6 +90,9 @@
               <p class="user-carnet">{{ user.nCarnet }}</p>
               @if (user.nIndicatiu) {
                 <p class="user-indicatiu">{{ user.nIndicatiu }}</p>
+              }
+              @if (user.phone) {
+                <p class="user-indicatiu">{{ user.phone }}</p>
               }
               <div class="hours-cell">
                 <span class="hours-split-pill">
@@ -147,7 +152,7 @@
   }
 
   @if (showFilters()) {
-    <div class="modal-overlay" (click)="closeFilters()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Filtres d'Usuaris</h3>
@@ -192,7 +197,7 @@
   }
 
   @if (showForm()) {
-    <div class="modal-overlay" (click)="closeForm()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>{{ editingId() ? 'Editar Usuari' : 'Nou Usuari' }}</h3>
@@ -216,6 +221,16 @@
               type="text"
               [value]="formData().nIndicatiu || ''"
               (change)="updateFormField('nIndicatiu', $any($event.target).value)"
+              [disabled]="formSubmitting()"
+            />
+          </div>
+
+          <div class="form-group">
+            <label>Telèfon</label>
+            <input
+              type="text"
+              [value]="formData().phone || ''"
+              (change)="updateFormField('phone', $any($event.target).value)"
               [disabled]="formSubmitting()"
             />
           </div>
@@ -367,7 +382,7 @@
   }
 
   @if (showImportModal()) {
-    <div class="modal-overlay" (click)="closeImportCsvModal()">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Importació d'Usuaris per CSV</h3>
@@ -441,7 +456,7 @@
   }
 
   @if (selectedUser()) {
-    <div class="modal-overlay" (click)="selectedUser.set(null)">
+    <div class="modal-overlay">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Detalls de l'Usuari</h3>
@@ -457,6 +472,11 @@
           <div class="detail-group">
             <label>Indicatiu</label>
             <p>{{ selectedUser()?.nIndicatiu || '-' }}</p>
+          </div>
+
+          <div class="detail-group">
+            <label>Telèfon</label>
+            <p>{{ selectedUser()?.phone || '-' }}</p>
           </div>
 
           <div class="detail-group">

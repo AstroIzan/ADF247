@@ -508,6 +508,10 @@
     min-height: 180px;
   }
 
+  .pla-alfa-selector-panel {
+    min-height: 320px;
+  }
+
   .pla-alfa-selected-preview {
     max-height: 96px;
   }

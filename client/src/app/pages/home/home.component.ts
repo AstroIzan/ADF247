@@ -1510,6 +1510,14 @@ export class HomeComponent implements OnInit {
         this.runningConvoAdminActionKey.set(null);
         this.replaceConvocatoriaInState(updatedConvo);
         this.adminActionFeedback.set(`Sortida actualitzada per a ${updatedConvo.title}.`);
+        this.dataService.sendConvocatoriaSortidaStatus(updatedConvo.id).subscribe({
+          next: () => {
+            this.adminActionFeedback.set(`Sortida actualitzada i notificació enviada per a ${updatedConvo.title}.`);
+          },
+          error: () => {
+            // Notification failure is non-critical
+          },
+        });
       },
       error: (err) => {
         this.runningConvoAdminActionKey.set(null);
@@ -1824,10 +1832,6 @@ export class HomeComponent implements OnInit {
   }
 
   canOpenGuardiaResponses(convo: Convocatoria) {
-    if (!this.isGuardiaConvocatoria(convo)) {
-      return false;
-    }
-
     if (this.authService.isAdmin()) {
       return true;
     }
@@ -2140,8 +2144,10 @@ export class HomeComponent implements OnInit {
         this.loadRespuestas();
       },
       error: (err) => {
-        this.error.set(err.message || 'No s\'ha pogut eliminar la convocatòria.');
         this.adminConvoSaving.set(false);
+        this.closeAdminConvoModal();
+        this.loadConvocatorias();
+        this.loadRespuestas();
       },
     });
   }

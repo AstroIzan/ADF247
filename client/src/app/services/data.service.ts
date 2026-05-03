@@ -6,6 +6,7 @@ export interface User {
   id: number;
   nCarnet: string;
   nIndicatiu?: string;
+  phone?: string;
   name: string;
   lastName?: string;
   password?: string;

@@ -365,6 +365,14 @@ function buildResponseRequestManualMessage(convocatoria, referenceDate = new Dat
   const horaInici = formatTimeForText(convocatoria?.startTime)
   const horaFinal = formatTimeForText(convocatoria?.finalTime || convocatoria?.startTime)
   const title = String(convocatoria?.title || 'convocatòria').trim() || 'convocatòria'
+  const typeName = String(convocatoria?.convoType?.name || '').trim().toLowerCase()
+
+  if (typeName.includes('formaci')) {
+    return {
+      title: 'Formació',
+      body: `Recordatori de formació: ${title} el dia ${dayLabel} de ${horaInici} a ${horaFinal}`,
+    }
+  }
 
   return {
     title: 'Disponibilitat',
@@ -504,8 +512,8 @@ const GUARDIA_DAILY_SLOTS = [
   { startHour: 16, startMinute: 0, endHour: 20, endMinute: 0 },
 ]
 
-const PVI_DAILY_SLOT = { startHour: 10, startMinute: 0, endHour: 14, endMinute: 0 }
-const PVI_WEEKLY_SLOT = { startHour: 12, startMinute: 0, endHour: 14, endMinute: 0 }
+const PVI_DAILY_SLOT = { startHour: 10, startMinute: 0, endHour: 16, endMinute: 0 }
+const PVI_WEEKLY_SLOT = { startHour: 12, startMinute: 0, endHour: 16, endMinute: 0 }
 
 function buildDateWithTime(baseDate, hour, minute = 0) {
   const value = startOfDay(baseDate)

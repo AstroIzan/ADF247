@@ -5,11 +5,11 @@ const dispoController = require('./dispo.controller')
 const router = express.Router()
 
 router.route('/')
-  .get(dispoController.getRespuestas)
-  .post(dispoController.createRespuesta)
+  .get(requireAuth, dispoController.getRespuestas)
+  .post(requireAuth, dispoController.createRespuesta)
 
 router.route('/:id')
-  .get(dispoController.getRespuestaById)
+  .get(requireAuth, dispoController.getRespuestaById)
   .put(requireAuth, dispoController.updateRespuesta)
   .delete(requireAuth, dispoController.deleteRespuesta)
 

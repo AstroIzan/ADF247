@@ -17,6 +17,21 @@ function parseUserId(rawId) {
   return id
 }
 
+function parseOptionalPositiveInt(rawValue, fieldName) {
+  if (rawValue === undefined) {
+    return undefined
+  }
+
+  const value = Number(rawValue)
+  if (!Number.isInteger(value) || value <= 0) {
+    const error = new Error(`El parametro "${fieldName}" debe ser un numero entero positivo.`)
+    error.statusCode = 400
+    throw error
+  }
+
+  return value
+}
+
 // Respuesta de error comun para todos los endpoints del controller.
 // Si el service ya adjunto statusCode o details, los respetamos.
 function sendErrorResponse(res, error) {
@@ -33,8 +48,23 @@ function sendErrorResponse(res, error) {
 }
 
 // GET /users -> lista completa de usuarios.
-async function getUsers(_req, res) {
+async function getUsers(req, res) {
   try {
+    const page = parseOptionalPositiveInt(req.query.page, 'page')
+    const pageSize = parseOptionalPositiveInt(req.query.pageSize, 'pageSize')
+
+    if ((page && !pageSize) || (!page && pageSize)) {
+      const error = new Error('Debes enviar "page" y "pageSize" juntos para usar paginacion.')
+      error.statusCode = 400
+      throw error
+    }
+
+    if (page && pageSize) {
+      const result = await usersService.getUsersPage({ page, pageSize })
+      res.json(result)
+      return
+    }
+
     const users = await usersService.getAllUsers()
     res.json(users)
   } catch (error) {

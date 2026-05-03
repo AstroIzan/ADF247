@@ -858,6 +858,32 @@ async function getAllConvocatorias() {
   return convocatorias.map(mapConvocatoriaToDto)
 }
 
+async function getConvocatoriasPage({ page, pageSize }) {
+  const skip = (page - 1) * pageSize
+
+  const [total, convocatorias] = await Promise.all([
+    database.convocatoria.count(),
+    database.convocatoria.findMany({
+      include: convocatoriaInclude,
+      orderBy: {
+        id: 'asc',
+      },
+      skip,
+      take: pageSize,
+    }),
+  ])
+
+  return {
+    items: convocatorias.map(mapConvocatoriaToDto),
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    },
+  }
+}
+
 async function getConvocatoriaById(id) {
   const convocatoria = await findConvocatoriaOrThrow(id)
   return mapConvocatoriaToDto(convocatoria)
@@ -1558,6 +1584,7 @@ module.exports = {
   deleteConvoType,
   finishConvocatoria,
   getAllConvocatorias,
+  getConvocatoriasPage,
   getAllConvoTypes,
   getConvocatoriaById,
   getConvoTypeById,

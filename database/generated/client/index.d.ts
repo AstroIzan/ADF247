@@ -1908,6 +1908,7 @@ export namespace Prisma {
     lastName: string | null
     password: string | null
     isActive: boolean | null
+    phone: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1920,6 +1921,7 @@ export namespace Prisma {
     lastName: string | null
     password: string | null
     isActive: boolean | null
+    phone: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -1932,6 +1934,7 @@ export namespace Prisma {
     lastName: number
     password: number
     isActive: number
+    phone: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -1954,6 +1957,7 @@ export namespace Prisma {
     lastName?: true
     password?: true
     isActive?: true
+    phone?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1966,6 +1970,7 @@ export namespace Prisma {
     lastName?: true
     password?: true
     isActive?: true
+    phone?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -1978,6 +1983,7 @@ export namespace Prisma {
     lastName?: true
     password?: true
     isActive?: true
+    phone?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -2077,6 +2083,7 @@ export namespace Prisma {
     lastName: string | null
     password: string
     isActive: boolean
+    phone: string | null
     createdAt: Date
     updatedAt: Date
     _count: UserCountAggregateOutputType | null
@@ -2108,6 +2115,7 @@ export namespace Prisma {
     lastName?: boolean
     password?: boolean
     isActive?: boolean
+    phone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     roles?: boolean | User$rolesArgs<ExtArgs>
@@ -2128,6 +2136,7 @@ export namespace Prisma {
     lastName?: boolean
     password?: boolean
     isActive?: boolean
+    phone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }, ExtArgs["result"]["user"]>
@@ -2140,6 +2149,7 @@ export namespace Prisma {
     lastName?: boolean
     password?: boolean
     isActive?: boolean
+    phone?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -2175,6 +2185,7 @@ export namespace Prisma {
       lastName: string | null
       password: string
       isActive: boolean
+      phone: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["user"]>
@@ -2584,6 +2595,7 @@ export namespace Prisma {
     readonly lastName: FieldRef<"User", 'String'>
     readonly password: FieldRef<"User", 'String'>
     readonly isActive: FieldRef<"User", 'Boolean'>
+    readonly phone: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
   }
@@ -13569,6 +13581,7 @@ export namespace Prisma {
     lastName: 'lastName',
     password: 'password',
     isActive: 'isActive',
+    phone: 'phone',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -13841,6 +13854,7 @@ export namespace Prisma {
     lastName?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
     isActive?: BoolFilter<"User"> | boolean
+    phone?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     roles?: RoleListRelationFilter
@@ -13860,6 +13874,7 @@ export namespace Prisma {
     lastName?: SortOrderInput | SortOrder
     password?: SortOrder
     isActive?: SortOrder
+    phone?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     roles?: RoleOrderByRelationAggregateInput
@@ -13882,6 +13897,7 @@ export namespace Prisma {
     lastName?: StringNullableFilter<"User"> | string | null
     password?: StringFilter<"User"> | string
     isActive?: BoolFilter<"User"> | boolean
+    phone?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     roles?: RoleListRelationFilter
@@ -13901,6 +13917,7 @@ export namespace Prisma {
     lastName?: SortOrderInput | SortOrder
     password?: SortOrder
     isActive?: SortOrder
+    phone?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: UserCountOrderByAggregateInput
@@ -13921,6 +13938,7 @@ export namespace Prisma {
     lastName?: StringNullableWithAggregatesFilter<"User"> | string | null
     password?: StringWithAggregatesFilter<"User"> | string
     isActive?: BoolWithAggregatesFilter<"User"> | boolean
+    phone?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
   }
@@ -14762,6 +14780,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
@@ -14781,6 +14800,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
@@ -14799,6 +14819,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
@@ -14818,6 +14839,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
@@ -14837,6 +14859,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -14848,6 +14871,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -14860,6 +14884,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -15877,6 +15902,7 @@ export namespace Prisma {
     lastName?: SortOrder
     password?: SortOrder
     isActive?: SortOrder
+    phone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15893,6 +15919,7 @@ export namespace Prisma {
     lastName?: SortOrder
     password?: SortOrder
     isActive?: SortOrder
+    phone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -15905,6 +15932,7 @@ export namespace Prisma {
     lastName?: SortOrder
     password?: SortOrder
     isActive?: SortOrder
+    phone?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -17972,6 +18000,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     convocatories?: ConvocatoriaCreateNestedManyWithoutUserInput
@@ -17990,6 +18019,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     convocatories?: ConvocatoriaUncheckedCreateNestedManyWithoutUserInput
@@ -18023,6 +18053,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     convocatories?: ConvocatoriaUpdateManyWithoutUserNestedInput
@@ -18041,6 +18072,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     convocatories?: ConvocatoriaUncheckedUpdateManyWithoutUserNestedInput
@@ -18117,6 +18149,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
@@ -18135,6 +18168,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
@@ -18258,6 +18292,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
@@ -18276,6 +18311,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
@@ -18406,6 +18442,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
@@ -18424,6 +18461,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
@@ -18501,6 +18539,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
@@ -18519,6 +18558,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
@@ -18536,6 +18576,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
@@ -18554,6 +18595,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
@@ -18587,6 +18629,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
@@ -18605,6 +18648,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
@@ -18622,6 +18666,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
@@ -18640,6 +18685,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
@@ -18673,6 +18719,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
@@ -18691,6 +18738,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
@@ -18708,6 +18756,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
@@ -18726,6 +18775,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
@@ -18792,6 +18842,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
@@ -18810,6 +18861,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput
@@ -18929,6 +18981,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleCreateNestedManyWithoutUserInput
@@ -18947,6 +19000,7 @@ export namespace Prisma {
     lastName?: string | null
     password: string
     isActive?: boolean
+    phone?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     roles?: RoleUncheckedCreateNestedManyWithoutUserInput
@@ -18980,6 +19034,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUpdateManyWithoutUserNestedInput
@@ -18998,6 +19053,7 @@ export namespace Prisma {
     lastName?: NullableStringFieldUpdateOperationsInput | string | null
     password?: StringFieldUpdateOperationsInput | string
     isActive?: BoolFieldUpdateOperationsInput | boolean
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     roles?: RoleUncheckedUpdateManyWithoutUserNestedInput

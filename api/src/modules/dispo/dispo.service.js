@@ -190,6 +190,43 @@ async function getAllRespuestas(filters = {}) {
   return respuestas.map(mapRespuestaToDto)
 }
 
+async function getRespuestasPage(filters = {}, { page, pageSize }) {
+  const where = {}
+
+  if (filters.convoId !== undefined) {
+    where.convoId = filters.convoId
+  }
+
+  if (filters.userNCarnet !== undefined) {
+    where.userNCarnet = filters.userNCarnet
+  }
+
+  const skip = (page - 1) * pageSize
+
+  const [total, respuestas] = await Promise.all([
+    database.respuesta.count({ where }),
+    database.respuesta.findMany({
+      where,
+      include: respuestaInclude,
+      orderBy: {
+        id: 'asc',
+      },
+      skip,
+      take: pageSize,
+    }),
+  ])
+
+  return {
+    items: respuestas.map(mapRespuestaToDto),
+    pagination: {
+      page,
+      pageSize,
+      total,
+      totalPages: Math.max(1, Math.ceil(total / pageSize)),
+    },
+  }
+}
+
 async function getRespuestaById(id) {
   const respuesta = await findRespuestaOrThrow(id)
   return mapRespuestaToDto(respuesta)
@@ -328,6 +365,7 @@ module.exports = {
   createServiceError,
   deleteRespuesta,
   getAllRespuestas,
+  getRespuestasPage,
   getRespuestaById,
   mapPrismaError,
   updateRespuesta,
