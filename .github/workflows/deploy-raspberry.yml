@@ -80,6 +80,13 @@ jobs:
 
           git fetch origin "${BRANCH}"
           git checkout "${BRANCH}"
+          
+          # Clean up any local modifications to ignored files (e.g., generated Prisma client)
+          # This prevents merge conflicts when pulling after files are added to .gitignore
+          echo "Cleaning local state..."
+          git clean -fd database/generated/
+          git reset --hard HEAD
+          
           git pull --ff-only origin "${BRANCH}"
 
           CACHE_DIR="${TARGET_DIR}/.deploy-cache"
