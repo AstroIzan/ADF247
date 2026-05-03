@@ -89,15 +89,24 @@
 
 .pla-alfa-checkbox-item {
   display: grid;
-  grid-template-columns: 20px 1fr;
+  grid-template-columns: 1fr;
   gap: 6px;
   align-items: center;
-  padding: 8px 9px;
+  padding: 10px 12px 8px;
   border-bottom: 1px solid #f2f2f2;
+  position: relative;
 }
 
 .pla-alfa-checkbox-item:last-child {
   border-bottom: 0;
+}
+
+.pla-alfa-checkbox-item .municipality-checkbox-toggle {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding-right: 34px;
 }
 
 .pla-alfa-checkbox-item input {
@@ -111,17 +120,19 @@
 }
 
 .pla-alfa-checkbox-item .municipality-comarca {
-  grid-column: 2;
+  grid-column: 1;
+  padding-left: 28px;
   font-size: 11px;
   color: #6a6a6a;
 }
 
 .pla-alfa-checkbox-item .municipality-principal-toggle {
-  grid-column: 2;
+  position: absolute;
+  top: 8px;
+  right: 8px;
   display: inline-flex;
   align-items: center;
   gap: 0;
-  position: relative;
   cursor: pointer;
 }
 
@@ -134,48 +145,57 @@
 .pla-alfa-checkbox-item .municipality-principal-chip {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 999px;
-  border: 1px solid #d8e1eb;
-  background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
-  color: #526277;
-  font-size: 11px;
-  font-weight: 700;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  border: 1px solid #dbe2ea;
+  background: #f8fafc;
   line-height: 1;
   transition: background 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.pla-alfa-checkbox-item .municipality-principal-chip::before {
-  content: '';
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: #c7d2e0;
-  box-shadow: inset 0 0 0 1px #aab8cb;
-  transition: background 160ms ease, box-shadow 160ms ease;
+.pla-alfa-checkbox-item .municipality-principal-icon {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  border: 1.5px solid #94a3b8;
+  background: transparent;
+  position: relative;
+  box-sizing: border-box;
+  transition: border-color 160ms ease, background 160ms ease;
 }
 
 .pla-alfa-checkbox-item .municipality-principal-toggle:hover .municipality-principal-chip {
-  border-color: #b8c8de;
-  color: #334155;
+  border-color: #c5d1de;
+  background: #f1f5f9;
 }
 
 .pla-alfa-checkbox-item .municipality-principal-toggle input[type='radio']:checked + .municipality-principal-chip {
-  border-color: #1d4ed8;
-  background: linear-gradient(180deg, #eff6ff 0%, #e2eeff 100%);
-  color: #1e3a8a;
-  box-shadow: 0 0 0 1px #c7dcff;
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 1px #dbeafe;
 }
 
-.pla-alfa-checkbox-item .municipality-principal-toggle input[type='radio']:checked + .municipality-principal-chip::before {
-  background: #1d4ed8;
-  box-shadow: inset 0 0 0 2px #ffffff;
+.pla-alfa-checkbox-item .municipality-principal-toggle input[type='radio']:checked + .municipality-principal-chip .municipality-principal-icon {
+  border-color: #2563eb;
+  background: #2563eb;
+}
+
+.pla-alfa-checkbox-item .municipality-principal-toggle input[type='radio']:checked + .municipality-principal-chip .municipality-principal-icon::after {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0px;
+  width: 3px;
+  height: 6px;
+  border-right: 2px solid #ffffff;
+  border-bottom: 2px solid #ffffff;
+  transform: rotate(45deg);
 }
 
 .pla-alfa-checkbox-item .municipality-principal-toggle input[type='radio']:disabled + .municipality-principal-chip {
-  opacity: 0.55;
-  border-style: dashed;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
