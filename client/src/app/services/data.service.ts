@@ -244,7 +244,8 @@ export interface NotificationAutomationTaskConfig {
     | 'sortida-reten'
     | 'weekly-pending'
     | 'campaign-d1-guardia-pvi'
-    | 'weekly-guardia-pvi-bootstrap';
+    | 'weekly-guardia-pvi-bootstrap'
+    | 'pla-alfa-daily-summary';
   enabled: boolean;
   schedule: {
     kind: 'daily' | 'weekly' | 'manual';
@@ -400,11 +401,13 @@ export interface PlaAlfaMunicipalityCatalogItem {
 export interface PlaAlfaCatalogResponse {
   updatedAt: string;
   selectedMunicipalities: string[];
+  principalMunicipality: string | null;
   municipalities: PlaAlfaMunicipalityCatalogItem[];
 }
 
 export interface PlaAlfaMunicipalityStatusItem {
   municipality: string;
+  isPrincipal: boolean;
   comarca: string | null;
   todayLevel: number | null;
   tomorrowLevel: number | null;
@@ -436,7 +439,13 @@ export interface PlaAlfaWeatherForecast {
 
 export interface PlaAlfaMunicipalitiesStatusResponse {
   updatedAt: string;
+  principalMunicipality: string | null;
   municipalities: PlaAlfaMunicipalityStatusItem[];
+}
+
+export interface PlaAlfaSelectionUpdatePayload {
+  municipalities: string[];
+  principalMunicipality?: string | null;
 }
 
 @Injectable({
@@ -682,8 +691,8 @@ export class DataService {
     return this.http.get<PlaAlfaCatalogResponse>('/pla-alfa/catalog');
   }
 
-  updatePlaAlfaMunicipalities(municipalities: string[]): Observable<{ updatedAt: string; municipalities: string[] }> {
-    return this.http.put<{ updatedAt: string; municipalities: string[] }>('/pla-alfa/municipalities', { municipalities });
+  updatePlaAlfaMunicipalities(payload: PlaAlfaSelectionUpdatePayload): Observable<{ updatedAt: string; municipalities: string[]; principalMunicipality: string | null }> {
+    return this.http.put<{ updatedAt: string; municipalities: string[]; principalMunicipality: string | null }>('/pla-alfa/municipalities', payload);
   }
 
   getPlaAlfaMunicipalitiesStatus(forceRefresh = false): Observable<PlaAlfaMunicipalitiesStatusResponse> {

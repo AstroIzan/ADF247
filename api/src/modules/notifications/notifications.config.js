@@ -83,6 +83,7 @@ const DEFAULT_NOTIFICATION_SETTINGS = {
     },
     tasks: [
       { taskKey: 'campaign-d1-guardia-pvi', notifyKind: 'campaign-d1-guardia-pvi', convoTypeFilter: ['Guardia', 'PVI'], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
+      { taskKey: 'pla-alfa-daily-summary', notifyKind: 'pla-alfa-daily-summary', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
       { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', convoTypeFilter: [], enabled: true, schedule: { kind: 'daily' }, timeoutMs: 120000, retryPolicy: { maxRetries: 0 }, dependsOn: [] },
@@ -245,6 +246,7 @@ function normalizeAutomationTask(task, fallbackTask) {
     'weekly-pending',
     'campaign-d1-guardia-pvi',
     'weekly-guardia-pvi-bootstrap',
+    'pla-alfa-daily-summary',
   ]
   const rawKind = source.notifyKind || fallback.notifyKind || source.taskKey || fallback.taskKey || ''
   const notifyKind = allowedKinds.includes(rawKind) ? rawKind : 'pending-responses'

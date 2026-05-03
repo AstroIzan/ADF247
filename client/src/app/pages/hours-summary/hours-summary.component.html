@@ -1,0 +1,53 @@
+<div class="hours-summary-page">
+  <section class="hours-summary-header">
+    <h1>Resum d'hores</h1>
+    <p>Resultat agregat d'hores dins/fora campanya amb penalitzacions aplicades.</p>
+    <div class="hours-summary-actions">
+      <button type="button" class="btn btn-secondary" (click)="loadSummary()" [disabled]="loading()">
+        {{ loading() ? 'Actualitzant...' : 'Actualitzar resum' }}
+      </button>
+      @if (generatedAt()) {
+        <span class="muted-text">Última generació: {{ generatedAt() | date:'short' }}</span>
+      }
+    </div>
+  </section>
+
+  @if (error()) {
+    <div class="error-alert">{{ error() }}</div>
+  } @else if (loading()) {
+    <div class="loading">Carregant resum d'hores...</div>
+  } @else if (rows().length === 0) {
+    <div class="empty-state">No hi ha dades d'hores per mostrar.</div>
+  } @else {
+    <div class="table-scroll">
+      <table class="logs-table hours-summary-table">
+        <thead>
+          <tr>
+            <th>Usuari</th>
+            <th>H campanya</th>
+            <th>H fora campanya</th>
+            <th>No respostes</th>
+            <th>No assistències</th>
+            <th class="hours-penalty-header"><span>Penalització<br>no resposta</span></th>
+            <th class="hours-penalty-header"><span>Penalització<br>no assistència</span></th>
+            <th>Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rows(); track row.userId) {
+            <tr>
+              <td class="hours-user-cell">{{ row.userName }}</td>
+              <td>{{ formatRoundedHours(row.campaignHours) }}</td>
+              <td>{{ formatRoundedHours(row.offCampaignHours) }}</td>
+              <td>{{ row.unansweredCount }}</td>
+              <td>{{ row.noShowCount }}</td>
+              <td class="hours-penalty-cell">-{{ formatRoundedHours(row.unansweredPenaltyHours) }}</td>
+              <td class="hours-penalty-cell">-{{ formatRoundedHours(row.noShowPenaltyHours) }}</td>
+              <td class="hours-total-cell"><strong>{{ formatRoundedHours(row.totalHours) }}</strong></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

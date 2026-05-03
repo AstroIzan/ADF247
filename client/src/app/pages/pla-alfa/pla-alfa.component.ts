@@ -24,6 +24,7 @@ export class PlaAlfaComponent implements OnInit {
   plaAlfaInfo = signal('');
   plaAlfaCatalog = signal<PlaAlfaMunicipalityCatalogItem[]>([]);
   plaAlfaSelected = signal<string[]>([]);
+  plaAlfaPrincipal = signal<string | null>(null);
   plaAlfaStatus = signal<PlaAlfaMunicipalityStatusItem[]>([]);
   plaAlfaUpdatedAt = signal<string | null>(null);
   plaAlfaSearch = signal('');
@@ -61,6 +62,7 @@ export class PlaAlfaComponent implements OnInit {
       next: (response) => {
         this.plaAlfaCatalog.set(response.municipalities || []);
         this.plaAlfaSelected.set(response.selectedMunicipalities || []);
+        this.plaAlfaPrincipal.set(response.principalMunicipality || null);
         this.plaAlfaLoading.set(false);
         this.refreshPlaAlfaStatus();
       },
@@ -91,7 +93,32 @@ export class PlaAlfaComponent implements OnInit {
     }
 
     this.plaAlfaSelected.set(Array.from(selected).sort((a, b) => a.localeCompare(b, 'ca')));
+
+    if (!checked && this.plaAlfaPrincipal() === municipality) {
+      this.plaAlfaPrincipal.set(null);
+    }
+
     this.plaAlfaInfo.set('');
+  }
+
+  setPrincipalMunicipality(municipality: string, checked: boolean) {
+    if (!checked) {
+      if (this.plaAlfaPrincipal() === municipality) {
+        this.plaAlfaPrincipal.set(null);
+      }
+      return;
+    }
+
+    if (!this.isPlaAlfaMunicipalitySelected(municipality)) {
+      this.togglePlaAlfaMunicipality(municipality, true);
+    }
+
+    this.plaAlfaPrincipal.set(municipality);
+    this.plaAlfaInfo.set('');
+  }
+
+  isPrincipalMunicipality(municipality: string) {
+    return this.plaAlfaPrincipal() === municipality;
   }
 
   isPlaAlfaMunicipalitySelected(municipality: string) {
@@ -300,8 +327,12 @@ export class PlaAlfaComponent implements OnInit {
     this.plaAlfaError.set('');
     this.plaAlfaInfo.set('');
 
-    this.dataService.updatePlaAlfaMunicipalities(this.plaAlfaSelected()).subscribe({
-      next: () => {
+    this.dataService.updatePlaAlfaMunicipalities({
+      municipalities: this.plaAlfaSelected(),
+      principalMunicipality: this.plaAlfaPrincipal(),
+    }).subscribe({
+      next: (response) => {
+        this.plaAlfaPrincipal.set(response.principalMunicipality || null);
         this.plaAlfaSaving.set(false);
         this.plaAlfaInfo.set('Municipis de Pla Alfa actualitzats correctament.');
         this.refreshPlaAlfaStatus(true);
@@ -318,6 +349,7 @@ export class PlaAlfaComponent implements OnInit {
 
     this.dataService.getPlaAlfaMunicipalitiesStatus(forceRefresh).subscribe({
       next: (response) => {
+        this.plaAlfaPrincipal.set(response.principalMunicipality || null);
         this.plaAlfaStatus.set(response.municipalities || []);
         this.plaAlfaUpdatedAt.set(response.updatedAt || null);
         this.plaAlfaRefreshingStatus.set(false);

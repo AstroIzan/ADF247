@@ -68,6 +68,16 @@
                   (change)="togglePlaAlfaMunicipality(item.municipality, $any($event.target).checked)"
                 />
                 <span class="municipality-name">{{ item.municipality }}</span>
+                <label class="municipality-principal-toggle" title="Municipi principal per notificacions diàries">
+                  <input
+                    type="radio"
+                    name="plaAlfaPrincipal"
+                    [checked]="isPrincipalMunicipality(item.municipality)"
+                    [disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
+                    (change)="setPrincipalMunicipality(item.municipality, $any($event.target).checked)"
+                  />
+                  <span>Principal</span>
+                </label>
                 <span class="municipality-comarca">{{ item.comarca || 'Sense comarca' }}</span>
               </label>
             }
@@ -114,7 +124,12 @@
                     @let todayWeather = formatPlaAlfaWeatherSummary(item.todayForecast);
                     @let tomorrowWeather = formatPlaAlfaWeatherSummary(item.tomorrowForecast);
                     <tr class="pla-alfa-row">
-                      <td class="pla-col-municipality" data-label="Municipi">{{ item.municipality }}</td>
+                      <td class="pla-col-municipality" data-label="Municipi">
+                        {{ item.municipality }}
+                        @if (item.isPrincipal) {
+                          <span class="pla-alfa-selected-pill">Principal</span>
+                        }
+                      </td>
                       <td class="pla-col-comarca" data-label="Comarca">{{ item.comarca || '-' }}</td>
                       <td class="pla-col-day" data-label="Avui">
                         <div class="pla-alfa-day-cell">

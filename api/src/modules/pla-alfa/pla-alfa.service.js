@@ -1,5 +1,6 @@
 const https = require('https')
 const {
+  readPlaAlfaSelection,
   readPlaAlfaMunicipalities,
   updatePlaAlfaMunicipalities,
 } = require('./pla-alfa.config')
@@ -901,7 +902,7 @@ async function fetchAllMunicipalitiesCatalog() {
 
 async function getPlaAlfaMunicipalitiesStatus(options = {}) {
   const forceRefresh = Boolean(options.forceRefresh)
-  const municipalities = readPlaAlfaMunicipalities()
+  const { municipalities, principalMunicipality } = readPlaAlfaSelection()
   const municipalitiesKey = buildMunicipalitiesCacheKey(municipalities)
 
   if (!forceRefresh && plaAlfaStatusCache.payload && plaAlfaStatusCache.municipalitiesKey === municipalitiesKey) {
@@ -919,6 +920,7 @@ async function getPlaAlfaMunicipalitiesStatus(options = {}) {
   if (municipalities.length === 0) {
     const emptyPayload = {
       updatedAt: new Date().toISOString(),
+      principalMunicipality: null,
       municipalities: [],
     }
 
@@ -1019,6 +1021,7 @@ async function getPlaAlfaMunicipalitiesStatus(options = {}) {
 
     return {
       municipality: name,
+      isPrincipal: name === principalMunicipality,
       comarca: today?.comarca || tomorrow?.comarca || null,
       todayLevel: today?.level ?? null,
       tomorrowLevel: tomorrow?.level ?? null,
@@ -1036,6 +1039,7 @@ async function getPlaAlfaMunicipalitiesStatus(options = {}) {
 
   const payload = {
     updatedAt: new Date().toISOString(),
+    principalMunicipality,
     municipalities: result,
     warnings,
   }
@@ -1058,13 +1062,14 @@ async function getPlaAlfaMunicipalitiesStatus(options = {}) {
 }
 
 async function getPlaAlfaMunicipalitiesCatalog() {
-  const selected = readPlaAlfaMunicipalities()
+  const { municipalities: selected, principalMunicipality } = readPlaAlfaSelection()
   const selectedSet = new Set(selected.map(normalizeMunicipalityName))
   const catalog = await fetchAllMunicipalitiesCatalog()
 
   return {
     updatedAt: new Date().toISOString(),
     selectedMunicipalities: selected,
+    principalMunicipality,
     municipalities: catalog.map((item) => ({
       ...item,
       selected: selectedSet.has(normalizeMunicipalityName(item.municipality)),
@@ -1083,15 +1088,17 @@ function buildUpdateMunicipalitiesDto(payload) {
 
   return {
     municipalities: payload.municipalities,
+    principalMunicipality: payload.principalMunicipality,
   }
 }
 
 async function updatePlaAlfaMunicipalitiesSelection(payload) {
   const dto = buildUpdateMunicipalitiesDto(payload)
-  const municipalities = updatePlaAlfaMunicipalities(dto.municipalities)
+  const selection = updatePlaAlfaMunicipalities(dto.municipalities, dto.principalMunicipality)
   return {
     updatedAt: new Date().toISOString(),
-    municipalities,
+    municipalities: selection.municipalities,
+    principalMunicipality: selection.principalMunicipality,
   }
 }
 

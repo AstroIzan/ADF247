@@ -116,6 +116,15 @@
   color: #6a6a6a;
 }
 
+.pla-alfa-checkbox-item .municipality-principal-toggle {
+  grid-column: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #334155;
+}
+
 .pla-alfa-bulk-actions {
   display: flex;
   align-items: center;

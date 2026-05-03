@@ -342,58 +342,6 @@
             </div>
           </section>
 
-          <section class="config-section full-width hours-summary-section">
-            <h3>Resum d'hores per usuari</h3>
-            <p class="section-help">Resultat agregat d'hores dins/fora campanya amb penalitzacions aplicades.</p>
-
-            <div class="section-actions">
-              <button type="button" class="btn btn-secondary btn-sm" (click)="loadHoursSummary()" [disabled]="hoursSummaryLoading">
-                {{ hoursSummaryLoading ? 'Actualitzant...' : 'Actualitzar resum' }}
-              </button>
-              @if (hoursSummaryGeneratedAt) {
-                <span class="muted-text">Última generació: {{ hoursSummaryGeneratedAt | date:'short' }}</span>
-              }
-            </div>
-
-            @if (hoursSummaryError) {
-              <div class="error-alert">{{ hoursSummaryError }}</div>
-            } @else if (hoursSummaryLoading) {
-              <div class="loading">Carregant resum d'hores...</div>
-            } @else if (hoursSummaryRows.length === 0) {
-              <div class="empty-state">No hi ha dades d'hores per mostrar.</div>
-            } @else {
-              <div class="table-scroll">
-                <table class="logs-table hours-summary-table">
-                  <thead>
-                    <tr>
-                      <th>Usuari</th>
-                      <th>H campanya</th>
-                      <th>H fora campanya</th>
-                      <th>No respostes</th>
-                      <th>No assistències</th>
-                      <th class="hours-penalty-header"><span>Penalització<br>no resposta</span></th>
-                      <th class="hours-penalty-header"><span>Penalització<br>no assistència</span></th>
-                      <th>Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (row of hoursSummaryRows; track row.userId) {
-                      <tr>
-                        <td class="hours-user-cell">{{ row.userName }}</td>
-                        <td>{{ formatRoundedHours(row.campaignHours) }}</td>
-                        <td>{{ formatRoundedHours(row.offCampaignHours) }}</td>
-                        <td>{{ row.unansweredCount }}</td>
-                        <td>{{ row.noShowCount }}</td>
-                        <td class="hours-penalty-cell">-{{ formatRoundedHours(row.unansweredPenaltyHours) }}</td>
-                        <td class="hours-penalty-cell">-{{ formatRoundedHours(row.noShowPenaltyHours) }}</td>
-                        <td class="hours-total-cell"><strong>{{ formatRoundedHours(row.totalHours) }}</strong></td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
-            }
-          </section>
         </div>
       }
 

@@ -1827,10 +1827,6 @@ export class HomeComponent implements OnInit {
     );
   }
 
-  getRespuestasForConvocatoria(convoId: number) {
-    return this.allRespuestas().filter((respuesta) => respuesta.convoId === convoId);
-  }
-
   canOpenGuardiaResponses(convo: Convocatoria) {
     if (this.authService.isAdmin()) {
       return true;
@@ -1907,12 +1903,16 @@ export class HomeComponent implements OnInit {
     this.guardiaResponsesConvo.set(null);
   }
 
-  getPositiveRespuestasForConvocatoria(convoId: number) {
+  getRespuestasForConvocatoria(convoId: number) {
     const usersByNCarnet = this.userByNCarnet();
 
     return this.allRespuestas()
-      .filter((respuesta) => respuesta.convoId === convoId && respuesta.response)
+      .filter((respuesta) => respuesta.convoId === convoId)
       .sort((left, right) => {
+        if (left.response !== right.response) {
+          return left.response ? -1 : 1;
+        }
+
         const leftCreatedAt = usersByNCarnet.get(left.userNCarnet)?.createdAt;
         const rightCreatedAt = usersByNCarnet.get(right.userNCarnet)?.createdAt;
         const leftTime = leftCreatedAt ? new Date(leftCreatedAt).getTime() : Number.MAX_SAFE_INTEGER;

@@ -14,6 +14,7 @@ const {
 } = require('./notifications.config')
 const { getFirebaseMessaging } = require('./notifications.firebase')
 const { getPlaAlfaMunicipalitiesStatus } = require('../pla-alfa/pla-alfa.service')
+const { readPlaAlfaSelection } = require('../pla-alfa/pla-alfa.config')
 const { updateSortidaForTomorrow } = require('../convos/convos.service')
 
 const GLOBAL_NOTIFICATION_TOPIC = 'adf247-all'
@@ -2046,6 +2047,90 @@ async function sendTomorrowSortidaNotifications(authUser, referenceDate = new Da
 
 }
 
+async function sendPlaAlfaDailySummary(authUser, referenceDate = new Date(), options = {}) {
+  if (authUser) {
+    await ensureAdmin(authUser)
+
+    await logAdminAuditEvent({
+      actorUserId: authUser?.userId,
+      trigger: 'manual-pla-alfa-daily-summary',
+      source: 'api',
+      message: 'Execucio manual del resum diari de Pla Alfa',
+    })
+  }
+
+  const settings = readNotificationSettings()
+  const now = new Date(referenceDate)
+
+  if (!isDateInsideCampaign(now, settings)) {
+    return {
+      skipped: true,
+      reason: 'outside-campaign',
+      campaignDate: getDateKey(now),
+    }
+  }
+
+  const selection = readPlaAlfaSelection()
+  const principalMunicipality = String(selection?.principalMunicipality || '').trim()
+  if (!principalMunicipality) {
+    return {
+      skipped: true,
+      reason: 'no-principal-municipality',
+    }
+  }
+
+  const status = await getPlaAlfaMunicipalitiesStatus({ forceRefresh: Boolean(options.forceRefreshPlaAlfa) })
+  const principalStatus = (status?.municipalities || []).find(
+    (item) => normalizeComparableText(item?.municipality) === normalizeComparableText(principalMunicipality)
+  )
+
+  if (!principalStatus) {
+    return {
+      skipped: true,
+      reason: 'principal-not-found-in-status',
+      principalMunicipality,
+    }
+  }
+
+  const todayLevel = Number.isInteger(principalStatus.todayLevel) ? `Alfa ${principalStatus.todayLevel}` : 'N/D'
+  const tomorrowLevel = Number.isInteger(principalStatus.tomorrowLevel) ? `Alfa ${principalStatus.tomorrowLevel}` : 'N/D'
+  const targetScope = options.scheduled
+    ? `scheduled-pla-alfa-daily:${getDateKey(now)}:${normalizeMunicipalityName(principalMunicipality)}`
+    : `manual-pla-alfa-daily:${Date.now()}:${normalizeMunicipalityName(principalMunicipality)}`
+
+  if (options.skipIfAlreadySent && await hasNotificationLogForScope(targetScope, now)) {
+    return {
+      skipped: true,
+      reason: 'already-sent-today',
+      principalMunicipality,
+    }
+  }
+
+  const notification = await sendMulticastNotification({
+    title: 'Pla Alfa diari',
+    body: `${principalMunicipality}: avui ${todayLevel} - dema ${tomorrowLevel}`,
+    link: '/pla-alfa',
+    data: {
+      kind: 'pla-alfa-daily-summary',
+      principalMunicipality,
+      todayLevel,
+      tomorrowLevel,
+    },
+    targetScope,
+    senderUserId: authUser?.userId ?? null,
+  })
+
+  return {
+    skipped: false,
+    principalMunicipality,
+    todayLevel: principalStatus.todayLevel,
+    tomorrowLevel: principalStatus.tomorrowLevel,
+    notificationCount: 1,
+    targetedUsers: notification?.requestedCount || null,
+    notification,
+  }
+}
+
 async function runDailyNotificationAutomation(authUser, referenceDate = new Date()) {
   if (authUser) {
     await ensureAdmin(authUser)
@@ -2082,6 +2167,7 @@ async function runDailyNotificationAutomation(authUser, referenceDate = new Date
     ? settings.automation.tasks
     : [
       { taskKey: 'campaign-d1-guardia-pvi', notifyKind: 'campaign-d1-guardia-pvi', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: ['Guardia', 'PVI'] },
+      { taskKey: 'pla-alfa-daily-summary', notifyKind: 'pla-alfa-daily-summary', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [] },
       { taskKey: 'sortida-d1-confirmed', notifyKind: 'sortida-confirmed', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [] },
       { taskKey: 'sortida-d1-cancelled', notifyKind: 'sortida-cancelled', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [] },
       { taskKey: 'sortida-d1-reten', notifyKind: 'sortida-reten', enabled: true, schedule: { kind: 'daily' }, convoTypeFilter: [] },
@@ -2163,6 +2249,13 @@ async function runDailyNotificationAutomation(authUser, referenceDate = new Date
 
       if (notifyKind === 'campaign-d1-guardia-pvi') {
         return applyCampaignD1GuardiaPviPlan(authUser, referenceDate)
+      }
+
+      if (notifyKind === 'pla-alfa-daily-summary') {
+        return sendPlaAlfaDailySummary(authUser, referenceDate, {
+          skipIfAlreadySent: !authUser,
+          scheduled: !authUser,
+        })
       }
 
       if (notifyKind === 'sortida-cancelled') {
@@ -2532,6 +2625,7 @@ async function runNotificationAutomationTask(authUser, taskKey, referenceDate = 
     'weekly-pending',
     'campaign-d1-guardia-pvi',
     'weekly-guardia-pvi-bootstrap',
+    'pla-alfa-daily-summary',
   ]
   const resolvedKind = allowedKinds.includes(notifyKind) ? notifyKind : null
 
@@ -2585,6 +2679,11 @@ async function runNotificationAutomationTask(authUser, taskKey, referenceDate = 
       weekScope: 'current-week',
     }),
     'campaign-d1-guardia-pvi': () => applyCampaignD1GuardiaPviPlan(authUser, referenceDate, {
+      forceRefreshPlaAlfa: true,
+    }),
+    'pla-alfa-daily-summary': () => sendPlaAlfaDailySummary(authUser, referenceDate, {
+      skipIfAlreadySent: false,
+      scheduled: false,
       forceRefreshPlaAlfa: true,
     }),
     'weekly-guardia-pvi-bootstrap': async () => {

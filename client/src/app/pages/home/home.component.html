@@ -1107,15 +1107,15 @@
         </div>
 
         <div class="modal-body">
-          @if (getPositiveRespuestasForConvocatoria(guardiaResponsesConvo()!.id).length === 0) {
-            <p class="empty-state">No hi ha usuaris amb resposta positiva.</p>
+          @if (getRespuestasForConvocatoria(guardiaResponsesConvo()!.id).length === 0) {
+            <p class="empty-state">No hi ha respostes registrades encara.</p>
           } @else {
             <div class="guardia-response-cards">
-              @for (respuesta of getPositiveRespuestasForConvocatoria(guardiaResponsesConvo()!.id); track respuesta.id) {
+              @for (respuesta of getRespuestasForConvocatoria(guardiaResponsesConvo()!.id); track respuesta.id) {
                 <article
                   class="guardia-response-card"
-                  [class.guardia-response-card-groc]="isUserGrocByNCarnet(respuesta.userNCarnet)"
-                  [class.guardia-response-card-verd]="!isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.guardia-response-card-groc]="respuesta.response && isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.guardia-response-card-verd]="respuesta.response && !isUserGrocByNCarnet(respuesta.userNCarnet)"
                   [class.attendance-unconfirmed]="respuesta.attendanceConfirmed === false"
                 >
                   <div class="guardia-response-card-wrapper">
@@ -1137,6 +1137,9 @@
                       </div>
 
                       <p class="guardia-response-card-name">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</p>
+                      <span [class]="respuesta.response ? 'badge-yes' : 'badge-no'">
+                        {{ respuesta.response ? 'Resposta: Sí' : 'Resposta: No' }}
+                      </span>
                     </div>
 
                     <div class="guardia-response-card-button">

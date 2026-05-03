@@ -27,7 +27,8 @@ type TaskFormItem = {
     | 'sortida-reten'
     | 'weekly-pending'
     | 'campaign-d1-guardia-pvi'
-    | 'weekly-guardia-pvi-bootstrap';
+    | 'weekly-guardia-pvi-bootstrap'
+    | 'pla-alfa-daily-summary';
   enabled: boolean;
   scheduleKind: 'daily' | 'weekly' | 'manual';
   convoTypeFilter: string[];
@@ -178,6 +179,7 @@ export class NotificationsAdminComponent {
 
   readonly notifyKindOptions: { value: TaskFormItem['notifyKind']; label: string }[] = [
     { value: 'campaign-d1-guardia-pvi', label: 'Planificació campanya D+1 (Guardia/PVI)' },
+    { value: 'pla-alfa-daily-summary', label: 'Resum diari Pla Alfa (municipi principal)' },
     { value: 'pending-responses', label: 'Recordatori disponibilitat' },
     { value: 'sortida-confirmed', label: 'Sortida confirmada (D+1)' },
     { value: 'sortida-cancelled', label: 'Convocatòria cancel·lada (D+1)' },
