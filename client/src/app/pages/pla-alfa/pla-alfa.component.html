@@ -61,13 +61,15 @@
 
           <div class="pla-alfa-checkbox-list" role="listbox" aria-label="Llista de municipis Pla Alfa">
             @for (item of getFilteredPlaAlfaCatalog(); track item.municipality) {
-              <label class="pla-alfa-checkbox-item">
-                <input
-                  type="checkbox"
-                  [checked]="isPlaAlfaMunicipalitySelected(item.municipality)"
-                  (change)="togglePlaAlfaMunicipality(item.municipality, $any($event.target).checked)"
-                />
-                <span class="municipality-name">{{ item.municipality }}</span>
+              <div class="pla-alfa-checkbox-item">
+                <label class="municipality-checkbox-toggle">
+                  <input
+                    type="checkbox"
+                    [checked]="isPlaAlfaMunicipalitySelected(item.municipality)"
+                    (change)="togglePlaAlfaMunicipality(item.municipality, $any($event.target).checked)"
+                  />
+                  <span class="municipality-name">{{ item.municipality }}</span>
+                </label>
                 <label class="municipality-principal-toggle" title="Municipi principal per notificacions diàries">
                   <input
                     type="radio"
@@ -76,10 +78,10 @@
                     [disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
                     (change)="setPrincipalMunicipality(item.municipality, $any($event.target).checked)"
                   />
-                  <span>Principal</span>
+                  <span class="municipality-principal-chip">Principal</span>
                 </label>
                 <span class="municipality-comarca">{{ item.comarca || 'Sense comarca' }}</span>
-              </label>
+              </div>
             }
           </div>
           <p class="pla-alfa-help">Els municipis seleccionats es mantenen visibles encara que no compleixin els filtres.</p>

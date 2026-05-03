@@ -746,6 +746,11 @@
   border-color: #e4cf82;
 }
 
+.guardia-response-card-no {
+  background: #ececec;
+  border-color: #cfcfcf;
+}
+
 .guardia-response-card-wrapper {
   display: flex;
   align-items: center;
@@ -1166,19 +1171,19 @@
   filter: grayscale(0.35);
 }
 
-.guardia-response-card.attendance-unconfirmed {
-  background: #ececec;
-  border-color: #cfcfcf;
+.guardia-response-card.guardia-response-card-unconfirmed {
+  background: #fff1f1;
+  border-color: #d39a9a;
 }
 
-.guardia-response-card.attendance-unconfirmed .guardia-response-card-content {
-  opacity: 0.45;
-  filter: grayscale(0.35);
+.guardia-response-card.guardia-response-card-unconfirmed .guardia-response-card-content {
+  opacity: 1;
+  filter: none;
 }
 
-.guardia-response-card.attendance-unconfirmed .guardia-response-card-button .attendance-toggle-btn,
-.guardia-response-card.attendance-unconfirmed .guardia-response-card-button .attendance-toggle-btn.attendance-toggle-btn-mark-present,
-.guardia-response-card.attendance-unconfirmed .guardia-response-card-button .attendance-toggle-btn.attendance-toggle-btn-mark-absent {
+.guardia-response-card.guardia-response-card-unconfirmed .guardia-response-card-button .attendance-toggle-btn,
+.guardia-response-card.guardia-response-card-unconfirmed .guardia-response-card-button .attendance-toggle-btn.attendance-toggle-btn-mark-present,
+.guardia-response-card.guardia-response-card-unconfirmed .guardia-response-card-button .attendance-toggle-btn.attendance-toggle-btn-mark-absent {
   opacity: 1 !important;
   filter: none !important;
 }

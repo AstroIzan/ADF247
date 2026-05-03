@@ -1114,9 +1114,10 @@
               @for (respuesta of getRespuestasForConvocatoria(guardiaResponsesConvo()!.id); track respuesta.id) {
                 <article
                   class="guardia-response-card"
-                  [class.guardia-response-card-groc]="respuesta.response && isUserGrocByNCarnet(respuesta.userNCarnet)"
-                  [class.guardia-response-card-verd]="respuesta.response && !isUserGrocByNCarnet(respuesta.userNCarnet)"
-                  [class.attendance-unconfirmed]="respuesta.attendanceConfirmed === false"
+                  [class.guardia-response-card-groc]="respuesta.response && respuesta.attendanceConfirmed !== false && isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.guardia-response-card-verd]="respuesta.response && respuesta.attendanceConfirmed !== false && !isUserGrocByNCarnet(respuesta.userNCarnet)"
+                  [class.guardia-response-card-no]="!respuesta.response && respuesta.attendanceConfirmed !== false"
+                  [class.guardia-response-card-unconfirmed]="respuesta.attendanceConfirmed === false"
                 >
                   <div class="guardia-response-card-wrapper">
                     <div class="guardia-response-card-content">
@@ -1137,9 +1138,6 @@
                       </div>
 
                       <p class="guardia-response-card-name">{{ getUserNameByNCarnet(respuesta.userNCarnet) }}</p>
-                      <span [class]="respuesta.response ? 'badge-yes' : 'badge-no'">
-                        {{ respuesta.response ? 'Resposta: Sí' : 'Resposta: No' }}
-                      </span>
                     </div>
 
                     <div class="guardia-response-card-button">
