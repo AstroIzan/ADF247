@@ -140,8 +140,19 @@
   white-space: nowrap;
   display: flex;
   gap: 6px;
-  align-items: center;
+  align-items: stretch;
   overflow: visible;
+}
+
+.desktop-users-view .actions .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-height: 100%;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  line-height: 1.1;
 }
 
 .users-table {
@@ -160,7 +171,12 @@
 .delete-menu {
   position: relative;
   display: inline-flex;
+  align-self: stretch;
   z-index: 30;
+}
+
+.desktop-users-view .delete-menu > .btn {
+  min-height: 100%;
 }
 
 .delete-popover {

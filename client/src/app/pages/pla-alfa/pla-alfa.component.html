@@ -62,18 +62,21 @@
           <div class="pla-alfa-checkbox-list" role="listbox" aria-label="Llista de municipis Pla Alfa">
             @for (item of getFilteredPlaAlfaCatalog(); track item.municipality) {
               <div class="pla-alfa-checkbox-item">
-                <label class="municipality-principal-toggle" title="Municipi principal per notificacions diàries" aria-label="Marcar municipi principal">
-                  <input
-                    type="radio"
-                    name="plaAlfaPrincipal"
-                    [checked]="isPrincipalMunicipality(item.municipality)"
-                    [disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
-                    (change)="setPrincipalMunicipality(item.municipality, $any($event.target).checked)"
-                  />
+                <button
+                  type="button"
+                  class="municipality-principal-toggle"
+                  [class.is-active]="isPrincipalMunicipality(item.municipality)"
+                  [class.is-disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
+                  [attr.aria-pressed]="isPrincipalMunicipality(item.municipality)"
+                  [disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
+                  [attr.title]="isPrincipalMunicipality(item.municipality) ? 'Treure municipi principal' : 'Marcar municipi principal'"
+                  [attr.aria-label]="isPrincipalMunicipality(item.municipality) ? 'Treure municipi principal' : 'Marcar municipi principal'"
+                  (click)="setPrincipalMunicipality(item.municipality, !isPrincipalMunicipality(item.municipality))"
+                >
                   <span class="municipality-principal-chip" aria-hidden="true">
                     <span class="municipality-principal-icon"></span>
                   </span>
-                </label>
+                </button>
                 <label class="municipality-checkbox-toggle">
                   <input
                     type="checkbox"

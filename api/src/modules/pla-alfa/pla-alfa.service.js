@@ -989,9 +989,17 @@ async function getPlaAlfaMunicipalitiesStatus(options = {}) {
 
   let openMeteoFallbackByMunicipality = new Map()
   if (missingAemetMunicipalities.length > 0) {
-    const openMeteoResult = await getOpenMeteoFallbackForecastForMunicipalities(missingAemetMunicipalities, { forceRefresh })
-    openMeteoFallbackByMunicipality = openMeteoResult.byMunicipality
-    warnings.push(...(openMeteoResult.warnings || []))
+    try {
+      const openMeteoResult = await getOpenMeteoFallbackForecastForMunicipalities(missingAemetMunicipalities, { forceRefresh })
+      openMeteoFallbackByMunicipality = openMeteoResult.byMunicipality
+      warnings.push(...(openMeteoResult.warnings || []))
+    } catch (error) {
+      warnings.push({
+        source: 'open-meteo',
+        message: error?.message || 'No se ha podido consultar Open-Meteo.',
+        details: error?.details || null,
+      })
+    }
   }
 
   const result = municipalities.map((name) => {

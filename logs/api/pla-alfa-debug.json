@@ -1,0 +1,81 @@
+﻿{
+    "statusMunicipalities":  [
+                                 {
+                                     "municipality":  "Barber� del Vall�s",
+                                     "comarca":  null
+                                 },
+                                 {
+                                     "municipality":  "Poliny�",
+                                     "comarca":  null
+                                 },
+                                 {
+                                     "municipality":  "Sabadell",
+                                     "comarca":  "Vallès Occidental"
+                                 },
+                                 {
+                                     "municipality":  "Sant Quirze del Vall�s",
+                                     "comarca":  null
+                                 },
+                                 {
+                                     "municipality":  "Terrassa",
+                                     "comarca":  "Vallès Occidental"
+                                 }
+                             ],
+    "selectedMunicipalities":  [
+                                   "Barber� del Vall�s",
+                                   "Poliny�",
+                                   "Sabadell",
+                                   "Sant Quirze del Vall�s",
+                                   "Terrassa"
+                               ],
+    "catalogSample":  [
+                          {
+                              "municipality":  "Abella de la Conca",
+                              "comarca":  "Pallars Jussà",
+                              "objectId":  1,
+                              "selected":  false
+                          },
+                          {
+                              "municipality":  "Abrera",
+                              "comarca":  "Baix Llobregat",
+                              "objectId":  2,
+                              "selected":  false
+                          },
+                          {
+                              "municipality":  "Àger",
+                              "comarca":  "Noguera",
+                              "objectId":  3,
+                              "selected":  false
+                          },
+                          {
+                              "municipality":  "Agramunt",
+                              "comarca":  "Urgell",
+                              "objectId":  4,
+                              "selected":  false
+                          },
+                          {
+                              "municipality":  "Aguilar de Segarra",
+                              "comarca":  "Bages",
+                              "objectId":  5,
+                              "selected":  false
+                          },
+                          {
+                              "municipality":  "Agullana",
+                              "comarca":  "Alt Empordà",
+                              "objectId":  6,
+                              "selected":  false
+                          },
+                          {
+                              "municipality":  "Aiguafreda",
+                              "comarca":  "Vallès Oriental",
+                              "objectId":  7,
+                              "selected":  false
+                          },
+                          {
+                              "municipality":  "Aiguamúrcia",
+                              "comarca":  "Alt Camp",
+                              "objectId":  8,
+                              "selected":  false
+                          }
+                      ]
+}

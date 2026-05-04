@@ -2072,49 +2072,74 @@ async function sendPlaAlfaDailySummary(authUser, referenceDate = new Date(), opt
 
   const selection = readPlaAlfaSelection()
   const principalMunicipality = String(selection?.principalMunicipality || '').trim()
-  if (!principalMunicipality) {
+  const status = await getPlaAlfaMunicipalitiesStatus({ forceRefresh: Boolean(options.forceRefreshPlaAlfa) })
+  const municipalitiesStatus = Array.isArray(status?.municipalities) ? status.municipalities : []
+
+  if (municipalitiesStatus.length === 0) {
     return {
       skipped: true,
-      reason: 'no-principal-municipality',
+      reason: 'no-selected-municipalities',
     }
   }
 
-  const status = await getPlaAlfaMunicipalitiesStatus({ forceRefresh: Boolean(options.forceRefreshPlaAlfa) })
-  const principalStatus = (status?.municipalities || []).find(
+  const principalStatus = municipalitiesStatus.find(
     (item) => normalizeComparableText(item?.municipality) === normalizeComparableText(principalMunicipality)
   )
 
-  if (!principalStatus) {
+  const useAllSelected = !principalMunicipality || !principalStatus
+  const selectedStatuses = useAllSelected ? municipalitiesStatus : [principalStatus]
+  const summaryRows = selectedStatuses.map((item) => {
+    const municipality = String(item?.municipality || '').trim()
+    const todayText = Number.isInteger(item?.todayLevel) ? `Alfa ${item.todayLevel}` : 'N/D'
+    const tomorrowText = Number.isInteger(item?.tomorrowLevel) ? `Alfa ${item.tomorrowLevel}` : 'N/D'
+    return {
+      municipality,
+      todayText,
+      tomorrowText,
+      todayLevel: item?.todayLevel ?? null,
+      tomorrowLevel: item?.tomorrowLevel ?? null,
+    }
+  }).filter((row) => row.municipality)
+
+  if (summaryRows.length === 0) {
     return {
       skipped: true,
-      reason: 'principal-not-found-in-status',
-      principalMunicipality,
+      reason: 'no-selected-municipalities',
     }
   }
 
-  const todayLevel = Number.isInteger(principalStatus.todayLevel) ? `Alfa ${principalStatus.todayLevel}` : 'N/D'
-  const tomorrowLevel = Number.isInteger(principalStatus.tomorrowLevel) ? `Alfa ${principalStatus.tomorrowLevel}` : 'N/D'
+  const rawSummaryBody = summaryRows
+    .map((row) => `${row.municipality}: avui ${row.todayText} - dema ${row.tomorrowText}`)
+    .join(' · ')
+  const summaryBody = rawSummaryBody.length <= 850
+    ? rawSummaryBody
+    : `Pla Alfa (${summaryRows.length} municipis): consulta el detall a l'app.`
+
+  const targetKey = useAllSelected
+    ? 'all-selected'
+    : normalizeMunicipalityName(summaryRows[0].municipality)
   const targetScope = options.scheduled
-    ? `scheduled-pla-alfa-daily:${getDateKey(now)}:${normalizeMunicipalityName(principalMunicipality)}`
-    : `manual-pla-alfa-daily:${Date.now()}:${normalizeMunicipalityName(principalMunicipality)}`
+    ? `scheduled-pla-alfa-daily:${getDateKey(now)}:${targetKey}`
+    : `manual-pla-alfa-daily:${Date.now()}:${targetKey}`
 
   if (options.skipIfAlreadySent && await hasNotificationLogForScope(targetScope, now)) {
     return {
       skipped: true,
       reason: 'already-sent-today',
-      principalMunicipality,
+      principalMunicipality: useAllSelected ? null : summaryRows[0].municipality,
+      appliesToAllSelected: useAllSelected,
     }
   }
 
   const notification = await sendMulticastNotification({
     title: 'Pla Alfa diari',
-    body: `${principalMunicipality}: avui ${todayLevel} - dema ${tomorrowLevel}`,
+    body: summaryBody,
     link: '/pla-alfa',
     data: {
       kind: 'pla-alfa-daily-summary',
-      principalMunicipality,
-      todayLevel,
-      tomorrowLevel,
+      principalMunicipality: useAllSelected ? '' : summaryRows[0].municipality,
+      appliesToAllSelected: useAllSelected ? 'true' : 'false',
+      municipalityCount: String(summaryRows.length),
     },
     targetScope,
     senderUserId: authUser?.userId ?? null,
@@ -2122,9 +2147,9 @@ async function sendPlaAlfaDailySummary(authUser, referenceDate = new Date(), opt
 
   return {
     skipped: false,
-    principalMunicipality,
-    todayLevel: principalStatus.todayLevel,
-    tomorrowLevel: principalStatus.tomorrowLevel,
+    principalMunicipality: useAllSelected ? null : summaryRows[0].municipality,
+    appliesToAllSelected: useAllSelected,
+    municipalities: summaryRows,
     notificationCount: 1,
     targetedUsers: notification?.requestedCount || null,
     notification,

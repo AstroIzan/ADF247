@@ -1,4 +1,5 @@
 const plaAlfaService = require('./pla-alfa.service')
+const { readPlaAlfaSelection } = require('./pla-alfa.config')
 
 function sendErrorResponse(res, error) {
   const statusCode = error.statusCode || 500
@@ -24,7 +25,41 @@ async function getMunicipalitiesPlaAlfaStatus(req, res) {
     const result = await plaAlfaService.getPlaAlfaMunicipalitiesStatus({ forceRefresh })
     res.json(result)
   } catch (error) {
-    sendErrorResponse(res, error)
+    try {
+      const selection = readPlaAlfaSelection()
+      const fallbackRows = (selection?.municipalities || []).map((municipality) => ({
+        municipality,
+        isPrincipal: municipality === (selection?.principalMunicipality || null),
+        comarca: null,
+        todayLevel: null,
+        tomorrowLevel: null,
+        todayForecast: null,
+        todayForecastSource: null,
+        tomorrowForecast: null,
+        tomorrowForecastSource: null,
+        forecastSource: null,
+        todayObjectId: null,
+        tomorrowObjectId: null,
+        foundToday: false,
+        foundTomorrow: false,
+      }))
+
+      res.status(200).json({
+        updatedAt: new Date().toISOString(),
+        principalMunicipality: selection?.principalMunicipality || null,
+        municipalities: fallbackRows,
+        warnings: [
+          {
+            source: 'pla-alfa-status',
+            message: error?.message || 'No s\'ha pogut actualitzar Pla Alfa en temps real.',
+            details: error?.details || null,
+          },
+        ],
+      })
+      return
+    } catch {
+      sendErrorResponse(res, error)
+    }
   }
 }
 

@@ -24,6 +24,7 @@
         <thead>
           <tr>
             <th>Usuari</th>
+            <th>Nº Carnet</th>
             <th>H campanya</th>
             <th>H fora campanya</th>
             <th>No respostes</th>
@@ -37,6 +38,7 @@
           @for (row of rows(); track row.userId) {
             <tr>
               <td class="hours-user-cell">{{ row.userName }}</td>
+              <td>{{ row.userNCarnet }}</td>
               <td>{{ formatRoundedHours(row.campaignHours) }}</td>
               <td>{{ formatRoundedHours(row.offCampaignHours) }}</td>
               <td>{{ row.unansweredCount }}</td>
