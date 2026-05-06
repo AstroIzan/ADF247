@@ -362,18 +362,22 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="checkbox-label">
-              <input
-                type="checkbox"
-                [checked]="customResponse().fullHorari"
-                (change)="updateCustomField('fullHorari', $any($event.target).checked)"
-              />
-              Disponible tot l'horari
-            </label>
-          </div>
+          @if (customResponse().response) {
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="customResponse().fullHorari"
+                  (change)="updateCustomField('fullHorari', $any($event.target).checked)"
+                />
+                Disponible tot l'horari
+              </label>
+            </div>
+          } @else {
+            <p><strong>No disponible:</strong> es marcarà automàticament per a tot l'horari.</p>
+          }
 
-          @if (!customResponse().fullHorari) {
+          @if (customResponse().response && !customResponse().fullHorari) {
             <div class="form-group">
               <label>Horari personalitzat (opcional)</label>
               <div class="time-range-row">
@@ -998,6 +1002,15 @@
                             >
                               <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
                             </button>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-edit"
+                              title="Editar resposta"
+                              aria-label="Editar resposta"
+                              (click)="openAdminResponseEditModal(respuesta)"
+                            >
+                              ✎
+                            </button>
                             @if (!respuesta.attendanceConfirmed) {
                               <button
                                 type="button"
@@ -1062,6 +1075,15 @@
                         (click)="updateAttendanceConfirmation(respuesta, !respuesta.attendanceConfirmed)"
                       >
                         <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn btn-sm btn-edit"
+                        title="Editar resposta"
+                        aria-label="Editar resposta"
+                        (click)="openAdminResponseEditModal(respuesta)"
+                      >
+                        ✎
                       </button>
                       @if (!respuesta.attendanceConfirmed) {
                         <button
@@ -1213,6 +1235,97 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-primary" (click)="closeRespuestaInfoModal()">Tancar</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (showAdminResponseEditModal() && adminResponseEditTarget()) {
+    <div class="modal-overlay">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h3>Editar resposta</h3>
+          <button class="close-btn" (click)="closeAdminResponseEditModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <p><strong>Usuari:</strong> {{ getUserNameByNCarnet(adminResponseEditTarget()!.userNCarnet) }}</p>
+
+          <div class="form-group">
+            <label>Disponibilitat</label>
+            <div class="custom-choice-row">
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.choice-active]="adminResponseEditForm().response"
+                (click)="updateAdminResponseEditField('response', true)"
+              >
+                Sí
+              </button>
+              <button
+                type="button"
+                class="btn btn-sm"
+                [class.choice-active]="!adminResponseEditForm().response"
+                (click)="updateAdminResponseEditField('response', false)"
+              >
+                No
+              </button>
+            </div>
+          </div>
+
+          @if (adminResponseEditForm().response) {
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="adminResponseEditForm().fullHorari"
+                  (change)="updateAdminResponseEditField('fullHorari', $any($event.target).checked)"
+                />
+                Disponible tot l'horari
+              </label>
+            </div>
+          } @else {
+            <p><strong>No disponible:</strong> s'aplicarà a tot l'horari.</p>
+          }
+
+          @if (adminResponseEditForm().response && !adminResponseEditForm().fullHorari) {
+            <div class="form-group">
+              <label>Horari personalitzat</label>
+              <div class="time-range-row">
+                <div class="time-field">
+                  <input
+                    type="time"
+                    step="60"
+                    [value]="adminResponseEditForm().customStartTime"
+                    (change)="updateAdminResponseEditField('customStartTime', $any($event.target).value)"
+                  />
+                </div>
+                <span>a</span>
+                <div class="time-field">
+                  <input
+                    type="time"
+                    step="60"
+                    [value]="adminResponseEditForm().customEndTime"
+                    (change)="updateAdminResponseEditField('customEndTime', $any($event.target).value)"
+                  />
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Comentari (opcional)</label>
+            <textarea
+              rows="3"
+              [value]="adminResponseEditForm().customText"
+              (input)="updateAdminResponseEditField('customText', $any($event.target).value)"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeAdminResponseEditModal()">Cancel·lar</button>
+          <button class="btn btn-primary" (click)="saveAdminResponseEdit()">Desar canvis</button>
         </div>
       </div>
     </div>

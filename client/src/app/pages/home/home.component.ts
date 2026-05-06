@@ -43,6 +43,15 @@ export class HomeComponent implements OnInit {
   showAdminConvoModal = signal(false);
   adminConvo = signal<Convocatoria | null>(null);
   adminConvoSaving = signal(false);
+  showAdminResponseEditModal = signal(false);
+  adminResponseEditTarget = signal<Respuesta | null>(null);
+  adminResponseEditForm = signal({
+    response: true,
+    fullHorari: false,
+    customText: '',
+    customStartTime: '',
+    customEndTime: '',
+  });
   adminConvoForm = signal({
     title: '',
     date: '',
@@ -1631,7 +1640,7 @@ export class HomeComponent implements OnInit {
     this.customConvo.set(convo);
     this.customResponse.set({
       response: existing?.response ?? true,
-      fullHorari: existing?.fullHorari ?? false,
+      fullHorari: existing?.response === false ? true : (existing?.fullHorari ?? false),
       customText: parsedCustom.comment,
       customStartTime: parsedCustom.customStartTime,
       customEndTime: parsedCustom.customEndTime,
@@ -1648,10 +1657,23 @@ export class HomeComponent implements OnInit {
     field: 'response' | 'fullHorari' | 'customText' | 'customStartTime' | 'customEndTime',
     value: boolean | string
   ) {
-    this.customResponse.set({
+    const next = {
       ...this.customResponse(),
       [field]: value,
-    });
+    };
+
+    if (field === 'response' && value === false) {
+      next.fullHorari = true;
+      next.customStartTime = '';
+      next.customEndTime = '';
+    }
+
+    if (field === 'fullHorari' && value === true) {
+      next.customStartTime = '';
+      next.customEndTime = '';
+    }
+
+    this.customResponse.set(next);
 
     // Validación real-time de rango de horarios
     if (field === 'customStartTime' || field === 'customEndTime') {
@@ -1682,8 +1704,10 @@ export class HomeComponent implements OnInit {
     }
 
     const trimmedComment = this.customResponse().customText.trim();
-    const customStartTime = this.customResponse().customStartTime.trim();
-    const customEndTime = this.customResponse().customEndTime.trim();
+    const responseValue = Boolean(this.customResponse().response);
+    const effectiveFullHorari = responseValue ? Boolean(this.customResponse().fullHorari) : true;
+    const customStartTime = responseValue ? this.customResponse().customStartTime.trim() : '';
+    const customEndTime = responseValue ? this.customResponse().customEndTime.trim() : '';
 
     if ((customStartTime && !customEndTime) || (!customStartTime && customEndTime)) {
       this.error.set('Si defineixes un horari personalitzat, has d\'indicar hora d\'inici i hora de fi.');
@@ -1702,9 +1726,9 @@ export class HomeComponent implements OnInit {
     const payload = {
       convoId: convo.id,
       userNCarnet: user.nCarnet,
-      response: this.customResponse().response,
+      response: responseValue,
       isCustom,
-      fullHorari: this.customResponse().fullHorari,
+      fullHorari: effectiveFullHorari,
       customText: isCustom
         ? this.composeCustomText({
             comment: trimmedComment,
@@ -2044,8 +2068,105 @@ export class HomeComponent implements OnInit {
 
   closeAdminConvoModal() {
     this.showAdminResponsableMenu.set(false);
+    this.closeAdminResponseEditModal();
     this.showAdminConvoModal.set(false);
     this.adminConvo.set(null);
+  }
+
+  openAdminResponseEditModal(respuesta: Respuesta) {
+    if (!this.canManageAttendanceForConvo(this.adminConvo())) {
+      this.error.set('No tens permisos per editar aquesta resposta.');
+      return;
+    }
+
+    const parsed = this.parseCustomText(respuesta.customText || '');
+    const responseValue = Boolean(respuesta.response);
+    this.adminResponseEditTarget.set(respuesta);
+    this.adminResponseEditForm.set({
+      response: responseValue,
+      fullHorari: responseValue ? Boolean(respuesta.fullHorari) : true,
+      customText: parsed.comment,
+      customStartTime: responseValue ? parsed.customStartTime : '',
+      customEndTime: responseValue ? parsed.customEndTime : '',
+    });
+    this.showAdminResponseEditModal.set(true);
+    this.error.set('');
+  }
+
+  closeAdminResponseEditModal() {
+    this.showAdminResponseEditModal.set(false);
+    this.adminResponseEditTarget.set(null);
+  }
+
+  updateAdminResponseEditField(
+    field: 'response' | 'fullHorari' | 'customText' | 'customStartTime' | 'customEndTime',
+    value: boolean | string
+  ) {
+    const next = {
+      ...this.adminResponseEditForm(),
+      [field]: value,
+    };
+
+    if (field === 'response' && value === false) {
+      next.fullHorari = true;
+      next.customStartTime = '';
+      next.customEndTime = '';
+    }
+
+    if (field === 'fullHorari' && value === true) {
+      next.customStartTime = '';
+      next.customEndTime = '';
+    }
+
+    this.adminResponseEditForm.set(next);
+  }
+
+  saveAdminResponseEdit() {
+    const target = this.adminResponseEditTarget();
+    if (!target) {
+      return;
+    }
+
+    const responseValue = Boolean(this.adminResponseEditForm().response);
+    const effectiveFullHorari = responseValue ? Boolean(this.adminResponseEditForm().fullHorari) : true;
+    const customStartTime = responseValue ? this.adminResponseEditForm().customStartTime.trim() : '';
+    const customEndTime = responseValue ? this.adminResponseEditForm().customEndTime.trim() : '';
+    const comment = this.adminResponseEditForm().customText.trim();
+
+    if ((customStartTime && !customEndTime) || (!customStartTime && customEndTime)) {
+      this.error.set('Si defineixes horari personalitzat, has d\'indicar inici i fi.');
+      return;
+    }
+
+    if (customStartTime && customEndTime && customStartTime >= customEndTime) {
+      this.error.set('L\'hora de fi ha de ser posterior a la d\'inici.');
+      return;
+    }
+
+    const hasCustomRange = customStartTime.length > 0 && customEndTime.length > 0;
+    const hasComment = comment.length > 0;
+    const isCustom = hasCustomRange || hasComment;
+
+    this.dataService.updateRespuesta(target.id, {
+      response: responseValue,
+      fullHorari: effectiveFullHorari,
+      isCustom,
+      customText: isCustom
+        ? this.composeCustomText({
+            comment,
+            customStartTime,
+            customEndTime,
+          })
+        : null,
+    }).subscribe({
+      next: () => {
+        this.loadRespuestas();
+        this.closeAdminResponseEditModal();
+      },
+      error: (err) => {
+        this.error.set(err.message || 'No s\'ha pogut actualitzar la resposta.');
+      },
+    });
   }
 
   updateAdminConvoField(

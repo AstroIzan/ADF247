@@ -1553,7 +1553,21 @@ async function recalculateAutoAssignedResponsable(convoId) {
 
   const selectedCandidate = sortedCandidates[0]?.user
 
-  if (!selectedCandidate || selectedCandidate.id === convocatoria.responsableId) {
+  if (!selectedCandidate) {
+    if (!convocatoria.responsableId) {
+      return convocatoria
+    }
+
+    return database.convocatoria.update({
+      where: { id: convoId },
+      data: {
+        responsableId: null,
+      },
+      include: convocatoriaInclude,
+    })
+  }
+
+  if (selectedCandidate.id === convocatoria.responsableId) {
     return convocatoria
   }
 

@@ -389,6 +389,21 @@ export class ConvosComponent implements OnDestroy {
     return this.sendingNotificationKey() === `${action}-${convoId}`;
   }
 
+  canSendSortidaNotification(convo: Convocatoria) {
+    const convoDate = new Date(convo.date);
+    if (Number.isNaN(convoDate.getTime())) {
+      return false;
+    }
+
+    const threshold = new Date();
+    threshold.setHours(0, 0, 0, 0);
+    threshold.setDate(threshold.getDate() - 1);
+
+    const convoDay = new Date(convoDate);
+    convoDay.setHours(0, 0, 0, 0);
+    return convoDay >= threshold;
+  }
+
   updateFormField(field: string, value: any) {
     const data = this.formData();
     if (field === 'convoTypeId') {

@@ -59,9 +59,11 @@
                   <button (click)="sendResponseRequest(convo)" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('response', convo.id)">
                     Avisar resposta
                   </button>
-                  <button (click)="sendSortidaStatus(convo)" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
-                    Avisar sortida
-                  </button>
+                  @if (canSendSortidaNotification(convo)) {
+                    <button (click)="sendSortidaStatus(convo)" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
+                      Avisar sortida
+                    </button>
+                  }
                 }
                 <button (click)="openForm(convo)" class="btn btn-sm btn-edit">Editar</button>
                 <div class="delete-menu">
@@ -106,9 +108,11 @@
                 <button (click)="sendResponseRequest(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('response', convo.id)">
                   Avisar resposta
                 </button>
-                <button (click)="sendSortidaStatus(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
-                  Avisar sortida
-                </button>
+                @if (canSendSortidaNotification(convo)) {
+                  <button (click)="sendSortidaStatus(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary" [disabled]="isSendingAction('sortida', convo.id)">
+                    Avisar sortida
+                  </button>
+                }
               }
               <button (click)="openForm(convo); $event.stopPropagation();" class="btn btn-sm btn-edit">Editar</button>
               <div class="delete-menu">

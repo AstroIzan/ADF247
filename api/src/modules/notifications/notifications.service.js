@@ -364,38 +364,37 @@ function getRelativeDayLabel(targetDate, referenceDate = new Date()) {
 function buildResponseRequestManualMessage(convocatoria, referenceDate = new Date()) {
   const dayLabel = getRelativeDayLabel(convocatoria?.date, referenceDate)
   const horaInici = formatTimeForText(convocatoria?.startTime)
-  const horaFinal = formatTimeForText(convocatoria?.finalTime || convocatoria?.startTime)
   const title = String(convocatoria?.title || 'convocatòria').trim() || 'convocatòria'
-  const typeName = String(convocatoria?.convoType?.name || '').trim().toLowerCase()
-
-  if (typeName.includes('formaci')) {
-    return {
-      title: 'Formació',
-      body: `Recordatori de formació: ${title} el dia ${dayLabel} de ${horaInici} a ${horaFinal}`,
-    }
-  }
 
   return {
     title: 'Disponibilitat',
-    body: `Es solicita disponibilitat per ${title} el dia ${dayLabel} de ${horaInici} a ${horaFinal}`,
+    body: `Es solicita la teva disponibilitat per la ${title} pel dia ${dayLabel} a les ${horaInici}`,
   }
 }
 
 function buildSortidaStatusManualMessage(convocatoria, settings, referenceDate = new Date()) {
+  const dayDescriptor = getRelativeDayDescriptor(convocatoria?.date, referenceDate)
   const dayLabel = getRelativeDayLabel(convocatoria?.date, referenceDate)
   const horaInici = formatTimeForText(convocatoria?.startTime)
   const ubicacio = String(convocatoria?.ubiSortida || convocatoria?.convoType?.defaultLocation || '-').trim() || '-'
   const responsableNom = `${convocatoria?.user?.name || ''} ${convocatoria?.user?.lastName || ''}`.trim() || '-'
+  const convocatoriaTitle = String(convocatoria?.title || 'convocatoria').trim() || 'convocatoria'
   const typeName = String(convocatoria?.convoType?.name || '').trim().toLowerCase()
   const isIncendiType = typeName === 'incendi'
   const guardiaSource = String(settings?.typeGroups?.guardiaSourceTypeName || 'guardia').trim().toLowerCase()
   const guardiaPvi = String(settings?.typeGroups?.guardiaPviTypeName || 'pvi').trim().toLowerCase()
   const isGuardiaType = typeName === guardiaSource || typeName === guardiaPvi
 
+  const startDate = new Date(convocatoria?.startTime || convocatoria?.date)
+  const brigadesDate = Number.isNaN(startDate.getTime())
+    ? null
+    : new Date(startDate.getTime() - (30 * 60 * 1000))
+  const brigadesTime = brigadesDate ? formatTimeForText(brigadesDate) : horaInici
+
   if (convocatoria?.sortida) {
     return {
       title: 'Convocatoria',
-      body: `Sortida ${dayLabel} a les ${horaInici} a ${ubicacio}\nResponsable ${responsableNom}`,
+      body: `Voluntaris disponibles per la ${convocatoriaTitle} a ${ubicacio} el dia ${dayLabel} a les ${horaInici}. Els que aneu a brigades a les ${brigadesTime}.`,
       dataKind: 'sortida-status-confirmed',
     }
   }
@@ -409,16 +408,48 @@ function buildSortidaStatusManualMessage(convocatoria, settings, referenceDate =
   }
 
   if (isGuardiaType) {
+    if (dayDescriptor.key === 'today') {
+      return {
+        title: 'Convocatoria',
+        body: 'Avui no se surt',
+        dataKind: 'sortida-status-reten',
+      }
+    }
+
+    if (dayDescriptor.key === 'tomorrow') {
+      return {
+        title: 'Convocatoria',
+        body: 'No hi ha sortida per la convocatoria de demà',
+        dataKind: 'sortida-status-reten',
+      }
+    }
+
     return {
       title: 'Convocatoria',
-      body: `No se surt per la convocatoria de ${dayLabel}`,
+      body: `No hi ha sortida per la convocatoria del dia ${dayDescriptor.dateText}`,
       dataKind: 'sortida-status-reten',
+    }
+  }
+
+  if (dayDescriptor.key === 'today') {
+    return {
+      title: 'Convocatoria',
+      body: 'Avui no se surt',
+      dataKind: 'sortida-status-cancelled',
+    }
+  }
+
+  if (dayDescriptor.key === 'tomorrow') {
+    return {
+      title: 'Convocatoria',
+      body: 'No hi ha sortida per la convocatoria de demà',
+      dataKind: 'sortida-status-cancelled',
     }
   }
 
   return {
     title: 'Convocatoria',
-    body: `No se surt per la convocatoria de ${dayLabel}`,
+    body: `No hi ha sortida per la convocatoria del dia ${dayDescriptor.dateText}`,
     dataKind: 'sortida-status-cancelled',
   }
 }
@@ -513,8 +544,11 @@ const GUARDIA_DAILY_SLOTS = [
   { startHour: 16, startMinute: 0, endHour: 20, endMinute: 0 },
 ]
 
-const PVI_DAILY_SLOT = { startHour: 10, startMinute: 0, endHour: 16, endMinute: 0 }
-const PVI_WEEKLY_SLOT = { startHour: 12, startMinute: 0, endHour: 16, endMinute: 0 }
+const PVI_BASE_SLOTS = [
+  { startHour: 12, startMinute: 0, endHour: 16, endMinute: 0 },
+  { startHour: 16, startMinute: 0, endHour: 20, endMinute: 0 },
+]
+const PVI_ALFA3_EXTRA_SLOT = { startHour: 10, startMinute: 0, endHour: 14, endMinute: 0 }
 
 function buildDateWithTime(baseDate, hour, minute = 0) {
   const value = startOfDay(baseDate)
@@ -740,15 +774,23 @@ async function applyCampaignD1GuardiaPviPlan(_authUser, referenceDate = new Date
       }
     }
 
-    const createdPvi = await ensureConvocatoriaForSlot({
-      targetDate: tomorrowStart,
-      slot: PVI_DAILY_SLOT,
-      convoType: pviType,
-      existingConvocatorias,
-    })
+    const pviSlots = [...PVI_BASE_SLOTS]
+    if (maxTomorrowAlfaLevel >= 3) {
+      pviSlots.push(PVI_ALFA3_EXTRA_SLOT)
+    }
 
-    if (createdPvi) {
-      createdPviCount += 1
+    for (const slot of pviSlots) {
+      const createdPvi = await ensureConvocatoriaForSlot({
+        targetDate: tomorrowStart,
+        slot,
+        convoType: pviType,
+        existingConvocatorias,
+        includeDateInTitle: false,
+      })
+
+      if (createdPvi) {
+        createdPviCount += 1
+      }
     }
   }
 
@@ -875,16 +917,18 @@ async function seedNextWeekGuardiaPviConvocatorias(_authUser, referenceDate = ne
     }
 
     if (weekHadAlfa2) {
-      const createdPvi = await ensureConvocatoriaForSlot({
-        targetDate: day,
-        slot: PVI_WEEKLY_SLOT,
-        convoType: pviType,
-        existingConvocatorias,
-        includeDateInTitle: false,
-      })
+      for (const slot of PVI_BASE_SLOTS) {
+        const createdPvi = await ensureConvocatoriaForSlot({
+          targetDate: day,
+          slot,
+          convoType: pviType,
+          existingConvocatorias,
+          includeDateInTitle: false,
+        })
 
-      if (createdPvi) {
-        createdPviCount += 1
+        if (createdPvi) {
+          createdPviCount += 1
+        }
       }
     }
   }
@@ -1640,6 +1684,14 @@ async function handleConvocatoriaCreated(convoId) {
 }
 
 async function sendConvocatoriaSortidaStatusInternal(convocatoria, senderUserId, targetScope) {
+  const convocatoriaDate = startOfDay(convocatoria?.date || new Date())
+  const earliestAllowedDate = startOfDay(new Date())
+  earliestAllowedDate.setDate(earliestAllowedDate.getDate() - 1)
+
+  if (convocatoriaDate < earliestAllowedDate) {
+    throw createServiceError('No es poden enviar notificacions de sortida per convocatòries anteriors a ahir.', 400)
+  }
+
   const typeName = normalizeTypeName(convocatoria?.convoType?.name)
   if (typeName === 'incendi' && convocatoria?.sortida) {
     return sendIncendiSortidaActivated(convocatoria.id, senderUserId, { targetScope })

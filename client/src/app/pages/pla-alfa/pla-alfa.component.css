@@ -583,14 +583,15 @@
 
   .pla-alfa-table-wrapper {
     border: 1px solid #e5e5e5;
-    overflow: auto;
+    overflow: visible;
     background: #fff;
-    max-height: 42vh;
+    max-height: none;
   }
 
   .pla-alfa-checkbox-list {
-    max-height: 42vh;
+    max-height: none;
     min-height: 180px;
+    overflow: visible;
   }
 
   .pla-alfa-selector-panel {

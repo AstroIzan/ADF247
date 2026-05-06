@@ -47,6 +47,8 @@ export class AvailabilityComponent implements OnInit {
     fromTime: '08:00',
     toDate: this.toDateInputValue(new Date()),
     toTime: '20:00',
+    fromDateTimeMobile: `${this.toDateInputValue(new Date())}T08:00`,
+    toDateTimeMobile: `${this.toDateInputValue(new Date())}T20:00`,
   });
 
   selectedDateRanges = computed(() => {
@@ -170,10 +172,40 @@ export class AvailabilityComponent implements OnInit {
     value: string
   ) {
     this.formError.set('');
-    this.form.set({
+    const next = {
       ...this.form(),
       [field]: value,
-    });
+    };
+
+    next.fromDateTimeMobile = `${next.fromDate}T${next.fromTime}`;
+    next.toDateTimeMobile = `${next.toDate}T${next.toTime}`;
+    this.form.set(next);
+  }
+
+  updateMobileDateTimeField(field: 'fromDateTimeMobile' | 'toDateTimeMobile', value: string) {
+    this.formError.set('');
+
+    const [datePart = '', timePart = ''] = String(value || '').split('T');
+    if (!datePart || !timePart) {
+      return;
+    }
+
+    const next = {
+      ...this.form(),
+      [field]: value,
+    };
+
+    if (field === 'fromDateTimeMobile') {
+      next.fromDate = datePart;
+      next.fromTime = timePart.slice(0, 5);
+      next.fromDateTimeMobile = `${next.fromDate}T${next.fromTime}`;
+    } else {
+      next.toDate = datePart;
+      next.toTime = timePart.slice(0, 5);
+      next.toDateTimeMobile = `${next.toDate}T${next.toTime}`;
+    }
+
+    this.form.set(next);
   }
 
   previousMonth() {
@@ -327,6 +359,8 @@ export class AvailabilityComponent implements OnInit {
       fromTime: '08:00',
       toDate: this.toDateInputValue(new Date()),
       toTime: '20:00',
+      fromDateTimeMobile: `${this.toDateInputValue(new Date())}T08:00`,
+      toDateTimeMobile: `${this.toDateInputValue(new Date())}T20:00`,
     });
     this.formError.set('');
   }

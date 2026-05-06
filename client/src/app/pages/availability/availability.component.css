@@ -387,6 +387,16 @@
   font: inherit;
 }
 
+.datetime-input-mobile {
+  display: none;
+  width: 100%;
+  min-height: 42px;
+  border: 1px solid #d0d0d0;
+  border-radius: 10px;
+  padding: 10px;
+  font: inherit;
+}
+
 .time-inputs select {
   flex: 1;
   max-width: 100px;
@@ -409,11 +419,12 @@
 }
 
 @media (max-width: 900px) {
+  .date-input-desktop,
   .time-inputs-desktop {
     display: none;
   }
 
-  .time-input-mobile {
+  .datetime-input-mobile {
     display: block;
   }
 }

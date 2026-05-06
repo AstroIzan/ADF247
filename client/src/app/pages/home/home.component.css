@@ -110,7 +110,8 @@
 }
 
 .modal.modal-allow-overflow {
-  overflow: visible;
+  overflow-y: visible;
+  overflow-x: hidden;
 }
 
 .modal.modal-allow-overflow .modal-body {

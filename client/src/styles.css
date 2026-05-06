@@ -224,7 +224,7 @@ textarea {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	z-index: 1000;
+	z-index: 1300;
 	padding: 18px;
 }
 
@@ -233,6 +233,7 @@ textarea {
 	max-height: 90vh;
 	display: flex;
 	flex-direction: column;
+	overflow-x: hidden;
 	background: var(--panel);
 	border: 1px solid var(--line);
 	border-radius: 16px;

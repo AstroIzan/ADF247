@@ -15,10 +15,6 @@
         <strong>{{ convocatorias().length }}</strong>
       </article>
       <article>
-        <h3>Tipus</h3>
-        <strong>{{ convoTypes().length }}</strong>
-      </article>
-      <article>
         <h3>Respostes</h3>
         <strong>{{ respuestas().length }}</strong>
       </article>
@@ -45,6 +41,9 @@
           </button>
           <button class="btn btn-secondary" (click)="runAdminAction('weekly')" [disabled]="adminActionLoading()">
             Enviar resum setmanal
+          </button>
+          <button class="btn btn-secondary" (click)="runAdminAction('pla-alfa')" [disabled]="adminActionLoading()">
+            Resum Pla Alfa
           </button>
           <button class="btn btn-primary" (click)="runAdminAction('automation')" [disabled]="adminActionLoading()">
             Executar automatització

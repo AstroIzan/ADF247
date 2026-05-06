@@ -363,7 +363,7 @@ export class DashboardComponent implements OnInit {
     this.loadRespuestas();
   }
 
-  runAdminAction(action: 'pending' | 'sortida' | 'weekly' | 'automation') {
+  runAdminAction(action: 'pending' | 'sortida' | 'weekly' | 'pla-alfa' | 'automation') {
     if (!this.isAdmin()) {
       return;
     }
@@ -375,6 +375,8 @@ export class DashboardComponent implements OnInit {
       ? this.dataService.sendPendingResponsesReminder()
       : action === 'sortida'
         ? this.dataService.sendTomorrowSortidaNotifications()
+        : action === 'pla-alfa'
+          ? this.dataService.runNotificationAutomationTask('pla-alfa-daily-summary')
         : action === 'weekly'
           ? this.dataService.sendWeeklyResponseDigest()
           : this.dataService.runNotificationAutomation();
@@ -391,7 +393,7 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  private getAdminActionSuccessMessage(action: 'pending' | 'sortida' | 'weekly' | 'automation', result?: any) {
+  private getAdminActionSuccessMessage(action: 'pending' | 'sortida' | 'weekly' | 'pla-alfa' | 'automation', result?: any) {
     if (action === 'pending') {
       const targeted = Number(result?.targetedUsers || 0);
       if (targeted === 0) {
@@ -443,6 +445,18 @@ export class DashboardComponent implements OnInit {
       }
 
       return `Resum setmanal: ${delivered} entregades, ${failed} fallides (${targeted} destinataris).`;
+    }
+
+    if (action === 'pla-alfa') {
+      if (result?.skipped) {
+        return `Resum Pla Alfa omès: ${result.reason || 'sense acció'}.`;
+      }
+
+      if (typeof result?.result?.notificationCount === 'number') {
+        return `Resum Pla Alfa enviat (${result.result.notificationCount} notificació).`;
+      }
+
+      return 'Resum Pla Alfa executat.';
     }
 
     if (result?.sortidaSummary || result?.weeklySummary || result?.pendingSummary) {
