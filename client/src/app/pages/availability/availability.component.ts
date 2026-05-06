@@ -316,11 +316,17 @@ export class AvailabilityComponent implements OnInit {
 
   editWindow(window: AvailabilityWindow) {
     this.editingWindowId.set(window.id);
+    const fromDate = this.extractDateValue(window.fromDateTime);
+    const fromTime = this.extractTimeValue(window.fromDateTime);
+    const toDate = this.extractDateValue(window.toDateTime);
+    const toTime = this.extractTimeValue(window.toDateTime);
     this.form.set({
-      fromDate: this.extractDateValue(window.fromDateTime),
-      fromTime: this.extractTimeValue(window.fromDateTime),
-      toDate: this.extractDateValue(window.toDateTime),
-      toTime: this.extractTimeValue(window.toDateTime),
+      fromDate,
+      fromTime,
+      toDate,
+      toTime,
+      fromDateTimeMobile: `${fromDate}T${fromTime}`,
+      toDateTimeMobile: `${toDate}T${toTime}`,
     });
 
     this.error.set('');
@@ -565,11 +571,17 @@ export class AvailabilityComponent implements OnInit {
 
   editWindowFromModal(windowData: AvailabilityWindow) {
     this.editingWindowId.set(windowData.id);
+    const fromDate = this.extractDateValue(windowData.fromDateTime);
+    const fromTime = this.extractTimeValue(windowData.fromDateTime);
+    const toDate = this.extractDateValue(windowData.toDateTime);
+    const toTime = this.extractTimeValue(windowData.toDateTime);
     this.form.set({
-      fromDate: this.extractDateValue(windowData.fromDateTime),
-      fromTime: this.extractTimeValue(windowData.fromDateTime),
-      toDate: this.extractDateValue(windowData.toDateTime),
-      toTime: this.extractTimeValue(windowData.toDateTime),
+      fromDate,
+      fromTime,
+      toDate,
+      toTime,
+      fromDateTimeMobile: `${fromDate}T${fromTime}`,
+      toDateTimeMobile: `${toDate}T${toTime}`,
     });
     this.closeDateModal();
     // Scroll to form
