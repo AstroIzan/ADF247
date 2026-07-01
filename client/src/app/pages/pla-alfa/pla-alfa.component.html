@@ -21,7 +21,27 @@
   } @else {
     <div class="pla-alfa-layout" [class.pla-alfa-layout-viewer]="!isAdminUser()">
       @if (isAdminUser()) {
-        <div class="pla-alfa-selector-panel">
+        <div
+          class="pla-alfa-selector-panel"
+          [class.pla-alfa-selector-panel-mobile]="isMobileSelectorMode()"
+          [class.is-collapsed]="isMobileSelectorMode() && isPlaAlfaSelectorCollapsed()"
+        >
+          <div class="pla-alfa-selector-panel-head" [class.is-expanded]="isMobileSelectorMode() && !isPlaAlfaSelectorCollapsed()">
+            <span class="pla-alfa-selector-title">Configuració de municipis</span>
+            @if (isMobileSelectorMode()) {
+              <button
+                type="button"
+                class="pla-alfa-selector-toggle"
+                [attr.aria-expanded]="!isPlaAlfaSelectorCollapsed()"
+                [attr.aria-label]="isPlaAlfaSelectorCollapsed() ? 'Desplegar configuració de municipis' : 'Plegar configuració de municipis'"
+                (click)="togglePlaAlfaSelectorCollapsed()"
+              >
+                <i class="fa-solid" [class.fa-chevron-down]="isPlaAlfaSelectorCollapsed()" [class.fa-chevron-up]="!isPlaAlfaSelectorCollapsed()" aria-hidden="true"></i>
+              </button>
+            }
+          </div>
+
+          @if (!isMobileSelectorMode() || !isPlaAlfaSelectorCollapsed()) {
           <label class="pla-alfa-selector-label" for="plaAlfaSearch">Municipis de Catalunya (Pla Alfa)</label>
 
           <div class="pla-alfa-filter-row">
@@ -99,6 +119,7 @@
               {{ plaAlfaRefreshingStatus() ? 'Actualitzant...' : 'Actualitzar nivells Pla Alfa' }}
             </button>
           </div>
+          }
         </div>
       }
 

@@ -88,6 +88,16 @@ function toIntegerOrNull(value) {
   return Number.isInteger(value) ? value : null
 }
 
+function normalizePlaAlfaLevel(value) {
+  const level = toIntegerOrNull(value)
+
+  if (level === null) {
+    return null
+  }
+
+  return level === 5 ? null : level
+}
+
 function splitInChunks(values, chunkSize) {
   const chunks = []
 
@@ -861,7 +871,7 @@ async function fetchPlaAlfaForDate(serviceConfig, municipalities) {
       byMunicipality.set(normalizedName, {
         name: attributes.NOMMUNI || null,
         comarca: attributes.NOMCOMAR || null,
-        level: toIntegerOrNull(attributes.PERIL_M),
+        level: normalizePlaAlfaLevel(attributes.PERIL_M),
         objectId: attributes[serviceConfig.objectIdField] ?? null,
       })
     }

@@ -61,6 +61,36 @@
   color: #303030;
 }
 
+.pla-alfa-selector-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.pla-alfa-selector-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #202020;
+}
+
+.pla-alfa-selector-toggle {
+  display: none;
+  border: 1px solid #cfd8e3;
+  border-radius: 999px;
+  background: #f8fbff;
+  color: #174a7c;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.pla-alfa-selector-toggle i {
+  line-height: 1;
+}
+
 .pla-alfa-filter-row {
   display: grid;
   gap: 8px;
@@ -354,9 +384,9 @@
   color: #ffffff;
 }
 
-.pla-alfa-level-5 {
-  background: #000000;
-  border-color: #000000;
+.pla-alfa-level-na {
+  background: #0b5ed7;
+  border-color: #084298;
   color: #ffffff;
 }
 
@@ -589,13 +619,40 @@
   }
 
   .pla-alfa-checkbox-list {
-    max-height: none;
-    min-height: 180px;
-    overflow: visible;
+    max-height: 220px;
+    min-height: 0;
+    overflow: auto;
   }
 
   .pla-alfa-selector-panel {
-    min-height: 320px;
+    min-height: auto;
+    padding: 10px;
+  }
+
+  .pla-alfa-selector-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .pla-alfa-selector-panel-mobile.is-collapsed {
+    padding-bottom: 10px;
+  }
+
+  .pla-alfa-selector-panel-head {
+    margin-bottom: 0;
+  }
+
+  .pla-alfa-selector-panel-head.is-expanded {
+    justify-content: flex-end;
+  }
+
+  .pla-alfa-selector-panel-head.is-expanded .pla-alfa-selector-title {
+    display: none;
+  }
+
+  .pla-alfa-selector-title {
+    font-size: 14px;
   }
 
   .pla-alfa-selected-preview {

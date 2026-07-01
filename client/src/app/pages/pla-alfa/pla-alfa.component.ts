@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import {
@@ -17,6 +17,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrl: './pla-alfa.component.css',
 })
 export class PlaAlfaComponent implements OnInit {
+  private readonly mobileSelectorBreakpointPx = 600;
   plaAlfaLoading = signal(false);
   plaAlfaSaving = signal(false);
   plaAlfaRefreshingStatus = signal(false);
@@ -29,6 +30,8 @@ export class PlaAlfaComponent implements OnInit {
   plaAlfaUpdatedAt = signal<string | null>(null);
   plaAlfaSearch = signal('');
   plaAlfaComarcaFilter = signal('all');
+  readonly isMobileSelectorMode = signal(false);
+  readonly isPlaAlfaSelectorCollapsed = signal(false);
   readonly isAdminUser = signal(false);
 
   constructor(
@@ -38,6 +41,8 @@ export class PlaAlfaComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.syncMobileSelectorMode();
+
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
       return;
@@ -51,6 +56,11 @@ export class PlaAlfaComponent implements OnInit {
     }
 
     this.refreshPlaAlfaStatus();
+  }
+
+  @HostListener('window:resize')
+  onWindowResize() {
+    this.syncMobileSelectorMode();
   }
 
   loadPlaAlfaData() {
@@ -176,6 +186,14 @@ export class PlaAlfaComponent implements OnInit {
     return this.plaAlfaSelected().length === catalog.length;
   }
 
+  togglePlaAlfaSelectorCollapsed() {
+    if (!this.isMobileSelectorMode()) {
+      return;
+    }
+
+    this.isPlaAlfaSelectorCollapsed.update((collapsed) => !collapsed);
+  }
+
   toggleSelectAllPlaAlfaMunicipalities() {
     if (this.areAllPlaAlfaMunicipalitiesSelected()) {
       this.plaAlfaSelected.set([]);
@@ -193,7 +211,7 @@ export class PlaAlfaComponent implements OnInit {
 
   getPlaAlfaLevelLabel(level: number | null | undefined) {
     if (!Number.isInteger(level) || level === null || level === undefined) {
-      return 'N/D';
+      return 'NA';
     }
 
     return `Alfa ${level}`;
@@ -201,14 +219,14 @@ export class PlaAlfaComponent implements OnInit {
 
   getPlaAlfaLevelClass(level: number | null | undefined) {
     if (!Number.isInteger(level) || level === null || level === undefined) {
-      return 'pla-alfa-level-unknown';
+      return 'pla-alfa-level-na';
     }
 
     if (level < 0) {
       return 'pla-alfa-level-unknown';
     }
 
-    if (level > 5) {
+    if (level > 4) {
       return 'pla-alfa-level-unknown';
     }
 
@@ -280,21 +298,39 @@ export class PlaAlfaComponent implements OnInit {
       return null;
     }
 
-    const directionMap: Record<string, number> = {
-      N: 180,
-      NE: 225,
-      E: 270,
-      SE: 315,
-      S: 0,
-      SO: 45,
-      O: 90,
-      NO: 135,
-      NW: 135,
-      W: 90,
-      SW: 45,
+    const sourceDirectionMap: Record<string, number> = {
+      N: 0,
+      NNE: 22.5,
+      NE: 45,
+      ENE: 67.5,
+      E: 90,
+      ESE: 112.5,
+      SE: 135,
+      SSE: 157.5,
+      S: 180,
+      SSO: 202.5,
+      SSW: 202.5,
+      SO: 225,
+      SW: 225,
+      OSO: 247.5,
+      WSW: 247.5,
+      O: 270,
+      W: 270,
+      ONO: 292.5,
+      WNW: 292.5,
+      NO: 315,
+      NW: 315,
+      NNO: 337.5,
+      NNW: 337.5,
     };
 
-    return directionMap[normalized] ?? null;
+    const sourceAngleDeg = sourceDirectionMap[normalized];
+
+    if (sourceAngleDeg === undefined) {
+      return null;
+    }
+
+    return sourceAngleDeg;
   }
 
   private formatRange(min: number | null | undefined, max: number | null | undefined, suffix: string) {
@@ -316,6 +352,22 @@ export class PlaAlfaComponent implements OnInit {
   private formatSingleValue(value: number | null | undefined, suffix: string) {
     const numericValue = Number.isFinite(value) ? Number(value) : null;
     return numericValue === null ? '-' : `${numericValue} ${suffix}`;
+  }
+
+  private syncMobileSelectorMode() {
+    const isMobile = typeof window !== 'undefined' && window.innerWidth <= this.mobileSelectorBreakpointPx;
+    const wasMobile = this.isMobileSelectorMode();
+
+    this.isMobileSelectorMode.set(isMobile);
+
+    if (isMobile && !wasMobile) {
+      this.isPlaAlfaSelectorCollapsed.set(true);
+      return;
+    }
+
+    if (!isMobile) {
+      this.isPlaAlfaSelectorCollapsed.set(false);
+    }
   }
 
   savePlaAlfaSelection() {
