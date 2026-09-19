@@ -1,0 +1,59 @@
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+
+    container_name: adf247-api
+
+    restart: unless-stopped
+
+    env_file:
+      - ./api/.env.pro
+
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      FIREBASE_SERVICE_ACCOUNT_PATH: /run/secrets/firebase-service-account.json
+
+    secrets:
+      - firebase_service_account
+
+    networks:
+      - adf247
+      - homelab-database
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+
+    container_name: adf247-client
+
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:8081:80"
+
+    depends_on:
+      - api
+
+    networks:
+      - adf247
+
+
+networks:
+
+  adf247:
+    driver: bridge
+
+  homelab-database:
+    external: true
+    name: homelab-database
+
+
+secrets:
+
+  firebase_service_account:
+    file: ./secrets/firebase-service-account.json
