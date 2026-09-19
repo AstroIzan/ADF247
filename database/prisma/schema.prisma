@@ -1,5 +1,5 @@
 datasource db {
-  provider = "postgresql"
+  provider = "sqlserver"
   url      = env("DATABASE_URL")
 }
 
@@ -10,15 +10,15 @@ generator client {
 
 model User {
   id         Int      @id @default(autoincrement())
-  nCarnet    String   @unique
-  nIndicatiu String?
-  name       String
-  lastName   String?
-  password   String
+  nCarnet    String   @unique @db.NVarChar(50)
+  nIndicatiu String?  @db.NVarChar(Max)
+  name       String   @db.NVarChar(Max)
+  lastName   String?  @db.NVarChar(Max)
+  password   String   @db.NVarChar(Max)
   isActive   Boolean  @default(true)
-  phone      String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  phone      String?  @db.NVarChar(Max)
+  createdAt  DateTime @default(now()) @db.DateTime2
+  updatedAt  DateTime @updatedAt @db.DateTime2
 
   roles            Role[]
   convocatories    Convocatoria[] @relation("ConvocatoriaResponsable")
@@ -31,7 +31,7 @@ model User {
 
 model Role {
   id            Int     @id @default(autoincrement())
-  nCarnet       String
+  nCarnet       String  @db.NVarChar(50)
   user          User    @relation(fields: [nCarnet], references: [nCarnet])
   isCapOperatiu Boolean @default(false)
   isCapColla    Boolean @default(false)
@@ -41,28 +41,28 @@ model Role {
 
 model ConvoType {
   id              Int     @id @default(autoincrement())
-  name            String  @unique
+  name            String  @unique @db.NVarChar(100)
   minGrocSortida  Int     @default(0)
   minVerdSortida  Int     @default(0)
-  defaultLocation String?
+  defaultLocation String? @db.NVarChar(Max)
 
   convocatories Convocatoria[]
 }
 
 model Convocatoria {
   id            Int       @id @default(autoincrement())
-  date          DateTime
-  title         String
-  ubiSortida    String
+  date          DateTime  @db.DateTime2
+  title         String    @db.NVarChar(Max)
+  ubiSortida    String    @db.NVarChar(Max)
   responsableId Int?
   user          User?     @relation("ConvocatoriaResponsable", fields: [responsableId], references: [id])
   convoTypeId   Int
   convoType     ConvoType @relation(fields: [convoTypeId], references: [id])
 
-  startTime     DateTime
-  finalTime     DateTime?
-  actualStartTime DateTime?
-  actualEndTime DateTime?
+  startTime     DateTime  @db.DateTime2
+  finalTime     DateTime? @db.DateTime2
+  actualStartTime DateTime? @db.DateTime2
+  actualEndTime DateTime? @db.DateTime2
   isActive      Boolean   @default(true)
   autoAssignResponsable Boolean @default(false)
   sortida       Boolean   @default(false)
@@ -74,17 +74,17 @@ model Convocatoria {
 model Respuesta {
   id           Int          @id @default(autoincrement())
   convoId      Int
-  convocatoria Convocatoria @relation(fields: [convoId], references: [id])
-  userNCarnet  String
-  user         User         @relation(fields: [userNCarnet], references: [nCarnet])
+  convocatoria Convocatoria @relation(fields: [convoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userNCarnet  String       @db.NVarChar(50)
+  user         User         @relation(fields: [userNCarnet], references: [nCarnet], onDelete: NoAction, onUpdate: NoAction)
   isCustom     Boolean      @default(false)
-  customText   String?
+  customText   String?      @db.NVarChar(Max)
   fullHorari   Boolean      @default(false)
   response     Boolean
   attendanceConfirmed Boolean @default(true)
   attendanceJustified Boolean @default(false)
-  source       String       @default("manual")
-  autoAssignReason String?
+  source       String       @default("manual") @db.NVarChar(50)
+  autoAssignReason String?  @db.NVarChar(Max)
 
   @@index([source])
 }
@@ -93,31 +93,31 @@ model NotificationLog {
   id             Int      @id @default(autoincrement())
   senderUserId   Int?
   senderUser     User?    @relation("NotificationLogSender", fields: [senderUserId], references: [id], onDelete: SetNull)
-  title          String
-  body           String
-  dataJson       String?
+  title          String   @db.NVarChar(Max)
+  body           String   @db.NVarChar(Max)
+  dataJson       String?  @db.NVarChar(Max)
   requestedCount Int      @default(0)
   successCount   Int      @default(0)
   failureCount   Int      @default(0)
-  targetScope    String   @default("all-active-devices")
-  status         String   @default("queued")
-  errorMessage   String?
-  createdAt      DateTime @default(now())
+  targetScope    String   @default("all-active-devices") @db.NVarChar(Max)
+  status         String   @default("queued") @db.NVarChar(Max)
+  errorMessage   String?  @db.NVarChar(Max)
+  createdAt      DateTime @default(now()) @db.DateTime2
 
   @@index([createdAt])
 }
 
 model AvailabilityWindow {
   id               Int      @id @default(autoincrement())
-  userNCarnet      String
+  userNCarnet      String   @db.NVarChar(50)
   user             User     @relation(fields: [userNCarnet], references: [nCarnet])
-  fromDateTime     DateTime
-  toDateTime       DateTime
-  availabilityType String
-  source           String   @default("manual")
-  notes            String?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  fromDateTime     DateTime @db.DateTime2
+  toDateTime       DateTime @db.DateTime2
+  availabilityType String   @db.NVarChar(Max)
+  source           String   @default("manual") @db.NVarChar(Max)
+  notes            String?  @db.NVarChar(Max)
+  createdAt        DateTime @default(now()) @db.DateTime2
+  updatedAt        DateTime @updatedAt @db.DateTime2
 
   @@index([userNCarnet])
   @@index([fromDateTime, toDateTime])
@@ -125,17 +125,17 @@ model AvailabilityWindow {
 
 model NotificationAutomationRun {
   id           Int      @id @default(autoincrement())
-  trigger      String
-  source       String
-  status       String   @default("running")
-  startedAt    DateTime @default(now())
-  finishedAt   DateTime?
+  trigger      String   @db.NVarChar(100)
+  source       String   @db.NVarChar(Max)
+  status       String   @default("running") @db.NVarChar(50)
+  startedAt    DateTime @default(now()) @db.DateTime2
+  finishedAt   DateTime? @db.DateTime2
   durationMs   Int?
   actorUserId  Int?
   actorUser    User?    @relation("NotificationAutomationRunActor", fields: [actorUserId], references: [id], onDelete: SetNull)
-  errorMessage String?
-  correlationId String
-  createdAt    DateTime @default(now())
+  errorMessage String?  @db.NVarChar(Max)
+  correlationId String  @db.NVarChar(100)
+  createdAt    DateTime @default(now()) @db.DateTime2
 
   tasks NotificationAutomationTaskRun[]
 
@@ -148,14 +148,14 @@ model NotificationAutomationTaskRun {
   id           Int      @id @default(autoincrement())
   runId        Int
   run          NotificationAutomationRun @relation(fields: [runId], references: [id], onDelete: Cascade)
-  taskKey      String
-  status       String   @default("running")
-  startedAt    DateTime @default(now())
-  finishedAt   DateTime?
+  taskKey      String   @db.NVarChar(100)
+  status       String   @default("running") @db.NVarChar(50)
+  startedAt    DateTime @default(now()) @db.DateTime2
+  finishedAt   DateTime? @db.DateTime2
   durationMs   Int?
-  errorMessage String?
-  detailsJson  String?
-  createdAt    DateTime @default(now())
+  errorMessage String?  @db.NVarChar(Max)
+  detailsJson  String?  @db.NVarChar(Max)
+  createdAt    DateTime @default(now()) @db.DateTime2
 
   @@index([runId, taskKey])
   @@index([createdAt])
@@ -172,23 +172,23 @@ model UserHoursSummary {
   unansweredPenaltyHours Float    @default(0)
   noShowPenaltyHours     Float    @default(0)
   totalHours             Float    @default(0)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  createdAt              DateTime @default(now()) @db.DateTime2
+  updatedAt              DateTime @updatedAt @db.DateTime2
 }
 
 model FormulariCampanya {
   id             Int          @id @default(autoincrement())
   convocatoriaId Int
   convocatoria   Convocatoria @relation(fields: [convocatoriaId], references: [id], onDelete: Cascade)
-  dia            DateTime
+  dia            DateTime     @db.DateTime2
   responsableId  Int?
-  responsableNCarnet String?
-  voluntarisJson String
-  vehiclesJson   String
-  serviceMoment  String
-  createdByNCarnet String?
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  responsableNCarnet String?  @db.NVarChar(Max)
+  voluntarisJson String       @db.NVarChar(Max)
+  vehiclesJson   String       @db.NVarChar(Max)
+  serviceMoment  String         @db.NVarChar(50)
+  createdByNCarnet String?    @db.NVarChar(Max)
+  createdAt      DateTime     @default(now()) @db.DateTime2
+  updatedAt      DateTime     @updatedAt @db.DateTime2
 
   @@index([convocatoriaId, serviceMoment])
   @@index([dia])

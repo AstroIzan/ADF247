@@ -2,7 +2,7 @@
 
 Monorepo con 3 partes:
 
-- `database`: Prisma + PostgreSQL
+- `database`: Prisma + Microsoft SQL Server
 - `api`: Express
 - `client`: Angular
 
@@ -12,7 +12,7 @@ Este README esta pensado para que cualquier persona pueda clonar el repo y levan
 
 - Node.js 20 o superior
 - npm 10 o superior
-- PostgreSQL 14+
+- Microsoft SQL Server 2019 o superior
 
 Comprobacion rapida:
 
@@ -52,13 +52,16 @@ Que hace esto:
 
 Archivos de entorno disponibles:
 
+- `database/.env.example` (plantilla versionada)
 - `database/.env.development`
 - `database/.env.pro`
 - `database/.env` (fallback)
 
 Variable usada:
 
-- `DATABASE_URL="postgresql://..."`
+- `DATABASE_URL="sqlserver://HOST:1433;database=DATABASE;user=USER;password=PASSWORD;encrypt=true;trustServerCertificate=true"`
+
+Copia la plantilla al archivo del entorno correspondiente y sustituye sus valores ficticios. En produccion, usa un certificado confiable y configura `trustServerCertificate` segun la politica del entorno.
 
 ### API
 
@@ -95,9 +98,11 @@ Desde `database`:
 
 ```bash
 npm run prisma:generate
-npm run prisma:db:push
+npm run prisma:migrate:deploy
 npm run prisma:seed
 ```
+
+La base de datos indicada por `database` en `DATABASE_URL` debe existir y estar vacia en una instalacion inicial. `prisma migrate deploy` crea el modelo completo bajo el esquema `dbo`.
 
 Alternativa recomendada desde raiz (entorno ya existente):
 
@@ -113,12 +118,7 @@ npm run prisma:studio
 
 ## 6) Arranque en desarrollo
 
-Antes de arrancar, asegura PostgreSQL del sistema en ejecucion:
-
-```bash
-sudo systemctl enable postgresql
-sudo systemctl restart postgresql
-```
+Antes de arrancar, asegura que la instancia SQL Server indicada en `DATABASE_URL` esta en ejecucion y que acepta conexiones TCP en el puerto configurado.
 
 Desde la raiz:
 
@@ -192,7 +192,7 @@ Ejemplos:
 - `npm run prisma:migrate:deploy`
 - `npm run prisma:migrate:deploy:dev`
 - `npm run prisma:migrate:deploy:pro`
-- `npm run prisma:baseline:pg` (genera SQL baseline PostgreSQL desde schema)
+- `npm run prisma:baseline` (genera una baseline para el datasource del schema)
 - `npm run prisma:seed`
 - `npm run prisma:studio`
 
@@ -322,12 +322,12 @@ Si aparece un error tipo `The table main.AvailabilityWindow does not exist`:
 
 - Ejecuta `npm run db:prepare` desde la raiz.
 
-### Migracion a PostgreSQL (estado actual)
+### Microsoft SQL Server (estado actual)
 
-- El proyecto ya esta preparado para usar `DATABASE_URL` de PostgreSQL.
-- El historico de migraciones se ha reseteado para PostgreSQL y queda una migracion inicial limpia desde cero.
-- El flujo recomendado actual es `prisma migrate deploy` (`npm run db:prepare`) para crear/actualizar esquema en despliegues.
-- Puedes generar baseline SQL PostgreSQL con `npm run prisma:baseline:pg --prefix database`.
+- Prisma usa exclusivamente `DATABASE_URL` para conectarse a SQL Server.
+- El historico contiene una baseline SQL Server para crear el modelo completo desde cero.
+- El flujo recomendado es `prisma migrate deploy` (`npm run db:prepare`) para crear o actualizar el esquema.
+- Puedes generar una nueva baseline desde el schema con `npm run prisma:baseline --prefix database`.
 
 ### PM2 en Raspberry
 

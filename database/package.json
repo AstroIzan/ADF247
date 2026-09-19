@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "prisma:generate": "prisma generate",
+    "prisma:validate": "prisma validate --schema prisma/schema.prisma",
     "prisma:generate:dev": "dotenv -e .env.development -- prisma generate",
     "prisma:generate:pro": "dotenv -e .env.pro -- prisma generate",
     "prisma:migrate": "prisma migrate dev",
@@ -14,12 +15,12 @@
     "prisma:db:push": "prisma db push --schema prisma/schema.prisma",
     "prisma:db:push:dev": "dotenv -e .env.development -- prisma db push --schema prisma/schema.prisma",
     "prisma:db:push:pro": "dotenv -e .env.pro -- prisma db push --schema prisma/schema.prisma",
-    "prisma:baseline:pg": "powershell -ExecutionPolicy Bypass -File ./scripts/generate-postgres-baseline.ps1",
+    "prisma:baseline": "powershell -ExecutionPolicy Bypass -File ./scripts/generate-baseline.ps1",
     "prisma:studio": "prisma studio",
     "prisma:seed": "node prisma/seed.js",
     "prisma:seed:dev": "dotenv -e .env.development -- node prisma/seed.js",
     "prisma:seed:pro": "dotenv -e .env.pro -- node prisma/seed.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run prisma:validate && node --check prisma/seed.js && node --check prisma/prisma.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
