@@ -1,0 +1,221 @@
+name: ADF247 CI/CD
+
+on:
+  push:
+    branches:
+      - master
+      - release/firebase-migration
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+
+  # ============================================================
+  # API
+  # ============================================================
+  api:
+    name: API - Tests
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: API tests
+        run: npm test
+
+
+  # ============================================================
+  # ANGULAR
+  # ============================================================
+  angular:
+    name: Angular - Build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: client
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular
+        run: npm run build
+
+
+  # ============================================================
+  # DATABASE / PRISMA
+  # ============================================================
+  database:
+    name: Database - Prisma
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: database
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: database/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prisma validate
+        run: npx prisma validate
+
+      - name: Prisma generate
+        run: npx prisma generate
+
+
+  # ============================================================
+  # BUILD + DEPLOY
+  # ============================================================
+  deploy:
+    name: Build & Deploy
+    needs:
+      - api
+      - angular
+      - database
+
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - production
+      - adf247
+
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # --------------------------------------------------------
+      # Preparar código
+      # --------------------------------------------------------
+      - name: Prepare deployment
+        shell: bash
+        run: |
+          set -e
+
+          DEPLOY_DIR="/home/deploy/deployments/ADF247"
+
+          mkdir -p "$DEPLOY_DIR"
+
+          rsync -a --delete \
+            --exclude='.git/' \
+            --exclude='api/.env.pro' \
+            --exclude='secrets/' \
+            ./ "$DEPLOY_DIR/"
+
+      # --------------------------------------------------------
+      # Firebase
+      # --------------------------------------------------------
+      - name: Configure Firebase
+        shell: bash
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+        run: |
+          set -e
+
+          DEPLOY_DIR="/home/deploy/deployments/ADF247"
+
+          mkdir -p "$DEPLOY_DIR/secrets"
+
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          data = {
+              "type": "service_account",
+              "project_id": os.environ["FIREBASE_PROJECT_ID"],
+              "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
+              "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n")
+          }
+
+          path = Path("/home/deploy/deployments/ADF247/secrets/firebase-service-account.json")
+          path.write_text(json.dumps(data), encoding="utf-8")
+          path.chmod(0o600)
+          PY
+
+      # --------------------------------------------------------
+      # Docker build
+      # --------------------------------------------------------
+      - name: Build Docker images
+        run: |
+          sudo /usr/local/sbin/adf247-build
+
+      # --------------------------------------------------------
+      # Database migrations
+      # --------------------------------------------------------
+      - name: Database migrations
+        run: |
+          sudo /usr/local/sbin/adf247-migrate
+
+      # --------------------------------------------------------
+      # Deploy
+      # --------------------------------------------------------
+      - name: Deploy containers
+        run: |
+          sudo /usr/local/sbin/adf247-deploy
+
+      # --------------------------------------------------------
+      # Health
+      # --------------------------------------------------------
+      - name: Health check
+        run: |
+          set -e
+
+          echo "=== FRONTEND ==="
+          curl -fsS http://127.0.0.1:8081/ > /dev/null
+
+          echo "=== API ==="
+          curl -fsS http://127.0.0.1:8081/api/health
+
+          echo
+          echo "=== CONTAINERS ==="
+          sudo docker compose \
+            -f /home/deploy/deployments/ADF247/compose.yml \
+            ps
+
+          echo
+          echo "=== OK ==="
