@@ -11,7 +11,6 @@ on:
       - master
 
 jobs:
-
   # ============================================================
   # API
   # ============================================================
@@ -22,6 +21,9 @@ jobs:
     defaults:
       run:
         working-directory: api
+
+    env:
+      DATABASE_URL: "sqlserver://localhost:1433;database=ADF247;user=ci;password=ci;encrypt=false"
 
     steps:
       - name: Checkout
@@ -34,8 +36,16 @@ jobs:
           cache: npm
           cache-dependency-path: api/package-lock.json
 
-      - name: Install dependencies
+      - name: Install API dependencies
         run: npm ci
+
+      - name: Install Database dependencies
+        working-directory: database
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: database
+        run: npx prisma generate
 
       - name: API tests
         run: npm test
@@ -80,6 +90,9 @@ jobs:
     defaults:
       run:
         working-directory: database
+
+    env:
+      DATABASE_URL: "sqlserver://localhost:1433;database=ADF247;user=ci;password=ci;encrypt=false"
 
     steps:
       - name: Checkout
