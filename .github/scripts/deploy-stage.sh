@@ -32,12 +32,16 @@ import json
 import os
 from pathlib import Path
 
-data = {
-    "type": "service_account",
-    "project_id": os.environ["FIREBASE_PROJECT_ID"],
-    "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
-    "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n"),
-}
+service_account_json = os.environ.get("FIREBASE_SERVICE_ACCOUNT_JSON", "").strip()
+if service_account_json:
+    data = json.loads(service_account_json)
+else:
+    data = {
+        "type": "service_account",
+        "project_id": os.environ["FIREBASE_PROJECT_ID"],
+        "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
+        "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n"),
+    }
 
 path = Path(os.environ["DEPLOY_DIR"]) / "secrets" / "firebase-service-account.json"
 path.parent.mkdir(parents=True, exist_ok=True)
