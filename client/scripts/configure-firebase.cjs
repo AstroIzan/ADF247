@@ -58,7 +58,12 @@ messaging.onBackgroundMessage((payload) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const targetPath = event.notification?.data?.link || '/home'
+  const data = event.notification?.data || {}
+  const convoId = data.convocatoriaId || data.convoId
+  const kind = data.kind || ''
+  const targetPath = convoId
+    ? \`/home?notificationKind=\${encodeURIComponent(kind)}&convoId=\${encodeURIComponent(convoId)}\`
+    : (data.link || '/home')
 
   event.waitUntil(clients.openWindow(targetPath))
 })

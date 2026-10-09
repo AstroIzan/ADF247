@@ -6,17 +6,19 @@ import { AuthService } from './services/auth.service';
 import { PushNotificationsService } from './services/push-notifications.service';
 import { ProfileComponent } from './pages/profile/profile.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { NotificationResponseModalComponent } from './components/notification-response-modal/notification-response-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ProfileComponent, SettingsComponent],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ProfileComponent, SettingsComponent, NotificationResponseModalComponent],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
   @ViewChild(ProfileComponent) profileComponent?: ProfileComponent;
   @ViewChild(SettingsComponent) settingsComponent?: SettingsComponent;
+  @ViewChild(NotificationResponseModalComponent) notificationResponseModal?: NotificationResponseModalComponent;
   currentPath = '';
   notificationWarning = '';
   isMobileMenuOpen = false;
@@ -42,7 +44,9 @@ export class App {
         const navEvent = event as NavigationEnd
         this.currentPath = navEvent.urlAfterRedirects
         this.isMobileMenuOpen = false
+        this.openNotificationResponseIfRequested(navEvent.urlAfterRedirects)
         void this.handleHomeNotificationCheck()
+        this.openNotificationResponseIfRequested(this.router.url)
       })
 
       void this.handleHomeNotificationCheck()
@@ -157,6 +161,14 @@ export class App {
     setTimeout(() => {
       this.settingsComponent?.openModal('device')
     }, 0)
+  }
+
+  private openNotificationResponseIfRequested(url: string) {
+    const params = new URL(url, window.location.origin).searchParams;
+    const convoId = Number(params.get('convoId'));
+    const kind = params.get('notificationKind');
+    if (!Number.isInteger(convoId) || convoId <= 0 || !kind || !this.authService.isLoggedIn()) return;
+    setTimeout(() => this.notificationResponseModal?.open(convoId));
   }
 
 }

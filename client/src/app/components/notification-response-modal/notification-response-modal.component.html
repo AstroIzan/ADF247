@@ -1,0 +1,23 @@
+@if (visible()) {
+  <div class="notification-response-backdrop" (click)="close()">
+    <section class="notification-response-modal" role="dialog" aria-modal="true" aria-labelledby="notification-response-title" (click)="$event.stopPropagation()">
+      <button class="close-button" type="button" aria-label="Cerrar" (click)="close()">×</button>
+      @if (loading()) {
+        <p>Cargando convocatoria…</p>
+      } @else if (error() && !convocatoria()) {
+        <p class="error">{{ error() }}</p>
+      } @else if (convocatoria(); as convo) {
+        <p class="eyebrow">Disponibilidad solicitada</p>
+        <h2 id="notification-response-title">{{ convo.title }}</h2>
+        <p><strong>Inicio:</strong> {{ convo.startTime | date:'EEEE, d MMMM · HH:mm' }}</p>
+        @if (convo.finalTime) { <p><strong>Fin:</strong> {{ convo.finalTime | date:'HH:mm' }}</p> }
+        <p><strong>Salida:</strong> {{ convo.ubiSortida }}</p>
+        @if (error()) { <p class="error">{{ error() }}</p> }
+        <div class="actions">
+          <button type="button" class="available" [disabled]="submitting()" (click)="respond(true)">Disponible</button>
+          <button type="button" class="unavailable" [disabled]="submitting()" (click)="respond(false)">No disponible</button>
+        </div>
+      }
+    </section>
+  </div>
+}
