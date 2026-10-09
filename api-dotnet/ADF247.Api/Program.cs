@@ -42,6 +42,9 @@ builder.Services.AddHealthChecks();
 builder.Services.AddScoped<JwtTokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<AvailabilityService>();
+builder.Services.AddScoped<ConvocatoriaCalculationService>();
+builder.Services.AddScoped<RespuestaService>();
 
 var app = builder.Build();
 
