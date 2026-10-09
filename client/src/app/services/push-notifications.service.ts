@@ -11,6 +11,7 @@ import { isNotificationsConfigReady, notificationsConfig } from '../config/notif
 })
 export class PushNotificationsService {
   private messaging: Messaging | null = null
+  private readonly linkedTokenKeyPrefix = 'fcmLinkedToken:'
   private foregroundListenerBound = false
   private readonly syncTimeoutMs = 5000
   private registerInFlight: Promise<void> | null = null
@@ -111,6 +112,7 @@ export class PushNotificationsService {
         const token = this.currentToken() || await this.withTimeout(this.resolveCurrentToken(), this.syncTimeoutMs)
         if (token) {
           this.currentToken.set(token)
+          this.restoreLinkedToken(token)
           if (!this.hasRegisteredCurrentToken()) {
             await this.withTimeout(this.ensureTokenRegistered(token), this.syncTimeoutMs)
             this.infoMessage.set('Dispositiu registrat correctament per rebre notificacions.')
@@ -175,6 +177,9 @@ export class PushNotificationsService {
       try {
         const token = await this.withTimeout(this.resolveCurrentToken(), this.syncTimeoutMs)
         this.currentToken.set(token || '')
+        if (token) {
+          this.restoreLinkedToken(token)
+        }
 
         // If the browser has permission and token, ensure this session/device is linked in backend.
         if (token && !this.hasRegisteredCurrentToken()) {
@@ -228,6 +233,7 @@ export class PushNotificationsService {
 
       await this.ensureTokenRegistered(token)
       this.currentToken.set(token)
+      this.restoreLinkedToken(token)
       this.modalVisible.set(false)
       this.infoMessage.set('Dispositiu registrat correctament per rebre notificacions.')
     } catch (error) {
@@ -277,6 +283,7 @@ export class PushNotificationsService {
       await this.registerInFlight
       this.currentToken.set(token)
       this.isTokenLinked.set(true)
+      localStorage.setItem(this.getLinkedTokenStorageKey(), token)
     } finally {
       if (this.registerInFlightToken === token) {
         this.registerInFlight = null
@@ -356,6 +363,14 @@ export class PushNotificationsService {
     this.currentToken.set('')
     this.isTokenLinked.set(false)
     this.modalVisible.set(false)
+  }
+
+  private getLinkedTokenStorageKey() {
+    return `${this.linkedTokenKeyPrefix}${this.authService.getCachedNCarnet() || 'anonymous'}`
+  }
+
+  private restoreLinkedToken(token: string) {
+    this.isTokenLinked.set(localStorage.getItem(this.getLinkedTokenStorageKey()) === token)
   }
 
   private async detectMessagingSupport(): Promise<boolean> {
