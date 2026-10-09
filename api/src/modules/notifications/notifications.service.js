@@ -1292,6 +1292,7 @@ async function sendMulticastNotification({
       return acc
     }, {}),
   }
+  const notificationLink = buildNotificationLink(link, payloadData)
 
   const allowedDevUserIds = await resolveAllowedDevNotificationUserIds()
 
@@ -1358,7 +1359,7 @@ async function sendMulticastNotification({
               image: NOTIFICATION_LOGO_URL,
             },
             fcmOptions: {
-              link,
+              link: notificationLink,
             },
           },
         })
@@ -1367,6 +1368,7 @@ async function sendMulticastNotification({
       } catch {
         failureCount += 1
       }
+
     }
 
     const log = await database.notificationLog.create({
@@ -1404,6 +1406,21 @@ async function sendMulticastNotification({
     serviceError.log = mapNotificationLogToDto(log)
     throw serviceError
   }
+}
+
+function buildNotificationLink(link, data) {
+  const convocatoriaId = data.convocatoriaId || data.convoId
+
+  if (!convocatoriaId) {
+    return link
+  }
+
+  const kind = data.kind || 'convocatoria'
+  const target = new URL('/home', 'https://adf247.local')
+  target.searchParams.set('notificationKind', kind)
+  target.searchParams.set('convoId', convocatoriaId)
+
+  return `${target.pathname}${target.search}`
 }
 
 async function registerDeviceToken(authUser, payload, userAgent) {
