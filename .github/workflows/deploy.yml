@@ -218,31 +218,34 @@ jobs:
         run: |
           set -e
 
-          echo "=== FRONTEND ==="
-          curl -fsS http://127.0.0.1:8081/ > /dev/null
+          wait_for_endpoint() {
+            local name="$1"
+            local url="$2"
 
-          echo "=== API ==="
-          api_ready=false
-          for attempt in {1..30}; do
-            if curl -fsS http://127.0.0.1:8081/api/health; then
-              api_ready=true
-              break
-            fi
+            for attempt in {1..30}; do
+              if curl -fsS "${url}" > /dev/null; then
+                return 0
+              fi
 
-            echo "API no disponible todavía (intento ${attempt}/30); reintentando..."
-            sleep 2
-          done
+              echo "${name} no disponible todavía (intento ${attempt}/30); reintentando..."
+              sleep 2
+            done
 
-          if [ "${api_ready}" != "true" ]; then
-            echo "La API no estuvo disponible después de 60 segundos."
+            echo "${name} no estuvo disponible después de 60 segundos."
             sudo docker compose \
               -f /home/deploy/deployments/ADF247/compose.yml \
               ps
             sudo docker compose \
               -f /home/deploy/deployments/ADF247/compose.yml \
-              logs --tail=100 api
-            exit 1
-          fi
+              logs --tail=100 client api
+            return 1
+          }
+
+          echo "=== FRONTEND ==="
+          wait_for_endpoint "Frontend" "http://127.0.0.1:8081/"
+
+          echo "=== API ==="
+          wait_for_endpoint "API" "http://127.0.0.1:8081/api/health"
 
           echo
           echo "=== CONTAINERS ==="
