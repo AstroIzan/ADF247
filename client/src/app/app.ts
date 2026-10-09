@@ -18,7 +18,18 @@ import { NotificationResponseModalComponent } from './components/notification-re
 export class App {
   @ViewChild(ProfileComponent) profileComponent?: ProfileComponent;
   @ViewChild(SettingsComponent) settingsComponent?: SettingsComponent;
-  @ViewChild(NotificationResponseModalComponent) notificationResponseModal?: NotificationResponseModalComponent;
+  private notificationResponseModal?: NotificationResponseModalComponent;
+  private pendingNotificationConvoId: number | null = null;
+
+  @ViewChild(NotificationResponseModalComponent)
+  set responseModal(component: NotificationResponseModalComponent | undefined) {
+    this.notificationResponseModal = component;
+    if (component && this.pendingNotificationConvoId !== null) {
+      const convoId = this.pendingNotificationConvoId;
+      this.pendingNotificationConvoId = null;
+      void component.open(convoId);
+    }
+  }
   currentPath = '';
   notificationWarning = '';
   isMobileMenuOpen = false;
@@ -168,7 +179,12 @@ export class App {
     const convoId = Number(params.get('convoId'));
     const kind = params.get('notificationKind');
     if (!Number.isInteger(convoId) || convoId <= 0 || !kind || !this.authService.isLoggedIn()) return;
-    setTimeout(() => this.notificationResponseModal?.open(convoId));
+    this.pendingNotificationConvoId = convoId;
+    if (this.notificationResponseModal) {
+      const pendingConvoId = this.pendingNotificationConvoId;
+      this.pendingNotificationConvoId = null;
+      void this.notificationResponseModal.open(pendingConvoId);
+    }
   }
 
 }
