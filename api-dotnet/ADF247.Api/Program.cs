@@ -93,7 +93,7 @@ static string? ConvertPrismaSqlServerUrl(string? databaseUrl)
     }
 
     var segments = databaseUrl[prefix.Length..].Split(';', 2);
-    var server = segments[0];
+    var server = segments[0].Replace(":", ",", StringComparison.Ordinal);
     var properties = segments.Length == 2 ? segments[1] : string.Empty;
     properties = properties.Replace("user=", "User ID=", StringComparison.OrdinalIgnoreCase);
 
