@@ -7,9 +7,10 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var configuredConnectionString = builder.Configuration.GetConnectionString("Adf247")
-    ?? builder.Configuration["DATABASE_CONNECTION_STRING"]
-    ?? ConvertPrismaSqlServerUrl(builder.Configuration["DATABASE_URL"]);
+var configuredConnectionString = FirstNonEmpty(
+    builder.Configuration.GetConnectionString("Adf247"),
+    builder.Configuration["DATABASE_CONNECTION_STRING"],
+    ConvertPrismaSqlServerUrl(builder.Configuration["DATABASE_URL"]));
 
 var connectionString = configuredConnectionString
     ?? "Server=localhost;Database=ADF247;Integrated Security=True;TrustServerCertificate=True";
@@ -98,3 +99,6 @@ static string? ConvertPrismaSqlServerUrl(string? databaseUrl)
 
     return $"Server={server};{properties}";
 }
+
+static string? FirstNonEmpty(params string?[] values) =>
+    values.FirstOrDefault(value => !string.IsNullOrWhiteSpace(value));
