@@ -35,11 +35,11 @@ function getJwtRefreshSecret() {
 }
 
 function getJwtExpiresIn() {
-  return process.env.JWT_EXPIRES_IN || '12h'
+  return process.env.JWT_EXPIRES_IN || '30d'
 }
 
 function getJwtRefreshExpiresIn() {
-  return process.env.JWT_REFRESH_EXPIRES_IN || '30d'
+  return process.env.JWT_REFRESH_EXPIRES_IN || '90d'
 }
 
 function createTokenPayload(user, type) {

@@ -9,10 +9,10 @@ namespace ADF247.Api.Services;
 public sealed class JwtTokenService(IConfiguration configuration)
 {
     public string AccessExpiresIn =>
-        configuration["JWT_EXPIRES_IN"] ?? configuration["Jwt:AccessExpiresIn"] ?? "12h";
+        configuration["JWT_EXPIRES_IN"] ?? configuration["Jwt:AccessExpiresIn"] ?? "30d";
 
     public string RefreshExpiresIn =>
-        configuration["JWT_REFRESH_EXPIRES_IN"] ?? configuration["Jwt:RefreshExpiresIn"] ?? "30d";
+        configuration["JWT_REFRESH_EXPIRES_IN"] ?? configuration["Jwt:RefreshExpiresIn"] ?? "90d";
 
     public string CreateAccessToken(User user) => CreateToken(
         user,
@@ -75,6 +75,6 @@ public sealed class JwtTokenService(IConfiguration configuration)
             return TimeSpan.FromDays(days);
         }
 
-        return TimeSpan.FromHours(12);
+        return TimeSpan.FromDays(30);
     }
 }
