@@ -29,6 +29,9 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        FIREBASE_WEB_CONFIG_JSON: ${FIREBASE_WEB_CONFIG_JSON:-}
+        FIREBASE_WEB_VAPID_KEY: ${FIREBASE_WEB_VAPID_KEY:-}
 
     container_name: adf247${DEPLOYMENT_SUFFIX:-}-client
 

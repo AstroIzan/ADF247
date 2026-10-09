@@ -22,6 +22,7 @@ esac
 
 rsync -a --delete \
   --exclude='.git/' \
+  --exclude='.env' \
   --exclude="${env_file}" \
   --exclude='secrets/' \
   ./ "${deploy_dir}/"
@@ -47,6 +48,34 @@ path = Path(os.environ["DEPLOY_DIR"]) / "secrets" / "firebase-service-account.js
 path.parent.mkdir(parents=True, exist_ok=True)
 path.write_text(json.dumps(data), encoding="utf-8")
 path.chmod(0o600)
+PY
+
+export FIREBASE_WEB_CONFIG_PATH="${deploy_dir}/.env"
+python3 - <<'PY'
+import json
+import os
+from pathlib import Path
+
+config = os.environ.get("FIREBASE_WEB_CONFIG_JSON", "").strip()
+vapid_key = os.environ.get("FIREBASE_WEB_VAPID_KEY", "").strip()
+path = Path(os.environ["FIREBASE_WEB_CONFIG_PATH"])
+
+if bool(config) != bool(vapid_key):
+    raise ValueError("Firebase web configuration and VAPID key must be configured together.")
+
+if config:
+    firebase_config = json.loads(config)
+    path.write_text(
+        "FIREBASE_WEB_CONFIG_JSON="
+        + json.dumps(json.dumps(firebase_config, separators=(",", ":")))
+        + "\nFIREBASE_WEB_VAPID_KEY="
+        + json.dumps(vapid_key)
+        + "\n",
+        encoding="utf-8",
+    )
+    path.chmod(0o600)
+elif path.exists():
+    path.unlink()
 PY
 
 sudo /usr/local/sbin/adf247-build "${stage}"
