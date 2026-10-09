@@ -11,6 +11,8 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
     public DbSet<Convocatoria> Convocatorias => Set<Convocatoria>();
     public DbSet<ConvoType> ConvoTypes => Set<ConvoType>();
     public DbSet<Respuesta> Respuestas => Set<Respuesta>();
+    public DbSet<CampaignForm> CampaignForms => Set<CampaignForm>();
+    public DbSet<UserHoursSummary> UserHoursSummaries => Set<UserHoursSummary>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -80,6 +82,27 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
                 .WithMany()
                 .HasForeignKey(respuesta => respuesta.UserNCarnet)
                 .HasPrincipalKey(user => user.NCarnet);
+        });
+
+        modelBuilder.Entity<CampaignForm>(entity =>
+        {
+            entity.ToTable("FormulariCampanya");
+            entity.HasKey(form => form.Id);
+            entity.Property(form => form.ServiceMoment).HasMaxLength(50);
+            entity.Property(form => form.VoluntarisJson).IsRequired();
+            entity.Property(form => form.VehiclesJson).IsRequired();
+            entity.HasOne(form => form.Convocatoria).WithMany().HasForeignKey(form => form.ConvocatoriaId);
+            entity.Property(form => form.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.Property(form => form.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
+        });
+
+        modelBuilder.Entity<UserHoursSummary>(entity =>
+        {
+            entity.ToTable("UserHoursSummary");
+            entity.HasKey(summary => summary.Id);
+            entity.HasIndex(summary => summary.UserId).IsUnique();
+            entity.Property(summary => summary.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.Property(summary => summary.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
         });
     }
 }

@@ -17,6 +17,7 @@ public sealed record CreateUserRequest(
     UserRolesRequest? Roles);
 
 public sealed record UpdateUserRequest(
+    string? NCarnet,
     string? Name,
     string? Password,
     string? LastName,
@@ -24,3 +25,5 @@ public sealed record UpdateUserRequest(
     string? Phone,
     bool? IsActive,
     UserRolesRequest? Roles);
+
+public sealed record ImportUsersRequest(string? CsvContent, string? FileName);

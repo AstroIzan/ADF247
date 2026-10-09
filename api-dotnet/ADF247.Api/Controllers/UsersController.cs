@@ -11,7 +11,12 @@ namespace ADF247.Api.Controllers;
 public sealed class UsersController(UserService users) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetAll() => Ok(await users.GetAllAsync());
+    public async Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int? pageSize)
+    {
+        if (page.HasValue != pageSize.HasValue) return BadRequest(new { message = "Debes enviar page y pageSize juntos para usar paginacion." });
+        try { return Ok(page.HasValue ? await users.GetPageAsync(page.Value, pageSize!.Value) : await users.GetAllAsync()); }
+        catch (ArgumentException error) { return BadRequest(new { message = error.Message }); }
+    }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> GetById(int id)
@@ -52,6 +57,14 @@ public sealed class UsersController(UserService users) : ControllerBase
         {
             return BadRequest(new { message = error.Message });
         }
+        catch (InvalidOperationException error) { return Conflict(new { message = error.Message }); }
+    }
+
+    [HttpPost("import")]
+    public async Task<IActionResult> Import(ImportUsersRequest request)
+    {
+        try { return Ok(await users.ImportAsync(request)); }
+        catch (ArgumentException error) { return BadRequest(new { message = error.Message }); }
     }
 
     [HttpDelete("{id:int}")]

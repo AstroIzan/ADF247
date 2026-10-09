@@ -19,6 +19,15 @@ public sealed class DispoController(RespuestaService respuestas, Adf247DbContext
         return identity is null ? Unauthorized() : Ok(await respuestas.GetAllAsync(identity.Value.Carnet, identity.Value.IsAdmin, convoId, userNCarnet));
     }
 
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetById(int id)
+    {
+        var identity = await GetIdentityAsync();
+        if (identity is null) return Unauthorized();
+        var response = (await respuestas.GetAllAsync(identity.Value.Carnet, identity.Value.IsAdmin, null, null)).SingleOrDefault(item => item.Id == id);
+        return response is null ? NotFound(new { message = "No se ha encontrado la respuesta solicitada." }) : Ok(response);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create(RespuestaRequest request)
     {
