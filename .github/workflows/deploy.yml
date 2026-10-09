@@ -232,12 +232,16 @@ jobs:
             done
 
             echo "${name} no estuvo disponible después de 60 segundos."
-            sudo docker compose \
+            if ! sudo -n docker compose \
               -f /home/deploy/deployments/ADF247/compose.yml \
-              ps
-            sudo docker compose \
+              ps; then
+              echo "No se pudo obtener el estado de los contenedores: sudo no está disponible sin contraseña."
+            fi
+            if ! sudo -n docker compose \
               -f /home/deploy/deployments/ADF247/compose.yml \
-              logs --tail=100 client api
+              logs --tail=100 client api; then
+              echo "No se pudieron obtener los logs de los contenedores: sudo no está disponible sin contraseña."
+            fi
             return 1
           }
 
@@ -247,11 +251,4 @@ jobs:
           echo "=== API ==="
           wait_for_endpoint "API" "http://127.0.0.1:8081/api/health"
 
-          echo
-          echo "=== CONTAINERS ==="
-          sudo docker compose \
-            -f /home/deploy/deployments/ADF247/compose.yml \
-            ps
-
-          echo
           echo "=== OK ==="
