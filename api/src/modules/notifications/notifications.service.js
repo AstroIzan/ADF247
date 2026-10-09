@@ -1420,7 +1420,14 @@ function buildNotificationLink(link, data) {
   target.searchParams.set('notificationKind', kind)
   target.searchParams.set('convoId', convocatoriaId)
 
-  return `${target.pathname}${target.search}`
+  const origin = String(process.env.CORS_ORIGIN || '')
+    .split(',')
+    .map((value) => value.trim())
+    .find((value) => /^https:\/\//i.test(value))
+
+  return origin
+    ? new URL(`${target.pathname}${target.search}`, origin).toString()
+    : `${target.pathname}${target.search}`
 }
 
 async function registerDeviceToken(authUser, payload, userAgent) {

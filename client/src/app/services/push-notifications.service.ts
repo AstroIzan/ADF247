@@ -34,6 +34,10 @@ export class PushNotificationsService {
     return Boolean(this.currentToken()) && this.isTokenLinked()
   })
 
+  hasKnownRegisteredDevice() {
+    return Boolean(localStorage.getItem(this.getLinkedTokenStorageKey()))
+  }
+
   readonly isDeviceReady = computed(() => {
     if (this.permission() !== 'granted') {
       return false

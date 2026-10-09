@@ -145,7 +145,7 @@ export class App {
       return
     }
 
-    if (!this.pushNotificationsService.hasRegisteredCurrentToken()) {
+    if (!this.pushNotificationsService.hasRegisteredCurrentToken() && !this.pushNotificationsService.hasKnownRegisteredDevice()) {
       this.notificationWarning = 'Aquest dispositiu encara no està registrat al servidor. Revisa-ho a Configuració.'
       return
     }
