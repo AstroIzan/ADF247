@@ -19,7 +19,7 @@ CREATE TABLE [Messaging].[DeviceRegistration] (
   [id] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
   [userId] INT NOT NULL,
   [nCarnet] NVARCHAR(50) NOT NULL,
-  [token] NVARCHAR(MAX) NOT NULL,
+  [token] NVARCHAR(450) NOT NULL,
   [platform] NVARCHAR(30) NOT NULL,
   [userAgent] NVARCHAR(MAX) NULL,
   [isActive] BIT NOT NULL CONSTRAINT [Messaging_DeviceRegistration_isActive_df] DEFAULT 1,

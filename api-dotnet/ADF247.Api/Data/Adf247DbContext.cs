@@ -116,6 +116,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.HasKey(registration => registration.Id);
             entity.HasIndex(registration => registration.Token).IsUnique();
             entity.Property(registration => registration.NCarnet).HasMaxLength(50);
+            entity.Property(registration => registration.Token).HasMaxLength(450);
             entity.Property(registration => registration.Platform).HasMaxLength(30);
             entity.Property(registration => registration.RegisteredAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
             entity.Property(registration => registration.LastSeenAt).HasDefaultValueSql("sysutcdatetime()");
