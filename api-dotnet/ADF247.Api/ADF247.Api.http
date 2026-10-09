@@ -1,0 +1,6 @@
+@ADF247.Api_HostAddress = http://localhost:5239
+
+GET {{ADF247.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

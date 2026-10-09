@@ -18,6 +18,8 @@ out/
 coverage/
 .tmp/
 tmp/
+**/bin/
+**/obj/
 
 # Environment files
 .env
