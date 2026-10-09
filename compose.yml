@@ -47,7 +47,6 @@ networks:
 
   adf247:
     driver: bridge
-    name: adf247${DEPLOYMENT_SUFFIX:-}
 
   homelab-database:
     external: true
