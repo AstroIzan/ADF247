@@ -3,7 +3,6 @@ name: ADF247 CI/CD
 on:
   push:
     branches:
-      - master
       - release/firebase-migration
 
   pull_request:
@@ -115,11 +114,8 @@ jobs:
         run: npx prisma generate
 
 
-  # ============================================================
-  # BUILD + DEPLOY
-  # ============================================================
-  deploy:
-    name: Build & Deploy
+  deploy-pre:
+    name: Deploy PRE
     needs:
       - api
       - angular
@@ -132,123 +128,39 @@ jobs:
       - production
       - adf247
 
-    environment:
-      name: production
+    environment: pre
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # --------------------------------------------------------
-      # Preparar código
-      # --------------------------------------------------------
-      - name: Prepare deployment
-        shell: bash
-        run: |
-          set -e
-
-          DEPLOY_DIR="/home/deploy/deployments/ADF247"
-
-          mkdir -p "$DEPLOY_DIR"
-
-          rsync -a --delete \
-            --exclude='.git/' \
-            --exclude='api/.env.pro' \
-            --exclude='secrets/' \
-            ./ "$DEPLOY_DIR/"
-
-      # --------------------------------------------------------
-      # Firebase
-      # --------------------------------------------------------
-      - name: Configure Firebase
-        shell: bash
+      - name: Deploy PRE
         env:
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-        run: |
-          set -e
+        run: .github/scripts/deploy-stage.sh pre
 
-          DEPLOY_DIR="/home/deploy/deployments/ADF247"
+  deploy-production:
+    name: Deploy PRO
+    needs: deploy-pre
 
-          mkdir -p "$DEPLOY_DIR/secrets"
+    runs-on:
+      - self-hosted
+      - linux
+      - x64
+      - production
+      - adf247
 
-          python3 - <<'PY'
-          import json
-          import os
-          from pathlib import Path
+    environment: production
 
-          data = {
-              "type": "service_account",
-              "project_id": os.environ["FIREBASE_PROJECT_ID"],
-              "client_email": os.environ["FIREBASE_CLIENT_EMAIL"],
-              "private_key": os.environ["FIREBASE_PRIVATE_KEY"].replace("\\n", "\n")
-          }
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-          path = Path("/home/deploy/deployments/ADF247/secrets/firebase-service-account.json")
-          path.write_text(json.dumps(data), encoding="utf-8")
-          path.chmod(0o600)
-          PY
-
-      # --------------------------------------------------------
-      # Docker build
-      # --------------------------------------------------------
-      - name: Build Docker images
-        run: |
-          sudo /usr/local/sbin/adf247-build
-
-      # --------------------------------------------------------
-      # Database migrations
-      # --------------------------------------------------------
-      - name: Database migrations
-        run: |
-          sudo /usr/local/sbin/adf247-migrate
-
-      # --------------------------------------------------------
-      # Deploy
-      # --------------------------------------------------------
-      - name: Deploy containers
-        run: |
-          sudo /usr/local/sbin/adf247-deploy
-
-      # --------------------------------------------------------
-      # Health
-      # --------------------------------------------------------
-      - name: Health check
-        run: |
-          set -e
-
-          wait_for_endpoint() {
-            local name="$1"
-            local url="$2"
-
-            for attempt in {1..30}; do
-              if curl -fsS "${url}" > /dev/null; then
-                return 0
-              fi
-
-              echo "${name} no disponible todavía (intento ${attempt}/30); reintentando..."
-              sleep 2
-            done
-
-            echo "${name} no estuvo disponible después de 60 segundos."
-            if ! sudo -n docker compose \
-              -f /home/deploy/deployments/ADF247/compose.yml \
-              ps; then
-              echo "No se pudo obtener el estado de los contenedores: sudo no está disponible sin contraseña."
-            fi
-            if ! sudo -n docker compose \
-              -f /home/deploy/deployments/ADF247/compose.yml \
-              logs --tail=100 client api; then
-              echo "No se pudieron obtener los logs de los contenedores: sudo no está disponible sin contraseña."
-            fi
-            return 1
-          }
-
-          echo "=== FRONTEND ==="
-          wait_for_endpoint "Frontend" "http://127.0.0.1:8081/"
-
-          echo "=== API ==="
-          wait_for_endpoint "API" "http://127.0.0.1:8081/api/health"
-
-          echo "=== OK ==="
+      - name: Deploy PRO
+        env:
+          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+        run: .github/scripts/deploy-stage.sh pro

@@ -5,12 +5,12 @@ services:
       context: .
       dockerfile: api/Dockerfile
 
-    container_name: adf247-api
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-api
 
     restart: unless-stopped
 
     env_file:
-      - ./api/.env.pro
+      - ${API_ENV_FILE:-./api/.env.pro}
 
     environment:
       NODE_ENV: production
@@ -29,12 +29,12 @@ services:
       context: ./client
       dockerfile: Dockerfile
 
-    container_name: adf247-client
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-client
 
     restart: unless-stopped
 
     ports:
-      - "127.0.0.1:8081:80"
+      - "127.0.0.1:${CLIENT_PORT:-8081}:80"
 
     depends_on:
       - api
@@ -47,6 +47,7 @@ networks:
 
   adf247:
     driver: bridge
+    name: adf247${DEPLOYMENT_SUFFIX:-}
 
   homelab-database:
     external: true
