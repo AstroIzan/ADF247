@@ -60,14 +60,24 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { ok = true, service = "api-dotnet" }));
-app.MapGet("/api/health", async (Adf247DbContext database, CancellationToken cancellationToken) =>
+app.MapGet("/api/health", async (
+    Adf247DbContext database,
+    ILogger<Program> logger,
+    CancellationToken cancellationToken) =>
 {
-    var databaseAvailable = await database.Database.CanConnectAsync(cancellationToken);
-    return databaseAvailable
-        ? Results.Ok(new { ok = true, service = "api-dotnet", dependencies = new { database = "connected" } })
-        : Results.Problem(
+    try
+    {
+        await database.Database.OpenConnectionAsync(cancellationToken);
+        await database.Database.CloseConnectionAsync();
+        return Results.Ok(new { ok = true, service = "api-dotnet", dependencies = new { database = "connected" } });
+    }
+    catch (Exception exception)
+    {
+        logger.LogError(exception, "Database health check failed.");
+        return Results.Problem(
             statusCode: StatusCodes.Status503ServiceUnavailable,
             title: "Database connection unavailable.");
+    }
 });
 app.MapControllers();
 
