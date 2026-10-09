@@ -90,6 +90,30 @@ elif path.exists():
 PY
 
 sudo /usr/local/sbin/adf247-build "${stage}"
+
+recover_failed_messaging_migration() {
+  local migration_name="20261009230500_messaging_schema"
+  local output
+
+  if output=$(cd "${deploy_dir}" && sudo env API_ENV_FILE="${env_file}" docker compose run --rm --no-deps api \
+    sh -c "../database/node_modules/.bin/prisma migrate resolve --rolled-back ${migration_name} --schema ../database/prisma/schema.prisma" 2>&1); then
+    echo "Recovered failed Prisma migration ${migration_name}."
+    return
+  fi
+
+  if grep -Eqi "not.*failed|not in a failed state|does not exist" <<<"${output}"; then
+    echo "Prisma migration ${migration_name} does not require recovery."
+    return
+  fi
+
+  printf '%s\n' "${output}" >&2
+  return 1
+}
+
+if [ "${stage}" = "pre" ]; then
+  recover_failed_messaging_migration
+fi
+
 sudo /usr/local/sbin/adf247-migrate "${stage}"
 sudo /usr/local/sbin/adf247-deploy "${stage}"
 
