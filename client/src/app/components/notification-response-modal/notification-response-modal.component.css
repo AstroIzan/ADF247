@@ -1,5 +1,0 @@
-.notification-response-backdrop { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; padding: 1rem; background: rgb(0 0 0 / 55%); }
-.notification-response-modal { position: relative; width: min(100%, 30rem); border-radius: 1rem; padding: 1.5rem; background: #fff; color: #1d2939; box-shadow: 0 1.5rem 3rem rgb(0 0 0 / 25%); }
-.close-button { position: absolute; top: .5rem; right: .75rem; border: 0; background: transparent; font-size: 2rem; cursor: pointer; }
-.eyebrow { margin: 0; color: #557; font-weight: 700; text-transform: uppercase; font-size: .75rem; }
-h2 { margin: .4rem 2rem .9rem 0; }.actions { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; margin-top: 1.5rem; }.actions button { border: 0; border-radius: .5rem; padding: .75rem; color: #fff; font-weight: 700; cursor: pointer; }.available { background: #16803c; }.unavailable { background: #b42318; }.error { color: #b42318; }
