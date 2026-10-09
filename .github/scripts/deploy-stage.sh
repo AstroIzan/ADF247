@@ -28,6 +28,7 @@ rsync -a --delete \
   ./ "${deploy_dir}/"
 
 export DEPLOY_DIR="${deploy_dir}"
+export DEPLOY_STAGE="${stage}"
 python3 - <<'PY'
 import json
 import os
@@ -63,16 +64,22 @@ path = Path(os.environ["FIREBASE_WEB_CONFIG_PATH"])
 if bool(config) != bool(vapid_key):
     raise ValueError("Firebase web configuration and VAPID key must be configured together.")
 
+profile = "COMPOSE_PROFILES=dotnet\n" if os.environ.get("DEPLOY_STAGE") == "pre" else ""
+
 if config:
     firebase_config = json.loads(config)
     path.write_text(
-        "FIREBASE_WEB_CONFIG_JSON="
+        profile
+        + "FIREBASE_WEB_CONFIG_JSON="
         + json.dumps(json.dumps(firebase_config, separators=(",", ":")))
         + "\nFIREBASE_WEB_VAPID_KEY="
         + json.dumps(vapid_key)
         + "\n",
         encoding="utf-8",
     )
+    path.chmod(0o600)
+elif profile:
+    path.write_text(profile, encoding="utf-8")
     path.chmod(0o600)
 elif path.exists():
     path.unlink()
@@ -101,3 +108,7 @@ wait_for_endpoint() {
 
 wait_for_endpoint "Frontend" "http://127.0.0.1:${health_port}/"
 wait_for_endpoint "API" "http://127.0.0.1:${health_port}/api/health"
+
+if [ "${stage}" = "pre" ]; then
+  wait_for_endpoint "API .NET" "http://127.0.0.1:3002/api/health"
+fi

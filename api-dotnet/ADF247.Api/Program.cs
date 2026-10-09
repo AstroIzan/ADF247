@@ -7,8 +7,11 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("Adf247")
+var configuredConnectionString = builder.Configuration.GetConnectionString("Adf247")
     ?? builder.Configuration["DATABASE_CONNECTION_STRING"]
+    ?? ConvertPrismaSqlServerUrl(builder.Configuration["DATABASE_URL"]);
+
+var connectionString = configuredConnectionString
     ?? "Server=localhost;Database=ADF247;Integrated Security=True;TrustServerCertificate=True";
 
 builder.Services.AddDbContext<Adf247DbContext>(options =>
@@ -57,7 +60,31 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { ok = true, service = "api-dotnet" }));
-app.MapGet("/api/health", () => Results.Ok(new { ok = true, service = "api-dotnet" }));
+app.MapGet("/api/health", async (Adf247DbContext database, CancellationToken cancellationToken) =>
+{
+    var databaseAvailable = await database.Database.CanConnectAsync(cancellationToken);
+    return databaseAvailable
+        ? Results.Ok(new { ok = true, service = "api-dotnet", dependencies = new { database = "connected" } })
+        : Results.Problem(
+            statusCode: StatusCodes.Status503ServiceUnavailable,
+            title: "Database connection unavailable.");
+});
 app.MapControllers();
 
 app.Run();
+
+static string? ConvertPrismaSqlServerUrl(string? databaseUrl)
+{
+    const string prefix = "sqlserver://";
+    if (string.IsNullOrWhiteSpace(databaseUrl) || !databaseUrl.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+    {
+        return null;
+    }
+
+    var segments = databaseUrl[prefix.Length..].Split(';', 2);
+    var server = segments[0];
+    var properties = segments.Length == 2 ? segments[1] : string.Empty;
+    properties = properties.Replace("user=", "User ID=", StringComparison.OrdinalIgnoreCase);
+
+    return $"Server={server};{properties}";
+}

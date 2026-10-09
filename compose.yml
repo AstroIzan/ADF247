@@ -25,6 +25,31 @@ services:
       - adf247
       - homelab-database
 
+  api-dotnet:
+    profiles:
+      - dotnet
+
+    build:
+      context: ./api-dotnet
+      dockerfile: ADF247.Api/Dockerfile
+
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-api-dotnet
+
+    restart: unless-stopped
+
+    env_file:
+      - ${API_ENV_FILE:-./api/.env.pro}
+
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+
+    ports:
+      - "127.0.0.1:${DOTNET_API_PORT:-3002}:8080"
+
+    networks:
+      - adf247
+      - homelab-database
+
   client:
     build:
       context: ./client
