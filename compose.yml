@@ -18,7 +18,8 @@ services:
       FIREBASE_SERVICE_ACCOUNT_PATH: /run/secrets/firebase-service-account.json
 
     secrets:
-      - firebase_service_account
+      - source: firebase_service_account
+        target: firebase-service-account.json
 
     networks:
       - adf247
