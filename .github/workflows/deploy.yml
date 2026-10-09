@@ -222,7 +222,27 @@ jobs:
           curl -fsS http://127.0.0.1:8081/ > /dev/null
 
           echo "=== API ==="
-          curl -fsS http://127.0.0.1:8081/api/health
+          api_ready=false
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:8081/api/health; then
+              api_ready=true
+              break
+            fi
+
+            echo "API no disponible todavía (intento ${attempt}/30); reintentando..."
+            sleep 2
+          done
+
+          if [ "${api_ready}" != "true" ]; then
+            echo "La API no estuvo disponible después de 60 segundos."
+            sudo docker compose \
+              -f /home/deploy/deployments/ADF247/compose.yml \
+              ps
+            sudo docker compose \
+              -f /home/deploy/deployments/ADF247/compose.yml \
+              logs --tail=100 api
+            exit 1
+          fi
 
           echo
           echo "=== CONTAINERS ==="
