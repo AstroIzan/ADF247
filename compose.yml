@@ -50,6 +50,34 @@ services:
       - adf247
       - homelab-database
 
+  messaging-worker:
+    profiles:
+      - messaging
+
+    build:
+      context: ./api-dotnet
+      dockerfile: ADF247.Messaging.Worker/Dockerfile
+
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-messaging-worker
+
+    restart: unless-stopped
+
+    env_file:
+      - ${API_ENV_FILE:-./api/.env.pro}
+
+    environment:
+      DOTNET_ENVIRONMENT: Production
+      MESSAGING_RUNBOOK_PATH: messaging-runbook.json
+      FIREBASE_SERVICE_ACCOUNT_PATH: /run/secrets/firebase-service-account.json
+
+    secrets:
+      - source: firebase_service_account
+        target: firebase-service-account.json
+
+    networks:
+      - adf247
+      - homelab-database
+
   client:
     build:
       context: ./client

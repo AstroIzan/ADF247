@@ -13,6 +13,11 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
     public DbSet<Respuesta> Respuestas => Set<Respuesta>();
     public DbSet<CampaignForm> CampaignForms => Set<CampaignForm>();
     public DbSet<UserHoursSummary> UserHoursSummaries => Set<UserHoursSummary>();
+    public DbSet<DeviceRegistration> DeviceRegistrations => Set<DeviceRegistration>();
+    public DbSet<MessagingConfiguration> MessagingConfigurations => Set<MessagingConfiguration>();
+    public DbSet<MessagingNotification> MessagingNotifications => Set<MessagingNotification>();
+    public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
+    public DbSet<RunbookExecution> RunbookExecutions => Set<RunbookExecution>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -103,6 +108,61 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.HasIndex(summary => summary.UserId).IsUnique();
             entity.Property(summary => summary.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
             entity.Property(summary => summary.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
+        });
+
+        modelBuilder.Entity<DeviceRegistration>(entity =>
+        {
+            entity.ToTable("DeviceRegistration", "Messaging");
+            entity.HasKey(registration => registration.Id);
+            entity.HasIndex(registration => registration.Token).IsUnique();
+            entity.Property(registration => registration.NCarnet).HasMaxLength(50);
+            entity.Property(registration => registration.Platform).HasMaxLength(30);
+            entity.Property(registration => registration.RegisteredAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.Property(registration => registration.LastSeenAt).HasDefaultValueSql("sysutcdatetime()");
+            entity.HasOne(registration => registration.User).WithMany().HasForeignKey(registration => registration.UserId);
+        });
+
+        modelBuilder.Entity<MessagingConfiguration>(entity =>
+        {
+            entity.ToTable("Configuration", "Messaging");
+            entity.HasKey(configuration => configuration.Id);
+            entity.HasIndex(configuration => configuration.Key).IsUnique();
+            entity.Property(configuration => configuration.Key).HasMaxLength(100);
+            entity.Property(configuration => configuration.Name).HasMaxLength(200);
+            entity.Property(configuration => configuration.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.Property(configuration => configuration.UpdatedAt).HasDefaultValueSql("sysutcdatetime()");
+        });
+
+        modelBuilder.Entity<MessagingNotification>(entity =>
+        {
+            entity.ToTable("Notification", "Messaging");
+            entity.HasKey(notification => notification.Id);
+            entity.Property(notification => notification.Trigger).HasMaxLength(50);
+            entity.Property(notification => notification.Status).HasMaxLength(30);
+            entity.HasOne(notification => notification.Configuration).WithMany().HasForeignKey(notification => notification.ConfigurationId);
+            entity.HasOne(notification => notification.Convocatoria).WithMany().HasForeignKey(notification => notification.ConvocatoriaId);
+            entity.HasOne(notification => notification.Actor).WithMany().HasForeignKey(notification => notification.ActorUserId);
+        });
+
+        modelBuilder.Entity<NotificationDelivery>(entity =>
+        {
+            entity.ToTable("NotificationDelivery", "Messaging");
+            entity.HasKey(delivery => delivery.Id);
+            entity.HasIndex(delivery => new { delivery.NotificationId, delivery.DeviceRegistrationId }).IsUnique();
+            entity.Property(delivery => delivery.NCarnet).HasMaxLength(50);
+            entity.Property(delivery => delivery.Status).HasMaxLength(30);
+            entity.HasOne(delivery => delivery.Notification).WithMany().HasForeignKey(delivery => delivery.NotificationId);
+            entity.HasOne(delivery => delivery.DeviceRegistration).WithMany().HasForeignKey(delivery => delivery.DeviceRegistrationId);
+            entity.HasOne(delivery => delivery.User).WithMany().HasForeignKey(delivery => delivery.UserId);
+        });
+
+        modelBuilder.Entity<RunbookExecution>(entity =>
+        {
+            entity.ToTable("RunbookExecution", "Messaging");
+            entity.HasKey(execution => execution.Id);
+            entity.Property(execution => execution.RunbookKey).HasMaxLength(100);
+            entity.Property(execution => execution.Trigger).HasMaxLength(30);
+            entity.Property(execution => execution.Status).HasMaxLength(30);
         });
     }
 }

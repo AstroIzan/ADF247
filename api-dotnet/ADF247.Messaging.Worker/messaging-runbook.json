@@ -1,0 +1,28 @@
+{
+  "MessagingWorker": {
+    "PollingIntervalSeconds": 30,
+    "NotificationClaimBatchSize": 10,
+    "DeliveryClaimBatchSize": 200,
+    "MaxDeliveryAttempts": 3
+  },
+  "MessagingRunbook": {
+    "Campaigns": [
+      {
+        "Id": "availability-reminder-weekly",
+        "Name": "Weekly availability reminder",
+        "Cron": "0 30 7 * * 1",
+        "Channel": "firebase",
+        "Template": "availability-reminder",
+        "Enabled": false
+      },
+      {
+        "Id": "convocatoria-closure-digest",
+        "Name": "Convocatoria closure digest",
+        "Cron": "0 0 18 * * *",
+        "Channel": "firebase",
+        "Template": "convocatoria-closure",
+        "Enabled": false
+      }
+    ]
+  }
+}

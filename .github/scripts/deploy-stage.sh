@@ -64,7 +64,11 @@ path = Path(os.environ["FIREBASE_WEB_CONFIG_PATH"])
 if bool(config) != bool(vapid_key):
     raise ValueError("Firebase web configuration and VAPID key must be configured together.")
 
-profile = "COMPOSE_PROFILES=dotnet\n" if os.environ.get("DEPLOY_STAGE") == "pre" else ""
+profile = (
+    "COMPOSE_PROFILES=dotnet,messaging\nDOTNET_API_PORT=3002\n"
+    if os.environ.get("DEPLOY_STAGE") == "pre"
+    else "COMPOSE_PROFILES=dotnet\nDOTNET_API_PORT=3003\n"
+)
 
 if config:
     firebase_config = json.loads(config)
@@ -109,6 +113,8 @@ wait_for_endpoint() {
 wait_for_endpoint "Frontend" "http://127.0.0.1:${health_port}/"
 wait_for_endpoint "API" "http://127.0.0.1:${health_port}/api/health"
 
-if [ "${stage}" = "pre" ]; then
-  wait_for_endpoint "API .NET" "http://127.0.0.1:3002/api/health"
+dotnet_port=3002
+if [ "${stage}" = "pro" ]; then
+  dotnet_port=3003
 fi
+wait_for_endpoint "API .NET" "http://127.0.0.1:${dotnet_port}/api/health"
