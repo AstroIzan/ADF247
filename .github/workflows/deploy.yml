@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - release/firebase-migration
+      - ieavueling-fix-docker-build
 
   pull_request:
     branches:
@@ -113,6 +114,22 @@ jobs:
       - name: Prisma generate
         run: npx prisma generate
 
+  dotnet:
+    name: .NET - Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build API and Messaging worker
+        run: dotnet build api-dotnet/ADF247.slnx --configuration Release
+
 
   deploy-pre:
     name: Deploy PRE
@@ -120,6 +137,7 @@ jobs:
       - api
       - angular
       - database
+      - dotnet
 
     runs-on:
       - self-hosted
@@ -156,6 +174,7 @@ jobs:
       - adf247
 
     environment: production
+    if: github.ref == 'refs/heads/release/firebase-migration'
 
     steps:
       - name: Checkout

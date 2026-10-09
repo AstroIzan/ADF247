@@ -1,10 +1,6 @@
 BEGIN TRY
 BEGIN TRAN;
 
-IF OBJECT_ID(N'[dbo].[NotificationAutomationTaskRun]', N'U') IS NOT NULL DROP TABLE [dbo].[NotificationAutomationTaskRun];
-IF OBJECT_ID(N'[dbo].[NotificationAutomationRun]', N'U') IS NOT NULL DROP TABLE [dbo].[NotificationAutomationRun];
-IF OBJECT_ID(N'[dbo].[NotificationLog]', N'U') IS NOT NULL DROP TABLE [dbo].[NotificationLog];
-
 IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = N'Messaging') EXEC(N'CREATE SCHEMA [Messaging]');
 
 CREATE TABLE [Messaging].[Configuration] (
