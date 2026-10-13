@@ -14,6 +14,7 @@ RUN npm ci --prefix database --omit=dev \
 
 COPY database/prisma ./database/prisma
 COPY api/src ./api/src
+COPY api/scripts ./api/scripts
 
 RUN ./database/node_modules/.bin/prisma generate \
     --schema=/app/database/prisma/schema.prisma
@@ -25,4 +26,7 @@ ENV PORT=3001
 
 EXPOSE 3001
 
+RUN chmod +x scripts/docker-entrypoint.sh
+
+ENTRYPOINT ["./scripts/docker-entrypoint.sh"]
 CMD ["node", "src/server.js"]

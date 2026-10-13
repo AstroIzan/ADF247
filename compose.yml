@@ -16,6 +16,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       FIREBASE_SERVICE_ACCOUNT_PATH: /run/secrets/firebase-service-account.json
+      PRISMA_RECOVER_MESSAGING_MIGRATION: ${PRISMA_RECOVER_MESSAGING_MIGRATION:-0}
 
     secrets:
       - source: firebase_service_account
