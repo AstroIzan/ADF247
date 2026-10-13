@@ -1,6 +1,6 @@
 services:
 
-  api-dotnet:
+  api:
     profiles:
       - dotnet
 
@@ -8,7 +8,7 @@ services:
       context: ./dotnet-services
       dockerfile: ADF247.Api/Dockerfile
 
-    container_name: adf247${DEPLOYMENT_SUFFIX:-}-api-dotnet
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-api
 
     restart: unless-stopped
 
@@ -69,7 +69,7 @@ services:
       - "127.0.0.1:${CLIENT_PORT:-8081}:80"
 
     depends_on:
-      - api-dotnet
+      - api
 
     networks:
       - adf247
