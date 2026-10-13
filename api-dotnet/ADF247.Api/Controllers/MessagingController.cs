@@ -11,6 +11,7 @@ namespace ADF247.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/notifications")]
+[Route("api/messaging")]
 public sealed class MessagingController(MessagingService messaging, Adf247DbContext database) : ControllerBase
 {
     [HttpPost("device-token")]

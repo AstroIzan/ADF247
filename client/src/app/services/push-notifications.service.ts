@@ -12,6 +12,7 @@ import { isNotificationsConfigReady, notificationsConfig } from '../config/notif
 export class PushNotificationsService {
   private messaging: Messaging | null = null
   private readonly linkedTokenKeyPrefix = 'fcmLinkedToken:'
+  private readonly messagingLinkedTokenKeyPrefix = 'messagingLinkedToken:'
   private foregroundListenerBound = false
   private readonly syncTimeoutMs = 5000
   private registerInFlight: Promise<void> | null = null
@@ -35,7 +36,10 @@ export class PushNotificationsService {
   })
 
   hasKnownRegisteredDevice() {
-    return Boolean(localStorage.getItem(this.getLinkedTokenStorageKey()))
+    return Boolean(
+      localStorage.getItem(this.getLinkedTokenStorageKey())
+      || localStorage.getItem(this.getMessagingLinkedTokenStorageKey())
+    )
   }
 
   readonly isDeviceReady = computed(() => {
@@ -264,6 +268,11 @@ export class PushNotificationsService {
       platform: this.resolvePlatform(),
       userAgent: navigator.userAgent,
     }))
+    await firstValueFrom(this.httpService.post('/messaging/device-token', {
+      token,
+      platform: this.resolvePlatform(),
+      userAgent: navigator.userAgent,
+    }))
   }
 
   private async ensureTokenRegistered(token: string) {
@@ -271,7 +280,11 @@ export class PushNotificationsService {
       return
     }
 
-    if (this.currentToken() === token && this.isTokenLinked()) {
+    if (
+      this.currentToken() === token
+      && this.isTokenLinked()
+      && localStorage.getItem(this.getMessagingLinkedTokenStorageKey()) === token
+    ) {
       return
     }
 
@@ -288,6 +301,7 @@ export class PushNotificationsService {
       this.currentToken.set(token)
       this.isTokenLinked.set(true)
       localStorage.setItem(this.getLinkedTokenStorageKey(), token)
+      localStorage.setItem(this.getMessagingLinkedTokenStorageKey(), token)
     } finally {
       if (this.registerInFlightToken === token) {
         this.registerInFlight = null
@@ -371,6 +385,10 @@ export class PushNotificationsService {
 
   private getLinkedTokenStorageKey() {
     return `${this.linkedTokenKeyPrefix}${this.authService.getCachedNCarnet() || 'anonymous'}`
+  }
+
+  private getMessagingLinkedTokenStorageKey() {
+    return `${this.messagingLinkedTokenKeyPrefix}${this.authService.getCachedNCarnet() || 'anonymous'}`
   }
 
   private restoreLinkedToken(token: string) {

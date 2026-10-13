@@ -603,11 +603,11 @@ export class DataService {
   }
 
   sendConvocatoriaResponseRequest(convoId: number): Observable<any> {
-    return this.http.post<any>(`/notifications/dispatch/convocatoria/${convoId}/response-request`, {});
+    return this.http.post<any>(`/messaging/dispatch/convocatoria/${convoId}/response-request`, {});
   }
 
   sendConvocatoriaSortidaStatus(convoId: number): Observable<any> {
-    return this.http.post<any>(`/notifications/dispatch/convocatoria/${convoId}/sortida-status`, {});
+    return this.http.post<any>(`/messaging/dispatch/convocatoria/${convoId}/sortida-status`, {});
   }
 
   sendPendingResponsesReminder(): Observable<any> {
