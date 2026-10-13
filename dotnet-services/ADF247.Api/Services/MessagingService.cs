@@ -60,12 +60,23 @@ public sealed class MessagingService(Adf247DbContext database)
 
     public async Task<MessagingNotification> QueueConvocatoriaAsync(string carnet, int convocatoriaId, string trigger, ConvocatoriaNotificationRequest request, CancellationToken cancellationToken)
     {
-        var convocatoria = await database.Convocatorias.SingleOrDefaultAsync(item => item.Id == convocatoriaId, cancellationToken)
+        var convocatoria = await database.Convocatorias
+            .Include(item => item.ConvoType)
+            .Include(item => item.Responsable)
+            .SingleOrDefaultAsync(item => item.Id == convocatoriaId, cancellationToken)
             ?? throw new KeyNotFoundException("No se ha encontrado la convocatoria.");
-        var title = request.Title ?? "Convocatoria";
-        var body = request.Body ?? convocatoria.Title;
+
+        var configuration = trigger == "response-request"
+            ? await FindResponseRequestConfigurationAsync(convocatoria, cancellationToken)
+            : null;
+        var title = request.Title ?? RenderTemplate(
+            configuration?.TitleTemplate ?? (trigger == "sortida-status" ? "Confirmació de sortida" : "Convocatòria"),
+            convocatoria);
+        var body = request.Body ?? RenderTemplate(
+            configuration?.BodyTemplate ?? DefaultBody(trigger, convocatoria),
+            convocatoria);
         return await QueueAsync(carnet, convocatoriaId, trigger, title, body,
-            new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() }, cancellationToken);
+            new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() }, cancellationToken, configuration?.Id);
     }
 
     public async Task<IReadOnlyList<MessagingNotification>> GetNotificationsAsync(CancellationToken cancellationToken) =>
@@ -127,7 +138,7 @@ public sealed class MessagingService(Adf247DbContext database)
         catch (JsonException) { throw new ArgumentException("La regla de audiencia debe ser JSON válido."); }
     }
 
-    private async Task<MessagingNotification> QueueAsync(string carnet, int? convocatoriaId, string trigger, string title, string body, Dictionary<string, string>? data, CancellationToken cancellationToken)
+    private async Task<MessagingNotification> QueueAsync(string carnet, int? convocatoriaId, string trigger, string title, string body, Dictionary<string, string>? data, CancellationToken cancellationToken, int? configurationId = null)
     {
         if (string.IsNullOrWhiteSpace(title) || string.IsNullOrWhiteSpace(body))
             throw new ArgumentException("El título y el cuerpo son obligatorios.");
@@ -135,6 +146,7 @@ public sealed class MessagingService(Adf247DbContext database)
         var actor = await database.Users.SingleAsync(user => user.NCarnet == carnet, cancellationToken);
         var notification = new MessagingNotification
         {
+            ConfigurationId = configurationId,
             ConvocatoriaId = convocatoriaId,
             Trigger = trigger,
             Status = "queued",
@@ -147,5 +159,56 @@ public sealed class MessagingService(Adf247DbContext database)
         database.MessagingNotifications.Add(notification);
         await database.SaveChangesAsync(cancellationToken);
         return notification;
+    }
+
+    private async Task<MessagingConfiguration?> FindResponseRequestConfigurationAsync(Convocatoria convocatoria, CancellationToken cancellationToken)
+    {
+        var key = GetResponseRequestConfigurationKey(convocatoria);
+        return await database.MessagingConfigurations
+            .SingleOrDefaultAsync(configuration => configuration.Key == key && configuration.Enabled, cancellationToken);
+    }
+
+    private static string GetResponseRequestConfigurationKey(Convocatoria convocatoria)
+    {
+        if (convocatoria.ConvoType?.Name.Contains("incendi", StringComparison.OrdinalIgnoreCase) == true)
+            return "convocatoria-fire";
+        if (convocatoria.ConvoType?.Name.Contains("setman", StringComparison.OrdinalIgnoreCase) == true
+            || convocatoria.ConvoType?.Name.Contains("guardia", StringComparison.OrdinalIgnoreCase) == true
+            || convocatoria.ConvoType?.Name.Contains("pvi", StringComparison.OrdinalIgnoreCase) == true)
+            return "convocatoria-weekly";
+
+        var date = DateOnly.FromDateTime(convocatoria.Date);
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        if (date < today || date == today && convocatoria.StartTime <= DateTime.Now)
+            return "convocatoria-now";
+        return date == today ? "convocatoria-today"
+            : date == today.AddDays(1) ? "convocatoria-tomorrow"
+            : "convocatoria-future";
+    }
+
+    private static string DefaultBody(string trigger, Convocatoria convocatoria) =>
+        trigger == "sortida-status"
+            ? $"La sortida de la convocatòria \"{convocatoria.Title}\" ha estat confirmada."
+            : $"{convocatoria.Title}\n{convocatoria.Date:dd/MM/yyyy} de {convocatoria.StartTime:HH:mm} a {convocatoria.FinalTime:HH:mm}\n{convocatoria.UbiSortida}";
+
+    private static string RenderTemplate(string template, Convocatoria convocatoria)
+    {
+        var responsable = convocatoria.Responsable is null
+            ? string.Empty
+            : $"{convocatoria.Responsable.NCarnet} {convocatoria.Responsable.Name} {convocatoria.Responsable.LastName}".Trim();
+        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+        {
+            ["convocatoria.title"] = convocatoria.Title,
+            ["convocatoria.date"] = convocatoria.Date.ToString("dd/MM/yyyy"),
+            ["convocatoria.startTime"] = convocatoria.StartTime.ToString("HH:mm"),
+            ["convocatoria.endTime"] = convocatoria.FinalTime?.ToString("HH:mm") ?? string.Empty,
+            ["convocatoria.location"] = convocatoria.UbiSortida,
+            ["convocatoria.responsable"] = responsable,
+            ["response.deadline"] = convocatoria.StartTime.ToString("dd/MM/yyyy HH:mm"),
+            ["fire.location"] = convocatoria.UbiSortida,
+        };
+        foreach (var (key, value) in values)
+            template = template.Replace($"{{{{{key}}}}}", value, StringComparison.OrdinalIgnoreCase);
+        return template;
     }
 }

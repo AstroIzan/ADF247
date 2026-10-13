@@ -279,6 +279,17 @@ export interface TaskExecutionLog {
   finalStatus?: string | null;
 }
 
+export interface MessagingConfiguration {
+  id: number;
+  key: string;
+  name: string;
+  titleTemplate: string;
+  bodyTemplate: string;
+  audienceRuleJson: string;
+  enabled: boolean;
+  updatedAt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -434,6 +445,21 @@ export class DataService {
 
   getTaskExecutions(): Observable<TaskExecutionLog[]> {
     return this.http.get<TaskExecutionLog[]>('/messaging/task-executions');
+  }
+
+  getMessagingConfigurations(): Observable<MessagingConfiguration[]> {
+    return this.http.get<MessagingConfiguration[]>('/messaging/configurations');
+  }
+
+  updateMessagingConfiguration(configuration: MessagingConfiguration): Observable<MessagingConfiguration> {
+    return this.http.put<MessagingConfiguration>(`/messaging/configurations/${configuration.id}`, {
+      key: configuration.key,
+      name: configuration.name,
+      titleTemplate: configuration.titleTemplate,
+      bodyTemplate: configuration.bodyTemplate,
+      audienceRuleJson: configuration.audienceRuleJson,
+      enabled: configuration.enabled,
+    });
   }
 
   // === AVAILABILITY WINDOWS ===

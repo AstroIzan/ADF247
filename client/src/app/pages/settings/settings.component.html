@@ -15,6 +15,9 @@
         Notificacions
       </button>
       @if (authService.isAdmin()) {
+        <button type="button" class="settings-tab" [class.active]="activeTab() === 'configurations'" (click)="setActiveTab('configurations')">
+          Plantilles
+        </button>
         <button type="button" class="settings-tab" [class.active]="activeTab() === 'messaging'" (click)="setActiveTab('messaging')">
           Missatgeria
         </button>
@@ -71,6 +74,40 @@
               <button class="btn btn-primary" type="button" (click)="activateNotifications()" [disabled]="pushNotificationsService.loading()">
                 {{ pushNotificationsService.loading() ? 'Preparant...' : 'Activar notificacions en aquest dispositiu' }}
               </button>
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab() === 'configurations' && authService.isAdmin()) {
+        <section class="settings-section logs-section">
+          <div class="pla-alfa-table-head">
+            <div>
+              <h3>Plantilles de missatgeria</h3>
+              <p class="section-help">Activa només les plantilles que vulguis aplicar als enviaments de convocatòries.</p>
+            </div>
+            <button class="btn btn-primary" type="button" [disabled]="adminLoading()" (click)="loadAdminData()">Actualitzar</button>
+          </div>
+          @if (adminError()) { <div class="alert alert-danger">{{ adminError() }}</div> }
+          @if (adminLoading()) {
+            <div class="loading-state">Carregant plantilles...</div>
+          } @else if (configurations().length === 0) {
+            <div class="loading-state">No hi ha plantilles configurades. Executa el seed de Messaging per crear-les.</div>
+          } @else {
+            <div class="logs-table-wrapper">
+              <table class="logs-table-lite">
+                <thead><tr><th>Clau</th><th>Nom</th><th>Títol</th><th>Activa</th></tr></thead>
+                <tbody>
+                  @for (configuration of configurations(); track configuration.id) {
+                    <tr>
+                      <td>{{ configuration.key }}</td>
+                      <td>{{ configuration.name }}</td>
+                      <td>{{ configuration.titleTemplate }}</td>
+                      <td><button class="btn" type="button" (click)="toggleConfiguration(configuration)">{{ configuration.enabled ? 'Desactivar' : 'Activar' }}</button></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
             </div>
           }
         </section>

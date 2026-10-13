@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { PushNotificationsService } from '../../services/push-notifications.service';
-import { DataService, MessagingNotificationLog, TaskExecutionLog } from '../../services/data.service';
+import { DataService, MessagingConfiguration, MessagingNotificationLog, TaskExecutionLog } from '../../services/data.service';
 
 @Component({
   selector: 'app-settings',
@@ -13,12 +13,13 @@ import { DataService, MessagingNotificationLog, TaskExecutionLog } from '../../s
 })
 export class SettingsComponent {
   showModal = signal(false);
-  activeTab = signal<'device' | 'messaging' | 'tasks'>('device');
+  activeTab = signal<'device' | 'configurations' | 'messaging' | 'tasks'>('device');
   deviceLoading = signal(false);
   adminLoading = signal(false);
   adminError = signal('');
   notificationLogs = signal<MessagingNotificationLog[]>([]);
   taskExecutions = signal<TaskExecutionLog[]>([]);
+  configurations = signal<MessagingConfiguration[]>([]);
 
   constructor(
     public authService: AuthService,
@@ -26,7 +27,7 @@ export class SettingsComponent {
     private dataService: DataService,
   ) {}
 
-  async openModal(tab: 'device' | 'messaging' | 'tasks' = 'device') {
+  async openModal(tab: 'device' | 'configurations' | 'messaging' | 'tasks' = 'device') {
     this.activeTab.set(this.authService.isAdmin() ? tab : 'device');
     this.showModal.set(true);
     document.body.classList.add('modal-open');
@@ -48,7 +49,7 @@ export class SettingsComponent {
     document.body.classList.remove('modal-open');
   }
 
-  setActiveTab(tab: 'device' | 'messaging' | 'tasks') {
+  setActiveTab(tab: 'device' | 'configurations' | 'messaging' | 'tasks') {
     if (tab !== 'device' && !this.authService.isAdmin()) return;
     this.activeTab.set(tab);
     if (tab !== 'device' && !this.adminLoading() && this.notificationLogs().length === 0 && this.taskExecutions().length === 0) {
@@ -67,7 +68,7 @@ export class SettingsComponent {
     let completed = 0;
     const complete = () => {
       completed++;
-      if (completed === 2) this.adminLoading.set(false);
+      if (completed === 3) this.adminLoading.set(false);
     };
 
     this.dataService.getMessagingLogs().subscribe({
@@ -89,6 +90,25 @@ export class SettingsComponent {
         this.adminError.set(error.message || 'No s’han pogut carregar les execucions.');
         complete();
       },
+    });
+    this.dataService.getMessagingConfigurations().subscribe({
+      next: (configurations) => {
+        this.configurations.set(configurations);
+        complete();
+      },
+      error: (error) => {
+        this.adminError.set(error.message || 'No s’han pogut carregar les configuracions.');
+        complete();
+      },
+    });
+  }
+
+  toggleConfiguration(configuration: MessagingConfiguration) {
+    const updated = { ...configuration, enabled: !configuration.enabled };
+    this.adminError.set('');
+    this.dataService.updateMessagingConfiguration(updated).subscribe({
+      next: (saved) => this.configurations.set(this.configurations().map((item) => item.id === saved.id ? saved : item)),
+      error: (error) => this.adminError.set(error.message || 'No s’ha pogut actualitzar la configuració.'),
     });
   }
 }
