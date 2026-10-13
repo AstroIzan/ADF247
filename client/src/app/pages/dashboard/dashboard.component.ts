@@ -1,4 +1,4 @@
-import { Component, signal, effect, OnInit } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,20 +9,17 @@ import {
   Convocatoria,
   ConvoType,
   Respuesta,
-  NotificationSettings,
-  NotificationLog,
   UserHoursSummaryRow,
   CampaignFormRecord,
 } from '../../services/data.service';
 import { UsersModule } from '../../modules/users/users.module';
 import { ConvosModule } from '../../modules/convos/convos.module';
 import { DispoModule } from '../../modules/dispo/dispo.module';
-import { NotificationsModule } from '../../modules/notifications/notifications.module';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, UsersModule, ConvosModule, DispoModule, NotificationsModule],
+  imports: [CommonModule, FormsModule, UsersModule, ConvosModule, DispoModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -30,9 +27,6 @@ export class DashboardComponent implements OnInit {
   activeTab = signal<string>('users');
   username = signal<string>('');
   isAdmin = signal(false);
-  adminActionLoading = signal(false);
-  adminActionMessage = signal('');
-
   // Users data
   users = signal<User[]>([]);
   loadingUsers = signal(false);
@@ -53,17 +47,6 @@ export class DashboardComponent implements OnInit {
   userHoursSummaryRows = signal<UserHoursSummaryRow[]>([]);
   loadingUserHoursSummary = signal(false);
   userHoursSummaryError = signal('');
-
-  // Notifications data
-  notificationConfig = signal<NotificationSettings | null>(null);
-  notificationLogs = signal<NotificationLog[]>([]);
-  loadingNotifConfig = signal(false);
-  loadingNotifLogs = signal(false);
-  notifConfigError = signal('');
-  notifLogsError = signal('');
-
-  firebaseConfigured = signal(true);
-  firebaseHealthMessage = signal('');
 
   // Campaign forms data
   campaignForms = signal<CampaignFormRecord[]>([]);
@@ -109,10 +92,7 @@ export class DashboardComponent implements OnInit {
     this.loadRespuestas();
     if (this.isAdmin()) {
       this.loadUserHoursSummary();
-      this.loadNotificationConfig();
-      this.loadNotificationLogs();
       this.loadCampaignForms();
-      this.loadHealthStatus();
     }
   }
 
@@ -211,20 +191,6 @@ export class DashboardComponent implements OnInit {
     return (vehicle.volunteerUserIds || []).map((userId) => this.getUserLabelById(userId));
   }
 
-  loadHealthStatus() {
-    this.dataService.getHealthStatus().subscribe({
-      next: (health) => {
-        const firebase = health?.dependencies?.firebase;
-        this.firebaseConfigured.set(Boolean(firebase?.configured));
-        this.firebaseHealthMessage.set(firebase?.message || 'Firebase no configurat.');
-      },
-      error: (err) => {
-        this.firebaseConfigured.set(false);
-        this.firebaseHealthMessage.set(err.message || 'No s\'ha pogut validar l\'estat de Firebase.');
-      }
-    });
-  }
-
   loadUsers() {
     this.loadingUsers.set(true);
     this.userError.set('');
@@ -298,37 +264,6 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  loadNotificationConfig() {
-    this.loadingNotifConfig.set(true);
-    this.notifConfigError.set('');
-    this.dataService.getNotificationConfig().subscribe({
-      next: (data) => {
-        this.notificationConfig.set(data);
-        this.loadingNotifConfig.set(false);
-      },
-      error: (err) => {
-        this.notifConfigError.set(err.message);
-        this.loadingNotifConfig.set(false);
-      }
-    });
-  }
-
-  loadNotificationLogs() {
-    this.loadingNotifLogs.set(true);
-    this.notifLogsError.set('');
-    this.dataService.getNotificationLogs(30).subscribe({
-      next: (data) => {
-        this.notificationLogs.set(data);
-        this.loadingNotifLogs.set(false);
-      },
-      error: (err) => {
-        this.notificationLogs.set([]);
-        this.notifLogsError.set(err.message || 'Error en carregar el registre de notificacions.');
-        this.loadingNotifLogs.set(false);
-      }
-    });
-  }
-
   onUserChanged() {
     this.loadUsers();
     if (this.isAdmin()) {
@@ -361,109 +296,6 @@ export class DashboardComponent implements OnInit {
 
   onRespuestaChanged() {
     this.loadRespuestas();
-  }
-
-  runAdminAction(action: 'pending' | 'sortida' | 'weekly' | 'pla-alfa' | 'automation') {
-    if (!this.isAdmin()) {
-      return;
-    }
-
-    this.adminActionLoading.set(true);
-    this.adminActionMessage.set('');
-
-    const request = action === 'pending'
-      ? this.dataService.sendPendingResponsesReminder()
-      : action === 'sortida'
-        ? this.dataService.sendTomorrowSortidaNotifications()
-        : action === 'pla-alfa'
-          ? this.dataService.runNotificationAutomationTask('pla-alfa-daily-summary')
-        : action === 'weekly'
-          ? this.dataService.sendWeeklyResponseDigest()
-          : this.dataService.runNotificationAutomation();
-
-    request.subscribe({
-      next: (result: any) => {
-        this.adminActionLoading.set(false);
-        this.adminActionMessage.set(this.getAdminActionSuccessMessage(action, result));
-      },
-      error: (err) => {
-        this.adminActionLoading.set(false);
-        this.adminActionMessage.set(`Error: ${err.message}`);
-      }
-    });
-  }
-
-  private getAdminActionSuccessMessage(action: 'pending' | 'sortida' | 'weekly' | 'pla-alfa' | 'automation', result?: any) {
-    if (action === 'pending') {
-      const targeted = Number(result?.targetedUsers || 0);
-      if (targeted === 0) {
-        return 'No hi ha usuaris amb pendents per avisar.';
-      }
-
-      const notifications = Array.isArray(result?.notifications) ? result.notifications : [];
-      const delivered = notifications.reduce((acc: number, item: any) => acc + Number(item?.successCount || 0), 0);
-      const failed = notifications.reduce((acc: number, item: any) => acc + Number(item?.failureCount || 0), 0);
-      const noTargets = notifications.reduce(
-        (acc: number, item: any) => acc + (item?.status === 'no-targets' ? 1 : 0),
-        0
-      );
-
-      if (delivered === 0 && failed > 0) {
-        return `S'ha intentat avisar ${targeted} usuari(s), però no s'ha entregat cap notificació.`;
-      }
-
-      if (delivered === 0 && failed === 0 && noTargets > 0) {
-        return `Hi ha ${targeted} usuaris amb pendents però cap d'ells té dispositiu registrat actiu.`;
-      }
-
-      return `Recordatori enviat: ${delivered} entregades, ${failed} fallides (${targeted} amb pendents).`;
-    }
-
-    if (action === 'sortida') {
-      const count = Number(result?.notificationCount || 0);
-      if (count === 0) {
-        return 'No hi ha convocatòries de sortida per notificar en el rang configurat.';
-      }
-      return `Notificacions de sortida enviades (${count}).`;
-    }
-
-    if (action === 'weekly') {
-      if (result?.skipped) {
-        return `Resum setmanal omès: ${result.reason || 'sense acció'}.`;
-      }
-
-      const delivered = Number(result?.notification?.successCount || 0);
-      const failed = Number(result?.notification?.failureCount || 0);
-      const targeted = Number(result?.targetedUsers || 0);
-
-      if (targeted === 0) {
-        return 'No hi ha usuaris pendents per al resum setmanal.';
-      }
-
-      if (delivered === 0 && failed > 0) {
-        return `S'ha intentat enviar el resum setmanal a ${targeted} usuari(s), però cap notificació s'ha entregat.`;
-      }
-
-      return `Resum setmanal: ${delivered} entregades, ${failed} fallides (${targeted} destinataris).`;
-    }
-
-    if (action === 'pla-alfa') {
-      if (result?.skipped) {
-        return `Resum Pla Alfa omès: ${result.reason || 'sense acció'}.`;
-      }
-
-      if (typeof result?.result?.notificationCount === 'number') {
-        return `Resum Pla Alfa enviat (${result.result.notificationCount} notificació).`;
-      }
-
-      return 'Resum Pla Alfa executat.';
-    }
-
-    if (result?.sortidaSummary || result?.weeklySummary || result?.pendingSummary) {
-      return 'Automatització executada. Revisa Registre per al detall.';
-    }
-
-    return 'Automatització executada.';
   }
 
   logout() {

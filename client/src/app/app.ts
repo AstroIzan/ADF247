@@ -56,8 +56,8 @@ export class App {
     this.profileComponent?.openModal();
   }
 
-  openSettingsModal(tab: 'device' | 'system' = 'device') {
-    this.settingsComponent?.openModal(tab);
+  openSettingsModal() {
+    this.settingsComponent?.openModal();
   }
 
   toggleMobileMenu() {
@@ -73,8 +73,8 @@ export class App {
     this.closeMobileMenu();
   }
 
-  openSettingsFromMenu(tab: 'device' | 'system' = 'device') {
-    this.openSettingsModal(tab);
+  openSettingsFromMenu() {
+    this.openSettingsModal();
     this.closeMobileMenu();
   }
 

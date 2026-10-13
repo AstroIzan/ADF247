@@ -11,7 +11,6 @@ import { isNotificationsConfigReady, notificationsConfig } from '../config/notif
 })
 export class PushNotificationsService {
   private messaging: Messaging | null = null
-  private readonly linkedTokenKeyPrefix = 'fcmLinkedToken:'
   private readonly messagingLinkedTokenKeyPrefix = 'messagingLinkedToken:'
   private foregroundListenerBound = false
   private readonly syncTimeoutMs = 5000
@@ -36,10 +35,7 @@ export class PushNotificationsService {
   })
 
   hasKnownRegisteredDevice() {
-    return Boolean(
-      localStorage.getItem(this.getLinkedTokenStorageKey())
-      || localStorage.getItem(this.getMessagingLinkedTokenStorageKey())
-    )
+    return Boolean(localStorage.getItem(this.getMessagingLinkedTokenStorageKey()))
   }
 
   readonly isDeviceReady = computed(() => {
@@ -263,11 +259,6 @@ export class PushNotificationsService {
   }
 
   private async registerToken(token: string) {
-    await firstValueFrom(this.httpService.post('/notifications/device-token', {
-      token,
-      platform: this.resolvePlatform(),
-      userAgent: navigator.userAgent,
-    }))
     await firstValueFrom(this.httpService.post('/messaging/device-token', {
       token,
       platform: this.resolvePlatform(),
@@ -300,7 +291,6 @@ export class PushNotificationsService {
       await this.registerInFlight
       this.currentToken.set(token)
       this.isTokenLinked.set(true)
-      localStorage.setItem(this.getLinkedTokenStorageKey(), token)
       localStorage.setItem(this.getMessagingLinkedTokenStorageKey(), token)
     } finally {
       if (this.registerInFlightToken === token) {
@@ -383,16 +373,12 @@ export class PushNotificationsService {
     this.modalVisible.set(false)
   }
 
-  private getLinkedTokenStorageKey() {
-    return `${this.linkedTokenKeyPrefix}${this.authService.getCachedNCarnet() || 'anonymous'}`
-  }
-
   private getMessagingLinkedTokenStorageKey() {
     return `${this.messagingLinkedTokenKeyPrefix}${this.authService.getCachedNCarnet() || 'anonymous'}`
   }
 
   private restoreLinkedToken(token: string) {
-    this.isTokenLinked.set(localStorage.getItem(this.getLinkedTokenStorageKey()) === token)
+    this.isTokenLinked.set(localStorage.getItem(this.getMessagingLinkedTokenStorageKey()) === token)
   }
 
   private async detectMessagingSupport(): Promise<boolean> {

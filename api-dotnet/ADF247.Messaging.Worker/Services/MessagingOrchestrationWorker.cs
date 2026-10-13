@@ -106,22 +106,29 @@ public sealed class MessagingOrchestrationWorker(
                 channel = campaign.Channel,
             });
 
-            var startResult = await repository.TryStartRunbookExecutionAsync(
-                runbookKey: campaign.Id,
-                trigger: "scheduled",
+            var startResult = await repository.TryStartTaskExecutionAsync(
+                taskDefinitionName: $"messaging-runbook:{campaign.Id}",
                 localMinute: localMinute,
-                detailsJson: startDetails,
+                startMessage: $"Scheduled runbook '{campaign.Name}' started.",
+                startDetailsJson: startDetails,
                 cancellationToken: cancellationToken);
 
-            if (!startResult.ShouldRun || !startResult.ExecutionId.HasValue)
+            if (!startResult.ShouldRun || !startResult.TaskExecutionId.HasValue)
             {
                 continue;
             }
 
-            var executionId = startResult.ExecutionId.Value;
+            var taskExecutionId = startResult.TaskExecutionId.Value;
 
             try
             {
+                await repository.AddTaskExecutionDetailAsync(
+                    taskExecutionId,
+                    TaskExecutionEventType.Info,
+                    $"Queueing notification for runbook '{campaign.Name}'.",
+                    startDetails,
+                    cancellationToken);
+
                 var payloadJson = JsonSerializer.Serialize(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
                 {
                     ["runbookKey"] = campaign.Id,
@@ -159,11 +166,18 @@ public sealed class MessagingOrchestrationWorker(
                     ? "succeeded"
                     : queueResult.Status.Equals("failed", StringComparison.OrdinalIgnoreCase) ? "failed" : "skipped";
 
-                await repository.CompleteRunbookExecutionAsync(
-                    executionId: executionId,
+                await repository.AddTaskExecutionDetailAsync(
+                    taskExecutionId,
+                    queueResult.NotificationQueued ? TaskExecutionEventType.Info : TaskExecutionEventType.Warning,
+                    queueResult.Message,
+                    completionDetails,
+                    cancellationToken);
+
+                await repository.CompleteTaskExecutionAsync(
+                    taskExecutionId: taskExecutionId,
                     status: status,
-                    detailsJson: completionDetails,
-                    errorMessage: status == "failed" ? queueResult.Message : null,
+                    endMessage: $"Scheduled runbook '{campaign.Name}' finished with status '{status}'.",
+                    endDetailsJson: completionDetails,
                     cancellationToken: cancellationToken);
 
                 if (!queueResult.NotificationQueued)
@@ -177,11 +191,23 @@ public sealed class MessagingOrchestrationWorker(
             }
             catch (Exception exception)
             {
-                await repository.CompleteRunbookExecutionAsync(
-                    executionId: executionId,
+                var errorDetails = JsonSerializer.Serialize(new
+                {
+                    runbookKey = campaign.Id,
+                    runbookName = campaign.Name,
+                    error = exception.Message,
+                });
+                await repository.AddTaskExecutionDetailAsync(
+                    taskExecutionId,
+                    TaskExecutionEventType.Error,
+                    $"Scheduled runbook '{campaign.Name}' failed: {exception.Message}",
+                    errorDetails,
+                    cancellationToken);
+                await repository.CompleteTaskExecutionAsync(
+                    taskExecutionId: taskExecutionId,
                     status: "failed",
-                    detailsJson: startDetails,
-                    errorMessage: exception.Message,
+                    endMessage: $"Scheduled runbook '{campaign.Name}' finished with status 'failed'.",
+                    endDetailsJson: errorDetails,
                     cancellationToken: cancellationToken);
                 logger.LogError(exception, "Runbook execution failed for {RunbookKey}.", campaign.Id);
             }

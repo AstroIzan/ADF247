@@ -72,14 +72,33 @@ public sealed class NotificationDelivery
     public User? User { get; set; }
 }
 
-public sealed class RunbookExecution
+public sealed class TaskDefinition
 {
-    public long Id { get; set; }
-    public required string RunbookKey { get; set; }
-    public required string Trigger { get; set; }
-    public required string Status { get; set; }
+    public int TaskDefinitionId { get; set; }
+    public required string Name { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public ICollection<TaskExecution> Executions { get; set; } = [];
+}
+
+public sealed class TaskExecution
+{
+    public long TaskExecutionId { get; set; }
+    public int TaskDefinitionId { get; set; }
     public DateTime StartedAt { get; set; }
     public DateTime? FinishedAt { get; set; }
+    public DateTime LastKeepAlive { get; set; }
+    public string? FinalStatus { get; set; }
+    public TaskDefinition? TaskDefinition { get; set; }
+    public ICollection<TaskExecutionDetail> Details { get; set; } = [];
+}
+
+public sealed class TaskExecutionDetail
+{
+    public long TaskExecutionDetailId { get; set; }
+    public long TaskExecutionId { get; set; }
+    public byte EventType { get; set; }
+    public DateTime OccurredAt { get; set; }
+    public required string Message { get; set; }
     public string? DetailsJson { get; set; }
-    public string? ErrorMessage { get; set; }
+    public TaskExecution? TaskExecution { get; set; }
 }

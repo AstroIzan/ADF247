@@ -105,20 +105,6 @@
                       @if (canManageConvocatoriaLifecycle(convo)) {
                       <button
                         type="button"
-                        class="admin-convo-btn admin-convo-bell"
-                        [disabled]="isRunningConvoAdminAction('automation', convo.id) || isConvocatoriaClosed(convo)"
-                        (click)="runConvoAutomation(convo)"
-                        [title]="isConvocatoriaClosed(convo)
-                          ? 'Convocatòria tancada'
-                          : 'Executar automatització de notificacions'"
-                        [attr.aria-label]="isConvocatoriaClosed(convo)
-                          ? 'Convocatòria tancada'
-                          : 'Executar automatització de notificacions'"
-                      >
-                        🔔
-                      </button>
-                      <button
-                        type="button"
                         class="admin-convo-btn"
                         (click)="openAdminConvoModal(convo)"
                         title="Gestionar convocatòria"

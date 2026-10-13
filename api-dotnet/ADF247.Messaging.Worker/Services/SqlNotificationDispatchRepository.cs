@@ -7,11 +7,11 @@ namespace ADF247.Messaging.Worker.Services;
 public sealed class SqlNotificationDispatchRepository(
     IOptionsMonitor<MessagingDatabaseOptions> databaseOptions) : INotificationDispatchRepository
 {
-    public async Task<RunbookExecutionStartResult> TryStartRunbookExecutionAsync(
-        string runbookKey,
-        string trigger,
+    public async Task<TaskExecutionStartResult> TryStartTaskExecutionAsync(
+        string taskDefinitionName,
         DateTimeOffset localMinute,
-        string? detailsJson,
+        string startMessage,
+        string? startDetailsJson,
         CancellationToken cancellationToken)
     {
         var localMinuteStart = new DateTimeOffset(
@@ -34,96 +34,181 @@ public sealed class SqlNotificationDispatchRepository(
 
             DECLARE @results TABLE (
                 [ShouldRun] BIT NOT NULL,
-                [ExecutionId] BIGINT NULL
+                [TaskExecutionId] BIGINT NULL
             );
+            DECLARE @definitionIds TABLE ([TaskDefinitionId] INT NOT NULL);
+            DECLARE @taskDefinitionId INT;
+
+            MERGE [Taskling].[TaskDefinition] WITH (HOLDLOCK) AS [target]
+            USING (SELECT @TaskDefinitionName AS [name]) AS [source]
+                ON [target].[name] = [source].[name]
+            WHEN NOT MATCHED THEN
+                INSERT ([name]) VALUES ([source].[name])
+            OUTPUT inserted.[taskDefinitionId] INTO @definitionIds;
+
+            SELECT @taskDefinitionId = [TaskDefinitionId] FROM @definitionIds;
 
             IF EXISTS (
                 SELECT 1
-                FROM [Messaging].[RunbookExecution] WITH (UPDLOCK, HOLDLOCK)
-                WHERE [runbookKey] = @RunbookKey
-                    AND [trigger] = @Trigger
+                FROM [Taskling].[TaskExecution] WITH (UPDLOCK, HOLDLOCK)
+                WHERE [taskDefinitionId] = @taskDefinitionId
                     AND [startedAt] >= @WindowStartUtc
                     AND [startedAt] < @WindowEndUtc
             )
             BEGIN
-                INSERT INTO @results ([ShouldRun], [ExecutionId])
+                INSERT INTO @results ([ShouldRun], [TaskExecutionId])
                 VALUES (0, NULL);
             END
             ELSE
             BEGIN
-                INSERT INTO [Messaging].[RunbookExecution] (
-                    [runbookKey],
-                    [trigger],
-                    [status],
+                INSERT INTO [Taskling].[TaskExecution] (
+                    [taskDefinitionId],
                     [startedAt],
-                    [detailsJson]
+                    [lastKeepAlive]
                 )
                 OUTPUT
                     CAST(1 AS BIT),
-                    inserted.[id]
-                INTO @results ([ShouldRun], [ExecutionId])
+                    inserted.[taskExecutionId]
+                INTO @results ([ShouldRun], [TaskExecutionId])
                 VALUES (
-                    @RunbookKey,
-                    @Trigger,
-                    N'running',
                     SYSUTCDATETIME(),
-                    @DetailsJson
+                    SYSUTCDATETIME()
                 );
+
+                INSERT INTO [Taskling].[TaskExecutionDetail] (
+                    [taskExecutionId],
+                    [eventType],
+                    [occurredAt],
+                    [message],
+                    [detailsJson]
+                )
+                SELECT
+                    [TaskExecutionId],
+                    @StartEventType,
+                    SYSUTCDATETIME(),
+                    @StartMessage,
+                    @StartDetailsJson
+                FROM @results;
             END
 
             COMMIT TRAN;
-            SELECT [ShouldRun], [ExecutionId] FROM @results;
+            SELECT [ShouldRun], [TaskExecutionId] FROM @results;
             """;
-        command.Parameters.Add(new SqlParameter("@RunbookKey", System.Data.SqlDbType.NVarChar, 100) { Value = Truncate(runbookKey, 100) });
-        command.Parameters.Add(new SqlParameter("@Trigger", System.Data.SqlDbType.NVarChar, 30) { Value = Truncate(trigger, 30) });
+        command.Parameters.Add(new SqlParameter("@TaskDefinitionName", System.Data.SqlDbType.NVarChar, 255) { Value = Truncate(taskDefinitionName, 255) });
         command.Parameters.Add(new SqlParameter("@WindowStartUtc", System.Data.SqlDbType.DateTime2) { Value = windowStartUtc });
         command.Parameters.Add(new SqlParameter("@WindowEndUtc", System.Data.SqlDbType.DateTime2) { Value = windowEndUtc });
-        command.Parameters.Add(new SqlParameter("@DetailsJson", System.Data.SqlDbType.NVarChar, -1)
+        command.Parameters.Add(new SqlParameter("@StartEventType", System.Data.SqlDbType.TinyInt) { Value = (byte)TaskExecutionEventType.Start });
+        command.Parameters.Add(new SqlParameter("@StartMessage", System.Data.SqlDbType.NVarChar, 4000) { Value = Truncate(startMessage, 4000) });
+        command.Parameters.Add(new SqlParameter("@StartDetailsJson", System.Data.SqlDbType.NVarChar, -1)
         {
-            Value = string.IsNullOrWhiteSpace(detailsJson) ? DBNull.Value : detailsJson,
+            Value = string.IsNullOrWhiteSpace(startDetailsJson) ? DBNull.Value : startDetailsJson,
         });
 
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
-            return new RunbookExecutionStartResult(false, null);
+            return new TaskExecutionStartResult(false, null);
         }
 
-        return new RunbookExecutionStartResult(
+        return new TaskExecutionStartResult(
             ShouldRun: reader.GetBoolean(0),
-            ExecutionId: reader.IsDBNull(1) ? null : reader.GetInt64(1));
+            TaskExecutionId: reader.IsDBNull(1) ? null : reader.GetInt64(1));
     }
 
-    public async Task CompleteRunbookExecutionAsync(
-        long executionId,
-        string status,
+    public async Task AddTaskExecutionDetailAsync(
+        long taskExecutionId,
+        TaskExecutionEventType eventType,
+        string message,
         string? detailsJson,
-        string? errorMessage,
         CancellationToken cancellationToken)
     {
         await using var connection = await OpenConnectionAsync(cancellationToken);
         await using var command = connection.CreateCommand();
         command.CommandText =
             """
-            UPDATE [Messaging].[RunbookExecution]
-            SET [status] = @Status,
-                [finishedAt] = SYSUTCDATETIME(),
-                [detailsJson] = @DetailsJson,
-                [errorMessage] = @ErrorMessage
-            WHERE [id] = @ExecutionId;
+            SET XACT_ABORT ON;
+            BEGIN TRAN;
+
+            UPDATE [Taskling].[TaskExecution]
+            SET [lastKeepAlive] = SYSUTCDATETIME()
+            WHERE [taskExecutionId] = @TaskExecutionId
+                AND [finishedAt] IS NULL;
+
+            INSERT INTO [Taskling].[TaskExecutionDetail] (
+                [taskExecutionId],
+                [eventType],
+                [occurredAt],
+                [message],
+                [detailsJson]
+            )
+            VALUES (
+                @TaskExecutionId,
+                @EventType,
+                SYSUTCDATETIME(),
+                @Message,
+                @DetailsJson
+            );
+
+            COMMIT TRAN;
             """;
-        command.Parameters.Add(new SqlParameter("@ExecutionId", System.Data.SqlDbType.BigInt) { Value = executionId });
-        command.Parameters.Add(new SqlParameter("@Status", System.Data.SqlDbType.NVarChar, 30)
-        {
-            Value = Truncate(status, 30),
-        });
+        command.Parameters.Add(new SqlParameter("@TaskExecutionId", System.Data.SqlDbType.BigInt) { Value = taskExecutionId });
+        command.Parameters.Add(new SqlParameter("@EventType", System.Data.SqlDbType.TinyInt) { Value = (byte)eventType });
+        command.Parameters.Add(new SqlParameter("@Message", System.Data.SqlDbType.NVarChar, 4000) { Value = Truncate(message, 4000) });
         command.Parameters.Add(new SqlParameter("@DetailsJson", System.Data.SqlDbType.NVarChar, -1)
         {
             Value = string.IsNullOrWhiteSpace(detailsJson) ? DBNull.Value : detailsJson,
         });
-        command.Parameters.Add(new SqlParameter("@ErrorMessage", System.Data.SqlDbType.NVarChar, -1)
+        await command.ExecuteNonQueryAsync(cancellationToken);
+    }
+
+    public async Task CompleteTaskExecutionAsync(
+        long taskExecutionId,
+        string status,
+        string endMessage,
+        string? endDetailsJson,
+        CancellationToken cancellationToken)
+    {
+        await using var connection = await OpenConnectionAsync(cancellationToken);
+        await using var command = connection.CreateCommand();
+        command.CommandText =
+            """
+            SET XACT_ABORT ON;
+            BEGIN TRAN;
+
+            UPDATE [Taskling].[TaskExecution]
+            SET [finalStatus] = @Status,
+                [finishedAt] = SYSUTCDATETIME(),
+                [lastKeepAlive] = SYSUTCDATETIME()
+            WHERE [taskExecutionId] = @TaskExecutionId
+                AND [finishedAt] IS NULL;
+
+            INSERT INTO [Taskling].[TaskExecutionDetail] (
+                [taskExecutionId],
+                [eventType],
+                [occurredAt],
+                [message],
+                [detailsJson]
+            )
+            VALUES (
+                @TaskExecutionId,
+                @EndEventType,
+                SYSUTCDATETIME(),
+                @EndMessage,
+                @EndDetailsJson
+            );
+
+            COMMIT TRAN;
+            """;
+        command.Parameters.Add(new SqlParameter("@TaskExecutionId", System.Data.SqlDbType.BigInt) { Value = taskExecutionId });
+        command.Parameters.Add(new SqlParameter("@Status", System.Data.SqlDbType.NVarChar, 30)
         {
-            Value = string.IsNullOrWhiteSpace(errorMessage) ? DBNull.Value : Truncate(errorMessage, 4000),
+            Value = Truncate(status, 30),
+        });
+        command.Parameters.Add(new SqlParameter("@EndEventType", System.Data.SqlDbType.TinyInt) { Value = (byte)TaskExecutionEventType.End });
+        command.Parameters.Add(new SqlParameter("@EndMessage", System.Data.SqlDbType.NVarChar, 4000) { Value = Truncate(endMessage, 4000) });
+        command.Parameters.Add(new SqlParameter("@EndDetailsJson", System.Data.SqlDbType.NVarChar, -1)
+        {
+            Value = string.IsNullOrWhiteSpace(endDetailsJson) ? DBNull.Value : endDetailsJson,
         });
         await command.ExecuteNonQueryAsync(cancellationToken);
     }

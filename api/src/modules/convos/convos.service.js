@@ -644,25 +644,7 @@ async function applyAvailabilityWindowsToConvocatoria(convocatoria) {
   })
 
   const existingNCarnets = new Set(existingResponses.map((item) => item.userNCarnet))
-  const candidateUserNCarnets = Array.from(windowsByUser.keys())
-  const candidateUsers = candidateUserNCarnets.length > 0
-    ? await database.user.findMany({
-      where: {
-        nCarnet: {
-          in: candidateUserNCarnets,
-        },
-      },
-      select: {
-        id: true,
-        nCarnet: true,
-      },
-    })
-    : []
-  const candidateUserIdsByCarnet = new Map(candidateUsers.map((user) => [user.nCarnet, user.id]))
-
   const rowsToInsert = []
-  const autoAvailableUserIds = []
-
   for (const [userNCarnet, userWindows] of windowsByUser.entries()) {
     if (existingNCarnets.has(userNCarnet)) {
       continue
@@ -685,13 +667,6 @@ async function applyAvailabilityWindowsToConvocatoria(convocatoria) {
       autoAssignReason: canAttend ? 'available-window-match' : 'unavailable-window-match',
     })
 
-    if (canAttend) {
-      const userId = candidateUserIdsByCarnet.get(userNCarnet)
-
-      if (userId) {
-        autoAvailableUserIds.push(userId)
-      }
-    }
   }
 
   if (matchingRules.autoCreateUnavailableForUsersWithoutWindow) {
@@ -737,18 +712,6 @@ async function applyAvailabilityWindowsToConvocatoria(convocatoria) {
     await recalculateAutoAssignedResponsable(convocatoria.id)
   } catch (error) {
     console.error('[convos.service] Error al recalcular autoresponsable tras auto-respuestas:', error.message)
-  }
-
-  if (matchingRules.notifyOnAutoAvailableResponse && autoAvailableUserIds.length > 0) {
-    try {
-      const notificationsService = require('../notifications/notifications.service')
-      await notificationsService.sendAutoAvailableNotifications({
-        convocatoria,
-        userIds: autoAvailableUserIds,
-      })
-    } catch (error) {
-      console.error('[convos.service] Error al enviar avisos automáticos de disponibilidad:', error.message)
-    }
   }
 
   return created.count || 0
@@ -922,13 +885,6 @@ async function createConvocatoria(payload) {
       console.error('[convos.service] Error al aplicar ventanas de disponibilidad:', error.message)
     }
 
-    try {
-      const notificationsService = require('../notifications/notifications.service')
-      await notificationsService.handleConvocatoriaCreated(convocatoria.id)
-    } catch (error) {
-      console.error('[convos.service] Error al enviar aviso de nueva convocatoria:', error.message)
-    }
-
     return getConvocatoriaById(convocatoria.id)
   } catch (error) {
     throw mapPrismaError(error)
@@ -969,28 +925,12 @@ async function updateConvocatoria(id, payload, authUser = null) {
     throw createConvosDtoError('El campo "finalTime" no puede ser anterior a "startTime".')
   }
 
-  const finalSortida = Object.prototype.hasOwnProperty.call(updateDto, 'sortida')
-    ? Boolean(updateDto.sortida)
-    : Boolean(existingConvocatoria.sortida)
-  const shouldNotifyIncendiSortidaActivation =
-    !Boolean(existingConvocatoria.sortida)
-    && finalSortida
-
   try {
     const convocatoria = await database.convocatoria.update({
       where: { id },
       data: updateDto,
       include: convocatoriaInclude,
     })
-
-    if (shouldNotifyIncendiSortidaActivation) {
-      try {
-        const notificationsService = require('../notifications/notifications.service')
-        await notificationsService.sendIncendiSortidaActivated(convocatoria.id, authUser?.userId || null)
-      } catch (error) {
-        console.error('[convos.service] Error al enviar aviso de sortida per incendi:', error.message)
-      }
-    }
 
     if (convocatoria.autoAssignResponsable) {
       await recalculateAutoAssignedResponsable(convocatoria.id)

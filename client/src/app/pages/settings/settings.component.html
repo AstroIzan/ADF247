@@ -5,7 +5,7 @@
     <div class="settings-header">
       <div>
         <h2>Configuració</h2>
-        <p>Centralitza les preferències del dispositiu i les automatitzacions del sistema.</p>
+        <p>Centralitza les preferències del dispositiu i la configuració del sistema.</p>
       </div>
       <button class="close-btn" type="button" (click)="closeModal()" aria-label="Tancar">&times;</button>
     </div>
@@ -14,14 +14,6 @@
       <button type="button" class="settings-tab" [class.active]="activeTab() === 'device'" (click)="setActiveTab('device')">
         Notificacions
       </button>
-      @if (authService.isAdmin()) {
-        <button type="button" class="settings-tab" [class.active]="activeTab() === 'system'" (click)="setActiveTab('system')">
-          Sistema
-        </button>
-        <button type="button" class="settings-tab" [class.active]="activeTab() === 'orchestrator'" (click)="setActiveTab('orchestrator')">
-          Orquestrador
-        </button>
-      }
     </nav>
 
     <div class="settings-body">
@@ -73,44 +65,6 @@
               </button>
             </div>
           }
-        </section>
-      }
-
-      @if (activeTab() === 'system' && authService.isAdmin()) {
-        <section class="settings-section admin-section">
-          <app-notifications-admin
-            [config]="adminConfig()"
-            [logs]="adminLogs()"
-            [convoTypes]="adminConvoTypes()"
-            [users]="adminUsers()"
-             [loading]="!adminConvoTypes().length && !adminUsers().length"
-            [compact]="true"
-            [loadingLogs]="false"
-            [error]="adminConfigError()"
-            [logsError]="adminLogsError()"
-            [visibleTabs]="['config']"
-            (onLogsRefresh)="loadNotificationLogs()"
-          ></app-notifications-admin>
-        </section>
-      }
-
-      @if (activeTab() === 'orchestrator' && authService.isAdmin()) {
-        <section class="settings-section admin-section">
-          <app-notifications-admin
-            [config]="adminConfig()"
-            [logs]="adminLogs()"
-            [convoTypes]="adminConvoTypes()"
-            [users]="adminUsers()"
-             [loading]="!adminConvoTypes().length && !adminUsers().length"
-            [compact]="true"
-            [loadingLogs]="false"
-            [error]="adminConfigError()"
-            [logsError]="adminLogsError()"
-            [visibleTabs]="['orchestrator-config']"
-            title="Configuració de l'Orquestrador"
-            description="Paràmetres de retencio, delegació de visibilitat i monitorització del pipeline automàtic."
-            (onLogsRefresh)="loadNotificationLogs()"
-          ></app-notifications-admin>
         </section>
       }
 

@@ -498,7 +498,7 @@ export class HomeComponent implements OnInit {
     this.showAdminResponsableMenu.set(false);
   }
 
-  isRunningConvoAdminAction(action: 'sortida' | 'automation' | 'start' | 'finish' | 'edit', convoId: number) {
+  isRunningConvoAdminAction(action: 'sortida' | 'start' | 'finish' | 'edit', convoId: number) {
     return this.runningConvoAdminActionKey() === `${action}-${convoId}`;
   }
 
@@ -1531,35 +1531,6 @@ export class HomeComponent implements OnInit {
       error: (err) => {
         this.runningConvoAdminActionKey.set(null);
         this.error.set(err.message || 'No s\'ha pogut actualitzar la sortida.');
-      },
-    });
-  }
-
-  runConvoAutomation(convo: Convocatoria) {
-    if (!this.canManageConvocatoriaLifecycle(convo)) {
-      return;
-    }
-
-    this.error.set('');
-    this.adminActionFeedback.set('');
-    this.runningConvoAdminActionKey.set(`automation-${convo.id}`);
-
-    this.dataService.runConvocatoriaNotificationAutomation(convo.id).subscribe({
-      next: (result) => {
-        this.runningConvoAdminActionKey.set(null);
-        const sortidaSummary = result?.sortidaSummary;
-        const sortidaSent = sortidaSummary && !sortidaSummary.skipped;
-
-        this.loadConvocatorias();
-        this.adminActionFeedback.set(
-          sortidaSent
-            ? `Automatitzacio enviada per a ${convo.title}: pendents + estat de sortida.`
-            : `Automatitzacio enviada per a ${convo.title}: avís de pendents (sense estat de sortida encara).`
-        );
-      },
-      error: (err) => {
-        this.runningConvoAdminActionKey.set(null);
-        this.error.set(err.message || 'No s\'ha pogut executar l\'automatitzacio de notificacions.');
       },
     });
   }
@@ -3161,4 +3132,3 @@ export class HomeComponent implements OnInit {
     };
   }
 }
-

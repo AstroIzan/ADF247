@@ -17,7 +17,9 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
     public DbSet<MessagingConfiguration> MessagingConfigurations => Set<MessagingConfiguration>();
     public DbSet<MessagingNotification> MessagingNotifications => Set<MessagingNotification>();
     public DbSet<NotificationDelivery> NotificationDeliveries => Set<NotificationDelivery>();
-    public DbSet<RunbookExecution> RunbookExecutions => Set<RunbookExecution>();
+    public DbSet<TaskDefinition> TaskDefinitions => Set<TaskDefinition>();
+    public DbSet<TaskExecution> TaskExecutions => Set<TaskExecution>();
+    public DbSet<TaskExecutionDetail> TaskExecutionDetails => Set<TaskExecutionDetail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -157,13 +159,39 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.HasOne(delivery => delivery.User).WithMany().HasForeignKey(delivery => delivery.UserId);
         });
 
-        modelBuilder.Entity<RunbookExecution>(entity =>
+        modelBuilder.Entity<TaskDefinition>(entity =>
         {
-            entity.ToTable("RunbookExecution", "Messaging");
-            entity.HasKey(execution => execution.Id);
-            entity.Property(execution => execution.RunbookKey).HasMaxLength(100);
-            entity.Property(execution => execution.Trigger).HasMaxLength(30);
-            entity.Property(execution => execution.Status).HasMaxLength(30);
+            entity.ToTable("TaskDefinition", "Taskling");
+            entity.HasKey(definition => definition.TaskDefinitionId);
+            entity.HasIndex(definition => definition.Name).IsUnique();
+            entity.Property(definition => definition.Name).HasMaxLength(200);
+            entity.Property(definition => definition.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+        });
+
+        modelBuilder.Entity<TaskExecution>(entity =>
+        {
+            entity.ToTable("TaskExecution", "Taskling");
+            entity.HasKey(execution => execution.TaskExecutionId);
+            entity.HasIndex(execution => new { execution.TaskDefinitionId, execution.StartedAt });
+            entity.Property(execution => execution.FinalStatus).HasMaxLength(30);
+            entity.Property(execution => execution.StartedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.Property(execution => execution.LastKeepAlive).HasDefaultValueSql("sysutcdatetime()");
+            entity.HasOne(execution => execution.TaskDefinition)
+                .WithMany(definition => definition.Executions)
+                .HasForeignKey(execution => execution.TaskDefinitionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<TaskExecutionDetail>(entity =>
+        {
+            entity.ToTable("TaskExecutionDetail", "Taskling");
+            entity.HasKey(detail => detail.TaskExecutionDetailId);
+            entity.HasIndex(detail => new { detail.TaskExecutionId, detail.OccurredAt });
+            entity.Property(detail => detail.OccurredAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.HasOne(detail => detail.TaskExecution)
+                .WithMany(execution => execution.Details)
+                .HasForeignKey(detail => detail.TaskExecutionId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

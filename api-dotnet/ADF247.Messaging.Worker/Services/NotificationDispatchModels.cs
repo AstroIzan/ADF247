@@ -26,9 +26,18 @@ public sealed record NotificationRecipientSelection(
     RecipientSelectionBehavior Behavior,
     string Tag);
 
-public sealed record RunbookExecutionStartResult(
+public enum TaskExecutionEventType : byte
+{
+    Start = 1,
+    Info = 2,
+    Error = 3,
+    Warning = 4,
+    End = 5,
+}
+
+public sealed record TaskExecutionStartResult(
     bool ShouldRun,
-    long? ExecutionId);
+    long? TaskExecutionId);
 
 public sealed record RunbookQueueResult(
     bool NotificationQueued,

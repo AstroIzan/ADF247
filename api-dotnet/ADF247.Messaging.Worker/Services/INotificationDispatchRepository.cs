@@ -2,17 +2,23 @@ namespace ADF247.Messaging.Worker.Services;
 
 public interface INotificationDispatchRepository
 {
-    Task<RunbookExecutionStartResult> TryStartRunbookExecutionAsync(
-        string runbookKey,
-        string trigger,
+    Task<TaskExecutionStartResult> TryStartTaskExecutionAsync(
+        string taskDefinitionName,
         DateTimeOffset localMinute,
+        string startMessage,
+        string? startDetailsJson,
+        CancellationToken cancellationToken);
+    Task AddTaskExecutionDetailAsync(
+        long taskExecutionId,
+        TaskExecutionEventType eventType,
+        string message,
         string? detailsJson,
         CancellationToken cancellationToken);
-    Task CompleteRunbookExecutionAsync(
-        long executionId,
+    Task CompleteTaskExecutionAsync(
+        long taskExecutionId,
         string status,
-        string? detailsJson,
-        string? errorMessage,
+        string endMessage,
+        string? endDetailsJson,
         CancellationToken cancellationToken);
     Task<RunbookQueueResult> QueueNotificationFromConfigurationAsync(
         string runbookKey,

@@ -10,7 +10,6 @@ namespace ADF247.Api.Controllers;
 
 [ApiController]
 [Authorize]
-[Route("api/notifications")]
 [Route("api/messaging")]
 public sealed class MessagingController(MessagingService messaging, Adf247DbContext database) : ControllerBase
 {
@@ -109,17 +108,80 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         return Ok(deliveries);
     }
 
-    [HttpGet("runbook-executions")]
-    public async Task<IActionResult> GetRunbookExecutions(CancellationToken cancellationToken)
+    [HttpGet("task-definitions")]
+    public async Task<IActionResult> GetTaskDefinitions(CancellationToken cancellationToken)
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
         if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
-        var executions = await database.RunbookExecutions
+        var definitions = await database.TaskDefinitions
+            .OrderBy(definition => definition.Name)
+            .Select(definition => new
+            {
+                definition.TaskDefinitionId,
+                definition.Name,
+                definition.CreatedAt,
+            })
+            .ToListAsync(cancellationToken);
+        return Ok(definitions);
+    }
+
+    [HttpGet("task-executions")]
+    public async Task<IActionResult> GetTaskExecutions([FromQuery] int limit = 100, CancellationToken cancellationToken = default)
+    {
+        var carnet = GetCarnet();
+        if (carnet is null) return Unauthorized();
+        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        var normalizedLimit = Math.Clamp(limit, 1, 200);
+        var executions = await database.TaskExecutions
+            .Include(execution => execution.TaskDefinition)
             .OrderByDescending(execution => execution.StartedAt)
-            .Take(100)
+            .Take(normalizedLimit)
+            .Select(execution => new
+            {
+                execution.TaskExecutionId,
+                execution.TaskDefinitionId,
+                TaskName = execution.TaskDefinition!.Name,
+                execution.StartedAt,
+                execution.FinishedAt,
+                execution.LastKeepAlive,
+                execution.FinalStatus,
+            })
             .ToListAsync(cancellationToken);
         return Ok(executions);
+    }
+
+    [HttpGet("task-executions/{taskExecutionId:long}")]
+    public async Task<IActionResult> GetTaskExecution(long taskExecutionId, CancellationToken cancellationToken)
+    {
+        var carnet = GetCarnet();
+        if (carnet is null) return Unauthorized();
+        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        var execution = await database.TaskExecutions
+            .Include(candidate => candidate.TaskDefinition)
+            .Include(candidate => candidate.Details)
+            .SingleOrDefaultAsync(candidate => candidate.TaskExecutionId == taskExecutionId, cancellationToken);
+        if (execution is null) return NotFound(new { message = "No se ha encontrado la ejecución." });
+        return Ok(new
+        {
+            execution.TaskExecutionId,
+            execution.TaskDefinitionId,
+            TaskName = execution.TaskDefinition!.Name,
+            execution.StartedAt,
+            execution.FinishedAt,
+            execution.LastKeepAlive,
+            execution.FinalStatus,
+            Details = execution.Details
+                .OrderBy(detail => detail.OccurredAt)
+                .Select(detail => new
+                {
+                    detail.TaskExecutionDetailId,
+                    detail.EventType,
+                    detail.OccurredAt,
+                    detail.Message,
+                    detail.DetailsJson,
+                }),
+        });
     }
 
     [HttpGet("configurations")]

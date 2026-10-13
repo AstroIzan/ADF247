@@ -69,81 +69,6 @@ export interface Respuesta {
   user?: User;
 }
 
-export interface NotificationSettings {
-  schedule: {
-    dailyRunHour: number;
-    dailyRunMinute: number;
-    weeklyRequestWeekday: number;
-  };
-  typeGroups: {
-    weeklyTypeNames: string[];
-    sortidaTypeNames: string[];
-    availabilityManagerNCarnets: string[];
-    guardiaSourceTypeName: string;
-    guardiaPviTypeName: string;
-  };
-  responseRequest: {
-    sendOnCreationForNonWeekly: boolean;
-    pendingLeadDays: number;
-    pendingLeadHours: number;
-    link: string;
-    creationTitle: string;
-    creationBody: string;
-    fireTitle?: string;
-    fireBody?: string;
-    weeklyCreatedTitle?: string;
-    weeklyCreatedBody?: string;
-    pendingTitle: string;
-    pendingBody: string;
-  };
-  weeklyRequest: {
-    enabled: boolean;
-    requestWeekday: number;
-    requestHour: number;
-    requestMinute: number;
-    link: string;
-    title: string;
-    body: string;
-  };
-  sortidaStatus: {
-    enabled: boolean;
-    confirmDaysBefore: number;
-    confirmHour: number;
-    confirmMinute: number;
-    link: string;
-    titleYes: string;
-    bodyYes: string;
-    titleNo: string;
-    bodyNo: string;
-    titleCancelled?: string;
-    bodyCancelled?: string;
-    titleReten?: string;
-    bodyReten?: string;
-    perTypeTemplates?: Record<string, {
-      title: string;
-      body: string;
-    }>;
-  };
-  availabilityMatching?: {
-    conflictPolicy: 'unavailable-wins' | 'available-wins' | 'skip-on-conflict';
-    createAvailableResponses: boolean;
-    createUnavailableResponses: boolean;
-    autoCreateUnavailableForUsersWithoutWindow: boolean;
-    notifyOnAutoAvailableResponse: boolean;
-  };
-  hourComputation?: {
-    campaignStartDate: string | null;
-    campaignEndDate: string | null;
-    unansweredPenaltyThreshold: number;
-    unansweredPenaltyHours: number;
-    noShowPenaltyHours: number;
-  };
-  campaignForm?: {
-    vehicleCatalog: CampaignVehicleCatalogItem[];
-  };
-  automation?: NotificationAutomationConfig;
-}
-
 export interface CampaignVehicleCatalogItem {
   indicativo: string;
   modelo: string;
@@ -233,98 +158,6 @@ export interface UserHoursSummaryResponse {
   users: UserHoursSummaryRow[];
 }
 
-export interface NotificationAutomationTaskConfig {
-  taskKey: string;
-  notifyKind:
-    | 'pending-responses'
-    | 'sortida-status'
-    | 'weekly-digest'
-    | 'sortida-confirmed'
-    | 'sortida-cancelled'
-    | 'sortida-reten'
-    | 'weekly-pending'
-    | 'campaign-d1-guardia-pvi'
-    | 'weekly-guardia-pvi-bootstrap'
-    | 'pla-alfa-daily-summary';
-  enabled: boolean;
-  schedule: {
-    kind: 'daily' | 'weekly' | 'manual';
-  };
-  convoTypeFilter: string[];
-  timeoutMs: number;
-  retryPolicy: {
-    maxRetries: number;
-  };
-  dependsOn: string[];
-}
-
-export interface NotificationAutomationConfig {
-  retentionDays: number;
-  viewerNCarnets: string[];
-  developerNCarnets: string[];
-  monitoring: {
-    enabled: boolean;
-    alertRecipientNCarnets: string[];
-    alertOnMissedRun: boolean;
-    alertOnTaskFailure: boolean;
-  };
-  tasks: NotificationAutomationTaskConfig[];
-}
-
-export interface NotificationAutomationTaskRun {
-  id: number;
-  taskKey: string;
-  status: 'running' | 'success' | 'failed' | 'skipped';
-  startedAt: string;
-  finishedAt?: string | null;
-  durationMs?: number | null;
-  errorMessage?: string | null;
-  details?: {
-    skipped?: boolean;
-    reason?: string | null;
-    notificationCount?: number | null;
-    targetedUsers?: number | null;
-    decision?: string | null;
-    campaignDate?: string | null;
-    maxTomorrowAlfaLevel?: number | null;
-    daysProcessed?: number | null;
-    daysInCampaign?: number | null;
-    weekStart?: string | null;
-    weekEnd?: string | null;
-    weekHadAlfa2?: boolean | null;
-    updatedSortidaCount?: number | null;
-    createdGuardiaCount?: number | null;
-    createdPviCount?: number | null;
-    createdConvocatoriasCount?: number | null;
-  } | null;
-}
-
-export interface NotificationAutomationRun {
-  id: number;
-  correlationId?: string;
-  trigger: string;
-  source: string;
-  status: 'running' | 'success' | 'partial' | 'failed' | 'skipped';
-  startedAt: string;
-  finishedAt?: string | null;
-  durationMs?: number | null;
-  errorMessage?: string | null;
-  actor?: {
-    id: number;
-    nCarnet: string;
-    name: string;
-    lastName?: string | null;
-  } | null;
-  tasks: NotificationAutomationTaskRun[];
-}
-
-export interface NotificationAutomationTaskExecutionResult {
-  runId: number;
-  taskKey: string;
-  status: 'success' | 'failed';
-  result?: Record<string, unknown> | null;
-}
-
 export interface AvailabilityWindow {
   id: number;
   userNCarnet: string;
@@ -344,32 +177,6 @@ export interface AvailabilityWindowUpsertPayload {
   availabilityType: 'available' | 'unavailable';
   source?: 'manual' | 'import' | 'system';
   notes?: string | null;
-}
-
-export interface NotificationLog {
-  id: number;
-  title: string;
-  body: string;
-  data?: Record<string, unknown> | null;
-  targetScope: string;
-  requestedCount: number;
-  successCount: number;
-  failureCount: number;
-  status: string;
-  errorMessage?: string | null;
-  createdAt: string;
-  senderUserId?: number | null;
-}
-
-export interface ApiHealthStatus {
-  ok: boolean;
-  service: string;
-  dependencies?: {
-    firebase?: {
-      configured: boolean;
-      message?: string;
-    };
-  };
 }
 
 export interface UsersCsvImportPayload {
@@ -589,57 +396,12 @@ export class DataService {
     return this.http.delete<any>(`/dispo/${id}`);
   }
 
-  // === NOTIFICATIONS ===
-  getNotificationConfig(): Observable<NotificationSettings> {
-    return this.http.get<NotificationSettings>('/notifications/config');
-  }
-
-  updateNotificationConfig(data: Partial<NotificationSettings>): Observable<NotificationSettings> {
-    return this.http.put<NotificationSettings>('/notifications/config', data);
-  }
-
-  getNotificationLogs(limit = 30): Observable<NotificationLog[]> {
-    return this.http.get<NotificationLog[]>(`/notifications/logs?limit=${limit}`);
-  }
-
   sendConvocatoriaResponseRequest(convoId: number): Observable<any> {
     return this.http.post<any>(`/messaging/dispatch/convocatoria/${convoId}/response-request`, {});
   }
 
   sendConvocatoriaSortidaStatus(convoId: number): Observable<any> {
     return this.http.post<any>(`/messaging/dispatch/convocatoria/${convoId}/sortida-status`, {});
-  }
-
-  sendPendingResponsesReminder(): Observable<any> {
-    return this.http.post<any>('/notifications/dispatch/pending-responses', {});
-  }
-
-  sendWeeklyResponseDigest(): Observable<any> {
-    return this.http.post<any>('/notifications/dispatch/weekly-response-digest', {});
-  }
-
-  sendTomorrowSortidaNotifications(): Observable<any> {
-    return this.http.post<any>('/notifications/dispatch/tomorrow-sortida', {});
-  }
-
-  runNotificationAutomation(): Observable<any> {
-    return this.http.post<any>('/notifications/automation/run', {});
-  }
-
-  runConvocatoriaNotificationAutomation(convoId: number): Observable<any> {
-    return this.http.post<any>(`/notifications/automation/convocatoria/${convoId}/run`, {});
-  }
-
-  runNotificationAutomationTask(taskKey: string): Observable<NotificationAutomationTaskExecutionResult> {
-    return this.http.post<NotificationAutomationTaskExecutionResult>(`/notifications/automation/tasks/${taskKey}/run`, {});
-  }
-
-  getNotificationAutomationRuns(limit = 50): Observable<NotificationAutomationRun[]> {
-    return this.http.get<NotificationAutomationRun[]>(`/notifications/automation/runs?limit=${limit}`);
-  }
-
-  getNotificationAutomationRunById(id: number): Observable<NotificationAutomationRun> {
-    return this.http.get<NotificationAutomationRun>(`/notifications/automation/runs/${id}`);
   }
 
   // === AVAILABILITY WINDOWS ===
@@ -681,10 +443,6 @@ export class DataService {
 
   deleteAvailabilityWindow(id: number): Observable<AvailabilityWindow> {
     return this.http.delete<AvailabilityWindow>(`/availability/windows/${id}`);
-  }
-
-  getHealthStatus(): Observable<ApiHealthStatus> {
-    return this.http.get<ApiHealthStatus>('/health');
   }
 
   getPlaAlfaCatalog(): Observable<PlaAlfaCatalogResponse> {

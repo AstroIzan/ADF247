@@ -8,9 +8,6 @@ async function main() {
 
   // Limpiar datos existentes
   console.log('\n\uD83D\uDDD1\uFE0F  Limpiando datos existentes...')
-  await prisma.notificationAutomationTaskRun.deleteMany({})
-  await prisma.notificationAutomationRun.deleteMany({})
-  await prisma.notificationLog.deleteMany({})
   await prisma.formulariCampanya.deleteMany({})
   await prisma.userHoursSummary.deleteMany({})
   await prisma.availabilityWindow.deleteMany({})
