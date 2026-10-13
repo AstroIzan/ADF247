@@ -96,6 +96,11 @@ elif path.exists():
     path.unlink()
 PY
 
+# The server-managed build helper still resolves this historical path. Keep only
+# a compatibility copy of the secret file; the Node API code is not deployed.
+mkdir -p "$(dirname "${deploy_dir}/${legacy_env_file}")"
+cp "${deploy_dir}/${env_file}" "${deploy_dir}/${legacy_env_file}"
+
 sudo /usr/local/sbin/adf247-build "${stage}"
 
 sudo /usr/local/sbin/adf247-migrate "${stage}"
