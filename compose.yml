@@ -31,7 +31,7 @@ services:
       - dotnet
 
     build:
-      context: ./api-dotnet
+      context: ./dotnet-services
       dockerfile: ADF247.Api/Dockerfile
 
     container_name: adf247${DEPLOYMENT_SUFFIX:-}-api-dotnet
@@ -56,7 +56,7 @@ services:
       - messaging
 
     build:
-      context: ./api-dotnet
+      context: ./dotnet-services
       dockerfile: ADF247.Messaging.Worker/Dockerfile
 
     container_name: adf247${DEPLOYMENT_SUFFIX:-}-messaging-worker

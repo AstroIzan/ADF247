@@ -128,7 +128,7 @@ jobs:
           dotnet-version: 10.0.x
 
       - name: Build API and Messaging worker
-        run: dotnet build api-dotnet/ADF247.slnx --configuration Release
+        run: dotnet build dotnet-services/ADF247.slnx --configuration Release
 
 
   deploy-pre:
