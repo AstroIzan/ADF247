@@ -124,11 +124,12 @@ if [ -z "${database_url}" ]; then
   exit 1
 fi
 
-(
-  cd "${deploy_dir}/database"
-  npm ci
-  DATABASE_URL="${database_url}" npx prisma migrate deploy --schema prisma/schema.prisma
-)
+sudo docker run --rm \
+  --network homelab-database \
+  --env DATABASE_URL="${database_url}" \
+  --volume "${deploy_dir}/database:/source:ro" \
+  node:24-bookworm-slim \
+  sh -ec 'mkdir /workspace && cp -a /source/. /workspace/ && cd /workspace && npm ci && npx prisma migrate deploy --schema prisma/schema.prisma'
 
 sudo /usr/local/sbin/adf247-deploy "${stage}"
 
