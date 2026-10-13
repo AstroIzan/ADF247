@@ -1,6 +1,6 @@
 FROM node:24-bookworm-slim
 
-WORKDIR /workspace
+WORKDIR /app/database
 
 COPY database/package*.json ./
 RUN npm ci
