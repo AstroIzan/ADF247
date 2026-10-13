@@ -95,7 +95,7 @@ recover_failed_messaging_migration() {
   local migration_name="20261009230500_messaging_schema"
   local output
 
-  if output=$(cd "${deploy_dir}" && sudo env API_ENV_FILE="${env_file}" docker compose run --rm --no-deps api \
+  if output=$(cd "${deploy_dir}" && API_ENV_FILE="${env_file}" docker compose run --rm --no-deps api \
     sh -c "../database/node_modules/.bin/prisma migrate resolve --rolled-back ${migration_name} --schema ../database/prisma/schema.prisma" 2>&1); then
     echo "Recovered failed Prisma migration ${migration_name}."
     return
