@@ -103,33 +103,7 @@ cp "${deploy_dir}/${env_file}" "${deploy_dir}/${legacy_env_file}"
 
 sudo /usr/local/sbin/adf247-build "${stage}"
 
-database_url="$(
-  python3 - "${deploy_dir}/${env_file}" <<'PY'
-import sys
-from pathlib import Path
-
-for raw_line in Path(sys.argv[1]).read_text(encoding="utf-8").splitlines():
-    line = raw_line.strip()
-    if not line or line.startswith("#") or "=" not in line:
-        continue
-    key, value = line.split("=", 1)
-    if key.strip() == "DATABASE_URL":
-        print(value.strip().strip('"').strip("'"))
-        break
-PY
-)"
-
-if [ -z "${database_url}" ]; then
-  echo "DATABASE_URL is required in ${env_file} to apply database migrations." >&2
-  exit 1
-fi
-
-sudo docker run --rm \
-  --network homelab-database \
-  --env DATABASE_URL="${database_url}" \
-  --volume "${deploy_dir}/database:/source:ro" \
-  node:24-bookworm-slim \
-  sh -ec 'mkdir /workspace && cp -a /source/. /workspace/ && cd /workspace && npm ci && npx prisma migrate deploy --schema prisma/schema.prisma'
+sudo /usr/local/sbin/adf247-migrate "${stage}"
 
 sudo /usr/local/sbin/adf247-deploy "${stage}"
 

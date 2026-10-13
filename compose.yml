@@ -1,6 +1,21 @@
 services:
 
   api:
+    build:
+      context: .
+      dockerfile: database/Dockerfile
+
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-database-migrator
+
+    restart: "no"
+
+    env_file:
+      - ${API_ENV_FILE:-./dotnet-services/.env.pro}
+
+    networks:
+      - homelab-database
+
+  api-dotnet:
     profiles:
       - dotnet
 
@@ -8,7 +23,7 @@ services:
       context: ./dotnet-services
       dockerfile: ADF247.Api/Dockerfile
 
-    container_name: adf247${DEPLOYMENT_SUFFIX:-}-api
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-api-dotnet
 
     restart: unless-stopped
 
@@ -69,7 +84,7 @@ services:
       - "127.0.0.1:${CLIENT_PORT:-8081}:80"
 
     depends_on:
-      - api
+      - api-dotnet
 
     networks:
       - adf247
