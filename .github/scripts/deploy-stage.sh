@@ -35,6 +35,7 @@ rsync -a --delete \
 
 export DEPLOY_DIR="${deploy_dir}"
 export DEPLOY_STAGE="${stage}"
+export API_ENV_FILE="${deploy_dir}/${env_file}"
 python3 - <<'PY'
 import json
 import os
