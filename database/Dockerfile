@@ -2,6 +2,10 @@ FROM node:24-bookworm-slim
 
 WORKDIR /app/database
 
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends openssl \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY database/package*.json ./
 RUN npm ci
 
