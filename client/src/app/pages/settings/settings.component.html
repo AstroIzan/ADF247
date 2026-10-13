@@ -14,6 +14,14 @@
       <button type="button" class="settings-tab" [class.active]="activeTab() === 'device'" (click)="setActiveTab('device')">
         Notificacions
       </button>
+      @if (authService.isAdmin()) {
+        <button type="button" class="settings-tab" [class.active]="activeTab() === 'messaging'" (click)="setActiveTab('messaging')">
+          Missatgeria
+        </button>
+        <button type="button" class="settings-tab" [class.active]="activeTab() === 'tasks'" (click)="setActiveTab('tasks')">
+          Execucions
+        </button>
+      }
     </nav>
 
     <div class="settings-body">
@@ -63,6 +71,63 @@
               <button class="btn btn-primary" type="button" (click)="activateNotifications()" [disabled]="pushNotificationsService.loading()">
                 {{ pushNotificationsService.loading() ? 'Preparant...' : 'Activar notificacions en aquest dispositiu' }}
               </button>
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab() === 'messaging' && authService.isAdmin()) {
+        <section class="settings-section logs-section">
+          <div class="pla-alfa-table-head">
+            <div>
+              <h3>Registre de notificacions</h3>
+              <p class="section-help">Últimes notificacions encolades i el seu resultat de lliurament.</p>
+            </div>
+            <button class="btn btn-primary" type="button" [disabled]="adminLoading()" (click)="loadAdminData()">Actualitzar</button>
+          </div>
+          @if (adminError()) { <div class="alert alert-danger">{{ adminError() }}</div> }
+          @if (adminLoading()) {
+            <div class="loading-state">Carregant registres...</div>
+          } @else if (notificationLogs().length === 0) {
+            <div class="loading-state">Encara no hi ha notificacions registrades.</div>
+          } @else {
+            <div class="logs-table-wrapper">
+              <table class="logs-table-lite">
+                <thead><tr><th>Hora</th><th>Acció</th><th>Títol</th><th>Estat</th><th>Resultat</th></tr></thead>
+                <tbody>
+                  @for (log of notificationLogs(); track log.id) {
+                    <tr><td>{{ log.createdAt | date:'short' }}</td><td>{{ log.trigger }}</td><td>{{ log.title }}</td><td>{{ log.status }}</td><td>{{ log.successCount }}/{{ log.requestedCount }} lliurades</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab() === 'tasks' && authService.isAdmin()) {
+        <section class="settings-section logs-section">
+          <div class="pla-alfa-table-head">
+            <div>
+              <h3>Execucions del worker</h3>
+              <p class="section-help">Historial Taskling del processament de missatgeria.</p>
+            </div>
+            <button class="btn btn-primary" type="button" [disabled]="adminLoading()" (click)="loadAdminData()">Actualitzar</button>
+          </div>
+          @if (adminLoading()) {
+            <div class="loading-state">Carregant execucions...</div>
+          } @else if (taskExecutions().length === 0) {
+            <div class="loading-state">Encara no hi ha execucions registrades.</div>
+          } @else {
+            <div class="logs-table-wrapper">
+              <table class="logs-table-lite">
+                <thead><tr><th>Tasca</th><th>Inici</th><th>Fi</th><th>Estat</th></tr></thead>
+                <tbody>
+                  @for (execution of taskExecutions(); track execution.taskExecutionId) {
+                    <tr><td>{{ execution.taskName }}</td><td>{{ execution.startedAt | date:'short' }}</td><td>{{ execution.finishedAt ? (execution.finishedAt | date:'short') : 'En curs' }}</td><td>{{ execution.finalStatus || 'En curs' }}</td></tr>
+                  }
+                </tbody>
+              </table>
             </div>
           }
         </section>

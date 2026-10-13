@@ -1,32 +1,42 @@
 using System.Globalization;
 using System.Text.Json;
+using ADF247.Api.Data;
+using ADF247.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ADF247.Api.Services;
 
-public sealed class PlaAlfaService(IWebHostEnvironment environment, IHttpClientFactory clients)
+public sealed class PlaAlfaService(Adf247DbContext database, IHttpClientFactory clients)
 {
     private const string TodayUrl = "https://services7.arcgis.com/ZCqVt1fRXwwK6GF4/ArcGIS/rest/services/Pla_Alfa_Municipal_Avui_FL_alternatiu_VW/FeatureServer/0/query";
     private const string TomorrowUrl = "https://services7.arcgis.com/ZCqVt1fRXwwK6GF4/ArcGIS/rest/services/pla_alfa_municipal_dema_FL_VW/FeatureServer/5/query";
-    private string SelectionPath => Path.Combine(environment.ContentRootPath, "pla-alfa-municipalities.json");
     private static readonly Dictionary<string, Cache> StatusCache = [];
     public async Task<object> CatalogAsync()
     {
-        var selected = Read();
+        var selected = await ReadAsync();
         var payload = await GetJsonAsync(TodayUrl + "?f=pjson&where=1%3D1&outFields=NOMMUNI%2CNOMCOMAR%2COBJECTID&returnGeometry=false");
         var values = Features(payload).Select(feature => new { municipality = GetString(feature, "NOMMUNI"), comarca = GetString(feature, "NOMCOMAR"), objectId = GetInt(feature, "OBJECTID") }).Where(item => item.municipality is not null).OrderBy(item => item.municipality).Select(item => new { item.municipality, item.comarca, item.objectId, selected = selected.Municipalities.Contains(item.municipality!, StringComparer.OrdinalIgnoreCase) });
         return new { updatedAt = DateTime.UtcNow, selectedMunicipalities = selected.Municipalities, principalMunicipality = selected.PrincipalMunicipality, municipalities = values };
     }
-    public object Update(IReadOnlyList<string>? municipalities, string? principal)
+    public async Task<object> UpdateAsync(IReadOnlyList<string>? municipalities, string? principal)
     {
         if (municipalities is null) throw new ArgumentException("El campo \"municipalities\" debe ser un array de strings.");
         var list = municipalities.Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(value => value, StringComparer.CurrentCulture).ToList();
         var selected = new Selection(list, !string.IsNullOrWhiteSpace(principal) && list.Contains(principal.Trim(), StringComparer.OrdinalIgnoreCase) ? principal.Trim() : null);
-        File.WriteAllText(SelectionPath, JsonSerializer.Serialize(selected, new JsonSerializerOptions { WriteIndented = true }));
+        await database.PlaAlfaMunicipalitySelections.ExecuteDeleteAsync();
+        database.PlaAlfaMunicipalitySelections.AddRange(selected.Municipalities.Select(municipality => new PlaAlfaMunicipalitySelection
+        {
+            Municipality = municipality,
+            IsPrincipal = string.Equals(municipality, selected.PrincipalMunicipality, StringComparison.OrdinalIgnoreCase),
+            UpdatedAt = DateTime.UtcNow,
+        }));
+        await database.SaveChangesAsync();
+        StatusCache.Clear();
         return new { updatedAt = DateTime.UtcNow, municipalities = selected.Municipalities, principalMunicipality = selected.PrincipalMunicipality };
     }
     public async Task<object> StatusAsync(bool forceRefresh)
     {
-        var selected = Read();
+        var selected = await ReadAsync();
         var key = string.Join('|', selected.Municipalities);
         if (!forceRefresh && StatusCache.TryGetValue(key, out var cached) && DateTime.UtcNow - cached.CreatedAt < TimeSpan.FromHours(1)) return cached.Payload;
         var warnings = new List<object>();
@@ -79,7 +89,15 @@ public sealed class PlaAlfaService(IWebHostEnvironment environment, IHttpClientF
         return result;
     }
     private async Task<JsonElement> GetJsonAsync(string url) { using var response = await clients.CreateClient("pla-alfa").GetAsync(url); response.EnsureSuccessStatusCode(); return JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement.Clone(); }
-    private Selection Read() => !File.Exists(SelectionPath) ? new([], null) : JsonSerializer.Deserialize<Selection>(File.ReadAllText(SelectionPath), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? new([], null);
+    private async Task<Selection> ReadAsync()
+    {
+        var selections = await database.PlaAlfaMunicipalitySelections
+            .OrderBy(selection => selection.Municipality)
+            .ToListAsync();
+        return new(
+            selections.Select(selection => selection.Municipality).ToList(),
+            selections.SingleOrDefault(selection => selection.IsPrincipal)?.Municipality);
+    }
     private static IEnumerable<JsonElement> Features(JsonElement root) => root.TryGetProperty("features", out var features) ? features.EnumerateArray() : [];
     private static string? GetString(JsonElement feature, string key) => feature.TryGetProperty("attributes", out var attrs) && attrs.TryGetProperty(key, out var value) && value.ValueKind != JsonValueKind.Null ? value.ToString() : null;
     private static int? GetInt(JsonElement feature, string key) => int.TryParse(GetString(feature, key), out var value) ? value : null;

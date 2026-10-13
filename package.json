@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "install:all": "npm install --prefix database && npm install --prefix api && npm install --prefix client",
+    "install:all": "npm install --prefix database && npm install --prefix client",
     "db:migrate:deploy": "npm run prisma:migrate:deploy --prefix database",
     "db:migrate:deploy:dev": "npm run prisma:migrate:deploy:dev --prefix database",
     "db:migrate:deploy:pro": "npm run prisma:migrate:deploy:pro --prefix database",
@@ -15,11 +15,11 @@
     "db:prepare:dev": "npm run prisma:generate:dev --prefix database && npm run db:migrate:deploy:dev",
     "db:prepare:pro": "npm run prisma:generate:pro --prefix database && npm run db:migrate:deploy:pro",
     "start": "npm run start:dev",
-    "start:dev": "npm run db:prepare:dev && concurrently -n api,client \"npm run dev --prefix api\" \"npm run start --prefix client\"",
-    "start:pro": "npm run db:prepare:pro && npm run build --prefix client && npm run start:pro --prefix api",
+    "start:dev": "npm run db:prepare:dev && concurrently -n dotnet,client \"dotnet run --project dotnet-services/ADF247.Api\" \"npm run start --prefix client\"",
+    "start:pro": "npm run db:prepare:pro && npm run build --prefix client && dotnet run --configuration Release --project dotnet-services/ADF247.Api",
     "dev": "npm run start:dev",
     "pro": "npm run start:pro",
-    "test": "npm run test --prefix api && npm run test:ci --prefix client"
+    "test": "dotnet build dotnet-services/ADF247.slnx --nologo && npm run test:ci --prefix client"
   },
   "repository": {
     "type": "git",

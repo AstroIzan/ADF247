@@ -180,6 +180,100 @@ public sealed class ConvocatoriaService(
         return new { convocatoria = MapConvocatoria(convo), responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, eligibleUsers = eligible, vehicleCatalog, lockedVehicleNames = Array.Empty<string>(), prefill = (object?)null };
     }
 
+    public async Task<object> GetHoursSummaryAsync()
+    {
+        var settings = configuration.GetSection("HourComputation").Get<HourComputationSettings>() ?? new();
+        var now = DateTime.UtcNow;
+        var users = await database.Users.Where(user => user.IsActive).OrderBy(user => user.NCarnet).ToListAsync();
+        var convocatorias = await database.Convocatorias
+            .Include(convo => convo.ConvoType)
+            .Where(convo => convo.StartTime <= now)
+            .ToListAsync();
+        var convocatoriaIds = convocatorias.Select(convo => convo.Id).ToList();
+        var responses = await database.Respuestas
+            .Where(response => convocatoriaIds.Contains(response.ConvoId))
+            .ToListAsync();
+        var responsesByConvocatoriaAndUser = responses.ToDictionary(
+            response => (response.ConvoId, response.UserNCarnet),
+            response => response);
+        var rows = new List<HoursSummaryRow>();
+
+        foreach (var user in users)
+        {
+            double campaignHours = 0;
+            double offCampaignHours = 0;
+            var unansweredCount = 0;
+            var noShowCount = 0;
+
+            foreach (var convocatoria in convocatorias)
+            {
+                var inCampaign = IsWithinCampaign(convocatoria.Date, settings);
+                var isFire = convocatoria.ConvoType?.Name.Contains("incendi", StringComparison.OrdinalIgnoreCase) == true;
+                var durationHours = GetDurationHours(convocatoria);
+                if (!responsesByConvocatoriaAndUser.TryGetValue((convocatoria.Id, user.NCarnet), out var response))
+                {
+                    if (inCampaign && !isFire) unansweredCount++;
+                    continue;
+                }
+
+                if (response.Response && response.AttendanceConfirmed)
+                {
+                    if (inCampaign) campaignHours += durationHours;
+                    else offCampaignHours += durationHours;
+                }
+                else if (inCampaign && response.Response && !response.AttendanceConfirmed && !response.AttendanceJustified)
+                {
+                    noShowCount++;
+                }
+            }
+
+            var unansweredPenaltyHours = Math.Max(0, unansweredCount - settings.UnansweredPenaltyThreshold) * settings.UnansweredPenaltyHours;
+            var noShowPenaltyHours = noShowCount * settings.NoShowPenaltyHours;
+            var row = new HoursSummaryRow(
+                user.Id,
+                user.NCarnet,
+                string.Join(' ', new[] { user.Name, user.LastName }.Where(value => !string.IsNullOrWhiteSpace(value))),
+                Math.Round(campaignHours, 2),
+                Math.Round(offCampaignHours, 2),
+                unansweredCount,
+                noShowCount,
+                Math.Round(unansweredPenaltyHours, 2),
+                Math.Round(noShowPenaltyHours, 2),
+                Math.Round(campaignHours + offCampaignHours - unansweredPenaltyHours - noShowPenaltyHours, 2));
+            rows.Add(row);
+
+            var summary = await database.UserHoursSummaries.SingleOrDefaultAsync(item => item.UserId == user.Id);
+            if (summary is null)
+            {
+                database.UserHoursSummaries.Add(new UserHoursSummary { UserId = user.Id });
+                summary = database.UserHoursSummaries.Local.Last();
+            }
+            summary.CampaignHours = row.CampaignHours;
+            summary.OffCampaignHours = row.OffCampaignHours;
+            summary.UnansweredCount = row.UnansweredCount;
+            summary.NoShowCount = row.NoShowCount;
+            summary.UnansweredPenaltyHours = row.UnansweredPenaltyHours;
+            summary.NoShowPenaltyHours = row.NoShowPenaltyHours;
+            summary.TotalHours = row.TotalHours;
+            summary.UpdatedAt = now;
+        }
+
+        await SaveAsync();
+        return new
+        {
+            generatedAt = now,
+            settings = new
+            {
+                campaignStartDate = settings.CampaignStartDate,
+                campaignEndDate = settings.CampaignEndDate,
+                unansweredPenaltyThreshold = settings.UnansweredPenaltyThreshold,
+                unansweredPenaltyHours = settings.UnansweredPenaltyHours,
+                noShowPenaltyHours = settings.NoShowPenaltyHours,
+            },
+            users = rows,
+        };
+    }
+
     private async Task<object?> ChangeServiceStateAsync(int id, CampaignFormRequest request, int userId, string carnet, bool isAdmin, string moment)
     {
         var convo = await RequireConvocatoriaAsync(id);
@@ -221,6 +315,27 @@ public sealed class ConvocatoriaService(
     private static object MapType(ConvoType type) => new { type.Id, type.Name, type.MinGrocSortida, type.MinVerdSortida, type.DefaultLocation };
     private static object MapConvocatoria(Convocatoria convo) => new { convo.Id, convo.Date, convo.Title, convo.UbiSortida, convo.ResponsableId, responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, convo.ConvoTypeId, convo.ConvoType, convo.StartTime, convo.FinalTime, convo.ActualStartTime, convo.ActualEndTime, convo.IsActive, convo.AutoAssignResponsable, convo.Sortida, responseCount = 0 };
     private static object MapForm(CampaignForm form) => new { form.Id, form.ConvocatoriaId, form.ServiceMoment, form.Dia, form.ResponsableId, form.ResponsableNCarnet, form.CreatedByNCarnet, form.CreatedAt, form.UpdatedAt, voluntaris = JsonSerializer.Deserialize<object>(form.VoluntarisJson), vehicles = JsonSerializer.Deserialize<object>(form.VehiclesJson), convocatoria = form.Convocatoria is null ? null : new { form.Convocatoria.Id, form.Convocatoria.Title, form.Convocatoria.Date } };
+    private static double GetDurationHours(Convocatoria convocatoria)
+    {
+        var start = convocatoria.ActualStartTime ?? convocatoria.StartTime;
+        var end = convocatoria.ActualEndTime ?? convocatoria.FinalTime ?? start.AddHours(1);
+        return Math.Max(0, (end - start).TotalHours);
+    }
+    private static bool IsWithinCampaign(DateTime date, HourComputationSettings settings)
+    {
+        if (!DateOnly.TryParse(settings.CampaignStartDate, out var start) || !DateOnly.TryParse(settings.CampaignEndDate, out var end)) return false;
+        var current = DateOnly.FromDateTime(date);
+        return current >= start && current <= end;
+    }
     private async Task SaveAsync() { try { await database.SaveChangesAsync(); } catch (DbUpdateException error) { throw new InvalidOperationException("No se ha podido guardar el recurso.", error); } }
     private sealed record CampaignUser(int Id, string NCarnet, string Name, string? LastName);
+    private sealed record HoursSummaryRow(int UserId, string UserNCarnet, string UserName, double CampaignHours, double OffCampaignHours, int UnansweredCount, int NoShowCount, double UnansweredPenaltyHours, double NoShowPenaltyHours, double TotalHours);
+    private sealed class HourComputationSettings
+    {
+        public string? CampaignStartDate { get; init; }
+        public string? CampaignEndDate { get; init; }
+        public int UnansweredPenaltyThreshold { get; init; } = 7;
+        public double UnansweredPenaltyHours { get; init; } = 1;
+        public double NoShowPenaltyHours { get; init; } = 4;
+    }
 }

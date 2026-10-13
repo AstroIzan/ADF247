@@ -19,7 +19,7 @@ public sealed class PlaAlfaController(PlaAlfaService plaAlfa, Adf247DbContext da
     {
         var carnet = User.FindFirst("nCarnet")?.Value;
         if (string.IsNullOrWhiteSpace(carnet) || !await database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin)) return Forbid();
-        return Ok(plaAlfa.Update(request.Municipalities, request.PrincipalMunicipality));
+        return Ok(await plaAlfa.UpdateAsync(request.Municipalities, request.PrincipalMunicipality));
     }
     private static bool IsTrue(string? value) => value is not null && value.Trim().ToLowerInvariant() is "1" or "true" or "yes";
 }

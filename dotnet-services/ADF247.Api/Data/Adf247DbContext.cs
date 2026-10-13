@@ -13,6 +13,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
     public DbSet<Respuesta> Respuestas => Set<Respuesta>();
     public DbSet<CampaignForm> CampaignForms => Set<CampaignForm>();
     public DbSet<UserHoursSummary> UserHoursSummaries => Set<UserHoursSummary>();
+    public DbSet<PlaAlfaMunicipalitySelection> PlaAlfaMunicipalitySelections => Set<PlaAlfaMunicipalitySelection>();
     public DbSet<DeviceRegistration> DeviceRegistrations => Set<DeviceRegistration>();
     public DbSet<MessagingConfiguration> MessagingConfigurations => Set<MessagingConfiguration>();
     public DbSet<MessagingNotification> MessagingNotifications => Set<MessagingNotification>();
@@ -110,6 +111,14 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.HasIndex(summary => summary.UserId).IsUnique();
             entity.Property(summary => summary.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
             entity.Property(summary => summary.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
+        });
+
+        modelBuilder.Entity<PlaAlfaMunicipalitySelection>(entity =>
+        {
+            entity.ToTable("MunicipalitySelection", "PlaAlfa");
+            entity.HasKey(selection => selection.Municipality);
+            entity.Property(selection => selection.Municipality).HasMaxLength(200);
+            entity.Property(selection => selection.UpdatedAt).HasDefaultValueSql("sysutcdatetime()");
         });
 
         modelBuilder.Entity<DeviceRegistration>(entity =>

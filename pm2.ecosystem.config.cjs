@@ -13,10 +13,9 @@ module.exports = {
       name: 'adf247-pro',
       cwd: '.',
       script: 'npm',
-      args: 'run start:pro --prefix api',
+      args: 'run start:pro',
       env: {
-        NODE_ENV: 'production',
-        PORT: '3001',
+        ASPNETCORE_ENVIRONMENT: 'Production',
       },
       autorestart: true,
       max_memory_restart: '700M',

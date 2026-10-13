@@ -12,46 +12,6 @@ on:
 
 jobs:
   # ============================================================
-  # API
-  # ============================================================
-  api:
-    name: API - Tests
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: api
-
-    env:
-      DATABASE_URL: "sqlserver://localhost:1433;database=ADF247;user=ci;password=ci;encrypt=false"
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: api/package-lock.json
-
-      - name: Install API dependencies
-        run: npm ci
-
-      - name: Install Database dependencies
-        working-directory: database
-        run: npm ci
-
-      - name: Generate Prisma client
-        working-directory: database
-        run: npx prisma generate
-
-      - name: API tests
-        run: npm test
-
-
-  # ============================================================
   # ANGULAR
   # ============================================================
   angular:
@@ -134,7 +94,6 @@ jobs:
   deploy-pre:
     name: Deploy PRE
     needs:
-      - api
       - angular
       - database
       - dotnet

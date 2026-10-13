@@ -17,6 +17,12 @@ public sealed class ConvocatoriasController(ConvocatoriaService convos, Adf247Db
     [HttpPost("types")] public Task<IActionResult> CreateType(ConvoTypeRequest request) => ExecuteCreatedAsync(() => convos.CreateTypeAsync(request));
     [HttpPut("types/{id:int}")] public Task<IActionResult> UpdateType(int id, ConvoTypeRequest request) => ExecuteAsync(() => convos.UpdateTypeAsync(id, request));
     [HttpDelete("types/{id:int}")] public Task<IActionResult> DeleteType(int id) => ExecuteAsync(() => convos.DeleteTypeAsync(id));
+    [HttpGet("hours/summary")]
+    public async Task<IActionResult> HoursSummary()
+    {
+        var identity = await IdentityAsync(); if (identity is null) return Unauthorized();
+        return identity.Value.IsAdmin ? Ok(await convos.GetHoursSummaryAsync()) : Forbid();
+    }
 
     [HttpGet] public Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int? pageSize) => ExecuteCreatedAsync(() => convos.GetAllAsync(page, pageSize), false);
     [HttpGet("{id:int}")] public Task<IActionResult> Get(int id) => ExecuteAsync(() => convos.GetAsync(id));

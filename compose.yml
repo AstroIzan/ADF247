@@ -1,31 +1,5 @@
 services:
 
-  api:
-    build:
-      context: .
-      dockerfile: api/Dockerfile
-
-    container_name: adf247${DEPLOYMENT_SUFFIX:-}-api
-
-    restart: unless-stopped
-
-    env_file:
-      - ${API_ENV_FILE:-./api/.env.pro}
-
-    environment:
-      NODE_ENV: production
-      PORT: 3001
-      FIREBASE_SERVICE_ACCOUNT_PATH: /run/secrets/firebase-service-account.json
-      PRISMA_RECOVER_MESSAGING_MIGRATION: ${PRISMA_RECOVER_MESSAGING_MIGRATION:-0}
-
-    secrets:
-      - source: firebase_service_account
-        target: firebase-service-account.json
-
-    networks:
-      - adf247
-      - homelab-database
-
   api-dotnet:
     profiles:
       - dotnet
@@ -39,7 +13,7 @@ services:
     restart: unless-stopped
 
     env_file:
-      - ${API_ENV_FILE:-./api/.env.pro}
+      - ${API_ENV_FILE:-./dotnet-services/.env.pro}
 
     environment:
       ASPNETCORE_ENVIRONMENT: Production
@@ -64,7 +38,7 @@ services:
     restart: unless-stopped
 
     env_file:
-      - ${API_ENV_FILE:-./api/.env.pro}
+      - ${API_ENV_FILE:-./dotnet-services/.env.pro}
 
     environment:
       DOTNET_ENVIRONMENT: Production
@@ -95,7 +69,7 @@ services:
       - "127.0.0.1:${CLIENT_PORT:-8081}:80"
 
     depends_on:
-      - api
+      - api-dotnet
 
     networks:
       - adf247

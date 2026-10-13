@@ -498,7 +498,7 @@ export class HomeComponent implements OnInit {
     this.showAdminResponsableMenu.set(false);
   }
 
-  isRunningConvoAdminAction(action: 'sortida' | 'start' | 'finish' | 'edit', convoId: number) {
+  isRunningConvoAdminAction(action: 'sortida' | 'start' | 'finish' | 'edit' | 'notify', convoId: number) {
     return this.runningConvoAdminActionKey() === `${action}-${convoId}`;
   }
 
@@ -1531,6 +1531,26 @@ export class HomeComponent implements OnInit {
       error: (err) => {
         this.runningConvoAdminActionKey.set(null);
         this.error.set(err.message || 'No s\'ha pogut actualitzar la sortida.');
+      },
+    });
+  }
+
+  sendResponseRequestNotification(convo: Convocatoria) {
+    if (!this.authService.isAdmin()) {
+      return;
+    }
+
+    this.error.set('');
+    this.adminActionFeedback.set('');
+    this.runningConvoAdminActionKey.set(`notify-${convo.id}`);
+    this.dataService.sendConvocatoriaResponseRequest(convo.id).subscribe({
+      next: () => {
+        this.runningConvoAdminActionKey.set(null);
+        this.adminActionFeedback.set(`Notificació de resposta enviada per a ${convo.title}.`);
+      },
+      error: (err) => {
+        this.runningConvoAdminActionKey.set(null);
+        this.error.set(err.message || 'No s’ha pogut enviar la notificació de resposta.');
       },
     });
   }

@@ -7,18 +7,24 @@ case "${stage}" in
   pre)
     deploy_dir="/home/deploy/deployments/ADF247-pre"
     health_port=8082
-    env_file="api/.env.pre"
+    env_file="dotnet-services/.env.pre"
     ;;
   pro)
     deploy_dir="/home/deploy/deployments/ADF247"
     health_port=8081
-    env_file="api/.env.pro"
+    env_file="dotnet-services/.env.pro"
     ;;
   *)
     echo "Unsupported deployment stage: ${stage}" >&2
     exit 2
     ;;
 esac
+
+legacy_env_file="api/.env.${stage}"
+if [ ! -f "${deploy_dir}/${env_file}" ] && [ -f "${deploy_dir}/${legacy_env_file}" ]; then
+  mkdir -p "$(dirname "${deploy_dir}/${env_file}")"
+  cp "${deploy_dir}/${legacy_env_file}" "${deploy_dir}/${env_file}"
+fi
 
 rsync -a --delete \
   --exclude='.git/' \

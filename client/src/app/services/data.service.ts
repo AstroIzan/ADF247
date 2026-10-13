@@ -255,6 +255,30 @@ export interface PlaAlfaSelectionUpdatePayload {
   principalMunicipality?: string | null;
 }
 
+export interface MessagingNotificationLog {
+  id: number;
+  convocatoriaId?: number | null;
+  trigger: string;
+  status: string;
+  title: string;
+  body: string;
+  createdAt: string;
+  requestedCount: number;
+  successCount: number;
+  failureCount: number;
+  errorMessage?: string | null;
+}
+
+export interface TaskExecutionLog {
+  taskExecutionId: number;
+  taskDefinitionId: number;
+  taskName: string;
+  startedAt: string;
+  finishedAt?: string | null;
+  lastKeepAlive: string;
+  finalStatus?: string | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -402,6 +426,14 @@ export class DataService {
 
   sendConvocatoriaSortidaStatus(convoId: number): Observable<any> {
     return this.http.post<any>(`/messaging/dispatch/convocatoria/${convoId}/sortida-status`, {});
+  }
+
+  getMessagingLogs(): Observable<MessagingNotificationLog[]> {
+    return this.http.get<MessagingNotificationLog[]>('/messaging/logs');
+  }
+
+  getTaskExecutions(): Observable<TaskExecutionLog[]> {
+    return this.http.get<TaskExecutionLog[]>('/messaging/task-executions');
   }
 
   // === AVAILABILITY WINDOWS ===

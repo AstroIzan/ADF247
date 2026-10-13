@@ -3,7 +3,7 @@
 Monorepo con 3 partes:
 
 - `database`: Prisma + Microsoft SQL Server
-- `api`: Express
+- `dotnet-services`: API y worker de mensajería .NET 10
 - `client`: Angular
 
 Este README esta pensado para que cualquier persona pueda clonar el repo y levantar el proyecto desde cero.
@@ -12,6 +12,7 @@ Este README esta pensado para que cualquier persona pueda clonar el repo y levan
 
 - Node.js 20 o superior
 - npm 10 o superior
+- .NET SDK 10
 - Microsoft SQL Server 2019 o superior
 
 Comprobacion rapida:
@@ -25,9 +26,9 @@ npm -v
 
 ```
 ADF247/
-	api/
 	client/
 	database/
+	dotnet-services/
 	postman/
 	package.json (scripts raiz)
 ```
@@ -44,7 +45,7 @@ npm run install:all
 Que hace esto:
 
 - Instala dependencias de la raiz (incluye `concurrently`)
-- Instala dependencias de `database`, `api` y `client`
+- Instala dependencias de `database` y `client`
 
 ## 4) Configuracion de entorno
 
@@ -63,34 +64,29 @@ Variable usada:
 
 Copia la plantilla al archivo del entorno correspondiente y sustituye sus valores ficticios. En produccion, usa un certificado confiable y configura `trustServerCertificate` segun la politica del entorno.
 
-### API
+### Servicios .NET
 
 Archivos ya presentes:
 
-- `api/.env.development`
-- `api/.env.pro`
+- `dotnet-services/.env.development`
+- `dotnet-services/.env.pre`
+- `dotnet-services/.env.pro`
 
 Variables principales:
 
-- `NODE_ENV`
-- `PORT`
-- `CORS_ORIGIN`
+- `ASPNETCORE_ENVIRONMENT`
+- `DATABASE_URL` o `ConnectionStrings__Adf247`
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
 - `JWT_REFRESH_SECRET`
 - `JWT_REFRESH_EXPIRES_IN`
-- `PASSWORD_SALT_ROUNDS`
-- `AEMET_OPENDATA_API_KEY`
-- `NOTIFICATION_DEV_ALLOWED_NCARNETS` (solo en desarrollo)
+- `FIREBASE_SERVICE_ACCOUNT_PATH`
 
 Notas importantes:
 
-- En desarrollo, la API carga `api/.env.development`.
-- En produccion (`NODE_ENV=pro` o `production`), carga `api/.env.pro`.
-- La API tambien carga automaticamente `database/.env.development` o `database/.env.pro` segun entorno.
-- AEMET y Firebase pueden compartirse entre dev y pro si ambos apuntan al mismo proyecto operativo.
-- En desarrollo, las push notifications solo se envian a usuarios activos cuyo `nCarnet` este en `NOTIFICATION_DEV_ALLOWED_NCARNETS` (y/o en `automation.developerNCarnets`).
-- Si faltan secretos JWT en produccion, la API falla al iniciar auth (esperado).
+- El despliegue migra automáticamente los ficheros secretos históricos desde `api/.env.<stage>` a `dotnet-services/.env.<stage>` durante el primer corte.
+- La API .NET acepta `DATABASE_URL` en formato Prisma SQL Server para conservar los secretos de despliegue existentes.
+- Si faltan secretos JWT en producción, la API falla al iniciar auth (esperado).
 
 ## 5) Preparar la base de datos
 
@@ -135,7 +131,7 @@ Esto levanta:
 
 Comprobacion API:
 
-- `http://localhost:3001/health`
+- `http://localhost:5000/api/health`
 
 ## 7) Credenciales de prueba (seed)
 
@@ -150,7 +146,7 @@ Ejemplos:
 
 ### Raiz
 
-- `npm run install:all`: instala dependencias en `database`, `api` y `client`
+- `npm run install:all`: instala dependencias en `database` y `client`
 - `npm run db:migrate:deploy`: aplica migraciones pendientes sobre la DB actual
 - `npm run db:migrate:deploy:dev`: aplica migraciones en DB de desarrollo (`database/.env.development`)
 - `npm run db:migrate:deploy:pro`: aplica migraciones en DB de produccion (`database/.env.pro`)
@@ -160,19 +156,15 @@ Ejemplos:
 - `npm run db:prepare:pro`: genera cliente y aplica migraciones en produccion
 - `npm start`: arranca entorno de desarrollo completo (API + cliente)
 - `npm run start:dev`: igual que `npm start`
-- `npm run start:pro`: arranca API + cliente en modo produccion
-- `npm run start:pro`: aplica DB, compila Angular y arranca API (sirviendo frontend estatico)
+- `npm run start:pro`: aplica DB, compila Angular y arranca la API .NET en modo producción
 - `npm run dev`: alias de `npm run start:dev`
 - `npm run pro`: alias de `npm run start:pro`
-- `npm run test`: ejecuta tests API + cliente en modo no interactivo
+- `npm run test`: compila los servicios .NET y ejecuta los tests no interactivos del cliente
 
-### API (`api/package.json`)
+### Servicios .NET
 
-- `npm run dev`: nodemon con `NODE_ENV=development`
-- `npm run start`: inicio simple (usar con `NODE_ENV` desde PM2)
-- `npm run start:dev`: inicio con `NODE_ENV=development`
-- `npm run start:pro`: inicio con `NODE_ENV=production`
-- `npm run test`: ejecuta runner de tests de Node
+- `dotnet run --project dotnet-services/ADF247.Api`: arranca la API.
+- `dotnet build dotnet-services/ADF247.slnx`: compila la API y el worker de mensajería.
 
 ### Cliente (`client/package.json`)
 
@@ -299,22 +291,17 @@ Configuracion versionada (json):
 
 ## 12) Problemas frecuentes
 
-### Puerto 3001 ocupado
+### Puerto 8080 ocupado
 
-- Cambia `PORT` en `api/.env.development` o libera el puerto.
+- Cambia el puerto del perfil local de ASP.NET Core o libera el puerto.
 
 ### Error de Prisma Client no generado
 
 - Ejecuta en `database`: `npm run prisma:generate`
 
-### CORS bloqueando peticiones
-
-- Verifica `CORS_ORIGIN` en `api/.env.development`.
-- Para local, debe incluir `http://localhost:4200`.
-
 ### Login falla por JWT en produccion
 
-- Revisa `JWT_SECRET` y `JWT_REFRESH_SECRET` en `api/.env.pro`.
+- Revisa `JWT_SECRET` y `JWT_REFRESH_SECRET` en `dotnet-services/.env.pro`.
 
 ### Error al abrir disponibilidad: tabla `AvailabilityWindow` no existe
 
@@ -352,4 +339,3 @@ Coleccion incluida:
 - `postman/ADF247.postman_collection.json`
 
 Incluye requests de health, auth y users con variables de coleccion.
-
