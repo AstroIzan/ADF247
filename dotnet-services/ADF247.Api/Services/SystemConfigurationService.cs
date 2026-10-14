@@ -44,14 +44,15 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         var configuration = await GetEntityAsync(cancellationToken);
         configuration.AutoCreateUnavailableForUsersWithoutWindow = request.AutoCreateUnavailableForUsersWithoutWindow;
         configuration.NotifyOnAutoAvailableResponse = request.NotifyOnAutoAvailableResponse;
+        configuration.PviEnabled = request.PviEnabled;
         configuration.WeeklyConvoTypeIdsJson = JsonSerializer.Serialize(weeklyTypeIds);
         configuration.WeeklyConvocatoriaSchedulesJson = JsonSerializer.Serialize(weeklySchedules);
         configuration.WeeklyRequestWeekday = request.WeeklyRequestWeekday;
         configuration.WeeklyRequestHour = request.WeeklyRequestHour;
         configuration.WeeklyRequestMinute = request.WeeklyRequestMinute;
         configuration.AvailabilityManagerNCarnetsJson = JsonSerializer.Serialize(managers);
-        configuration.PendingLeadDays = request.PendingLeadDays;
-        configuration.PendingLeadHours = request.PendingLeadHours;
+        configuration.DailyNotificationsHour = request.DailyNotificationsHour;
+        configuration.DailyNotificationsMinute = request.DailyNotificationsMinute;
         configuration.CampaignStartDate = request.CampaignStartDate;
         configuration.CampaignEndDate = request.CampaignEndDate;
         configuration.UnansweredPenaltyThreshold = request.UnansweredPenaltyThreshold;
@@ -84,6 +85,8 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         WeeklyRequestWeekday = 5,
         WeeklyRequestHour = 8,
         WeeklyRequestMinute = 0,
+        DailyNotificationsHour = 8,
+        DailyNotificationsMinute = 0,
         UnansweredPenaltyHours = 1,
         NoShowPenaltyHours = 4,
         UpdatedAt = DateTime.UtcNow,
@@ -93,14 +96,15 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
     {
         configuration.AutoCreateUnavailableForUsersWithoutWindow,
         configuration.NotifyOnAutoAvailableResponse,
+        configuration.PviEnabled,
         WeeklyConvoTypeIds = Deserialize<int>(configuration.WeeklyConvoTypeIdsJson),
         WeeklyConvocatoriaSchedules = Deserialize<WeeklyConvocatoriaScheduleRequest>(configuration.WeeklyConvocatoriaSchedulesJson),
         configuration.WeeklyRequestWeekday,
         configuration.WeeklyRequestHour,
         configuration.WeeklyRequestMinute,
         AvailabilityManagerNCarnets = Deserialize<string>(configuration.AvailabilityManagerNCarnetsJson),
-        configuration.PendingLeadDays,
-        configuration.PendingLeadHours,
+        configuration.DailyNotificationsHour,
+        configuration.DailyNotificationsMinute,
         configuration.CampaignStartDate,
         configuration.CampaignEndDate,
         configuration.UnansweredPenaltyThreshold,
@@ -118,7 +122,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
 
     private static CampaignVehicleRequest[] NormalizeVehicles(IReadOnlyList<CampaignVehicleRequest>? vehicles) =>
         (vehicles ?? [])
-            .Select(vehicle => new CampaignVehicleRequest(vehicle.Indicatiu.Trim(), vehicle.Modelo?.Trim(), vehicle.Kms))
+            .Select(vehicle => new CampaignVehicleRequest(vehicle.Indicatiu.Trim(), vehicle.Modelo?.Trim(), vehicle.Litres, vehicle.Kms))
             .Where(vehicle => vehicle.Indicatiu.Length > 0)
             .GroupBy(vehicle => vehicle.Indicatiu, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())
@@ -149,15 +153,15 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         if (request.WeeklyRequestWeekday is < 0 or > 6
             || request.WeeklyRequestHour is < 0 or > 23
             || request.WeeklyRequestMinute is < 0 or > 59
-            || request.PendingLeadDays is < 0 or > 30
-            || request.PendingLeadHours is < 0 or > 720
+            || request.DailyNotificationsHour is < 0 or > 23
+            || request.DailyNotificationsMinute is < 0 or > 59
             || request.UnansweredPenaltyThreshold is < 0 or > 365
             || request.UnansweredPenaltyHours is < 0 or > 24
             || request.NoShowPenaltyHours is < 0 or > 24
             || (request.CampaignStartDate.HasValue
                 && request.CampaignEndDate.HasValue
                 && request.CampaignEndDate.Value < request.CampaignStartDate.Value)
-            || (request.VehicleCatalog ?? []).Any(vehicle => vehicle.Kms < 0))
+            || (request.VehicleCatalog ?? []).Any(vehicle => vehicle.Kms < 0 || vehicle.Litres < 0))
             throw new ArgumentException("La configuració del sistema conté valors no vàlids.");
     }
 }

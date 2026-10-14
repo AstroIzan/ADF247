@@ -71,6 +71,14 @@ VALUES
     0
   ),
   (
+    N'availability-multiple-today',
+    N'Disponibilitats múltiples - avui',
+    N'Tens diferentes convocatories per avui sense respondre.',
+    N'Entra a l''aplicatiu i revisa les convocatories sense resposta per avui.',
+    N'{"messageKind":"availability","timing":"today","recipientSelector":{"response":"missing","roles":{"include":[],"exclude":[]}}}',
+    0
+  ),
+  (
     N'availability-fire',
     N'Disponibilitat - incendi',
     N'Disponibilitat per incendi a {{fire.location}}',
@@ -116,6 +124,14 @@ VALUES
     N'Convocatòria setmanal',
     N'S''enviarà una convocatòria cada dia a les 08:00 per a la convocatòria del dia següent i per a la del dia en curs.',
     N'{"messageKind":"convocatoria","timing":"weekly","recipientSelector":{"response":"yes","roles":{"include":[],"exclude":[]}}}',
+    0
+  ),
+  (
+    N'convocatoria-multiple-today',
+    N'Convocatories múltiples - avui',
+    N'Tens diferentes convocatories per avui.',
+    N'Entra a l''aplicatiu i revisa les convocatories per avui.',
+    N'{"messageKind":"convocatoria","timing":"today","recipientSelector":{"response":"yes-or-custom","roles":{"include":[],"exclude":[]}}}',
     0
   ),
   (

@@ -24,7 +24,7 @@ export class SystemConfigurationComponent {
   configuration = signal<SystemConfiguration | null>(null);
   convoTypes = signal<ConvoType[]>([]);
   users = signal<User[]>([]);
-  newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', kms: 0 });
+  newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', litres: 0, kms: 0 });
 
   constructor(private dataService: DataService) {
     this.load();
@@ -159,10 +159,11 @@ export class SystemConfigurationComponent {
       vehicleCatalog: [...configuration.vehicleCatalog, {
         indicatiu: vehicle.indicatiu.trim(),
         modelo: vehicle.modelo?.trim() || null,
+        litres: Number(vehicle.litres) || 0,
         kms: Number(vehicle.kms) || 0,
       }],
     }));
-    this.newVehicle.set({ indicatiu: '', modelo: '', kms: 0 });
+    this.newVehicle.set({ indicatiu: '', modelo: '', litres: 0, kms: 0 });
   }
 
   removeVehicle(indicatiu: string) {

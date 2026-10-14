@@ -199,7 +199,15 @@ public sealed class ConvocatoriaService(
             .SingleOrDefaultAsync(configuration => configuration.Id == 1);
         var vehicleCatalog = string.IsNullOrWhiteSpace(systemConfiguration?.VehicleCatalogJson)
             ? []
-            : JsonSerializer.Deserialize<List<object>>(systemConfiguration.VehicleCatalogJson) ?? [];
+            : (JsonSerializer.Deserialize<List<CampaignVehicleRequest>>(systemConfiguration.VehicleCatalogJson) ?? [])
+                .Select(vehicle => new
+                {
+                    indicativo = vehicle.Indicatiu,
+                    modelo = vehicle.Modelo,
+                    litros = vehicle.Litres,
+                    kms = vehicle.Kms,
+                })
+                .ToArray();
         return new { convocatoria = MapConvocatoria(convo), responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, eligibleUsers = eligible, vehicleCatalog, lockedVehicleNames = Array.Empty<string>(), prefill = (object?)null };
     }
 

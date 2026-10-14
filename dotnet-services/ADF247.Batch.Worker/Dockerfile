@@ -3,6 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY ADF247.Batch.Worker/ADF247.Batch.Worker.csproj ADF247.Batch.Worker/
+COPY ADF247.Api/ADF247.Api.csproj ADF247.Api/
 RUN dotnet restore ADF247.Batch.Worker/ADF247.Batch.Worker.csproj
 
 COPY . .

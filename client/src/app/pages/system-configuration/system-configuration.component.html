@@ -22,8 +22,14 @@
       <section class="system-config-card">
         <h2>Disponibilitat automàtica</h2>
         <p>Controla com es creen respostes a partir del calendari de disponibilitat.</p>
-        <label><input type="checkbox" [(ngModel)]="configuration.autoCreateUnavailableForUsersWithoutWindow"> Marcar automàticament com a no disponible els usuaris sense cap tram al calendari</label>
-        <label><input type="checkbox" [(ngModel)]="configuration.notifyOnAutoAvailableResponse"> Avisar l’usuari quan una automatització el marqui com a disponible</label>
+        <label class="toggle-option"><input type="checkbox" [(ngModel)]="configuration.autoCreateUnavailableForUsersWithoutWindow"><span class="toggle-control" aria-hidden="true"></span><span>Marcar automàticament com a no disponible els usuaris sense cap tram al calendari</span></label>
+        <label class="toggle-option"><input type="checkbox" [(ngModel)]="configuration.notifyOnAutoAvailableResponse"><span class="toggle-control" aria-hidden="true"></span><span>Avisar l’usuari quan una automatització el marqui com a disponible</span></label>
+      </section>
+
+      <section class="system-config-card">
+        <h2>Programa PVI</h2>
+        <p>Defineix si l’agrupació realitza el programa PVI. Quan estigui actiu, les convocatòries setmanals automàtiques seran de tipus PVI; si no, seran de tipus Guàrdia.</p>
+        <label class="toggle-option"><input type="checkbox" [(ngModel)]="configuration.pviEnabled"><span class="toggle-control" aria-hidden="true"></span><span>{{ configuration.pviEnabled ? 'Programa PVI actiu' : 'Programa PVI inactiu' }}</span></label>
       </section>
 
       <section class="system-config-card">
@@ -46,7 +52,7 @@
         <div class="checkbox-list">
           @for (type of convoTypes(); track type.id) {
             <div class="weekly-type-row">
-              <label><input type="checkbox" [checked]="isWeeklyTypeSelected(type.id)" (change)="toggleWeeklyType(type.id, $any($event.target).checked)"> {{ type.name }}</label>
+              <label class="toggle-option"><input type="checkbox" [checked]="isWeeklyTypeSelected(type.id)" (change)="toggleWeeklyType(type.id, $any($event.target).checked)"><span class="toggle-control" aria-hidden="true"></span><span>{{ type.name }}</span></label>
               @if (isWeeklyTypeSelected(type.id)) {
                 <div class="weekly-schedule-list">
                   @for (schedule of schedulesForType(type.id); track $index; let index = $index) {
@@ -70,21 +76,24 @@
       <section class="system-config-card">
         <h2>Responsables de disponibilitat</h2>
         <p>Admins amb responsabilitat sobre disponibilitat i convocatòries.</p>
-        <div class="checkbox-list">
-          @for (user of getAdminUsers(); track user.id) {
-            <label><input type="checkbox" [checked]="isAvailabilityManagerSelected(user.nCarnet)" (change)="toggleAvailabilityManager(user.nCarnet, $any($event.target).checked)"> {{ user.nCarnet }} · {{ user.name }} {{ user.lastName || '' }}</label>
-          } @empty {
-            <span>No hi ha admins disponibles.</span>
-          }
-        </div>
+        <details class="multi-select">
+          <summary>Selecciona responsables <span>{{ configuration.availabilityManagerNCarnets.length }} seleccionats</span></summary>
+          <div class="checkbox-list multi-select-options">
+            @for (user of getAdminUsers(); track user.id) {
+              <label class="toggle-option"><input type="checkbox" [checked]="isAvailabilityManagerSelected(user.nCarnet)" (change)="toggleAvailabilityManager(user.nCarnet, $any($event.target).checked)"><span class="toggle-control" aria-hidden="true"></span><span>{{ user.nCarnet }} · {{ user.name }} {{ user.lastName || '' }}</span></label>
+            } @empty {
+              <span>No hi ha admins disponibles.</span>
+            }
+          </div>
+        </details>
       </section>
 
       <section class="system-config-card">
-        <h2>Sol·licitud normal si no has respost</h2>
-        <p>Finestra d’antelació respecte al dia de l’activitat.</p>
+        <h2>Notificacions diàries</h2>
+        <p>Hora local a la qual el Batch Worker revisarà i notificarà les convocatòries del dia en curs.</p>
         <div class="form-grid form-grid-two">
-          <label>Dies <input type="number" min="0" max="30" [(ngModel)]="configuration.pendingLeadDays"></label>
-          <label>Hores <input type="number" min="0" max="720" [(ngModel)]="configuration.pendingLeadHours"></label>
+          <label>Hora <input type="number" min="0" max="23" [(ngModel)]="configuration.dailyNotificationsHour"></label>
+          <label>Minut <input type="number" min="0" max="59" [(ngModel)]="configuration.dailyNotificationsMinute"></label>
         </div>
       </section>
 
@@ -106,17 +115,18 @@
         <div class="vehicle-form">
           <input placeholder="Indicatiu" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })">
           <input placeholder="Model" [ngModel]="newVehicle().modelo" (ngModelChange)="newVehicle.set({ ...newVehicle(), modelo: $event })">
+          <input type="number" min="0" placeholder="Litres" [ngModel]="newVehicle().litres" (ngModelChange)="newVehicle.set({ ...newVehicle(), litres: $event })">
           <input type="number" min="0" placeholder="KMs" [ngModel]="newVehicle().kms" (ngModelChange)="newVehicle.set({ ...newVehicle(), kms: $event })">
           <button class="btn" type="button" (click)="addVehicle()">Afegir vehicle</button>
         </div>
         <div class="table-wrapper">
           <table>
-            <thead><tr><th>Indicatiu</th><th>Model</th><th>KMs</th><th></th></tr></thead>
+            <thead><tr><th>Indicatiu</th><th>Model</th><th>Litres</th><th>KMs</th><th></th></tr></thead>
             <tbody>
               @for (vehicle of configuration.vehicleCatalog; track vehicle.indicatiu) {
-                <tr><td>{{ vehicle.indicatiu }}</td><td>{{ vehicle.modelo || '—' }}</td><td>{{ vehicle.kms }}</td><td><button class="btn btn-small" type="button" (click)="removeVehicle(vehicle.indicatiu)">Eliminar</button></td></tr>
+                <tr><td>{{ vehicle.indicatiu }}</td><td>{{ vehicle.modelo || '—' }}</td><td>{{ vehicle.litres }}</td><td>{{ vehicle.kms }}</td><td><button class="btn btn-danger btn-small" type="button" (click)="removeVehicle(vehicle.indicatiu)">Eliminar</button></td></tr>
               } @empty {
-                <tr><td colspan="4">No hi ha vehicles configurats.</td></tr>
+                <tr><td colspan="5">No hi ha vehicles configurats.</td></tr>
               }
             </tbody>
           </table>

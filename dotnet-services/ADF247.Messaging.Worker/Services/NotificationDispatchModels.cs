@@ -20,11 +20,13 @@ public enum RecipientSelectionBehavior
     BroadcastAllDevices = 0,
     ConvocatoriaResponseRequest = 1,
     ConvocatoriaSortidaStatus = 2,
+    ExplicitRecipients = 3,
 }
 
 public sealed record NotificationRecipientSelection(
     RecipientSelectionBehavior Behavior,
-    string Tag);
+    string Tag,
+    IReadOnlyCollection<string>? RecipientNCarnets = null);
 
 public enum TaskExecutionEventType : byte
 {

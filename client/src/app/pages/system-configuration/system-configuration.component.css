@@ -66,6 +66,12 @@
   color: #171717;
 }
 
+.btn-danger {
+  border-color: #be2f2f;
+  background: #d83a3a;
+  color: #fff;
+}
+
 .btn-small {
   padding: 6px 9px;
   font-size: 12px;
@@ -108,14 +114,56 @@
   grid-column: 1 / -1;
 }
 
-.system-config-card > label,
-.checkbox-list label {
+.toggle-option {
   display: flex;
-  gap: 8px;
-  align-items: flex-start;
+  align-items: center;
+  gap: 12px;
+  min-height: 54px;
+  box-sizing: border-box;
+  padding: 11px 14px;
+  border: 1px solid #cbd1d9;
+  border-radius: 11px;
   color: #303846;
+  cursor: pointer;
   font-size: 13px;
   line-height: 1.35;
+}
+
+.toggle-option input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.toggle-control {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  place-items: center;
+  border: 2px solid #b9c1cb;
+  border-radius: 6px;
+  background: #fff;
+  color: transparent;
+}
+
+.toggle-control::before {
+  content: '×';
+  font-size: 23px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.toggle-option input:checked + .toggle-control {
+  border-color: #d99500;
+  background: #f0b000;
+  color: #1d1d1d;
+}
+
+.toggle-option input:focus-visible + .toggle-control {
+  outline: 3px solid rgba(45, 111, 183, .35);
+  outline-offset: 2px;
 }
 
 .checkbox-list {
@@ -131,6 +179,35 @@
   gap: 9px;
   padding: 10px 0;
   border-bottom: 1px solid #edf0f3;
+}
+
+.multi-select {
+  border: 1px solid #cbd1d9;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.multi-select summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px 14px;
+  color: #303846;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.multi-select summary span {
+  color: #687383;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.multi-select-options {
+  max-height: 240px;
+  padding: 8px;
+  border-top: 1px solid #e5e9ee;
 }
 
 .weekly-type-row:last-child {
@@ -185,7 +262,7 @@ select {
 }
 
 .vehicle-form {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 130px auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 110px 110px auto;
 }
 
 .table-wrapper {

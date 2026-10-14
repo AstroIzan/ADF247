@@ -122,14 +122,15 @@ model SystemConfiguration {
   id Int @id
   autoCreateUnavailableForUsersWithoutWindow Boolean @default(false)
   notifyOnAutoAvailableResponse Boolean @default(false)
+  pviEnabled Boolean @default(false)
   weeklyConvoTypeIdsJson String @default("[]") @db.NVarChar(Max)
   weeklyConvocatoriaSchedulesJson String @default("[]") @db.NVarChar(Max)
   weeklyRequestWeekday Int @default(5)
   weeklyRequestHour Int @default(8)
   weeklyRequestMinute Int @default(0)
   availabilityManagerNCarnetsJson String @default("[]") @db.NVarChar(Max)
-  pendingLeadDays Int @default(0)
-  pendingLeadHours Int @default(24)
+  dailyNotificationsHour Int @default(8)
+  dailyNotificationsMinute Int @default(0)
   campaignStartDate DateTime? @db.Date
   campaignEndDate DateTime? @db.Date
   unansweredPenaltyThreshold Int @default(0)

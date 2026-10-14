@@ -264,6 +264,7 @@ public sealed class SqlNotificationDispatchRepository(
         long notificationId,
         int? convocatoriaId,
         RecipientSelectionBehavior selectionBehavior,
+        IReadOnlyCollection<string>? recipientNCarnets,
         CancellationToken cancellationToken)
     {
         await using var connection = await OpenConnectionAsync(cancellationToken);
@@ -291,6 +292,14 @@ public sealed class SqlNotificationDispatchRepository(
                 AND r.[invalidatedAt] IS NULL
                 AND d.[id] IS NULL
                 AND (
+                    @SelectionMode <> @SelectionExplicitRecipients
+                    OR EXISTS (
+                        SELECT 1
+                        FROM STRING_SPLIT(@RecipientNCarnets, N';') recipients
+                        WHERE LTRIM(RTRIM(recipients.[value])) = r.[nCarnet]
+                    )
+                )
+                AND (
                     @ConvocatoriaId IS NULL
                     OR NOT EXISTS (
                         SELECT 1
@@ -302,6 +311,7 @@ public sealed class SqlNotificationDispatchRepository(
                 )
                 AND (
                     @SelectionMode = @SelectionBroadcast
+                    OR @SelectionMode = @SelectionExplicitRecipients
                     OR (
                         @SelectionMode = @SelectionResponseRequest
                         AND @ConvocatoriaId IS NOT NULL
@@ -346,6 +356,11 @@ public sealed class SqlNotificationDispatchRepository(
         command.Parameters.Add(new SqlParameter("@SelectionBroadcast", System.Data.SqlDbType.Int) { Value = (int)RecipientSelectionBehavior.BroadcastAllDevices });
         command.Parameters.Add(new SqlParameter("@SelectionResponseRequest", System.Data.SqlDbType.Int) { Value = (int)RecipientSelectionBehavior.ConvocatoriaResponseRequest });
         command.Parameters.Add(new SqlParameter("@SelectionSortidaStatus", System.Data.SqlDbType.Int) { Value = (int)RecipientSelectionBehavior.ConvocatoriaSortidaStatus });
+        command.Parameters.Add(new SqlParameter("@SelectionExplicitRecipients", System.Data.SqlDbType.Int) { Value = (int)RecipientSelectionBehavior.ExplicitRecipients });
+        command.Parameters.Add(new SqlParameter("@RecipientNCarnets", System.Data.SqlDbType.NVarChar, -1)
+        {
+            Value = recipientNCarnets is { Count: > 0 } ? string.Join(';', recipientNCarnets) : string.Empty,
+        });
         return await command.ExecuteNonQueryAsync(cancellationToken);
     }
 

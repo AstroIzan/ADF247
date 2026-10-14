@@ -92,6 +92,7 @@ public sealed class MessagingOrchestrationWorker(
                     notification.Id,
                     notification.ConvocatoriaId,
                     recipientSelection.Behavior,
+                    recipientSelection.RecipientNCarnets,
                     cancellationToken);
                 var requeuedDeliveries = await repository.RequeueRetryableDeliveriesAsync(
                     notification.Id,
@@ -245,6 +246,21 @@ public sealed class MessagingOrchestrationWorker(
         ClaimedNotification notification,
         IReadOnlyDictionary<string, string> payload)
     {
+        if (payload.TryGetValue("recipientNCarnets", out var recipientNCarnets))
+        {
+            var recipients = recipientNCarnets
+                .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray();
+            if (recipients.Length > 0)
+            {
+                return new NotificationRecipientSelection(
+                    RecipientSelectionBehavior.ExplicitRecipients,
+                    "explicit-recipients",
+                    recipients);
+            }
+        }
+
         if (!notification.ConvocatoriaId.HasValue)
         {
             return new NotificationRecipientSelection(

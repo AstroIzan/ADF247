@@ -314,6 +314,7 @@ export interface MessagingConfiguration {
 export interface SystemConfigurationVehicle {
   indicatiu: string;
   modelo?: string | null;
+  litres: number;
   kms: number;
 }
 
@@ -327,14 +328,15 @@ export interface WeeklyConvocatoriaSchedule {
 export interface SystemConfiguration {
   autoCreateUnavailableForUsersWithoutWindow: boolean;
   notifyOnAutoAvailableResponse: boolean;
+  pviEnabled: boolean;
   weeklyConvoTypeIds: number[];
   weeklyConvocatoriaSchedules: WeeklyConvocatoriaSchedule[];
   weeklyRequestWeekday: number;
   weeklyRequestHour: number;
   weeklyRequestMinute: number;
   availabilityManagerNCarnets: string[];
-  pendingLeadDays: number;
-  pendingLeadHours: number;
+  dailyNotificationsHour: number;
+  dailyNotificationsMinute: number;
   campaignStartDate: string | null;
   campaignEndDate: string | null;
   unansweredPenaltyThreshold: number;
