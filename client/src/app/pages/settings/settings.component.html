@@ -86,15 +86,113 @@
         <section class="settings-section logs-section">
           <div class="pla-alfa-table-head">
             <div>
-              <h3>Estat del sistema</h3>
-              <p class="section-help">Visibilitat de la cua, els dispositius i el processament del worker.</p>
+              <h3>Sistema</h3>
+              <p class="section-help">Configuració de disponibilitat, convocatòries setmanals, càlcul d’hores i vehicles.</p>
             </div>
-            <button class="btn btn-primary" type="button" [disabled]="adminLoading()" (click)="loadAdminData()">Actualitzar</button>
+            <div class="settings-actions">
+              <button class="btn" type="button" [disabled]="adminLoading()" (click)="loadAdminData()">Actualitzar</button>
+              <button class="btn btn-primary" type="button" [disabled]="systemConfigurationSaving() || !systemConfiguration()" (click)="saveSystemConfiguration()">
+                {{ systemConfigurationSaving() ? 'Desant...' : 'Desar configuració' }}
+              </button>
+            </div>
           </div>
           @if (adminError()) { <div class="alert alert-danger">{{ adminError() }}</div> }
           @if (adminLoading()) {
             <div class="loading-state">Carregant estat del sistema...</div>
-          } @else if (systemStatus(); as status) {
+          } @else if (systemConfiguration(); as configuration) {
+            <div class="system-config-grid">
+              <section class="system-config-card">
+                <h4>Disponibilitat automàtica</h4>
+                <p>Controla com es creen respostes a partir del calendari de disponibilitat.</p>
+                <label><input type="checkbox" [(ngModel)]="configuration.autoCreateUnavailableForUsersWithoutWindow"> Marcar automàticament com a no disponible els usuaris sense cap tram al calendari</label>
+                <label><input type="checkbox" [(ngModel)]="configuration.notifyOnAutoAvailableResponse"> Avisar l’usuari quan una automatització el marqui com a disponible</label>
+              </section>
+
+              <section class="system-config-card">
+                <h4>Tipus setmanals</h4>
+                <p>Selecciona quins tipus es consideren convocatòries setmanals.</p>
+                <div class="system-checkbox-list">
+                  @for (type of systemConvoTypes(); track type.id) {
+                    <label><input type="checkbox" [checked]="isWeeklyTypeSelected(type.id)" (change)="toggleWeeklyType(type.id, $any($event.target).checked)"> {{ type.name }}</label>
+                  }
+                </div>
+              </section>
+
+              <section class="system-config-card">
+                <h4>Sol·licitud setmanal de disponibilitat</h4>
+                <p>Dia i hora de la setmana anterior en què el worker prepara la disponibilitat de la setmana següent.</p>
+                <div class="system-form-grid">
+                  <label>Dia
+                    <select [(ngModel)]="configuration.weeklyRequestWeekday">
+                      <option [ngValue]="0">Diumenge</option><option [ngValue]="1">Dilluns</option><option [ngValue]="2">Dimarts</option><option [ngValue]="3">Dimecres</option><option [ngValue]="4">Dijous</option><option [ngValue]="5">Divendres</option><option [ngValue]="6">Dissabte</option>
+                    </select>
+                  </label>
+                  <label>Hora <input type="number" min="0" max="23" [(ngModel)]="configuration.weeklyRequestHour"></label>
+                  <label>Minut <input type="number" min="0" max="59" [(ngModel)]="configuration.weeklyRequestMinute"></label>
+                </div>
+              </section>
+
+              <section class="system-config-card">
+                <h4>Responsables de disponibilitat</h4>
+                <p>Admins amb responsabilitat sobre disponibilitat i convocatòries.</p>
+                <div class="system-checkbox-list">
+                  @for (user of getAdminUsers(); track user.id) {
+                    <label><input type="checkbox" [checked]="isAvailabilityManagerSelected(user.nCarnet)" (change)="toggleAvailabilityManager(user.nCarnet, $any($event.target).checked)"> {{ user.nCarnet }} · {{ user.name }} {{ user.lastName || '' }}</label>
+                  } @empty {
+                    <span>No hi ha admins disponibles.</span>
+                  }
+                </div>
+              </section>
+
+              <section class="system-config-card">
+                <h4>Sol·licitud normal si no has respost</h4>
+                <p>Finestra d’antelació respecte al dia de l’activitat.</p>
+                <div class="system-form-grid">
+                  <label>Dies <input type="number" min="0" max="30" [(ngModel)]="configuration.pendingLeadDays"></label>
+                  <label>Hores <input type="number" min="0" max="720" [(ngModel)]="configuration.pendingLeadHours"></label>
+                </div>
+              </section>
+
+              <section class="system-config-card">
+                <h4>Càlcul d’hores i campanya</h4>
+                <p>Període de campanya i penalitzacions aplicades al còmput d’hores.</p>
+                <div class="system-form-grid">
+                  <label>Inici <input type="date" [(ngModel)]="configuration.campaignStartDate"></label>
+                  <label>Fi <input type="date" [(ngModel)]="configuration.campaignEndDate"></label>
+                  <label>No respostes mínimes <input type="number" min="0" max="365" [(ngModel)]="configuration.unansweredPenaltyThreshold"></label>
+                  <label>Hores per no resposta <input type="number" min="0" max="24" step="0.5" [(ngModel)]="configuration.unansweredPenaltyHours"></label>
+                  <label>Hores per no assistència <input type="number" min="0" max="24" step="0.5" [(ngModel)]="configuration.noShowPenaltyHours"></label>
+                </div>
+              </section>
+
+              <section class="system-config-card system-config-card-wide">
+                <h4>Vehicles de l’agrupació</h4>
+                <p>Indicatiu, model i quilòmetres dels vehicles disponibles per als formularis de campanya.</p>
+                <div class="system-vehicle-form">
+                  <input placeholder="Indicatiu" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })">
+                  <input placeholder="Model" [ngModel]="newVehicle().modelo" (ngModelChange)="newVehicle.set({ ...newVehicle(), modelo: $event })">
+                  <input type="number" min="0" placeholder="KMs" [ngModel]="newVehicle().kms" (ngModelChange)="newVehicle.set({ ...newVehicle(), kms: $event })">
+                  <button class="btn" type="button" (click)="addVehicle()">Afegir</button>
+                </div>
+                <div class="logs-table-wrapper">
+                  <table class="logs-table-lite">
+                    <thead><tr><th>Indicatiu</th><th>Model</th><th>KMs</th><th></th></tr></thead>
+                    <tbody>
+                      @for (vehicle of configuration.vehicleCatalog; track vehicle.indicatiu) {
+                        <tr><td>{{ vehicle.indicatiu }}</td><td>{{ vehicle.modelo || '—' }}</td><td>{{ vehicle.kms }}</td><td><button class="btn" type="button" (click)="removeVehicle(vehicle.indicatiu)">Eliminar</button></td></tr>
+                      } @empty {
+                        <tr><td colspan="4">No hi ha vehicles configurats.</td></tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          }
+
+          @if (systemStatus(); as status) {
+            <section class="system-operational-status">
+              <h4>Estat operatiu</h4>
             <div class="status-grid">
               <article><strong>Base de dades</strong><span>{{ status.database }}</span></article>
               <article><strong>Dispositius actius</strong><span>{{ status.activeDevices }}</span></article>
@@ -109,6 +207,7 @@
                 </tbody>
               </table>
             </div>
+            </section>
           }
         </section>
       }

@@ -9,8 +9,7 @@ namespace ADF247.Api.Services;
 public sealed class ConvocatoriaService(
     Adf247DbContext database,
     ConvocatoriaCalculationService calculations,
-    MessagingService messaging,
-    IConfiguration configuration)
+    MessagingService messaging)
 {
     public async Task<IReadOnlyList<object>> GetTypesAsync() =>
         (await database.ConvoTypes.OrderBy(type => type.Id).ToListAsync()).Select(MapType).ToList();
@@ -195,13 +194,28 @@ public sealed class ConvocatoriaService(
         var convo = await RequireConvocatoriaAsync(id);
         EnsureManager(convo, userId, isAdmin);
         var eligible = await EligibleUsersAsync(id);
-        var vehicleCatalog = configuration.GetSection("CampaignForm:VehicleCatalog").Get<List<object>>() ?? [];
+        var systemConfiguration = await database.SystemConfigurations
+            .AsNoTracking()
+            .SingleOrDefaultAsync(configuration => configuration.Id == 1);
+        var vehicleCatalog = string.IsNullOrWhiteSpace(systemConfiguration?.VehicleCatalogJson)
+            ? []
+            : JsonSerializer.Deserialize<List<object>>(systemConfiguration.VehicleCatalogJson) ?? [];
         return new { convocatoria = MapConvocatoria(convo), responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, eligibleUsers = eligible, vehicleCatalog, lockedVehicleNames = Array.Empty<string>(), prefill = (object?)null };
     }
 
     public async Task<object> GetHoursSummaryAsync()
     {
-        var settings = configuration.GetSection("HourComputation").Get<HourComputationSettings>() ?? new();
+        var systemConfiguration = await database.SystemConfigurations
+            .AsNoTracking()
+            .SingleOrDefaultAsync(configuration => configuration.Id == 1);
+        var settings = new HourComputationSettings
+        {
+            CampaignStartDate = systemConfiguration?.CampaignStartDate,
+            CampaignEndDate = systemConfiguration?.CampaignEndDate,
+            UnansweredPenaltyThreshold = systemConfiguration?.UnansweredPenaltyThreshold ?? 0,
+            UnansweredPenaltyHours = (double)(systemConfiguration?.UnansweredPenaltyHours ?? 1),
+            NoShowPenaltyHours = (double)(systemConfiguration?.NoShowPenaltyHours ?? 4),
+        };
         var now = DateTime.UtcNow;
         var users = await database.Users.Where(user => user.IsActive).OrderBy(user => user.NCarnet).ToListAsync();
         var convocatorias = await database.Convocatorias
@@ -342,18 +356,18 @@ public sealed class ConvocatoriaService(
     }
     private static bool IsWithinCampaign(DateTime date, HourComputationSettings settings)
     {
-        if (!DateOnly.TryParse(settings.CampaignStartDate, out var start) || !DateOnly.TryParse(settings.CampaignEndDate, out var end)) return false;
+        if (!settings.CampaignStartDate.HasValue || !settings.CampaignEndDate.HasValue) return false;
         var current = DateOnly.FromDateTime(date);
-        return current >= start && current <= end;
+        return current >= settings.CampaignStartDate.Value && current <= settings.CampaignEndDate.Value;
     }
     private async Task SaveAsync() { try { await database.SaveChangesAsync(); } catch (DbUpdateException error) { throw new InvalidOperationException("No se ha podido guardar el recurso.", error); } }
     private sealed record CampaignUser(int Id, string NCarnet, string Name, string? LastName);
     private sealed record HoursSummaryRow(int UserId, string UserNCarnet, string UserName, double CampaignHours, double OffCampaignHours, int UnansweredCount, int NoShowCount, double UnansweredPenaltyHours, double NoShowPenaltyHours, double TotalHours);
     private sealed class HourComputationSettings
     {
-        public string? CampaignStartDate { get; init; }
-        public string? CampaignEndDate { get; init; }
-        public int UnansweredPenaltyThreshold { get; init; } = 7;
+        public DateOnly? CampaignStartDate { get; init; }
+        public DateOnly? CampaignEndDate { get; init; }
+        public int UnansweredPenaltyThreshold { get; init; }
         public double UnansweredPenaltyHours { get; init; } = 1;
         public double NoShowPenaltyHours { get; init; } = 4;
     }

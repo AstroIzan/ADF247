@@ -118,6 +118,26 @@ model UserHoursSummary {
   updatedAt              DateTime @updatedAt @db.DateTime2
 }
 
+model SystemConfiguration {
+  id Int @id
+  autoCreateUnavailableForUsersWithoutWindow Boolean @default(false)
+  notifyOnAutoAvailableResponse Boolean @default(false)
+  weeklyConvoTypeIdsJson String @default("[]") @db.NVarChar(Max)
+  weeklyRequestWeekday Int @default(5)
+  weeklyRequestHour Int @default(8)
+  weeklyRequestMinute Int @default(0)
+  availabilityManagerNCarnetsJson String @default("[]") @db.NVarChar(Max)
+  pendingLeadDays Int @default(0)
+  pendingLeadHours Int @default(24)
+  campaignStartDate DateTime? @db.Date
+  campaignEndDate DateTime? @db.Date
+  unansweredPenaltyThreshold Int @default(0)
+  unansweredPenaltyHours Decimal @default(1) @db.Decimal(5, 2)
+  noShowPenaltyHours Decimal @default(4) @db.Decimal(5, 2)
+  vehicleCatalogJson String @default("[]") @db.NVarChar(Max)
+  updatedAt DateTime @default(now()) @db.DateTime2
+}
+
 model FormulariCampanya {
   id             Int          @id @default(autoincrement())
   convocatoriaId Int

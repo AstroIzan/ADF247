@@ -8,6 +8,9 @@ public sealed class ConvocatoriaCalculationService(Adf247DbContext database)
 {
     public async Task ApplyAvailabilityAsync(Convocatoria convocatoria)
     {
+        var systemConfiguration = await database.SystemConfigurations
+            .AsNoTracking()
+            .SingleOrDefaultAsync(configuration => configuration.Id == 1);
         var end = convocatoria.FinalTime ?? convocatoria.StartTime.AddMinutes(1);
         var windows = await database.AvailabilityWindows
             .Where(window => window.FromDateTime < end
@@ -49,6 +52,33 @@ public sealed class ConvocatoriaCalculationService(Adf247DbContext database)
                     ? "available-window-match"
                     : "unavailable-window-match",
             });
+        }
+
+        if (systemConfiguration?.AutoCreateUnavailableForUsersWithoutWindow == true)
+        {
+            var coveredCarnets = windows.Select(window => window.UserNCarnet).ToHashSet(StringComparer.OrdinalIgnoreCase);
+            var usersWithoutWindow = await database.Users
+                .Where(user => user.IsActive
+                    && !existingCarnets.Contains(user.NCarnet)
+                    && !coveredCarnets.Contains(user.NCarnet))
+                .Select(user => user.NCarnet)
+                .ToListAsync();
+
+            foreach (var carnet in usersWithoutWindow)
+            {
+                database.Respuestas.Add(new Respuesta
+                {
+                    ConvoId = convocatoria.Id,
+                    UserNCarnet = carnet,
+                    Response = false,
+                    IsCustom = false,
+                    FullHorari = false,
+                    AttendanceConfirmed = true,
+                    AttendanceJustified = false,
+                    Source = "auto-no-window",
+                    AutoAssignReason = "no-availability-window",
+                });
+            }
         }
 
         await database.SaveChangesAsync();

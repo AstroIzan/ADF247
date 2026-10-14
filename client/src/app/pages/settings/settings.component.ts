@@ -1,13 +1,14 @@
 import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { PushNotificationsService } from '../../services/push-notifications.service';
-import { DataService, MessagingConfiguration, MessagingNotificationLog, MessagingSystemStatus, TaskExecutionLog } from '../../services/data.service';
+import { ConvoType, DataService, MessagingConfiguration, MessagingNotificationLog, MessagingSystemStatus, SystemConfiguration, SystemConfigurationVehicle, TaskExecutionLog, User } from '../../services/data.service';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.css',
 })
@@ -21,6 +22,11 @@ export class SettingsComponent {
   taskExecutions = signal<TaskExecutionLog[]>([]);
   configurations = signal<MessagingConfiguration[]>([]);
   systemStatus = signal<MessagingSystemStatus | null>(null);
+  systemConfiguration = signal<SystemConfiguration | null>(null);
+  systemConfigurationSaving = signal(false);
+  systemConvoTypes = signal<ConvoType[]>([]);
+  systemUsers = signal<User[]>([]);
+  newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', kms: 0 });
 
   constructor(
     public authService: AuthService,
@@ -69,7 +75,7 @@ export class SettingsComponent {
     let completed = 0;
     const complete = () => {
       completed++;
-      if (completed === 4) this.adminLoading.set(false);
+      if (completed === 7) this.adminLoading.set(false);
     };
 
     this.dataService.getMessagingSystemStatus().subscribe({
@@ -112,6 +118,36 @@ export class SettingsComponent {
         complete();
       },
     });
+    this.dataService.getSystemConfiguration().subscribe({
+      next: (configuration) => {
+        this.systemConfiguration.set(configuration);
+        complete();
+      },
+      error: (error) => {
+        this.adminError.set(error.message || 'No s’ha pogut carregar la configuració del sistema.');
+        complete();
+      },
+    });
+    this.dataService.getConvoTypes().subscribe({
+      next: (types) => {
+        this.systemConvoTypes.set(types);
+        complete();
+      },
+      error: (error) => {
+        this.adminError.set(error.message || 'No s’han pogut carregar els tipus de convocatòria.');
+        complete();
+      },
+    });
+    this.dataService.getUsers().subscribe({
+      next: (users) => {
+        this.systemUsers.set(users);
+        complete();
+      },
+      error: (error) => {
+        this.adminError.set(error.message || 'No s’han pogut carregar els usuaris.');
+        complete();
+      },
+    });
   }
 
   toggleConfiguration(configuration: MessagingConfiguration) {
@@ -121,5 +157,85 @@ export class SettingsComponent {
       next: (saved) => this.configurations.set(this.configurations().map((item) => item.id === saved.id ? saved : item)),
       error: (error) => this.adminError.set(error.message || 'No s’ha pogut actualitzar la configuració.'),
     });
+  }
+
+  isWeeklyTypeSelected(typeId: number) {
+    return this.systemConfiguration()?.weeklyConvoTypeIds.includes(typeId) ?? false;
+  }
+
+  toggleWeeklyType(typeId: number, selected: boolean) {
+    this.updateSystemConfiguration((configuration) => ({
+      ...configuration,
+      weeklyConvoTypeIds: selected
+        ? [...new Set([...configuration.weeklyConvoTypeIds, typeId])]
+        : configuration.weeklyConvoTypeIds.filter((id) => id !== typeId),
+    }));
+  }
+
+  isAvailabilityManagerSelected(nCarnet: string) {
+    return this.systemConfiguration()?.availabilityManagerNCarnets.includes(nCarnet) ?? false;
+  }
+
+  toggleAvailabilityManager(nCarnet: string, selected: boolean) {
+    this.updateSystemConfiguration((configuration) => ({
+      ...configuration,
+      availabilityManagerNCarnets: selected
+        ? [...new Set([...configuration.availabilityManagerNCarnets, nCarnet])]
+        : configuration.availabilityManagerNCarnets.filter((value) => value !== nCarnet),
+    }));
+  }
+
+  getAdminUsers() {
+    return this.systemUsers().filter((user) => user.isActive && user.roles.isAdmin);
+  }
+
+  addVehicle() {
+    const vehicle = this.newVehicle();
+    if (!vehicle.indicatiu.trim()) {
+      this.adminError.set('L’indicatiu del vehicle és obligatori.');
+      return;
+    }
+
+    this.updateSystemConfiguration((configuration) => ({
+      ...configuration,
+      vehicleCatalog: [...configuration.vehicleCatalog, {
+        indicatiu: vehicle.indicatiu.trim(),
+        modelo: vehicle.modelo?.trim() || null,
+        kms: Number(vehicle.kms) || 0,
+      }],
+    }));
+    this.newVehicle.set({ indicatiu: '', modelo: '', kms: 0 });
+  }
+
+  removeVehicle(indicatiu: string) {
+    this.updateSystemConfiguration((configuration) => ({
+      ...configuration,
+      vehicleCatalog: configuration.vehicleCatalog.filter((vehicle) => vehicle.indicatiu !== indicatiu),
+    }));
+  }
+
+  saveSystemConfiguration() {
+    const configuration = this.systemConfiguration();
+    if (!configuration || this.systemConfigurationSaving()) return;
+    this.systemConfigurationSaving.set(true);
+    this.adminError.set('');
+    const { updatedAt: _, ...request } = configuration;
+    this.dataService.updateSystemConfiguration(request).subscribe({
+      next: (saved) => {
+        this.systemConfiguration.set(saved);
+        this.systemConfigurationSaving.set(false);
+      },
+      error: (error) => {
+        this.adminError.set(error.error?.message || error.message || 'No s’ha pogut desar la configuració del sistema.');
+        this.systemConfigurationSaving.set(false);
+      },
+    });
+  }
+
+  private updateSystemConfiguration(update: (configuration: SystemConfiguration) => SystemConfiguration) {
+    const configuration = this.systemConfiguration();
+    if (configuration) {
+      this.systemConfiguration.set(update(configuration));
+    }
   }
 }

@@ -13,6 +13,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
     public DbSet<Respuesta> Respuestas => Set<Respuesta>();
     public DbSet<CampaignForm> CampaignForms => Set<CampaignForm>();
     public DbSet<UserHoursSummary> UserHoursSummaries => Set<UserHoursSummary>();
+    public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
     public DbSet<PlaAlfaMunicipalitySelection> PlaAlfaMunicipalitySelections => Set<PlaAlfaMunicipalitySelection>();
     public DbSet<DeviceRegistration> DeviceRegistrations => Set<DeviceRegistration>();
     public DbSet<MessagingConfiguration> MessagingConfigurations => Set<MessagingConfiguration>();
@@ -111,6 +112,18 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.HasIndex(summary => summary.UserId).IsUnique();
             entity.Property(summary => summary.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
             entity.Property(summary => summary.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
+        });
+
+        modelBuilder.Entity<SystemConfiguration>(entity =>
+        {
+            entity.ToTable("SystemConfiguration");
+            entity.HasKey(configuration => configuration.Id);
+            entity.Property(configuration => configuration.WeeklyConvoTypeIdsJson).IsRequired();
+            entity.Property(configuration => configuration.AvailabilityManagerNCarnetsJson).IsRequired();
+            entity.Property(configuration => configuration.VehicleCatalogJson).IsRequired();
+            entity.Property(configuration => configuration.UnansweredPenaltyHours).HasPrecision(5, 2);
+            entity.Property(configuration => configuration.NoShowPenaltyHours).HasPrecision(5, 2);
+            entity.Property(configuration => configuration.UpdatedAt).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<PlaAlfaMunicipalitySelection>(entity =>

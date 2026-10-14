@@ -48,6 +48,7 @@ builder.Services.AddScoped<RespuestaService>();
 builder.Services.AddScoped<ConvocatoriaService>();
 builder.Services.AddScoped<PlaAlfaService>();
 builder.Services.AddScoped<MessagingService>();
+builder.Services.AddScoped<SystemConfigurationService>();
 builder.Services.AddHttpClient("pla-alfa", client => client.Timeout = TimeSpan.FromSeconds(12));
 
 var app = builder.Build();

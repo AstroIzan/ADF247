@@ -311,6 +311,31 @@ export interface MessagingConfiguration {
   updatedAt: string;
 }
 
+export interface SystemConfigurationVehicle {
+  indicatiu: string;
+  modelo?: string | null;
+  kms: number;
+}
+
+export interface SystemConfiguration {
+  autoCreateUnavailableForUsersWithoutWindow: boolean;
+  notifyOnAutoAvailableResponse: boolean;
+  weeklyConvoTypeIds: number[];
+  weeklyRequestWeekday: number;
+  weeklyRequestHour: number;
+  weeklyRequestMinute: number;
+  availabilityManagerNCarnets: string[];
+  pendingLeadDays: number;
+  pendingLeadHours: number;
+  campaignStartDate: string | null;
+  campaignEndDate: string | null;
+  unansweredPenaltyThreshold: number;
+  unansweredPenaltyHours: number;
+  noShowPenaltyHours: number;
+  vehicleCatalog: SystemConfigurationVehicle[];
+  updatedAt: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -346,6 +371,14 @@ export class DataService {
   // === CONVOCATION TYPES ===
   getConvoTypes(): Observable<ConvoType[]> {
     return this.http.get<ConvoType[]>('/convos/types');
+  }
+
+  getSystemConfiguration(): Observable<SystemConfiguration> {
+    return this.http.get<SystemConfiguration>('/system-configuration');
+  }
+
+  updateSystemConfiguration(configuration: Omit<SystemConfiguration, 'updatedAt'>): Observable<SystemConfiguration> {
+    return this.http.put<SystemConfiguration>('/system-configuration', configuration);
   }
 
   getConvoTypeById(id: number): Observable<ConvoType> {
