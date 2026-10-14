@@ -158,7 +158,11 @@
           </div>
           <p>Els administradors seleccionats tenen responsabilitat operativa sobre disponibilitat i convocatòries.</p>
           <details class="multi-select">
-            <summary>Seleccionar responsables <span>Obrir llista</span></summary>
+            <summary>
+              <span class="multi-select-label">Seleccionar responsables</span>
+              <span class="multi-select-value">{{ configuration.availabilityManagerNCarnets.length ? configuration.availabilityManagerNCarnets.length + ' seleccionats' : 'Cap seleccionat' }}</span>
+              <span class="multi-select-chevron" aria-hidden="true"></span>
+            </summary>
             <div class="checkbox-list multi-select-options">
               @for (user of getAdminUsers(); track user.id) {
                 <label class="toggle-option">
