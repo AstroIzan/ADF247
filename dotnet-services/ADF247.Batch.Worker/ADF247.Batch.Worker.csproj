@@ -16,7 +16,7 @@
   <Target Name="ExcludeApiSettingsFromBatchPublish" AfterTargets="ComputeFilesToPublish">
     <ItemGroup>
       <ResolvedFileToPublish Remove="@(ResolvedFileToPublish)"
-                             Condition="$([System.String]::Copy('%(ResolvedFileToPublish.Identity)').Contains('\ADF247.Api\appsettings'))" />
+                             Condition="$([System.String]::Copy('%(ResolvedFileToPublish.Identity)').Contains('\ADF247.Api\appsettings')) Or $([System.String]::Copy('%(ResolvedFileToPublish.Identity)').Contains('/ADF247.Api/appsettings'))" />
     </ItemGroup>
   </Target>
 
