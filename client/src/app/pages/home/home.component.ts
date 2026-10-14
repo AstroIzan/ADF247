@@ -1518,15 +1518,11 @@ export class HomeComponent implements OnInit {
       next: (updatedConvo) => {
         this.runningConvoAdminActionKey.set(null);
         this.replaceConvocatoriaInState(updatedConvo);
-        this.adminActionFeedback.set(`Sortida actualitzada per a ${updatedConvo.title}.`);
-        this.dataService.sendConvocatoriaSortidaStatus(updatedConvo.id).subscribe({
-          next: () => {
-            this.adminActionFeedback.set(`Sortida actualitzada i notificació enviada per a ${updatedConvo.title}.`);
-          },
-          error: () => {
-            // Notification failure is non-critical
-          },
-        });
+        this.adminActionFeedback.set(
+          updatedConvo.sortida
+            ? `Sortida actualitzada i notificació enviada per a ${updatedConvo.title}.`
+            : `Sortida actualitzada per a ${updatedConvo.title}.`,
+        );
       },
       error: (err) => {
         this.runningConvoAdminActionKey.set(null);

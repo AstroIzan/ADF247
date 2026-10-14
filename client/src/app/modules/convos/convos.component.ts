@@ -282,16 +282,6 @@ export class ConvosComponent implements OnDestroy {
     if (this.editingId()) {
       this.dataService.updateConvocatoria(this.editingId()!, payload).subscribe({
         next: (updatedConvo) => {
-          if (sortidaChanged) {
-            this.dataService.sendConvocatoriaSortidaStatus(updatedConvo.id).subscribe({
-              next: () => {
-                this.actionFeedback.set(`S'ha actualitzat la convocatòria i enviat l'estat de sortida per a ${updatedConvo.title}.`);
-              },
-              error: () => {
-                // Keep save successful even if notification dispatch fails.
-              },
-            });
-          }
           this.formSubmitting.set(false);
           this.closeForm();
           this.onChanged.emit(updatedConvo);

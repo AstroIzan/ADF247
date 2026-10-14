@@ -120,18 +120,6 @@
                       >
                         📝
                       </button>
-                      @if (authService.isAdmin()) {
-                        <button
-                          type="button"
-                          class="admin-convo-btn"
-                          [disabled]="isRunningConvoAdminAction('notify', convo.id)"
-                          (click)="sendResponseRequestNotification(convo)"
-                          title="Notificar i demanar resposta"
-                          aria-label="Notificar i demanar resposta"
-                        >
-                          🔔
-                        </button>
-                      }
                       }
 
                       @if (canOpenGuardiaResponses(convo)) {
@@ -145,6 +133,19 @@
                           👥
                         </button>
                       }
+                    }
+
+                    @if (authService.isAdmin()) {
+                      <button
+                        type="button"
+                        class="admin-convo-btn"
+                        [disabled]="isRunningConvoAdminAction('notify', convo.id)"
+                        (click)="sendResponseRequestNotification(convo)"
+                        title="Notificar i demanar resposta"
+                        aria-label="Notificar i demanar resposta"
+                      >
+                        🔔
+                      </button>
                     }
 
                     @if (isResponseWindowClosed(convo) && !getMyRespuesta(convo.id)) {

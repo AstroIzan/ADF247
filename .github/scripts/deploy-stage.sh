@@ -20,12 +20,6 @@ case "${stage}" in
     ;;
 esac
 
-legacy_env_file="api/.env.${stage}"
-if [ ! -f "${deploy_dir}/${env_file}" ] && [ -f "${deploy_dir}/${legacy_env_file}" ]; then
-  mkdir -p "$(dirname "${deploy_dir}/${env_file}")"
-  cp "${deploy_dir}/${legacy_env_file}" "${deploy_dir}/${env_file}"
-fi
-
 rsync -a --delete \
   --exclude='.git/' \
   --exclude='.env' \
@@ -95,11 +89,6 @@ elif profile:
 elif path.exists():
     path.unlink()
 PY
-
-# The server-managed build helper still resolves this historical path. Keep only
-# a compatibility copy of the secret file; the Node API code is not deployed.
-mkdir -p "$(dirname "${deploy_dir}/${legacy_env_file}")"
-cp "${deploy_dir}/${env_file}" "${deploy_dir}/${legacy_env_file}"
 
 sudo /usr/local/sbin/adf247-build "${stage}"
 

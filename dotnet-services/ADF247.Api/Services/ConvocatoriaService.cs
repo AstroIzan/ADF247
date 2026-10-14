@@ -97,6 +97,7 @@ public sealed class ConvocatoriaService(
     {
         var convo = await IncludeConvocatoria(database.Convocatorias).SingleOrDefaultAsync(item => item.Id == id);
         if (convo is null) return null;
+        var notifyConfirmedSortida = request.Sortida is true && !convo.Sortida;
         if (request.Sortida.HasValue) EnsureManager(convo, userId, isAdmin);
         if (request.ConvoTypeId.HasValue) { await RequireTypeAsync(request.ConvoTypeId); convo.ConvoTypeId = request.ConvoTypeId.Value; }
         if (request.ResponsableId.HasValue) { await RequireUserAsync(request.ResponsableId.Value); convo.ResponsableId = request.ResponsableId; }
@@ -109,6 +110,25 @@ public sealed class ConvocatoriaService(
         if (request.IsActive.HasValue) convo.IsActive = request.IsActive.Value;
         if (request.AutoAssignResponsable.HasValue) convo.AutoAssignResponsable = request.AutoAssignResponsable.Value;
         if (request.Sortida.HasValue) convo.Sortida = request.Sortida.Value;
+
+        if (notifyConfirmedSortida)
+        {
+            database.MessagingNotifications.Add(new MessagingNotification
+            {
+                ConvocatoriaId = convo.Id,
+                Trigger = "sortida-status",
+                Status = "queued",
+                Title = "Confirmació de sortida",
+                Body = $"La sortida de la convocatòria \"{convo.Title}\" ha estat confirmada.",
+                PayloadJson = JsonSerializer.Serialize(new Dictionary<string, string>
+                {
+                    ["convocatoriaId"] = convo.Id.ToString(),
+                }),
+                ActorUserId = userId,
+                CreatedAt = DateTime.UtcNow,
+            });
+        }
+
         await SaveAsync();
         if (convo.AutoAssignResponsable) await calculations.RecalculateResponsableAsync(id);
         return await GetAsync(id);

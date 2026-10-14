@@ -2,7 +2,7 @@
 
 Monorepo con 3 partes:
 
-- `database`: Prisma + Microsoft SQL Server
+- `database`: historial de migraciones Prisma + Microsoft SQL Server
 - `dotnet-services`: API y worker de mensajería .NET 10
 - `client`: Angular
 
@@ -84,7 +84,6 @@ Variables principales:
 
 Notas importantes:
 
-- El despliegue migra automáticamente los ficheros secretos históricos desde `api/.env.<stage>` a `dotnet-services/.env.<stage>` durante el primer corte.
 - La API .NET acepta `DATABASE_URL` en formato Prisma SQL Server para conservar los secretos de despliegue existentes.
 - Si faltan secretos JWT en producción, la API falla al iniciar auth (esperado).
 

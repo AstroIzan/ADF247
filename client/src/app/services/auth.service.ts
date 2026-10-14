@@ -173,7 +173,8 @@ export class AuthService {
   }
 
   getCachedIsAdmin(): boolean {
-    return this.getBasicUserCache()?.isAdmin ?? false;
+    const user = this.getCurrentUser();
+    return user ? this.resolveIsAdmin(user.roles) : this.getBasicUserCache()?.isAdmin ?? false;
   }
 
   getCachedNCarnet(): string | null {
@@ -225,10 +226,6 @@ export class AuthService {
   }
 
   private ensureBasicUserCache() {
-    if (localStorage.getItem(this.BASIC_USER_CACHE_KEY)) {
-      return;
-    }
-
     const user = this.getCurrentUser();
     if (!user) {
       return;
