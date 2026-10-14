@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
@@ -16,6 +16,12 @@ export class HoursSummaryComponent implements OnInit {
   error = signal('');
   generatedAt = signal<string | null>(null);
   rows = signal<UserHoursSummaryRow[]>([]);
+  totalHours = computed(() => this.rows().reduce((total, row) => total + this.formatRoundedHours(row.totalHours), 0));
+  totalPenalties = computed(() => this.rows().reduce(
+    (total, row) => total + this.formatRoundedHours(row.unansweredPenaltyHours) + this.formatRoundedHours(row.noShowPenaltyHours),
+    0,
+  ));
+  totalUnanswered = computed(() => this.rows().reduce((total, row) => total + (Number(row.unansweredCount) || 0), 0));
 
   constructor(
     private authService: AuthService,

@@ -1,55 +1,86 @@
-<div class="hours-summary-page">
-  <section class="hours-summary-header">
-    <h1>Resum d'hores</h1>
-    <p>Resultat agregat d'hores dins/fora campanya amb penalitzacions aplicades.</p>
-    <div class="hours-summary-actions">
+<section class="hours-summary-page">
+  <header class="hours-hero">
+    <div>
+      <p class="eyebrow">Administració · Còmput</p>
+      <h1>Resum d’hores</h1>
+      <p>Consulta les hores de campanya, l’activitat fora de període i les penalitzacions aplicades a cada voluntari.</p>
+    </div>
+    <div class="hours-hero-actions">
+      @if (generatedAt()) {
+        <span class="generated-at">Actualitzat {{ generatedAt() | date:'short' }}</span>
+      }
       <button type="button" class="btn btn-secondary" (click)="loadSummary()" [disabled]="loading()">
         {{ loading() ? 'Actualitzant...' : 'Actualitzar resum' }}
       </button>
-      @if (generatedAt()) {
-        <span class="muted-text">Última generació: {{ generatedAt() | date:'short' }}</span>
-      }
     </div>
-  </section>
+  </header>
 
   @if (error()) {
     <div class="error-alert">{{ error() }}</div>
   } @else if (loading()) {
-    <div class="loading">Carregant resum d'hores...</div>
+    <div class="loading">Carregant resum d’hores...</div>
   } @else if (rows().length === 0) {
-    <div class="empty-state">No hi ha dades d'hores per mostrar.</div>
+    <div class="empty-state">No hi ha dades d’hores per mostrar.</div>
   } @else {
-    <div class="table-scroll">
-      <table class="logs-table hours-summary-table">
-        <thead>
-          <tr>
-            <th>Usuari</th>
-            <th>Nº Carnet</th>
-            <th>H campanya</th>
-            <th>H fora campanya</th>
-            <th>No respostes</th>
-            <th>No assistències</th>
-            <th class="hours-penalty-header"><span>Penalització<br>no resposta</span></th>
-            <th class="hours-penalty-header"><span>Penalització<br>no assistència</span></th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (row of rows(); track row.userId) {
+    <section class="hours-overview">
+      <article>
+        <span>Voluntaris comptabilitzats</span>
+        <strong>{{ rows().length }}</strong>
+      </article>
+      <article>
+        <span>Hores totals</span>
+        <strong>{{ totalHours() }}</strong>
+      </article>
+      <article>
+        <span>Penalitzacions aplicades</span>
+        <strong>-{{ totalPenalties() }}</strong>
+      </article>
+      <article>
+        <span>Respostes pendents</span>
+        <strong>{{ totalUnanswered() }}</strong>
+      </article>
+    </section>
+
+    <section class="hours-table-card">
+      <div class="hours-table-head">
+        <div>
+          <p class="table-kicker">Detall per persona</p>
+          <h2>Hores i penalitzacions</h2>
+        </div>
+        <span>{{ rows().length }} registres</span>
+      </div>
+      <div class="table-scroll">
+        <table class="logs-table hours-summary-table">
+          <thead>
             <tr>
-              <td class="hours-user-cell">{{ row.userName }}</td>
-              <td>{{ row.userNCarnet }}</td>
-              <td>{{ formatRoundedHours(row.campaignHours) }}</td>
-              <td>{{ formatRoundedHours(row.offCampaignHours) }}</td>
-              <td>{{ row.unansweredCount }}</td>
-              <td>{{ row.noShowCount }}</td>
-              <td class="hours-penalty-cell">-{{ formatRoundedHours(row.unansweredPenaltyHours) }}</td>
-              <td class="hours-penalty-cell">-{{ formatRoundedHours(row.noShowPenaltyHours) }}</td>
-              <td class="hours-total-cell"><strong>{{ formatRoundedHours(row.totalHours) }}</strong></td>
+              <th>Usuari</th>
+              <th>Nº Carnet</th>
+              <th>H campanya</th>
+              <th>H fora campanya</th>
+              <th>No respostes</th>
+              <th>No assistències</th>
+              <th class="hours-penalty-header"><span>Penalització<br>no resposta</span></th>
+              <th class="hours-penalty-header"><span>Penalització<br>no assistència</span></th>
+              <th>Total</th>
             </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.userId) {
+              <tr>
+                <td class="hours-user-cell"><strong>{{ row.userName }}</strong></td>
+                <td><span class="carnet-pill">{{ row.userNCarnet }}</span></td>
+                <td>{{ formatRoundedHours(row.campaignHours) }}</td>
+                <td>{{ formatRoundedHours(row.offCampaignHours) }}</td>
+                <td>{{ row.unansweredCount }}</td>
+                <td>{{ row.noShowCount }}</td>
+                <td class="hours-penalty-cell">-{{ formatRoundedHours(row.unansweredPenaltyHours) }}</td>
+                <td class="hours-penalty-cell">-{{ formatRoundedHours(row.noShowPenaltyHours) }}</td>
+                <td class="hours-total-cell"><strong>{{ formatRoundedHours(row.totalHours) }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
   }
-</div>
+</section>
