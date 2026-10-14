@@ -5,9 +5,12 @@
 }
 
 .system-page {
+  box-sizing: border-box;
   max-width: 1240px;
+  min-height: calc(100dvh - var(--top-nav-height, 0px));
   margin: 0 auto;
-  padding: 28px;
+  padding: 28px 28px 52px;
+  background: #f3f5f7;
 }
 
 .system-hero {
