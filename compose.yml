@@ -67,6 +67,28 @@ services:
       - adf247
       - homelab-database
 
+  batch-worker:
+    profiles:
+      - batch
+
+    build:
+      context: ./dotnet-services
+      dockerfile: ADF247.Batch.Worker/Dockerfile
+
+    container_name: adf247${DEPLOYMENT_SUFFIX:-}-batch-worker
+
+    restart: unless-stopped
+
+    env_file:
+      - ${API_ENV_FILE:-./dotnet-services/.env.pro}
+
+    environment:
+      DOTNET_ENVIRONMENT: Production
+
+    networks:
+      - adf247
+      - homelab-database
+
   client:
     build:
       context: ./client

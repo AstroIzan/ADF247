@@ -66,9 +66,9 @@ if bool(config) != bool(vapid_key):
     raise ValueError("Firebase web configuration and VAPID key must be configured together.")
 
 profile = (
-    "COMPOSE_PROFILES=dotnet,messaging\nDOTNET_API_PORT=3002\n"
+    "COMPOSE_PROFILES=dotnet,messaging,batch\nDOTNET_API_PORT=3002\n"
     if os.environ.get("DEPLOY_STAGE") == "pre"
-    else "COMPOSE_PROFILES=dotnet\nDOTNET_API_PORT=3003\n"
+    else "COMPOSE_PROFILES=dotnet,batch\nDOTNET_API_PORT=3003\n"
 )
 
 if config:

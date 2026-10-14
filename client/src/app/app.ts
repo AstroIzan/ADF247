@@ -56,7 +56,7 @@ export class App {
     this.profileComponent?.openModal();
   }
 
-  openSettingsModal() {
+  openNotificationsModal() {
     this.settingsComponent?.openModal();
   }
 
@@ -73,8 +73,8 @@ export class App {
     this.closeMobileMenu();
   }
 
-  openSettingsFromMenu() {
-    this.openSettingsModal();
+  openNotificationsFromMenu() {
+    this.openNotificationsModal();
     this.closeMobileMenu();
   }
 
@@ -142,7 +142,7 @@ export class App {
     }
 
     if (!this.pushNotificationsService.hasRegisteredCurrentToken() && !this.pushNotificationsService.hasKnownRegisteredDevice()) {
-      this.notificationWarning = 'Aquest dispositiu encara no està registrat al servidor. Revisa-ho a Configuració.'
+      this.notificationWarning = 'Aquest dispositiu encara no està registrat al servidor. Revisa-ho a Notificacions.'
       return
     }
 

@@ -1,0 +1,127 @@
+<section class="system-page">
+  <header class="system-page-header">
+    <div>
+      <p class="eyebrow">Administració</p>
+      <h1>Sistema</h1>
+      <p>Configura les automatitzacions de disponibilitat, les convocatòries recurrents, el càlcul d’hores i els vehicles de l’agrupació.</p>
+    </div>
+    <div class="page-actions">
+      <button class="btn" type="button" [disabled]="loading()" (click)="load()">Actualitzar</button>
+      <button class="btn btn-primary" type="button" [disabled]="saving() || !configuration()" (click)="save()">
+        {{ saving() ? 'Desant...' : 'Desar canvis' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error()) { <div class="alert alert-danger">{{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="loading-state">Carregant la configuració del sistema...</div>
+  } @else if (configuration(); as configuration) {
+    <div class="system-config-grid">
+      <section class="system-config-card">
+        <h2>Disponibilitat automàtica</h2>
+        <p>Controla com es creen respostes a partir del calendari de disponibilitat.</p>
+        <label><input type="checkbox" [(ngModel)]="configuration.autoCreateUnavailableForUsersWithoutWindow"> Marcar automàticament com a no disponible els usuaris sense cap tram al calendari</label>
+        <label><input type="checkbox" [(ngModel)]="configuration.notifyOnAutoAvailableResponse"> Avisar l’usuari quan una automatització el marqui com a disponible</label>
+      </section>
+
+      <section class="system-config-card">
+        <h2>Sol·licitud setmanal de disponibilitat</h2>
+        <p>Dia i hora de la setmana anterior en què el Batch Worker prepararà la disponibilitat de la setmana següent.</p>
+        <div class="form-grid">
+          <label>Dia
+            <select [(ngModel)]="configuration.weeklyRequestWeekday">
+              <option [ngValue]="0">Diumenge</option><option [ngValue]="1">Dilluns</option><option [ngValue]="2">Dimarts</option><option [ngValue]="3">Dimecres</option><option [ngValue]="4">Dijous</option><option [ngValue]="5">Divendres</option><option [ngValue]="6">Dissabte</option>
+            </select>
+          </label>
+          <label>Hora <input type="number" min="0" max="23" [(ngModel)]="configuration.weeklyRequestHour"></label>
+          <label>Minut <input type="number" min="0" max="59" [(ngModel)]="configuration.weeklyRequestMinute"></label>
+        </div>
+      </section>
+
+      <section class="system-config-card system-config-card-wide">
+        <h2>Tipus setmanals</h2>
+        <p>Selecciona els tipus que es generaran setmanalment i defineix una o més franges per tipus.</p>
+        <div class="checkbox-list">
+          @for (type of convoTypes(); track type.id) {
+            <div class="weekly-type-row">
+              <label><input type="checkbox" [checked]="isWeeklyTypeSelected(type.id)" (change)="toggleWeeklyType(type.id, $any($event.target).checked)"> {{ type.name }}</label>
+              @if (isWeeklyTypeSelected(type.id)) {
+                <div class="weekly-schedule-list">
+                  @for (schedule of schedulesForType(type.id); track $index; let index = $index) {
+                    <div class="weekly-schedule-row">
+                      <select [ngModel]="schedule.dayOfWeek" (ngModelChange)="updateWeeklySchedule(type.id, index, 'dayOfWeek', $event)">
+                        <option [ngValue]="0">Diumenge</option><option [ngValue]="1">Dilluns</option><option [ngValue]="2">Dimarts</option><option [ngValue]="3">Dimecres</option><option [ngValue]="4">Dijous</option><option [ngValue]="5">Divendres</option><option [ngValue]="6">Dissabte</option>
+                      </select>
+                      <input type="time" [ngModel]="schedule.startTime" (ngModelChange)="updateWeeklySchedule(type.id, index, 'startTime', $event)">
+                      <input type="time" [ngModel]="schedule.endTime" (ngModelChange)="updateWeeklySchedule(type.id, index, 'endTime', $event)">
+                      <button class="btn btn-small" type="button" (click)="removeWeeklySchedule(type.id, index)">Eliminar</button>
+                    </div>
+                  }
+                  <button class="btn btn-small" type="button" (click)="addWeeklySchedule(type.id)">Afegir franja</button>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="system-config-card">
+        <h2>Responsables de disponibilitat</h2>
+        <p>Admins amb responsabilitat sobre disponibilitat i convocatòries.</p>
+        <div class="checkbox-list">
+          @for (user of getAdminUsers(); track user.id) {
+            <label><input type="checkbox" [checked]="isAvailabilityManagerSelected(user.nCarnet)" (change)="toggleAvailabilityManager(user.nCarnet, $any($event.target).checked)"> {{ user.nCarnet }} · {{ user.name }} {{ user.lastName || '' }}</label>
+          } @empty {
+            <span>No hi ha admins disponibles.</span>
+          }
+        </div>
+      </section>
+
+      <section class="system-config-card">
+        <h2>Sol·licitud normal si no has respost</h2>
+        <p>Finestra d’antelació respecte al dia de l’activitat.</p>
+        <div class="form-grid form-grid-two">
+          <label>Dies <input type="number" min="0" max="30" [(ngModel)]="configuration.pendingLeadDays"></label>
+          <label>Hores <input type="number" min="0" max="720" [(ngModel)]="configuration.pendingLeadHours"></label>
+        </div>
+      </section>
+
+      <section class="system-config-card system-config-card-wide">
+        <h2>Càlcul d’hores i campanya</h2>
+        <p>Període de campanya i penalitzacions aplicades al còmput d’hores.</p>
+        <div class="form-grid form-grid-five">
+          <label>Inici <input type="date" [(ngModel)]="configuration.campaignStartDate"></label>
+          <label>Fi <input type="date" [(ngModel)]="configuration.campaignEndDate"></label>
+          <label>No respostes mínimes <input type="number" min="0" max="365" [(ngModel)]="configuration.unansweredPenaltyThreshold"></label>
+          <label>Hores per no resposta <input type="number" min="0" max="24" step="0.5" [(ngModel)]="configuration.unansweredPenaltyHours"></label>
+          <label>Hores per no assistència <input type="number" min="0" max="24" step="0.5" [(ngModel)]="configuration.noShowPenaltyHours"></label>
+        </div>
+      </section>
+
+      <section class="system-config-card system-config-card-wide">
+        <h2>Vehicles de l’agrupació</h2>
+        <p>Indicatiu, model i quilòmetres dels vehicles disponibles per als formularis de campanya.</p>
+        <div class="vehicle-form">
+          <input placeholder="Indicatiu" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })">
+          <input placeholder="Model" [ngModel]="newVehicle().modelo" (ngModelChange)="newVehicle.set({ ...newVehicle(), modelo: $event })">
+          <input type="number" min="0" placeholder="KMs" [ngModel]="newVehicle().kms" (ngModelChange)="newVehicle.set({ ...newVehicle(), kms: $event })">
+          <button class="btn" type="button" (click)="addVehicle()">Afegir vehicle</button>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Indicatiu</th><th>Model</th><th>KMs</th><th></th></tr></thead>
+            <tbody>
+              @for (vehicle of configuration.vehicleCatalog; track vehicle.indicatiu) {
+                <tr><td>{{ vehicle.indicatiu }}</td><td>{{ vehicle.modelo || '—' }}</td><td>{{ vehicle.kms }}</td><td><button class="btn btn-small" type="button" (click)="removeVehicle(vehicle.indicatiu)">Eliminar</button></td></tr>
+              } @empty {
+                <tr><td colspan="4">No hi ha vehicles configurats.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  }
+</section>

@@ -5,6 +5,7 @@ import { HomeComponent } from './pages/home/home.component';
 import { AvailabilityComponent } from './pages/availability/availability.component';
 import { PlaAlfaComponent } from './pages/pla-alfa/pla-alfa.component';
 import { HoursSummaryComponent } from './pages/hours-summary/hours-summary.component';
+import { SystemConfigurationComponent } from './pages/system-configuration/system-configuration.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 
@@ -41,6 +42,11 @@ export const routes: Routes = [
   {
     path: 'hours-summary',
     component: HoursSummaryComponent,
+    canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'system',
+    component: SystemConfigurationComponent,
     canActivate: [authGuard, adminGuard]
   },
   {
