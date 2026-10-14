@@ -254,6 +254,402 @@ textarea {
 	font-size: 18px;
 }
 
+/*
+ * Internal management modules share the dashboard's workspace language while
+ * retaining their isolated component behaviour and responsive card views.
+ */
+body app-users .users-container,
+body app-convos .convos-container,
+body app-convo-types .types-container,
+body app-respuestas .respuestas-container {
+	padding: 10px;
+}
+
+body app-users .users-header,
+body app-convos .convos-header,
+body app-convo-types .types-header,
+body app-respuestas .respuestas-header {
+	align-items: flex-end;
+	margin-bottom: 18px;
+	padding: 18px 19px;
+	border: 1px solid #dfe5eb;
+	border-radius: 14px;
+	background: linear-gradient(135deg, #fbfcfd, #f1f4f7);
+}
+
+body app-users .module-title,
+body app-convos .module-title,
+body app-convo-types .module-title,
+body app-respuestas .module-title {
+	min-width: 0;
+}
+
+body app-users .module-kicker,
+body app-convos .module-kicker,
+body app-convo-types .module-kicker,
+body app-respuestas .module-kicker {
+	margin: 0 0 4px;
+	color: #9b7100;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: .11em;
+	text-transform: uppercase;
+}
+
+body app-users .users-header h2,
+body app-convos .convos-header h2,
+body app-convo-types .types-header h2,
+body app-respuestas .respuestas-header h2 {
+	margin: 0;
+	color: #263243;
+	font-size: 22px;
+	letter-spacing: -.025em;
+}
+
+body app-users .module-description,
+body app-convos .module-description,
+body app-convo-types .module-description,
+body app-respuestas .module-description {
+	margin: 5px 0 0;
+	color: #687587;
+	font-size: 12px;
+	line-height: 1.5;
+}
+
+body app-users .header-actions,
+body app-convos .header-actions,
+body app-convo-types .header-actions,
+body app-respuestas .header-actions {
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+body app-users .icon-filter-btn,
+body app-convos .icon-filter-btn,
+body app-convo-types .icon-filter-btn,
+body app-respuestas .icon-filter-btn {
+	border: 1px solid #cbd5df;
+	background: #fff;
+	color: #415064;
+	box-shadow: none;
+}
+
+body app-users .icon-filter-btn:hover,
+body app-convos .icon-filter-btn:hover,
+body app-convo-types .icon-filter-btn:hover,
+body app-respuestas .icon-filter-btn:hover {
+	border-color: #8090a1;
+	background: #edf1f5;
+}
+
+body app-users .btn-primary,
+body app-convos .btn-primary,
+body app-convo-types .btn-primary,
+body app-respuestas .btn-primary {
+	border: 1px solid #d49500;
+	background: #f0b000;
+	color: #24303e;
+	box-shadow: none;
+}
+
+body app-users .btn-secondary,
+body app-convos .btn-secondary,
+body app-convo-types .btn-secondary,
+body app-respuestas .btn-secondary {
+	border: 1px solid #cbd5df;
+	background: #fff;
+	color: #405064;
+	box-shadow: none;
+}
+
+body app-users .btn-edit,
+body app-convos .btn-edit,
+body app-convo-types .btn-edit,
+body app-respuestas .btn-edit {
+	border: 1px solid #438466;
+	background: #edf8f1;
+	color: #246245;
+	box-shadow: none;
+}
+
+body app-users .btn-danger,
+body app-convos .btn-danger,
+body app-convo-types .btn-danger,
+body app-respuestas .btn-danger {
+	border: 1px solid #d7666a;
+	background: #fff1f2;
+	color: #a5272d;
+	box-shadow: none;
+}
+
+body app-users .btn:hover:not(:disabled),
+body app-convos .btn:hover:not(:disabled),
+body app-convo-types .btn:hover:not(:disabled),
+body app-respuestas .btn:hover:not(:disabled) {
+	filter: none;
+	box-shadow: 0 3px 7px rgba(32, 46, 63, .12);
+}
+
+body app-users .table-responsive,
+body app-convos .table-responsive,
+body app-respuestas .table-responsive {
+	border: 1px solid #dfe5eb;
+	border-radius: 12px;
+	background: #fff;
+}
+
+body app-users .users-table,
+body app-convos .convos-table,
+body app-respuestas .respuestas-table {
+	border: 0;
+	border-radius: 0;
+	font-size: 12px;
+}
+
+body app-users .users-table th,
+body app-convos .convos-table th,
+body app-respuestas .respuestas-table th {
+	padding: 12px;
+	border-bottom: 1px solid #dfe5eb;
+	background: #f5f7f9;
+	color: #657286;
+	font-size: 10px;
+	font-weight: 800;
+	letter-spacing: .06em;
+}
+
+body app-users .users-table td,
+body app-convos .convos-table td,
+body app-respuestas .respuestas-table td {
+	padding: 12px;
+	border-bottom-color: #edf0f3;
+	color: #3c4a5d;
+}
+
+body app-users .users-table tbody tr:nth-child(even) td,
+body app-convos .convos-table tbody tr:nth-child(even) td,
+body app-respuestas .respuestas-table tbody tr:nth-child(even) td {
+	background: #fbfcfd;
+}
+
+body app-users .users-table tbody tr:hover td,
+body app-convos .convos-table tbody tr:hover td,
+body app-respuestas .respuestas-table tbody tr:hover td {
+	background: #f4f8fb;
+}
+
+body app-users .role-chip,
+body app-users .chip,
+body app-convos .role-pill {
+	border: 1px solid #ccd9ee;
+	background: #eef4ff;
+	color: #345a96;
+}
+
+body app-users .badge-active,
+body app-respuestas .badge-yes,
+body app-convos .badge-sortida-yes,
+body app-convos .badge-active {
+	border: 1px solid #bfe2cc;
+	background: #edf8f1;
+	color: #246245;
+}
+
+body app-users .badge-inactive,
+body app-respuestas .badge-no,
+body app-convos .badge-sortida-no,
+body app-convos .badge-inactive {
+	border: 1px solid #f0ced0;
+	background: #fff3f3;
+	color: #a52e34;
+}
+
+body app-respuestas .badge-custom {
+	border: 1px solid #eed790;
+	background: #fff8e1;
+	color: #8a6300;
+}
+
+body app-users .pagination-controls,
+body app-convos .pagination-controls,
+body app-convo-types .pagination-controls,
+body app-respuestas .pagination-controls {
+	padding: 12px;
+	border: 1px solid #dfe5eb;
+	border-radius: 12px;
+	background: #f8fafb;
+}
+
+body app-users .pagination-size,
+body app-users .pagination-nav,
+body app-convos .pagination-size,
+body app-convos .pagination-nav,
+body app-convo-types .pagination-size,
+body app-convo-types .pagination-nav,
+body app-respuestas .pagination-size,
+body app-respuestas .pagination-nav {
+	color: #667486;
+	font-size: 12px;
+	font-weight: 650;
+}
+
+body app-users .pagination-size select,
+body app-convos .pagination-size select,
+body app-convo-types .pagination-size select,
+body app-respuestas .pagination-size select {
+	border-color: #cad4df;
+	background: #fff;
+	color: #354255;
+}
+
+body app-users .user-card,
+body app-convos .convo-card,
+body app-respuestas .respuesta-card,
+body app-convo-types .type-card {
+	border-color: #dfe5eb;
+	background: #fff;
+	box-shadow: 0 3px 8px rgba(29, 43, 60, .04);
+}
+
+body app-users .user-card:hover,
+body app-convos .convo-card:hover,
+body app-respuestas .respuesta-card:hover,
+body app-convo-types .type-card:hover {
+	border-color: #b6c3d0;
+	box-shadow: 0 9px 18px rgba(29, 43, 60, .1);
+}
+
+body app-convo-types .types-list {
+	gap: 14px;
+}
+
+body app-convo-types .type-card {
+	min-height: 190px;
+	padding: 17px;
+	border-radius: 14px;
+}
+
+body app-convo-types .type-info h4 {
+	color: #273445;
+	font-size: 17px;
+}
+
+body app-convo-types .type-id-badge {
+	background: #eef2f6;
+	color: #657286;
+}
+
+body app-convo-types .type-location-row {
+	margin-top: 3px;
+	border-color: #e0e6ec;
+	background: #f7f9fb;
+	color: #59687a;
+	padding: 5px 8px;
+}
+
+body app-convo-types .type-actions {
+	margin-top: auto;
+	padding-top: 14px;
+}
+
+body app-users .modal,
+body app-convos .modal,
+body app-convo-types .modal,
+body app-respuestas .modal {
+	border-color: #d5dde6;
+	border-radius: 16px;
+	box-shadow: 0 20px 45px rgba(24, 34, 48, .25);
+}
+
+body app-users .modal-header,
+body app-convos .modal-header,
+body app-convo-types .modal-header,
+body app-respuestas .modal-header {
+	background: #f7f9fb;
+}
+
+body app-users .modal-header h3,
+body app-convos .modal-header h3,
+body app-convo-types .modal-header h3,
+body app-respuestas .modal-header h3 {
+	color: #273445;
+	font-size: 17px;
+}
+
+body app-users .modal-body,
+body app-convos .modal-body,
+body app-convo-types .modal-body,
+body app-respuestas .modal-body {
+	gap: 13px;
+}
+
+body app-users .modal-body .form-group > label:not(.checkbox-label),
+body app-convos .modal-body .form-group > label:not(.checkbox-label),
+body app-convo-types .modal-body .form-group > label:not(.checkbox-label),
+body app-respuestas .modal-body .form-group > label:not(.checkbox-label) {
+	color: #536276;
+	font-size: 12px;
+	font-weight: 750;
+}
+
+body app-users .modal-body input:not([type='checkbox']),
+body app-users .modal-body select,
+body app-users .modal-body textarea,
+body app-convos .modal-body input:not([type='checkbox']),
+body app-convos .modal-body select,
+body app-convos .modal-body textarea,
+body app-convo-types .modal-body input:not([type='checkbox']),
+body app-convo-types .modal-body select,
+body app-convo-types .modal-body textarea,
+body app-respuestas .modal-body input:not([type='checkbox']),
+body app-respuestas .modal-body select,
+body app-respuestas .modal-body textarea {
+	border-color: #cbd5df;
+	border-radius: 9px;
+	background: #fbfcfd;
+}
+
+body app-users .modal-body input:focus,
+body app-users .modal-body select:focus,
+body app-users .modal-body textarea:focus,
+body app-convos .modal-body input:focus,
+body app-convos .modal-body select:focus,
+body app-convos .modal-body textarea:focus,
+body app-convo-types .modal-body input:focus,
+body app-convo-types .modal-body select:focus,
+body app-convo-types .modal-body textarea:focus,
+body app-respuestas .modal-body input:focus,
+body app-respuestas .modal-body select:focus,
+body app-respuestas .modal-body textarea:focus {
+	border-color: #d99f00;
+	box-shadow: 0 0 0 3px rgba(240, 176, 0, .15);
+}
+
+@media (max-width: 700px) {
+	body app-users .users-header,
+	body app-convos .convos-header,
+	body app-convo-types .types-header,
+	body app-respuestas .respuestas-header {
+		align-items: flex-start;
+		padding: 15px;
+	}
+
+	body app-users .header-actions,
+	body app-convos .header-actions,
+	body app-convo-types .header-actions,
+	body app-respuestas .header-actions {
+		width: 100%;
+		justify-content: flex-start;
+	}
+
+	body app-users .module-description,
+	body app-convos .module-description,
+	body app-convo-types .module-description,
+	body app-respuestas .module-description {
+		font-size: 11px;
+	}
+}
+
 .close-btn {
 	background: transparent;
 	border: 0;
