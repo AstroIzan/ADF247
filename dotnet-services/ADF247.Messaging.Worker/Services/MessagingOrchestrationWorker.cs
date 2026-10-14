@@ -8,7 +8,6 @@ namespace ADF247.Messaging.Worker.Services;
 
 public sealed class MessagingOrchestrationWorker(
     IMessagingReadinessProbe readinessProbe,
-    IMessagingRunbookProvider runbookProvider,
     INotificationDispatchRepository repository,
     IFirebaseNotificationSender firebaseSender,
     IOptionsMonitor<MessagingWorkerOptions> configuredWorkerOptions,
@@ -16,7 +15,7 @@ public sealed class MessagingOrchestrationWorker(
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("Messaging worker started.");
+        logger.LogInformation("Messaging worker started. It only dispatches Messaging.Notification records to Firebase.");
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -24,49 +23,17 @@ public sealed class MessagingOrchestrationWorker(
 
             try
             {
-                var runbookSnapshot = runbookProvider.GetSnapshot();
-                var effectiveWorkerOptions = BuildEffectiveWorkerOptions(runbookSnapshot.Worker);
+                var effectiveWorkerOptions = configuredWorkerOptions.CurrentValue;
                 pollInterval = TimeSpan.FromSeconds(Math.Max(5, effectiveWorkerOptions.PollingIntervalSeconds));
 
-                if (runbookSnapshot.IsStale && !string.IsNullOrWhiteSpace(runbookSnapshot.Warning))
-                {
-                    logger.LogWarning("{RunbookWarning}", runbookSnapshot.Warning);
-                }
-
-                var localNow = DateTimeOffset.Now;
-                var localMinute = new DateTimeOffset(
-                    localNow.Year,
-                    localNow.Month,
-                    localNow.Day,
-                    localNow.Hour,
-                    localNow.Minute,
-                    0,
-                    localNow.Offset);
-
-                var invalidCampaigns = FindInvalidCampaigns(runbookSnapshot.Runbook).ToArray();
                 var readiness = await readinessProbe.CheckAsync(stoppingToken);
                 if (!readiness.IsReady)
                 {
-                    logger.LogWarning(
-                        "Messaging worker not ready: {Reason}. Enabled campaigns: {EnabledCampaigns}. Invalid campaigns: {InvalidCampaigns}.",
-                        readiness.Reason,
-                        runbookSnapshot.Runbook.Campaigns.Count(campaign => campaign.Enabled),
-                        invalidCampaigns.Length);
+                    logger.LogWarning("Messaging worker database is not ready: {Reason}.", readiness.Reason);
                 }
                 else
                 {
-                    logger.LogInformation(
-                        "Messaging worker ready. Enabled campaigns: {EnabledCampaigns}. Invalid campaigns: {InvalidCampaigns}.",
-                        runbookSnapshot.Runbook.Campaigns.Count(campaign => campaign.Enabled),
-                        invalidCampaigns.Length);
-
-                    await ProcessRunbookSchedulesAsync(runbookSnapshot.Runbook, localMinute, stoppingToken);
                     await ProcessQueuedNotificationsAsync(effectiveWorkerOptions, stoppingToken);
-                }
-
-                if (invalidCampaigns.Length > 0)
-                {
-                    logger.LogWarning("Runbook campaigns with invalid cron schedules: {CampaignIds}", invalidCampaigns);
                 }
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
@@ -84,136 +51,6 @@ public sealed class MessagingOrchestrationWorker(
         logger.LogInformation("Messaging worker stopping.");
     }
 
-    private async Task ProcessRunbookSchedulesAsync(
-        MessagingRunbookOptions runbook,
-        DateTimeOffset localMinute,
-        CancellationToken cancellationToken)
-    {
-        foreach (var campaign in runbook.Campaigns.Where(campaign => campaign.Enabled))
-        {
-            if (!SixFieldCron.TryParse(campaign.Cron, out var schedule) || !schedule.IsMatch(localMinute))
-            {
-                continue;
-            }
-
-            var startDetails = JsonSerializer.Serialize(new
-            {
-                runbookKey = campaign.Id,
-                runbookName = campaign.Name,
-                cron = campaign.Cron,
-                localMinute = localMinute.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture),
-                template = campaign.Template,
-                channel = campaign.Channel,
-            });
-
-            var startResult = await repository.TryStartTaskExecutionAsync(
-                taskDefinitionName: $"messaging-runbook:{campaign.Id}",
-                localMinute: localMinute,
-                startMessage: $"Scheduled runbook '{campaign.Name}' started.",
-                startDetailsJson: startDetails,
-                cancellationToken: cancellationToken);
-
-            if (!startResult.ShouldRun || !startResult.TaskExecutionId.HasValue)
-            {
-                continue;
-            }
-
-            var taskExecutionId = startResult.TaskExecutionId.Value;
-
-            try
-            {
-                await repository.AddTaskExecutionDetailAsync(
-                    taskExecutionId,
-                    TaskExecutionEventType.Info,
-                    $"Queueing notification for runbook '{campaign.Name}'.",
-                    startDetails,
-                    cancellationToken);
-
-                var payloadJson = JsonSerializer.Serialize(new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    ["runbookKey"] = campaign.Id,
-                    ["runbookName"] = campaign.Name,
-                    ["runbookCron"] = campaign.Cron,
-                    ["runbookLocalMinute"] = localMinute.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture),
-                    ["dispatchBehavior"] = "broadcast-all-devices",
-                    ["notificationTrigger"] = $"runbook:{campaign.Id}",
-                    ["channel"] = campaign.Channel,
-                    ["template"] = campaign.Template,
-                });
-
-                var queueResult = await repository.QueueNotificationFromConfigurationAsync(
-                    runbookKey: campaign.Id,
-                    templateKey: campaign.Template,
-                    notificationTrigger: $"runbook:{campaign.Id}",
-                    payloadJson: payloadJson,
-                    cancellationToken: cancellationToken);
-
-                var completionDetails = JsonSerializer.Serialize(new
-                {
-                    runbookKey = campaign.Id,
-                    runbookName = campaign.Name,
-                    cron = campaign.Cron,
-                    localMinute = localMinute.ToString("yyyy-MM-ddTHH:mm:sszzz", CultureInfo.InvariantCulture),
-                    template = campaign.Template,
-                    channel = campaign.Channel,
-                    queueResult.NotificationQueued,
-                    queueResult.NotificationId,
-                    queueResult.Status,
-                    queueResult.Message,
-                });
-
-                var status = queueResult.NotificationQueued
-                    ? "succeeded"
-                    : queueResult.Status.Equals("failed", StringComparison.OrdinalIgnoreCase) ? "failed" : "skipped";
-
-                await repository.AddTaskExecutionDetailAsync(
-                    taskExecutionId,
-                    queueResult.NotificationQueued ? TaskExecutionEventType.Info : TaskExecutionEventType.Warning,
-                    queueResult.Message,
-                    completionDetails,
-                    cancellationToken);
-
-                await repository.CompleteTaskExecutionAsync(
-                    taskExecutionId: taskExecutionId,
-                    status: status,
-                    endMessage: $"Scheduled runbook '{campaign.Name}' finished with status '{status}'.",
-                    endDetailsJson: completionDetails,
-                    cancellationToken: cancellationToken);
-
-                if (!queueResult.NotificationQueued)
-                {
-                    logger.LogWarning(
-                        "Runbook {RunbookKey} did not queue a notification. Status: {Status}. Reason: {Message}.",
-                        campaign.Id,
-                        queueResult.Status,
-                        queueResult.Message);
-                }
-            }
-            catch (Exception exception)
-            {
-                var errorDetails = JsonSerializer.Serialize(new
-                {
-                    runbookKey = campaign.Id,
-                    runbookName = campaign.Name,
-                    error = exception.Message,
-                });
-                await repository.AddTaskExecutionDetailAsync(
-                    taskExecutionId,
-                    TaskExecutionEventType.Error,
-                    $"Scheduled runbook '{campaign.Name}' failed: {exception.Message}",
-                    errorDetails,
-                    cancellationToken);
-                await repository.CompleteTaskExecutionAsync(
-                    taskExecutionId: taskExecutionId,
-                    status: "failed",
-                    endMessage: $"Scheduled runbook '{campaign.Name}' finished with status 'failed'.",
-                    endDetailsJson: errorDetails,
-                    cancellationToken: cancellationToken);
-                logger.LogError(exception, "Runbook execution failed for {RunbookKey}.", campaign.Id);
-            }
-        }
-    }
-
     private async Task ProcessQueuedNotificationsAsync(MessagingWorkerOptions workerOptions, CancellationToken cancellationToken)
     {
         var claimedNotifications = await repository.ClaimQueuedNotificationsAsync(workerOptions.NotificationClaimBatchSize, cancellationToken);
@@ -222,7 +59,9 @@ public sealed class MessagingOrchestrationWorker(
             return;
         }
 
-        logger.LogInformation("Claimed {NotificationCount} queued notification(s) for processing.", claimedNotifications.Count);
+        logger.LogInformation(
+            "MessagingQueueClaimed {NotificationCount} notification(s) for Firebase dispatch.",
+            claimedNotifications.Count);
 
         foreach (var notification in claimedNotifications)
         {
@@ -241,6 +80,11 @@ public sealed class MessagingOrchestrationWorker(
 
             try
             {
+                logger.LogInformation(
+                    "MessagingNotificationDispatchStarted {NotificationId} {Trigger} {ConvocatoriaId}",
+                    notification.Id,
+                    notification.Trigger,
+                    notification.ConvocatoriaId);
                 var payload = ParsePayload(notification.PayloadJson);
                 var recipientSelection = ResolveRecipientSelection(notification, payload);
                 var taggedPayload = TagPayload(payload, notification.Trigger, recipientSelection.Tag);
@@ -273,6 +117,10 @@ public sealed class MessagingOrchestrationWorker(
                         executionDetails,
                         cancellationToken);
                 }
+                logger.LogInformation(
+                    "MessagingNotificationDispatchCompleted {NotificationId} {Trigger}",
+                    notification.Id,
+                    notification.Trigger);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -280,7 +128,11 @@ public sealed class MessagingOrchestrationWorker(
             }
             catch (Exception exception)
             {
-                logger.LogError(exception, "Failed to process notification {NotificationId}.", notification.Id);
+                logger.LogError(
+                    exception,
+                    "MessagingNotificationDispatchFailed {NotificationId} {Trigger}",
+                    notification.Id,
+                    notification.Trigger);
                 await repository.FailNotificationAsync(notification.Id, exception.Message, cancellationToken);
                 if (execution.TaskExecutionId.HasValue)
                 {
@@ -327,13 +179,21 @@ public sealed class MessagingOrchestrationWorker(
             {
                 try
                 {
-                    await firebaseSender.SendAsync(
+                    var firebaseMessageId = await firebaseSender.SendAsync(
                         delivery.Token,
                         notification.Title,
                         notification.Body,
                         payload,
                         cancellationToken);
                     await repository.MarkDeliverySentAsync(delivery.Id, cancellationToken);
+                    logger.LogInformation(
+                        "FirebaseDeliverySent {NotificationId} {DeliveryId} {DeviceRegistrationId} {UserId} {NCarnet} {FirebaseMessageId}",
+                        notification.Id,
+                        delivery.Id,
+                        delivery.DeviceRegistrationId,
+                        delivery.UserId,
+                        delivery.NCarnet,
+                        firebaseMessageId);
                 }
                 catch (FirebaseMessagingException exception)
                 {
@@ -350,6 +210,15 @@ public sealed class MessagingOrchestrationWorker(
                         IsRetryableFcmFailure(exception) ? GetRetryableErrorCode(exception) : GetErrorCode(exception),
                         exception.Message,
                         cancellationToken);
+                    logger.LogWarning(
+                        exception,
+                        "FirebaseDeliveryFailed {NotificationId} {DeliveryId} {DeviceRegistrationId} {UserId} {NCarnet} {ErrorCode}",
+                        notification.Id,
+                        delivery.Id,
+                        delivery.DeviceRegistrationId,
+                        delivery.UserId,
+                        delivery.NCarnet,
+                        exception.MessagingErrorCode);
                 }
                 catch (Exception exception)
                 {
@@ -358,34 +227,18 @@ public sealed class MessagingOrchestrationWorker(
                         "unexpected-error",
                         exception.Message,
                         cancellationToken);
+                    logger.LogError(
+                        exception,
+                        "FirebaseDeliveryFailed {NotificationId} {DeliveryId} {DeviceRegistrationId} {UserId} {NCarnet} {ErrorCode}",
+                        notification.Id,
+                        delivery.Id,
+                        delivery.DeviceRegistrationId,
+                        delivery.UserId,
+                        delivery.NCarnet,
+                        "unexpected-error");
                 }
             }
         }
-    }
-
-    private MessagingWorkerOptions BuildEffectiveWorkerOptions(MessagingWorkerOptions runbookWorkerOptions)
-    {
-        var fallback = configuredWorkerOptions.CurrentValue;
-        return new MessagingWorkerOptions
-        {
-            PollingIntervalSeconds = ChoosePositive(runbookWorkerOptions.PollingIntervalSeconds, fallback.PollingIntervalSeconds, 30),
-            NotificationClaimBatchSize = ChoosePositive(runbookWorkerOptions.NotificationClaimBatchSize, fallback.NotificationClaimBatchSize, 10),
-            DeliveryClaimBatchSize = ChoosePositive(runbookWorkerOptions.DeliveryClaimBatchSize, fallback.DeliveryClaimBatchSize, 200),
-            MaxDeliveryAttempts = ChoosePositive(runbookWorkerOptions.MaxDeliveryAttempts, fallback.MaxDeliveryAttempts, 3),
-        };
-    }
-
-    private static int ChoosePositive(params int[] values)
-    {
-        foreach (var value in values)
-        {
-            if (value > 0)
-            {
-                return value;
-            }
-        }
-
-        return 1;
     }
 
     private NotificationRecipientSelection ResolveRecipientSelection(
@@ -566,16 +419,6 @@ public sealed class MessagingOrchestrationWorker(
         return GetErrorCode(exception);
     }
 
-    private static IEnumerable<string> FindInvalidCampaigns(MessagingRunbookOptions runbook)
-    {
-        foreach (var campaign in runbook.Campaigns)
-        {
-            if (!SixFieldCron.TryParse(campaign.Cron, out _))
-            {
-                yield return string.IsNullOrWhiteSpace(campaign.Id) ? "(missing-id)" : campaign.Id;
-            }
-        }
-    }
 }
 
 internal sealed class SixFieldCron

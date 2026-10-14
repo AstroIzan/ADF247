@@ -38,9 +38,3 @@ public enum TaskExecutionEventType : byte
 public sealed record TaskExecutionStartResult(
     bool ShouldRun,
     long? TaskExecutionId);
-
-public sealed record RunbookQueueResult(
-    bool NotificationQueued,
-    long? NotificationId,
-    string Status,
-    string Message);

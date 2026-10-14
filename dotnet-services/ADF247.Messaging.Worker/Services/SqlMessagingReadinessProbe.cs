@@ -6,7 +6,6 @@ namespace ADF247.Messaging.Worker.Services;
 
 public sealed class SqlMessagingReadinessProbe(
     IOptionsMonitor<MessagingDatabaseOptions> databaseOptions,
-    IOptionsMonitor<MessagingFirebaseOptions> firebaseOptions,
     ILogger<SqlMessagingReadinessProbe> logger) : IMessagingReadinessProbe
 {
     public async Task<MessagingReadinessResult> CheckAsync(CancellationToken cancellationToken)
@@ -27,18 +26,6 @@ public sealed class SqlMessagingReadinessProbe(
         {
             logger.LogWarning(exception, "Messaging worker database readiness probe failed.");
             return MessagingReadinessResult.NotReady("Database is unreachable.");
-        }
-
-        var serviceAccountPath = firebaseOptions.CurrentValue.ServiceAccountPath;
-        if (string.IsNullOrWhiteSpace(serviceAccountPath))
-        {
-            return MessagingReadinessResult.NotReady("Firebase service account path is not configured.");
-        }
-
-        var resolvedPath = Path.GetFullPath(serviceAccountPath);
-        if (!File.Exists(resolvedPath))
-        {
-            return MessagingReadinessResult.NotReady($"Firebase service account file is missing at '{resolvedPath}'.");
         }
 
         return MessagingReadinessResult.Ready();

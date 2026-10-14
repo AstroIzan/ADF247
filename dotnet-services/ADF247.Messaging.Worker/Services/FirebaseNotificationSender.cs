@@ -7,7 +7,8 @@ using Microsoft.Extensions.Options;
 namespace ADF247.Messaging.Worker.Services;
 
 public sealed class FirebaseNotificationSender(
-    IOptionsMonitor<MessagingFirebaseOptions> firebaseOptions) : IFirebaseNotificationSender
+    IOptionsMonitor<MessagingFirebaseOptions> firebaseOptions,
+    ILogger<FirebaseNotificationSender> logger) : IFirebaseNotificationSender
 {
     private readonly object _sync = new();
     private FirebaseApp? _firebaseApp;
@@ -74,6 +75,7 @@ public sealed class FirebaseNotificationSender(
             {
                 Credential = credential,
             });
+            logger.LogInformation("Firebase application initialized from configured service account.");
             return _firebaseApp;
         }
     }

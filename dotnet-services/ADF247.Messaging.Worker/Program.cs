@@ -3,8 +3,6 @@ using ADF247.Messaging.Worker.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-var runbookPath = builder.Configuration["MESSAGING_RUNBOOK_PATH"] ?? "messaging-runbook.json";
-
 builder.Services.Configure<MessagingWorkerOptions>(builder.Configuration.GetSection(MessagingWorkerOptions.SectionName));
 builder.Services.Configure<MessagingFirebaseOptions>(builder.Configuration.GetSection(MessagingFirebaseOptions.SectionName));
 builder.Services.PostConfigure<MessagingFirebaseOptions>(options =>
@@ -22,8 +20,6 @@ builder.Services.Configure<MessagingDatabaseOptions>(options =>
         ConvertPrismaSqlServerUrl(builder.Configuration["DATABASE_URL"]));
 });
 
-builder.Services.AddSingleton<IMessagingRunbookProvider>(_ =>
-    new JsonMessagingRunbookProvider(runbookPath));
 builder.Services.AddSingleton<IFirebaseNotificationSender, FirebaseNotificationSender>();
 builder.Services.AddSingleton<INotificationDispatchRepository, SqlNotificationDispatchRepository>();
 builder.Services.AddSingleton<IMessagingReadinessProbe, SqlMessagingReadinessProbe>();

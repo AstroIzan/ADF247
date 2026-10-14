@@ -20,12 +20,6 @@ public interface INotificationDispatchRepository
         string endMessage,
         string? endDetailsJson,
         CancellationToken cancellationToken);
-    Task<RunbookQueueResult> QueueNotificationFromConfigurationAsync(
-        string runbookKey,
-        string templateKey,
-        string notificationTrigger,
-        string? payloadJson,
-        CancellationToken cancellationToken);
     Task<IReadOnlyList<ClaimedNotification>> ClaimQueuedNotificationsAsync(int batchSize, CancellationToken cancellationToken);
     Task<int> EnsureNotificationDeliveriesAsync(
         long notificationId,
