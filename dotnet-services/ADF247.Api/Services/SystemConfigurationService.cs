@@ -15,6 +15,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
     {
         Validate(request);
         var weeklyTypeIds = request.WeeklyConvoTypeIds?.Distinct().Order().ToArray() ?? [];
+        var weeklySchedules = NormalizeWeeklySchedules(request.WeeklyConvocatoriaSchedules, weeklyTypeIds.ToHashSet());
         if (weeklyTypeIds.Length > 0)
         {
             var knownTypeCount = await database.ConvoTypes.CountAsync(type => weeklyTypeIds.Contains(type.Id), cancellationToken);
@@ -44,6 +45,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         configuration.AutoCreateUnavailableForUsersWithoutWindow = request.AutoCreateUnavailableForUsersWithoutWindow;
         configuration.NotifyOnAutoAvailableResponse = request.NotifyOnAutoAvailableResponse;
         configuration.WeeklyConvoTypeIdsJson = JsonSerializer.Serialize(weeklyTypeIds);
+        configuration.WeeklyConvocatoriaSchedulesJson = JsonSerializer.Serialize(weeklySchedules);
         configuration.WeeklyRequestWeekday = request.WeeklyRequestWeekday;
         configuration.WeeklyRequestHour = request.WeeklyRequestHour;
         configuration.WeeklyRequestMinute = request.WeeklyRequestMinute;
@@ -76,6 +78,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
     {
         Id = 1,
         WeeklyConvoTypeIdsJson = "[]",
+        WeeklyConvocatoriaSchedulesJson = "[]",
         AvailabilityManagerNCarnetsJson = "[]",
         VehicleCatalogJson = "[]",
         WeeklyRequestWeekday = 5,
@@ -91,6 +94,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         configuration.AutoCreateUnavailableForUsersWithoutWindow,
         configuration.NotifyOnAutoAvailableResponse,
         WeeklyConvoTypeIds = Deserialize<int>(configuration.WeeklyConvoTypeIdsJson),
+        WeeklyConvocatoriaSchedules = Deserialize<WeeklyConvocatoriaScheduleRequest>(configuration.WeeklyConvocatoriaSchedulesJson),
         configuration.WeeklyRequestWeekday,
         configuration.WeeklyRequestHour,
         configuration.WeeklyRequestMinute,
@@ -120,6 +124,25 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
             .Select(group => group.First())
             .OrderBy(vehicle => vehicle.Indicatiu, StringComparer.OrdinalIgnoreCase)
             .ToArray();
+
+    private static WeeklyConvocatoriaScheduleRequest[] NormalizeWeeklySchedules(
+        IReadOnlyList<WeeklyConvocatoriaScheduleRequest>? schedules,
+        IReadOnlySet<int> weeklyTypeIds)
+    {
+        var normalized = (schedules ?? [])
+            .Where(schedule => weeklyTypeIds.Contains(schedule.ConvoTypeId))
+            .GroupBy(schedule => new { schedule.ConvoTypeId, schedule.DayOfWeek, schedule.StartTime })
+            .Select(group => group.First())
+            .OrderBy(schedule => schedule.ConvoTypeId)
+            .ThenBy(schedule => schedule.DayOfWeek)
+            .ThenBy(schedule => schedule.StartTime)
+            .ToArray();
+
+        if (normalized.Any(schedule => schedule.DayOfWeek is < 0 or > 6 || schedule.EndTime <= schedule.StartTime))
+            throw new ArgumentException("Cada pauta setmanal ha de tenir un dia i una franja horària vàlids.");
+
+        return normalized;
+    }
 
     private static void Validate(SystemConfigurationRequest request)
     {

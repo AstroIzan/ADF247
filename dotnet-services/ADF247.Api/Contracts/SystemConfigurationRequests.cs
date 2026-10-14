@@ -4,6 +4,7 @@ public sealed record SystemConfigurationRequest(
     bool AutoCreateUnavailableForUsersWithoutWindow,
     bool NotifyOnAutoAvailableResponse,
     IReadOnlyList<int>? WeeklyConvoTypeIds,
+    IReadOnlyList<WeeklyConvocatoriaScheduleRequest>? WeeklyConvocatoriaSchedules,
     int WeeklyRequestWeekday,
     int WeeklyRequestHour,
     int WeeklyRequestMinute,
@@ -18,3 +19,9 @@ public sealed record SystemConfigurationRequest(
     IReadOnlyList<CampaignVehicleRequest>? VehicleCatalog);
 
 public sealed record CampaignVehicleRequest(string Indicatiu, string? Modelo, decimal Kms);
+
+public sealed record WeeklyConvocatoriaScheduleRequest(
+    int ConvoTypeId,
+    int DayOfWeek,
+    TimeOnly StartTime,
+    TimeOnly EndTime);

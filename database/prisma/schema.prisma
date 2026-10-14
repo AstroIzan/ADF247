@@ -123,6 +123,7 @@ model SystemConfiguration {
   autoCreateUnavailableForUsersWithoutWindow Boolean @default(false)
   notifyOnAutoAvailableResponse Boolean @default(false)
   weeklyConvoTypeIdsJson String @default("[]") @db.NVarChar(Max)
+  weeklyConvocatoriaSchedulesJson String @default("[]") @db.NVarChar(Max)
   weeklyRequestWeekday Int @default(5)
   weeklyRequestHour Int @default(8)
   weeklyRequestMinute Int @default(0)

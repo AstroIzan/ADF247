@@ -113,7 +113,24 @@
                 <p>Selecciona quins tipus es consideren convocatòries setmanals.</p>
                 <div class="system-checkbox-list">
                   @for (type of systemConvoTypes(); track type.id) {
-                    <label><input type="checkbox" [checked]="isWeeklyTypeSelected(type.id)" (change)="toggleWeeklyType(type.id, $any($event.target).checked)"> {{ type.name }}</label>
+                    <div class="weekly-type-row">
+                      <label><input type="checkbox" [checked]="isWeeklyTypeSelected(type.id)" (change)="toggleWeeklyType(type.id, $any($event.target).checked)"> {{ type.name }}</label>
+                      @if (isWeeklyTypeSelected(type.id)) {
+                        <div class="weekly-schedule-list">
+                          @for (schedule of schedulesForType(type.id); track $index; let index = $index) {
+                            <div class="weekly-schedule-row">
+                              <select [ngModel]="schedule.dayOfWeek" (ngModelChange)="updateWeeklySchedule(type.id, index, 'dayOfWeek', $event)">
+                                <option [ngValue]="0">Diumenge</option><option [ngValue]="1">Dilluns</option><option [ngValue]="2">Dimarts</option><option [ngValue]="3">Dimecres</option><option [ngValue]="4">Dijous</option><option [ngValue]="5">Divendres</option><option [ngValue]="6">Dissabte</option>
+                              </select>
+                              <input type="time" [ngModel]="schedule.startTime" (ngModelChange)="updateWeeklySchedule(type.id, index, 'startTime', $event)">
+                              <input type="time" [ngModel]="schedule.endTime" (ngModelChange)="updateWeeklySchedule(type.id, index, 'endTime', $event)">
+                              <button class="btn" type="button" (click)="removeWeeklySchedule(type.id, index)">Eliminar</button>
+                            </div>
+                          }
+                          <button class="btn" type="button" (click)="addWeeklySchedule(type.id)">Afegir franja</button>
+                        </div>
+                      }
+                    </div>
                   }
                 </div>
               </section>

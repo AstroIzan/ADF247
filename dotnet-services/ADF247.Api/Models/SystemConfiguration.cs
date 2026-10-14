@@ -6,6 +6,7 @@ public sealed class SystemConfiguration
     public bool AutoCreateUnavailableForUsersWithoutWindow { get; set; }
     public bool NotifyOnAutoAvailableResponse { get; set; }
     public required string WeeklyConvoTypeIdsJson { get; set; }
+    public required string WeeklyConvocatoriaSchedulesJson { get; set; }
     public int WeeklyRequestWeekday { get; set; }
     public int WeeklyRequestHour { get; set; }
     public int WeeklyRequestMinute { get; set; }

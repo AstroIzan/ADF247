@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { PushNotificationsService } from '../../services/push-notifications.service';
-import { ConvoType, DataService, MessagingConfiguration, MessagingNotificationLog, MessagingSystemStatus, SystemConfiguration, SystemConfigurationVehicle, TaskExecutionLog, User } from '../../services/data.service';
+import { ConvoType, DataService, MessagingConfiguration, MessagingNotificationLog, MessagingSystemStatus, SystemConfiguration, SystemConfigurationVehicle, TaskExecutionLog, User, WeeklyConvocatoriaSchedule } from '../../services/data.service';
 
 @Component({
   selector: 'app-settings',
@@ -169,7 +169,58 @@ export class SettingsComponent {
       weeklyConvoTypeIds: selected
         ? [...new Set([...configuration.weeklyConvoTypeIds, typeId])]
         : configuration.weeklyConvoTypeIds.filter((id) => id !== typeId),
+      weeklyConvocatoriaSchedules: selected
+        ? [...configuration.weeklyConvocatoriaSchedules, { convoTypeId: typeId, dayOfWeek: 1, startTime: '08:00', endTime: '14:00' }]
+        : configuration.weeklyConvocatoriaSchedules.filter((schedule) => schedule.convoTypeId !== typeId),
     }));
+  }
+
+  schedulesForType(typeId: number) {
+    return this.systemConfiguration()?.weeklyConvocatoriaSchedules.filter((schedule) => schedule.convoTypeId === typeId) ?? [];
+  }
+
+  updateWeeklySchedule(typeId: number, index: number, field: keyof WeeklyConvocatoriaSchedule, value: string | number) {
+    this.updateSystemConfiguration((configuration) => {
+      const matching = configuration.weeklyConvocatoriaSchedules
+        .filter((schedule) => schedule.convoTypeId === typeId);
+      const target = matching[index];
+      if (!target) return configuration;
+      const replacement = { ...target, [field]: value };
+      let occurrence = 0;
+      return {
+        ...configuration,
+        weeklyConvocatoriaSchedules: configuration.weeklyConvocatoriaSchedules.map((schedule) => {
+          if (schedule.convoTypeId !== typeId) return schedule;
+          const currentIndex = occurrence++;
+          return currentIndex === index ? replacement : schedule;
+        }),
+      };
+    });
+  }
+
+  addWeeklySchedule(typeId: number) {
+    this.updateSystemConfiguration((configuration) => ({
+      ...configuration,
+      weeklyConvocatoriaSchedules: [...configuration.weeklyConvocatoriaSchedules, {
+        convoTypeId: typeId,
+        dayOfWeek: 1,
+        startTime: '08:00',
+        endTime: '14:00',
+      }],
+    }));
+  }
+
+  removeWeeklySchedule(typeId: number, index: number) {
+    this.updateSystemConfiguration((configuration) => {
+      let occurrence = 0;
+      return {
+        ...configuration,
+        weeklyConvocatoriaSchedules: configuration.weeklyConvocatoriaSchedules.filter((schedule) => {
+          if (schedule.convoTypeId !== typeId) return true;
+          return occurrence++ !== index;
+        }),
+      };
+    });
   }
 
   isAvailabilityManagerSelected(nCarnet: string) {

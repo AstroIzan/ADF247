@@ -467,6 +467,32 @@
   font-size: 13px;
 }
 
+.weekly-type-row {
+  display: grid;
+  gap: 7px;
+}
+
+.weekly-schedule-list {
+  display: grid;
+  gap: 6px;
+  padding-left: 28px;
+}
+
+.weekly-schedule-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1fr) 92px 92px auto;
+  gap: 6px;
+}
+
+.weekly-schedule-row select,
+.weekly-schedule-row input {
+  min-width: 0;
+  border: 1px solid #d0d0d0;
+  border-radius: 8px;
+  padding: 6px;
+  font: inherit;
+}
+
 .system-form-grid,
 .system-vehicle-form {
   display: grid;
@@ -661,7 +687,8 @@
 
   .system-config-grid,
   .system-form-grid,
-  .system-vehicle-form {
+  .system-vehicle-form,
+  .weekly-schedule-row {
     grid-template-columns: 1fr;
   }
 

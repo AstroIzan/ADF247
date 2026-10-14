@@ -317,10 +317,18 @@ export interface SystemConfigurationVehicle {
   kms: number;
 }
 
+export interface WeeklyConvocatoriaSchedule {
+  convoTypeId: number;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
 export interface SystemConfiguration {
   autoCreateUnavailableForUsersWithoutWindow: boolean;
   notifyOnAutoAvailableResponse: boolean;
   weeklyConvoTypeIds: number[];
+  weeklyConvocatoriaSchedules: WeeklyConvocatoriaSchedule[];
   weeklyRequestWeekday: number;
   weeklyRequestHour: number;
   weeklyRequestMinute: number;
