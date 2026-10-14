@@ -2,11 +2,8 @@
 	--top-nav-height: 58px;
 	display: flex;
 	flex-direction: column;
-	height: 100vh;
-	height: 100dvh;
 	min-height: 100vh;
 	min-height: 100dvh;
-	overflow: hidden;
 }
 
 .top-nav {
@@ -289,9 +286,9 @@
 
 .app-content {
 	flex: 1 1 auto;
-	min-height: 0;
+	min-height: calc(100vh - var(--top-nav-height));
+	min-height: calc(100dvh - var(--top-nav-height));
 	padding-top: var(--top-nav-height);
-	overflow-y: auto;
 }
 
 app-home {
