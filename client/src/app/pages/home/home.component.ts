@@ -1546,7 +1546,7 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => {
         this.runningConvoAdminActionKey.set(null);
-        this.error.set(err.message || 'No s’ha pogut enviar la notificació de resposta.');
+        this.error.set(err.error?.message || err.message || 'No s’ha pogut enviar la notificació de resposta.');
       },
     });
   }

@@ -9,6 +9,7 @@ namespace ADF247.Api.Services;
 public sealed class ConvocatoriaService(
     Adf247DbContext database,
     ConvocatoriaCalculationService calculations,
+    MessagingService messaging,
     IConfiguration configuration)
 {
     public async Task<IReadOnlyList<object>> GetTypesAsync() =>
@@ -93,7 +94,13 @@ public sealed class ConvocatoriaService(
         return (await GetAsync(convo.Id))!;
     }
 
-    public async Task<object?> UpdateAsync(int id, ConvocatoriaRequest request, int userId, bool isAdmin)
+    public async Task<object?> UpdateAsync(
+        int id,
+        ConvocatoriaRequest request,
+        int userId,
+        string carnet,
+        bool isAdmin,
+        CancellationToken cancellationToken)
     {
         var convo = await IncludeConvocatoria(database.Convocatorias).SingleOrDefaultAsync(item => item.Id == id);
         if (convo is null) return null;
@@ -113,20 +120,12 @@ public sealed class ConvocatoriaService(
 
         if (notifyConfirmedSortida)
         {
-            database.MessagingNotifications.Add(new MessagingNotification
-            {
-                ConvocatoriaId = convo.Id,
-                Trigger = "sortida-status",
-                Status = "queued",
-                Title = "Confirmació de sortida",
-                Body = $"La sortida de la convocatòria \"{convo.Title}\" ha estat confirmada.",
-                PayloadJson = JsonSerializer.Serialize(new Dictionary<string, string>
-                {
-                    ["convocatoriaId"] = convo.Id.ToString(),
-                }),
-                ActorUserId = userId,
-                CreatedAt = DateTime.UtcNow,
-            });
+            await messaging.QueueConvocatoriaAsync(
+                carnet,
+                convo.Id,
+                "sortida-status",
+                new ConvocatoriaNotificationRequest(null, null),
+                cancellationToken);
         }
 
         await SaveAsync();

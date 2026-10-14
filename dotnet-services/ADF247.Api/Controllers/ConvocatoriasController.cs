@@ -28,10 +28,10 @@ public sealed class ConvocatoriasController(ConvocatoriaService convos, Adf247Db
     [HttpGet("{id:int}")] public Task<IActionResult> Get(int id) => ExecuteAsync(() => convos.GetAsync(id));
     [HttpPost] public Task<IActionResult> Create(ConvocatoriaRequest request) => ExecuteCreatedAsync(() => convos.CreateAsync(request));
     [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, ConvocatoriaRequest request)
+    public async Task<IActionResult> Update(int id, ConvocatoriaRequest request, CancellationToken cancellationToken)
     {
         var identity = await IdentityAsync(); if (identity is null) return Unauthorized();
-        return await ExecuteAsync(() => convos.UpdateAsync(id, request, identity.Value.UserId, identity.Value.IsAdmin));
+        return await ExecuteAsync(() => convos.UpdateAsync(id, request, identity.Value.UserId, identity.Value.Carnet, identity.Value.IsAdmin, cancellationToken));
     }
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => await convos.DeleteAsync(id) ? NoContent() : NotFound(new { message = "No se ha encontrado la convocatoria solicitada." });

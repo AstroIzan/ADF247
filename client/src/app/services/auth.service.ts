@@ -249,7 +249,7 @@ export class AuthService {
     }
 
     if (Array.isArray(roles)) {
-      return Boolean(roles[0]?.isAdmin);
+      return roles.some((role) => Boolean(role.isAdmin));
     }
 
     return Boolean(roles.isAdmin);

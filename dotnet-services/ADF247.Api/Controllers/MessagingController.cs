@@ -73,14 +73,29 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         catch (ArgumentException exception) { return BadRequest(new { message = exception.Message }); }
     }
 
-    [HttpPost("dispatch/convocatoria/{convocatoriaId:int}/{action}")]
-    public async Task<IActionResult> DispatchConvocatoria(int convocatoriaId, string action, ConvocatoriaNotificationRequest request, CancellationToken cancellationToken)
+    [HttpPost("dispatch/convocatoria/{convocatoriaId:int}/response-request")]
+    public Task<IActionResult> DispatchResponseRequest(
+        int convocatoriaId,
+        ConvocatoriaNotificationRequest request,
+        CancellationToken cancellationToken) =>
+        DispatchConvocatoriaAsync(convocatoriaId, "response-request", request, cancellationToken);
+
+    [HttpPost("dispatch/convocatoria/{convocatoriaId:int}/sortida-status")]
+    public Task<IActionResult> DispatchSortidaStatus(
+        int convocatoriaId,
+        ConvocatoriaNotificationRequest request,
+        CancellationToken cancellationToken) =>
+        DispatchConvocatoriaAsync(convocatoriaId, "sortida-status", request, cancellationToken);
+
+    private async Task<IActionResult> DispatchConvocatoriaAsync(
+        int convocatoriaId,
+        string action,
+        ConvocatoriaNotificationRequest request,
+        CancellationToken cancellationToken)
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
         if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
-        if (action is not ("response-request" or "sortida-status"))
-            return BadRequest(new { message = "La acción de convocatoria no es válida." });
         try { return StatusCode(StatusCodes.Status201Created, await messaging.QueueConvocatoriaAsync(carnet, convocatoriaId, action, request, cancellationToken)); }
         catch (KeyNotFoundException exception) { return NotFound(new { message = exception.Message }); }
         catch (ArgumentException exception) { return BadRequest(new { message = exception.Message }); }

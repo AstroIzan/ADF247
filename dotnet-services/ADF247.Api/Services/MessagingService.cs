@@ -66,9 +66,7 @@ public sealed class MessagingService(Adf247DbContext database)
             .SingleOrDefaultAsync(item => item.Id == convocatoriaId, cancellationToken)
             ?? throw new KeyNotFoundException("No se ha encontrado la convocatoria.");
 
-        var configuration = trigger == "response-request"
-            ? await FindResponseRequestConfigurationAsync(convocatoria, cancellationToken)
-            : null;
+        var configuration = await FindConvocatoriaConfigurationAsync(convocatoria, trigger, cancellationToken);
         var title = request.Title ?? RenderTemplate(
             configuration?.TitleTemplate ?? (trigger == "sortida-status" ? "Confirmació de sortida" : "Convocatòria"),
             convocatoria);
@@ -161,29 +159,34 @@ public sealed class MessagingService(Adf247DbContext database)
         return notification;
     }
 
-    private async Task<MessagingConfiguration?> FindResponseRequestConfigurationAsync(Convocatoria convocatoria, CancellationToken cancellationToken)
+    private async Task<MessagingConfiguration?> FindConvocatoriaConfigurationAsync(
+        Convocatoria convocatoria,
+        string trigger,
+        CancellationToken cancellationToken)
     {
-        var key = GetResponseRequestConfigurationKey(convocatoria);
+        var key = GetConvocatoriaConfigurationKey(convocatoria, trigger);
         return await database.MessagingConfigurations
             .SingleOrDefaultAsync(configuration => configuration.Key == key && configuration.Enabled, cancellationToken);
     }
 
-    private static string GetResponseRequestConfigurationKey(Convocatoria convocatoria)
+    private static string GetConvocatoriaConfigurationKey(Convocatoria convocatoria, string trigger)
     {
+        var prefix = trigger == "response-request" ? "availability" : "convocatoria";
+
         if (convocatoria.ConvoType?.Name.Contains("incendi", StringComparison.OrdinalIgnoreCase) == true)
-            return "convocatoria-fire";
+            return $"{prefix}-fire";
         if (convocatoria.ConvoType?.Name.Contains("setman", StringComparison.OrdinalIgnoreCase) == true
             || convocatoria.ConvoType?.Name.Contains("guardia", StringComparison.OrdinalIgnoreCase) == true
             || convocatoria.ConvoType?.Name.Contains("pvi", StringComparison.OrdinalIgnoreCase) == true)
-            return "convocatoria-weekly";
+            return $"{prefix}-weekly";
 
         var date = DateOnly.FromDateTime(convocatoria.Date);
         var today = DateOnly.FromDateTime(DateTime.Today);
         if (date < today || date == today && convocatoria.StartTime <= DateTime.Now)
-            return "convocatoria-now";
-        return date == today ? "convocatoria-today"
-            : date == today.AddDays(1) ? "convocatoria-tomorrow"
-            : "convocatoria-future";
+            return $"{prefix}-now";
+        return date == today ? $"{prefix}-today"
+            : date == today.AddDays(1) ? $"{prefix}-tomorrow"
+            : $"{prefix}-future";
     }
 
     private static string DefaultBody(string trigger, Convocatoria convocatoria) =>
