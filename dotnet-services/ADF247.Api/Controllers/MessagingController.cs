@@ -95,6 +95,52 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         return Ok(await messaging.GetNotificationsAsync(cancellationToken));
     }
 
+    [HttpGet("system-status")]
+    public async Task<IActionResult> GetSystemStatus(CancellationToken cancellationToken)
+    {
+        var carnet = GetCarnet();
+        if (carnet is null) return Unauthorized();
+        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+
+        var lastNotification = await database.MessagingNotifications
+            .OrderByDescending(notification => notification.CreatedAt)
+            .Select(notification => new
+            {
+                notification.Id,
+                notification.Trigger,
+                notification.Status,
+                notification.CreatedAt,
+                notification.CompletedAt,
+                notification.ErrorMessage,
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+        var lastExecution = await database.TaskExecutions
+            .Include(execution => execution.TaskDefinition)
+            .OrderByDescending(execution => execution.StartedAt)
+            .Select(execution => new
+            {
+                execution.TaskExecutionId,
+                TaskName = execution.TaskDefinition!.Name,
+                execution.StartedAt,
+                execution.FinishedAt,
+                execution.FinalStatus,
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        return Ok(new
+        {
+            database = "connected",
+            activeDevices = await database.DeviceRegistrations.CountAsync(
+                registration => registration.IsActive && registration.InvalidatedAt == null,
+                cancellationToken),
+            queuedNotifications = await database.MessagingNotifications.CountAsync(
+                notification => notification.Status == "queued" || notification.Status == "processing",
+                cancellationToken),
+            lastNotification,
+            lastExecution,
+        });
+    }
+
     [HttpGet("{notificationId:long}/deliveries")]
     public async Task<IActionResult> GetDeliveries(long notificationId, CancellationToken cancellationToken)
     {

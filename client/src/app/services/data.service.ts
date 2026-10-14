@@ -279,6 +279,27 @@ export interface TaskExecutionLog {
   finalStatus?: string | null;
 }
 
+export interface MessagingSystemStatus {
+  database: 'connected';
+  activeDevices: number;
+  queuedNotifications: number;
+  lastNotification: {
+    id: number;
+    trigger: string;
+    status: string;
+    createdAt: string;
+    completedAt?: string | null;
+    errorMessage?: string | null;
+  } | null;
+  lastExecution: {
+    taskExecutionId: number;
+    taskName: string;
+    startedAt: string;
+    finishedAt?: string | null;
+    finalStatus?: string | null;
+  } | null;
+}
+
 export interface MessagingConfiguration {
   id: number;
   key: string;
@@ -441,6 +462,10 @@ export class DataService {
 
   getMessagingLogs(): Observable<MessagingNotificationLog[]> {
     return this.http.get<MessagingNotificationLog[]>('/messaging/logs');
+  }
+
+  getMessagingSystemStatus(): Observable<MessagingSystemStatus> {
+    return this.http.get<MessagingSystemStatus>('/messaging/system-status');
   }
 
   getTaskExecutions(): Observable<TaskExecutionLog[]> {

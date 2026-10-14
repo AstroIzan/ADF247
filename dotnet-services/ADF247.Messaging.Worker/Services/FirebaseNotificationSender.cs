@@ -67,7 +67,9 @@ public sealed class FirebaseNotificationSender(
                 throw new InvalidOperationException($"Firebase service account file not found at '{resolvedPath}'.");
             }
 
-            var credential = GoogleCredential.FromFile(resolvedPath);
+            var credential = CredentialFactory
+                .FromFile<ServiceAccountCredential>(resolvedPath)
+                .ToGoogleCredential();
             _firebaseApp = FirebaseApp.Create(new AppOptions
             {
                 Credential = credential,

@@ -50,8 +50,8 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.ToTable("AvailabilityWindow");
             entity.HasKey(window => window.Id);
             entity.Property(window => window.UserNCarnet).HasMaxLength(50);
-            entity.Property(window => window.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
-            entity.Property(window => window.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
+            entity.Property(window => window.CreatedAt).ValueGeneratedNever();
+            entity.Property(window => window.UpdatedAt).ValueGeneratedNever();
             entity.HasOne(window => window.User)
                 .WithMany()
                 .HasForeignKey(window => window.UserNCarnet)

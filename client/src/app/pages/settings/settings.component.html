@@ -15,6 +15,9 @@
         Notificacions
       </button>
       @if (authService.isAdmin()) {
+        <button type="button" class="settings-tab" [class.active]="activeTab() === 'system'" (click)="setActiveTab('system')">
+          Sistema
+        </button>
         <button type="button" class="settings-tab" [class.active]="activeTab() === 'configurations'" (click)="setActiveTab('configurations')">
           Plantilles
         </button>
@@ -74,6 +77,37 @@
               <button class="btn btn-primary" type="button" (click)="activateNotifications()" [disabled]="pushNotificationsService.loading()">
                 {{ pushNotificationsService.loading() ? 'Preparant...' : 'Activar notificacions en aquest dispositiu' }}
               </button>
+            </div>
+          }
+        </section>
+      }
+
+      @if (activeTab() === 'system' && authService.isAdmin()) {
+        <section class="settings-section logs-section">
+          <div class="pla-alfa-table-head">
+            <div>
+              <h3>Estat del sistema</h3>
+              <p class="section-help">Visibilitat de la cua, els dispositius i el processament del worker.</p>
+            </div>
+            <button class="btn btn-primary" type="button" [disabled]="adminLoading()" (click)="loadAdminData()">Actualitzar</button>
+          </div>
+          @if (adminError()) { <div class="alert alert-danger">{{ adminError() }}</div> }
+          @if (adminLoading()) {
+            <div class="loading-state">Carregant estat del sistema...</div>
+          } @else if (systemStatus(); as status) {
+            <div class="status-grid">
+              <article><strong>Base de dades</strong><span>{{ status.database }}</span></article>
+              <article><strong>Dispositius actius</strong><span>{{ status.activeDevices }}</span></article>
+              <article><strong>Notificacions pendents</strong><span>{{ status.queuedNotifications }}</span></article>
+            </div>
+            <div class="logs-table-wrapper">
+              <table class="logs-table-lite">
+                <tbody>
+                  <tr><th>Última notificació</th><td>{{ status.lastNotification ? ('#' + status.lastNotification.id + ' · ' + status.lastNotification.status + ' · ' + status.lastNotification.trigger) : 'Encara no n’hi ha' }}</td></tr>
+                  <tr><th>Error d’enviament</th><td>{{ status.lastNotification?.errorMessage || '—' }}</td></tr>
+                  <tr><th>Última execució Taskling</th><td>{{ status.lastExecution ? (status.lastExecution.taskName + ' · ' + (status.lastExecution.finalStatus || 'En curs')) : 'Encara no n’hi ha' }}</td></tr>
+                </tbody>
+              </table>
             </div>
           }
         </section>

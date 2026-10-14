@@ -36,17 +36,17 @@ public sealed class SqlNotificationDispatchRepository(
                 [ShouldRun] BIT NOT NULL,
                 [TaskExecutionId] BIGINT NULL
             );
-            DECLARE @definitionIds TABLE ([TaskDefinitionId] INT NOT NULL);
             DECLARE @taskDefinitionId INT;
 
             MERGE [Taskling].[TaskDefinition] WITH (HOLDLOCK) AS [target]
             USING (SELECT @TaskDefinitionName AS [name]) AS [source]
                 ON [target].[name] = [source].[name]
             WHEN NOT MATCHED THEN
-                INSERT ([name]) VALUES ([source].[name])
-            OUTPUT inserted.[taskDefinitionId] INTO @definitionIds;
+                INSERT ([name]) VALUES ([source].[name]);
 
-            SELECT @taskDefinitionId = [TaskDefinitionId] FROM @definitionIds;
+            SELECT @taskDefinitionId = [taskDefinitionId]
+            FROM [Taskling].[TaskDefinition] WITH (UPDLOCK, HOLDLOCK)
+            WHERE [name] = @TaskDefinitionName;
 
             IF EXISTS (
                 SELECT 1
@@ -71,6 +71,7 @@ public sealed class SqlNotificationDispatchRepository(
                     inserted.[taskExecutionId]
                 INTO @results ([ShouldRun], [TaskExecutionId])
                 VALUES (
+                    @taskDefinitionId,
                     SYSUTCDATETIME(),
                     SYSUTCDATETIME()
                 );

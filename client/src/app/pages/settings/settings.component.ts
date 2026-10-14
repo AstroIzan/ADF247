@@ -2,7 +2,7 @@ import { Component, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../services/auth.service';
 import { PushNotificationsService } from '../../services/push-notifications.service';
-import { DataService, MessagingConfiguration, MessagingNotificationLog, TaskExecutionLog } from '../../services/data.service';
+import { DataService, MessagingConfiguration, MessagingNotificationLog, MessagingSystemStatus, TaskExecutionLog } from '../../services/data.service';
 
 @Component({
   selector: 'app-settings',
@@ -13,13 +13,14 @@ import { DataService, MessagingConfiguration, MessagingNotificationLog, TaskExec
 })
 export class SettingsComponent {
   showModal = signal(false);
-  activeTab = signal<'device' | 'configurations' | 'messaging' | 'tasks'>('device');
+  activeTab = signal<'device' | 'system' | 'configurations' | 'messaging' | 'tasks'>('device');
   deviceLoading = signal(false);
   adminLoading = signal(false);
   adminError = signal('');
   notificationLogs = signal<MessagingNotificationLog[]>([]);
   taskExecutions = signal<TaskExecutionLog[]>([]);
   configurations = signal<MessagingConfiguration[]>([]);
+  systemStatus = signal<MessagingSystemStatus | null>(null);
 
   constructor(
     public authService: AuthService,
@@ -27,7 +28,7 @@ export class SettingsComponent {
     private dataService: DataService,
   ) {}
 
-  async openModal(tab: 'device' | 'configurations' | 'messaging' | 'tasks' = 'device') {
+  async openModal(tab: 'device' | 'system' | 'configurations' | 'messaging' | 'tasks' = 'device') {
     this.activeTab.set(this.authService.isAdmin() ? tab : 'device');
     this.showModal.set(true);
     document.body.classList.add('modal-open');
@@ -49,7 +50,7 @@ export class SettingsComponent {
     document.body.classList.remove('modal-open');
   }
 
-  setActiveTab(tab: 'device' | 'configurations' | 'messaging' | 'tasks') {
+  setActiveTab(tab: 'device' | 'system' | 'configurations' | 'messaging' | 'tasks') {
     if (tab !== 'device' && !this.authService.isAdmin()) return;
     this.activeTab.set(tab);
     if (tab !== 'device' && !this.adminLoading() && this.notificationLogs().length === 0 && this.taskExecutions().length === 0) {
@@ -68,9 +69,19 @@ export class SettingsComponent {
     let completed = 0;
     const complete = () => {
       completed++;
-      if (completed === 3) this.adminLoading.set(false);
+      if (completed === 4) this.adminLoading.set(false);
     };
 
+    this.dataService.getMessagingSystemStatus().subscribe({
+      next: (status) => {
+        this.systemStatus.set(status);
+        complete();
+      },
+      error: (error) => {
+        this.adminError.set(error.message || 'No s’ha pogut carregar l’estat del sistema.');
+        complete();
+      },
+    });
     this.dataService.getMessagingLogs().subscribe({
       next: (logs) => {
         this.notificationLogs.set(logs);

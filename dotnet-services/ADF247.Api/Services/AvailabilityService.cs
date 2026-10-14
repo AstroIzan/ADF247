@@ -45,6 +45,8 @@ public sealed class AvailabilityService(
             AvailabilityType = request.AvailabilityType!.Trim(),
             Source = string.IsNullOrWhiteSpace(request.Source) ? "manual" : request.Source.Trim(),
             Notes = NormalizeOptional(request.Notes),
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
         };
         database.AvailabilityWindows.Add(window);
         await database.SaveChangesAsync();
