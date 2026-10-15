@@ -1245,7 +1245,7 @@ export class HomeComponent implements OnInit {
   }
 
   canAssignUserAsVehicleVolunteer(vehicleName: string, userId: number) {
-    const vehicles = this.campaignForm().vehicles;
+    const vehicles = this.campaignForm().vehicles.filter((vehicle) => vehicle.status !== 'withdrawn');
 
     const assignedAsConductor = vehicles.some((vehicle) => vehicle.conductorUserId === userId);
     if (assignedAsConductor) {
@@ -1268,12 +1268,14 @@ export class HomeComponent implements OnInit {
       return false;
     }
 
-    const vehicles = this.campaignForm().vehicles;
+    const vehicles = this.campaignForm().vehicles.filter((vehicle) => vehicle.status !== 'withdrawn');
     const assignedAsConductorInOtherVehicle = vehicles.some(
       (vehicle) => vehicle.vehicleName !== vehicleName && vehicle.conductorUserId === userId
     );
 
-    return !assignedAsConductorInOtherVehicle;
+    const assignedAsVolunteer = vehicles.some((vehicle) => vehicle.volunteerUserIds.includes(userId));
+
+    return !assignedAsConductorInOtherVehicle && !assignedAsVolunteer;
   }
 
   toggleCampaignConductorMenu(vehicleName: string) {
@@ -1308,7 +1310,9 @@ export class HomeComponent implements OnInit {
     if (userId != null) {
       vehicles = vehicles.map((vehicle) => ({
         ...vehicle,
-        volunteerUserIds: vehicle.volunteerUserIds.filter((id) => id !== userId),
+        volunteerUserIds: vehicle.status === 'withdrawn'
+          ? vehicle.volunteerUserIds
+          : vehicle.volunteerUserIds.filter((id) => id !== userId),
       }));
     }
 
@@ -1413,6 +1417,10 @@ export class HomeComponent implements OnInit {
 
     const assignedConductorIds = new Set<number>();
     const uniqueConductorVehicles = normalizedVehicles.map((vehicle) => {
+      if (vehicle.status === 'withdrawn') {
+        return vehicle;
+      }
+
       const conductorId = vehicle.conductorUserId;
       if (conductorId == null) {
         return vehicle;
@@ -1431,12 +1439,17 @@ export class HomeComponent implements OnInit {
 
     const conductorIds = new Set(
       uniqueConductorVehicles
+        .filter((vehicle) => vehicle.status !== 'withdrawn')
         .map((vehicle) => vehicle.conductorUserId)
         .filter((id): id is number => id != null)
     );
 
     const assignedVolunteerIds = new Set<number>();
     const resolvedVehicles = uniqueConductorVehicles.map((vehicle) => {
+      if (vehicle.status === 'withdrawn') {
+        return vehicle;
+      }
+
       const filteredVolunteerIds = vehicle.volunteerUserIds.filter((id) => {
         if (conductorIds.has(id)) {
           return false;

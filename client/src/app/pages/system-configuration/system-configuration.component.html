@@ -198,7 +198,7 @@
 
       <article class="settings-panel fleet-panel">
         <div class="vehicle-form">
-          <label>Indicatiu <input placeholder="Ex. BR-01" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })"></label>
+          <label>Indicatiu <input placeholder="Ex. S401" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })"></label>
           <label>Model <input placeholder="Model del vehicle" [ngModel]="newVehicle().modelo" (ngModelChange)="newVehicle.set({ ...newVehicle(), modelo: $event })"></label>
           <label>Litres <input type="number" min="0" placeholder="0" [ngModel]="newVehicle().litres" (ngModelChange)="newVehicle.set({ ...newVehicle(), litres: $event })"></label>
           <label>Kilòmetres <input type="number" min="0" placeholder="0" [ngModel]="newVehicle().kms" (ngModelChange)="newVehicle.set({ ...newVehicle(), kms: $event })"></label>
@@ -262,42 +262,45 @@
               }
             </div>
           </details>
-        </article>
 
         @if (isDeveloper()) {
-        <article class="settings-panel developer-panel">
-          <div class="panel-heading">
-            <p class="panel-kicker">Simulació Batch</p>
-            <h3>Pla Alfa del municipi principal</h3>
-          </div>
-          @if (plaAlfaSimulation(); as simulation) {
-            @if (simulation.principalMunicipality) {
-              <p>Les properes execucions Batch faran servir aquests nivells simulats per a <strong>{{ simulation.principalMunicipality }}</strong>, abans de consultar el servei extern.</p>
-              <div class="schedule-inputs schedule-inputs-two">
-                <label>Nivell avui
-                  <select [value]="simulation.todayLevel ?? ''" (change)="updatePlaAlfaSimulation('todayLevel', $any($event.target).value)">
-                    <option value="">Sense simulació</option>
-                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
-                  </select>
-                </label>
-                <label>Nivell demà
-                  <select [value]="simulation.tomorrowLevel ?? ''" (change)="updatePlaAlfaSimulation('tomorrowLevel', $any($event.target).value)">
-                    <option value="">Sense simulació</option>
-                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
-                  </select>
-                </label>
+          <section class="developer-simulation">
+            <div class="developer-simulation-heading">
+              <div>
+                <p class="panel-kicker">Simulació Batch</p>
+                <h4>Pla Alfa del municipi principal</h4>
               </div>
-              <button class="btn btn-primary" type="button" [disabled]="simulationSaving()" (click)="savePlaAlfaSimulation()">
-                {{ simulationSaving() ? 'Desant simulació...' : 'Desar simulació' }}
-              </button>
+              <span class="developer-simulation-badge">Només Developer</span>
+            </div>
+            @if (plaAlfaSimulation(); as simulation) {
+              @if (simulation.principalMunicipality) {
+                <p>Les properes execucions Batch faran servir aquests nivells simulats per a <strong>{{ simulation.principalMunicipality }}</strong>, abans de consultar el servei extern.</p>
+                <div class="schedule-inputs schedule-inputs-two">
+                  <label>Nivell avui
+                    <select [value]="simulation.todayLevel ?? ''" (change)="updatePlaAlfaSimulation('todayLevel', $any($event.target).value)">
+                      <option value="">Sense simulació</option>
+                      <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
+                    </select>
+                  </label>
+                  <label>Nivell demà
+                    <select [value]="simulation.tomorrowLevel ?? ''" (change)="updatePlaAlfaSimulation('tomorrowLevel', $any($event.target).value)">
+                      <option value="">Sense simulació</option>
+                      <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
+                    </select>
+                  </label>
+                </div>
+                <button class="btn btn-primary" type="button" [disabled]="simulationSaving()" (click)="savePlaAlfaSimulation()">
+                  {{ simulationSaving() ? 'Desant simulació...' : 'Desar simulació' }}
+                </button>
+              } @else {
+                <p class="empty-copy">Cal marcar un municipi com a principal a Pla Alfa abans de poder simular-ne el nivell.</p>
+              }
             } @else {
-              <p class="empty-copy">Cal marcar un municipi com a principal a Pla Alfa abans de poder simular-ne el nivell.</p>
+              <p class="empty-copy">Carregant la configuració de proves...</p>
             }
-          } @else {
-            <p class="empty-copy">Carregant la configuració de proves...</p>
-          }
-        </article>
+          </section>
         }
+        </article>
       </section>
   }
 </section>

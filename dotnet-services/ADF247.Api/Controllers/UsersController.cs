@@ -49,7 +49,10 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateUserRequest request)
     {
-        if (!await IsAdminAsync()) return Forbid();
+        var isAdmin = await IsAdminAsync();
+        if (!isAdmin && !IsCurrentUser(id)) return Forbid();
+        if (!isAdmin && (request.NCarnet is not null || request.NIndicatiu is not null || request.Phone is not null || request.IsActive.HasValue || request.Roles is not null))
+            return Forbid();
         try
         {
             var user = await users.UpdateAsync(id, request);
@@ -89,4 +92,7 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
             ? Task.FromResult(false)
             : database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin);
     }
+
+    private bool IsCurrentUser(int id) =>
+        int.TryParse(User.FindFirst("sub")?.Value, out var currentUserId) && currentUserId == id;
 }

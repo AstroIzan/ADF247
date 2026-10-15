@@ -387,6 +387,12 @@ public sealed class ConvocatoriaService(
             vehicle.ConductorUserId,
             (vehicle.VolunteerUserIds ?? []).Distinct().ToArray())).ToList();
         if (vehicles.Any(vehicle => vehicle.InitialKms < 0 || vehicle.FinalKms < vehicle.InitialKms || vehicle.ConductorUserId.HasValue && !eligibleIds.Contains(vehicle.ConductorUserId.Value) || vehicle.VolunteerUserIds.Any(id => !eligibleIds.Contains(id)))) throw new ArgumentException("El formulario contiene vehiculos o voluntarios no validos.");
+        var activeAssignments = vehicles
+            .Where(vehicle => !string.Equals(vehicle.Status, "withdrawn", StringComparison.OrdinalIgnoreCase))
+            .SelectMany(vehicle => vehicle.VolunteerUserIds.Concat(vehicle.ConductorUserId is int conductorId ? [conductorId] : []))
+            .ToArray();
+        if (activeAssignments.Length != activeAssignments.Distinct().Count())
+            throw new ArgumentException("Un voluntario no puede estar asignado a más de un vehículo activo.");
         if (isFinal && vehicles.Any(vehicle => !vehicle.FinalKms.HasValue))
             throw new ArgumentException("Indica los kilómetros finales de todos los vehículos utilizados antes de finalizar el servicio.");
         var form = await database.CampaignForms
@@ -395,7 +401,7 @@ public sealed class ConvocatoriaService(
             .FirstOrDefaultAsync();
         if (form is null)
         {
-            form = new CampaignForm { ConvocatoriaId = convo.Id, CreatedByNCarnet = carnet, ServiceMoment = "START", VoluntarisJson = "[]", VehiclesJson = "[]" };
+            form = new CampaignForm { ConvocatoriaId = convo.Id, CreatedByNCarnet = carnet, ServiceMoment = "START", VoluntarisJson = "[]", VehiclesJson = "[]", CreatedAt = DateTime.UtcNow };
             database.CampaignForms.Add(form);
         }
         form.Dia = request.Dia ?? DateTime.UtcNow;
@@ -405,6 +411,7 @@ public sealed class ConvocatoriaService(
         form.VehiclesJson = JsonSerializer.Serialize(vehicles);
         form.FinalObservations = Optional(request.FinalObservations);
         form.ServiceMoment = isFinal ? "END" : "START";
+        form.UpdatedAt = DateTime.UtcNow;
 
         if (isFinal)
         {

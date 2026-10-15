@@ -102,7 +102,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.Property(form => form.VehiclesJson).IsRequired();
             entity.HasOne(form => form.Convocatoria).WithMany().HasForeignKey(form => form.ConvocatoriaId);
             entity.Property(form => form.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
-            entity.Property(form => form.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
+            entity.Property(form => form.UpdatedAt).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<UserHoursSummary>(entity =>

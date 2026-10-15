@@ -513,10 +513,37 @@ select:focus {
   padding-bottom: 20px;
 }
 
-.developer-panel {
-  max-width: 600px;
-  border-color: #ead59a;
-  background: linear-gradient(135deg, #fffdf7, #fff);
+.developer-simulation {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 15px;
+  border: 1px solid #e3e8ee;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.developer-simulation-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.developer-simulation h4 {
+  margin: 2px 0 0;
+  color: #334154;
+  font-size: 14px;
+}
+
+.developer-simulation-badge {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: #e9eef4;
+  color: #657286;
+  font-size: 10px;
+  font-weight: 750;
 }
 
 .vehicle-form {
