@@ -83,6 +83,7 @@ public sealed class MessagingService(Adf247DbContext database)
         string serviceMoment,
         IReadOnlyCollection<string> vehicleNames,
         int volunteerCount,
+        string? finalObservations,
         CancellationToken cancellationToken)
     {
         var convocatoria = await database.Convocatorias
@@ -121,13 +122,15 @@ public sealed class MessagingService(Adf247DbContext database)
         if (serviceMoment == "END")
         {
             var localNow = GetBarcelonaNow();
-            var volunteerSummary = volunteerCount == 1 ? "1 voluntari" : $"{volunteerCount} voluntaris";
+            var summary = string.IsNullOrWhiteSpace(finalObservations)
+                ? $"Resum del formulari: {(volunteerCount == 1 ? "1 voluntari" : $"{volunteerCount} voluntaris")} · Vehicles: {vehicles}"
+                : finalObservations.Trim();
             return await QueueAsync(
                 carnet,
                 convocatoriaId,
                 "service-finish",
                 "Sabadell finalitza servei",
-                $"Fi de servei a les {localNow:HH:mm}.\nResum del formulari: {volunteerSummary} · Vehicles: {vehicles}\nMoltes gracies!",
+                $"Fi de servei a les {localNow:HH:mm}.\n{summary}\nMoltes gracies!",
                 new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() },
                 cancellationToken);
         }

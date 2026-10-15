@@ -74,7 +74,7 @@ export class HomeComponent implements OnInit {
   });
   showCampaignFormModal = signal(false);
   campaignFormConvo = signal<Convocatoria | null>(null);
-  campaignFormMode = signal<'start' | 'finish' | null>(null);
+  campaignFormMode = signal<'start' | 'update' | 'finish' | null>(null);
   campaignFormContext = signal<CampaignFormContext | null>(null);
   campaignFormLoading = signal(false);
   campaignFormSubmitting = signal(false);
@@ -96,7 +96,11 @@ export class HomeComponent implements OnInit {
       kms: number;
       conductorUserId: number | null;
       volunteerUserIds: number[];
+      finalKms: number | null;
+      status: 'active' | 'withdrawn';
+      statusNotes: string;
     }>,
+    finalObservations: '',
   });
   showGuardiaResponsesModal = signal(false);
   guardiaResponsesConvo = signal<Convocatoria | null>(null);
@@ -648,7 +652,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
-  openCampaignFormModal(convo: Convocatoria, mode: 'start' | 'finish') {
+  openCampaignFormModal(convo: Convocatoria, mode: 'start' | 'update' | 'finish') {
     if (!this.canManageConvocatoriaLifecycle(convo)) {
       return;
     }
@@ -662,7 +666,7 @@ export class HomeComponent implements OnInit {
       next: (context) => {
         this.campaignFormContext.set(context);
 
-        const prefill = mode === 'finish' ? context.prefill : null;
+        const prefill = mode === 'start' ? null : context.prefill;
         const fallbackDia = this.toDateTimeLocalValue(new Date().toISOString());
         const diaValue = prefill?.dia ? this.toDateTimeLocalValue(prefill.dia) : fallbackDia;
 
@@ -674,11 +678,15 @@ export class HomeComponent implements OnInit {
           vehicles: prefill?.vehicles?.length
             ? prefill.vehicles.map((vehicle) => ({
                 vehicleName: vehicle.vehicleName,
-                kms: Number(vehicle.kms || 0),
+                kms: Number(vehicle.initialKms || 0),
+                finalKms: vehicle.finalKms ?? null,
+                status: vehicle.status || 'active',
+                statusNotes: vehicle.statusNotes || '',
                 conductorUserId: vehicle.conductorUserId,
                 volunteerUserIds: [...(vehicle.volunteerUserIds || [])],
               }))
             : [],
+          finalObservations: prefill?.finalObservations || '',
         });
         this.campaignFormLoading.set(false);
         this.showCampaignFormModal.set(true);
@@ -700,6 +708,7 @@ export class HomeComponent implements OnInit {
       dia: this.toDateTimeLocalValue(new Date().toISOString()),
       volunteerUserIds: [],
       vehicles: [],
+      finalObservations: '',
     });
     this.closeCampaignPickerMenus();
   }
@@ -1040,6 +1049,9 @@ export class HomeComponent implements OnInit {
       {
         vehicleName: normalizedName,
         kms: Number.isFinite(initialKms) && initialKms >= 0 ? initialKms : 0,
+        finalKms: null,
+        status: 'active' as const,
+        statusNotes: '',
         conductorUserId: null,
         volunteerUserIds: [],
       },
@@ -1078,6 +1090,38 @@ export class HomeComponent implements OnInit {
     });
 
     this.updateCampaignVehicles(vehicles);
+  }
+
+  updateCampaignVehicleFinalKms(vehicleName: string, value: string) {
+    const finalKms = value.trim() === '' ? null : Number(value);
+    this.campaignForm.set({
+      ...this.campaignForm(),
+      vehicles: this.campaignForm().vehicles.map((vehicle) => vehicle.vehicleName === vehicleName
+        ? { ...vehicle, finalKms: finalKms != null && Number.isFinite(finalKms) && finalKms >= vehicle.kms ? finalKms : null }
+        : vehicle),
+    });
+  }
+
+  updateCampaignVehicleStatus(vehicleName: string, status: string) {
+    this.campaignForm.set({
+      ...this.campaignForm(),
+      vehicles: this.campaignForm().vehicles.map((vehicle) => vehicle.vehicleName === vehicleName
+        ? { ...vehicle, status: status === 'withdrawn' ? 'withdrawn' : 'active' }
+        : vehicle),
+    });
+  }
+
+  updateCampaignVehicleStatusNotes(vehicleName: string, statusNotes: string) {
+    this.campaignForm.set({
+      ...this.campaignForm(),
+      vehicles: this.campaignForm().vehicles.map((vehicle) => vehicle.vehicleName === vehicleName
+        ? { ...vehicle, statusNotes }
+        : vehicle),
+    });
+  }
+
+  updateCampaignFinalObservations(finalObservations: string) {
+    this.campaignForm.set({ ...this.campaignForm(), finalObservations });
   }
 
   toggleCampaignVehicleVolunteer(vehicleName: string, userId: number, checked?: boolean) {
@@ -1280,6 +1324,9 @@ export class HomeComponent implements OnInit {
     kms: number;
     conductorUserId: number | null;
     volunteerUserIds: number[];
+    finalKms: number | null;
+    status: 'active' | 'withdrawn';
+    statusNotes: string;
   }>) {
     const allowedVolunteerIds = new Set(this.campaignForm().volunteerUserIds);
 
@@ -1372,7 +1419,29 @@ export class HomeComponent implements OnInit {
       return;
     }
 
+    if (mode === 'update') {
+      this.updateCampaignServiceForm(convo);
+      return;
+    }
+
     this.finishConvocatoriaLifecycle(convo);
+  }
+
+  private updateCampaignServiceForm(convo: Convocatoria) {
+    if (this.campaignFormSubmitting()) return;
+    this.campaignFormSubmitting.set(true);
+    this.dataService.updateCampaignForm(convo.id, this.buildCampaignFormPayload()).subscribe({
+      next: (updatedConvo) => {
+        this.campaignFormSubmitting.set(false);
+        this.replaceConvocatoriaInState(updatedConvo);
+        this.adminActionFeedback.set(`Part de servei actualitzat: ${updatedConvo.title}.`);
+        this.closeCampaignFormModal();
+      },
+      error: (err) => {
+        this.campaignFormSubmitting.set(false);
+        this.error.set(err.message || 'No s’ha pogut actualitzar el part de servei.');
+      },
+    });
   }
 
   private buildCampaignFormPayload(): CampaignFormSubmitPayload {
@@ -1385,10 +1454,14 @@ export class HomeComponent implements OnInit {
       volunteerUserIds: [...this.campaignForm().volunteerUserIds],
       vehicles: this.campaignForm().vehicles.map((vehicle) => ({
         vehicleName: vehicle.vehicleName,
-        kms: Number(vehicle.kms || 0),
+        initialKms: Number(vehicle.kms || 0),
+        finalKms: vehicle.finalKms,
+        status: vehicle.status,
+        statusNotes: vehicle.statusNotes || null,
         conductorUserId: vehicle.conductorUserId,
         volunteerUserIds: [...vehicle.volunteerUserIds],
       })),
+      finalObservations: this.campaignForm().finalObservations.trim() || null,
     };
   }
 

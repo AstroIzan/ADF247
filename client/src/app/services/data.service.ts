@@ -80,7 +80,11 @@ export interface CampaignVehicleCatalogItem {
 
 export interface CampaignFormVehicleInput {
   vehicleName: string;
-  kms: number;
+  kms?: number;
+  initialKms: number;
+  finalKms?: number | null;
+  status: 'active' | 'withdrawn';
+  statusNotes?: string | null;
   conductorUserId: number | null;
   volunteerUserIds: number[];
 }
@@ -89,12 +93,14 @@ export interface CampaignFormSubmitPayload {
   dia?: string;
   volunteerUserIds: number[];
   vehicles: CampaignFormVehicleInput[];
+  finalObservations?: string | null;
 }
 
 export interface CampaignFormPrefill {
   dia?: string;
   volunteerUserIds: number[];
   vehicles: CampaignFormVehicleInput[];
+  finalObservations?: string | null;
 }
 
 export interface CampaignFormContext {
@@ -126,6 +132,7 @@ export interface CampaignFormRecord {
   createdByNCarnet: string | null;
   createdAt: string;
   updatedAt: string;
+  finalObservations?: string | null;
   voluntaris: number[];
   vehicles: CampaignFormVehicleInput[];
   convocatoria: {
@@ -448,7 +455,7 @@ export class DataService {
     return this.http.post<Convocatoria>(`/convos/${id}/finish`, campaignForm);
   }
 
-  getCampaignFormContext(id: number, mode?: 'start' | 'finish'): Observable<CampaignFormContext> {
+  getCampaignFormContext(id: number, mode?: 'start' | 'update' | 'finish'): Observable<CampaignFormContext> {
     const query = new URLSearchParams();
     if (mode) {
       query.set('mode', mode);
@@ -484,6 +491,10 @@ export class DataService {
     payload: { actualStartTime?: string | null; actualEndTime?: string | null }
   ): Observable<Convocatoria> {
     return this.http.patch<Convocatoria>(`/convos/${id}/lifecycle`, payload);
+  }
+
+  updateCampaignForm(id: number, campaignForm: CampaignFormSubmitPayload): Observable<Convocatoria> {
+    return this.http.put<Convocatoria>(`/convos/${id}/campaign-form`, campaignForm);
   }
 
   deleteConvocatoria(id: number): Observable<any> {

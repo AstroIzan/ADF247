@@ -173,14 +173,6 @@
                     }
                   </p>
                 </div>
-                @if (getVisibleConvocatoriaElapsedLabel(convo); as elapsedLabel) {
-                  <div class="convo-meta-row convo-meta-row-end">
-                    <p class="convo-time-text">
-                      <strong>Hores totals:</strong>
-                      <span class="convo-time-value">{{ elapsedLabel }} h</span>
-                    </p>
-                  </div>
-                }
                 <p class="convo-sortida-row">
                   @if (!canManageConvocatoriaLifecycle(convo)) {
                     <span class="convo-sortida-label-group">
@@ -441,7 +433,7 @@
     <div class="modal-overlay">
       <div class="modal modal-wide modal-allow-overflow" (click)="onCampaignFormModalClick($event)">
         <div class="modal-header">
-          <h3>Formulari de campanya - {{ campaignFormMode() === 'start' ? 'Inici de servei' : 'Final de servei' }}</h3>
+          <h3>Part de servei - {{ campaignFormMode() === 'start' ? 'Inici de servei' : (campaignFormMode() === 'finish' ? 'Final de servei' : 'Actualització de servei') }}</h3>
           <button class="close-btn" (click)="closeCampaignFormModal()">&times;</button>
         </div>
 
@@ -523,15 +515,28 @@
 
                     <div class="form-grid-2">
                       <div class="form-group">
-                        <label>KMs</label>
+                        <label>{{ campaignFormMode() === 'finish' ? 'KMs finals' : 'KMs inicials' }}</label>
                         <input
                           type="number"
                           min="0"
                           step="0.1"
-                          [value]="getCampaignVehicleKmsInputValue(vehicle.vehicleName)"
+                          [value]="campaignFormMode() === 'finish' ? (vehicle.finalKms ?? '') : getCampaignVehicleKmsInputValue(vehicle.vehicleName)"
                           [placeholder]="getCampaignVehicleKmsPlaceholder(vehicle.vehicleName)"
-                          (change)="updateCampaignVehicleField(vehicle.vehicleName, 'kms', $any($event.target).value)"
+                          (change)="campaignFormMode() === 'finish' ? updateCampaignVehicleFinalKms(vehicle.vehicleName, $any($event.target).value) : updateCampaignVehicleField(vehicle.vehicleName, 'kms', $any($event.target).value)"
                         />
+                      </div>
+                      <div class="form-grid-2">
+                        <div class="form-group">
+                          <label>Estat del vehicle</label>
+                          <select [value]="vehicle.status" (change)="updateCampaignVehicleStatus(vehicle.vehicleName, $any($event.target).value)">
+                            <option value="active">En servei</option>
+                            <option value="withdrawn">Baixa durant el servei</option>
+                          </select>
+                        </div>
+                        <div class="form-group">
+                          <label>Incidència o canvi</label>
+                          <input [value]="vehicle.statusNotes" placeholder="Explica el canvi si n'hi ha" (change)="updateCampaignVehicleStatusNotes(vehicle.vehicleName, $any($event.target).value)" />
+                        </div>
                       </div>
 
                       <div class="form-group">
@@ -561,6 +566,12 @@
                                 >
                                   <span class="responsable-picker-option-name">{{ getCampaignUserLabel(userId) }}</span>
                                 </button>
+                              }
+                              @if (campaignFormMode() === 'finish') {
+                                <div class="form-group">
+                                  <label>Observacions finals (missatge de final de servei)</label>
+                                  <textarea [value]="campaignForm().finalObservations" (change)="updateCampaignFinalObservations($any($event.target).value)" placeholder="Resum del servei, incidències i observacions"></textarea>
+                                </div>
                               }
                             </div>
                           }
@@ -607,7 +618,7 @@
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="closeCampaignFormModal()" [disabled]="campaignFormSubmitting()">Cancel·lar</button>
           <button class="btn btn-primary" (click)="executeCampaignLifecycleAction()" [disabled]="campaignFormLoading() || campaignFormSubmitting()">
-            {{ campaignFormSubmitting() ? 'Desant...' : (campaignFormMode() === 'start' ? 'Desar i iniciar' : 'Desar i finalitzar') }}
+            {{ campaignFormSubmitting() ? 'Desant...' : (campaignFormMode() === 'start' ? 'Desar i iniciar' : (campaignFormMode() === 'finish' ? 'Desar i finalitzar' : 'Desar canvis')) }}
           </button>
         </div>
       </div>
@@ -623,6 +634,9 @@
         </div>
 
         <div class="modal-body">
+          @if (campaignRecordsConvo()!.actualStartTime && !campaignRecordsConvo()!.actualEndTime) {
+            <button class="btn btn-primary" type="button" (click)="closeCampaignRecordsModal(); openCampaignFormModal(campaignRecordsConvo()!, 'update')">Editar part de servei</button>
+          }
           @if (campaignRecordsLoading()) {
             <div class="loading">Carregant formularis...</div>
           } @else if (campaignRecords().length === 0) {

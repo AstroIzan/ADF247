@@ -9,6 +9,7 @@ public sealed class CampaignForm
     public string? ResponsableNCarnet { get; set; }
     public required string VoluntarisJson { get; set; }
     public required string VehiclesJson { get; set; }
+    public string? FinalObservations { get; set; }
     public required string ServiceMoment { get; set; }
     public string? CreatedByNCarnet { get; set; }
     public DateTime CreatedAt { get; set; }

@@ -58,6 +58,12 @@ public sealed class ConvocatoriasController(ConvocatoriaService convos, Adf247Db
         var identity = await IdentityAsync(); if (identity is null) return Unauthorized();
         return await ExecuteAsync(() => convos.FinishAsync(id, request, identity.Value.UserId, identity.Value.Carnet, identity.Value.IsAdmin));
     }
+    [HttpPut("{id:int}/campaign-form")]
+    public async Task<IActionResult> UpdateCampaignForm(int id, CampaignFormRequest request)
+    {
+        var identity = await IdentityAsync(); if (identity is null) return Unauthorized();
+        return await ExecuteAsync(() => convos.UpdateCampaignFormAsync(id, request, identity.Value.UserId, identity.Value.Carnet, identity.Value.IsAdmin));
+    }
     [HttpGet("campaign-forms/list")]
     public async Task<IActionResult> Forms([FromQuery] int? convoId, [FromQuery] string? serviceMoment)
     {

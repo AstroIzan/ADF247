@@ -172,6 +172,17 @@ public sealed class ConvocatoriaService(
     public async Task<object?> FinishAsync(int id, CampaignFormRequest request, int userId, string carnet, bool isAdmin) =>
         await ChangeServiceStateAsync(id, request, userId, carnet, isAdmin, "END");
 
+    public async Task<object?> UpdateCampaignFormAsync(int id, CampaignFormRequest request, int userId, string carnet, bool isAdmin)
+    {
+        var convo = await RequireConvocatoriaAsync(id);
+        EnsureManager(convo, userId, isAdmin);
+        if (!convo.ActualStartTime.HasValue || convo.ActualEndTime.HasValue)
+            throw new InvalidOperationException("El parte sólo se puede actualizar durante un servicio activo.");
+        await SaveServiceFormAsync(convo, request, carnet, false);
+        await SaveAsync();
+        return await GetAsync(id);
+    }
+
     public async Task<IReadOnlyList<object>> ListFormsAsync(int? convoId, string? moment, int userId, bool isAdmin)
     {
         var query = database.CampaignForms.Include(form => form.Convocatoria).AsQueryable();
@@ -216,7 +227,18 @@ public sealed class ConvocatoriaService(
                     kms = vehicle.Kms,
                 })
                 .ToArray();
-        return new { convocatoria = MapConvocatoria(convo), responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, eligibleUsers = eligible, vehicleCatalog, lockedVehicleNames = Array.Empty<string>(), prefill = (object?)null };
+        var form = await database.CampaignForms
+            .Where(item => item.ConvocatoriaId == id)
+            .OrderByDescending(item => item.Id)
+            .FirstOrDefaultAsync();
+        var prefill = form is null ? null : new
+        {
+            form.Dia,
+            volunteerUserIds = Deserialize<int[]>(form.VoluntarisJson) ?? [],
+            vehicles = Deserialize<List<ServiceVehicle>>(form.VehiclesJson) ?? [],
+            form.FinalObservations,
+        };
+        return new { convocatoria = MapConvocatoria(convo), responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, eligibleUsers = eligible, vehicleCatalog, lockedVehicleNames = Array.Empty<string>(), prefill };
     }
 
     public async Task<object> GetHoursSummaryAsync()
@@ -332,7 +354,7 @@ public sealed class ConvocatoriaService(
         if (moment == "END" && convo.ActualEndTime.HasValue) throw new InvalidOperationException("La convocatoria ya fue finalizada.");
         var now = DateTime.UtcNow;
         if (moment == "START") convo.ActualStartTime = now; else { convo.ActualEndTime = now; convo.IsActive = false; }
-        await CreateFormAsync(convo, request, moment, carnet);
+        await SaveServiceFormAsync(convo, request, carnet, moment == "END");
         await SaveAsync();
         await messaging.QueueServiceLifecycleAsync(
             carnet,
@@ -345,19 +367,56 @@ public sealed class ConvocatoriaService(
                 .Distinct(StringComparer.OrdinalIgnoreCase)
                 .ToArray(),
             (request.VolunteerUserIds ?? []).Distinct().Count(),
+            request.FinalObservations,
             CancellationToken.None);
         return MapConvocatoria(convo);
     }
 
-    private async Task CreateFormAsync(Convocatoria convo, CampaignFormRequest request, string moment, string carnet)
+    private async Task SaveServiceFormAsync(Convocatoria convo, CampaignFormRequest request, string carnet, bool isFinal)
     {
         var eligible = await EligibleUsersAsync(convo.Id);
         var eligibleIds = eligible.Select(user => user.Id).ToHashSet();
         var volunteers = (request.VolunteerUserIds ?? []).Distinct().ToList();
         if (volunteers.Any(id => !eligibleIds.Contains(id))) throw new ArgumentException("El formulari inclou voluntaris que no han respost afirmativament o no han assistit.");
-        var vehicles = (request.Vehicles ?? []).Select(vehicle => new { vehicleName = Required(vehicle.VehicleName, "vehicleName"), kms = vehicle.Kms ?? 0, conductorUserId = vehicle.ConductorUserId, volunteerUserIds = (vehicle.VolunteerUserIds ?? []).Distinct().ToList() }).ToList();
-        if (vehicles.Any(vehicle => vehicle.kms < 0 || vehicle.conductorUserId.HasValue && !eligibleIds.Contains(vehicle.conductorUserId.Value) || vehicle.volunteerUserIds.Any(id => !eligibleIds.Contains(id)))) throw new ArgumentException("El formulario contiene vehiculos o voluntarios no validos.");
-        database.CampaignForms.Add(new CampaignForm { ConvocatoriaId = convo.Id, Dia = request.Dia ?? DateTime.UtcNow, ResponsableId = convo.ResponsableId, ResponsableNCarnet = convo.Responsable?.NCarnet, VoluntarisJson = JsonSerializer.Serialize(volunteers), VehiclesJson = JsonSerializer.Serialize(vehicles), ServiceMoment = moment, CreatedByNCarnet = carnet });
+        var vehicles = (request.Vehicles ?? []).Select(vehicle => new ServiceVehicle(
+            Required(vehicle.VehicleName, "vehicleName"),
+            vehicle.InitialKms ?? 0,
+            vehicle.FinalKms,
+            string.IsNullOrWhiteSpace(vehicle.Status) ? "active" : vehicle.Status.Trim(),
+            Optional(vehicle.StatusNotes),
+            vehicle.ConductorUserId,
+            (vehicle.VolunteerUserIds ?? []).Distinct().ToArray())).ToList();
+        if (vehicles.Any(vehicle => vehicle.InitialKms < 0 || vehicle.FinalKms < vehicle.InitialKms || vehicle.ConductorUserId.HasValue && !eligibleIds.Contains(vehicle.ConductorUserId.Value) || vehicle.VolunteerUserIds.Any(id => !eligibleIds.Contains(id)))) throw new ArgumentException("El formulario contiene vehiculos o voluntarios no validos.");
+        var form = await database.CampaignForms
+            .Where(item => item.ConvocatoriaId == convo.Id)
+            .OrderByDescending(item => item.Id)
+            .FirstOrDefaultAsync();
+        if (form is null)
+        {
+            form = new CampaignForm { ConvocatoriaId = convo.Id, CreatedByNCarnet = carnet, ServiceMoment = "START", VoluntarisJson = "[]", VehiclesJson = "[]" };
+            database.CampaignForms.Add(form);
+        }
+        form.Dia = request.Dia ?? DateTime.UtcNow;
+        form.ResponsableId = convo.ResponsableId;
+        form.ResponsableNCarnet = convo.Responsable?.NCarnet;
+        form.VoluntarisJson = JsonSerializer.Serialize(volunteers);
+        form.VehiclesJson = JsonSerializer.Serialize(vehicles);
+        form.FinalObservations = Optional(request.FinalObservations);
+        form.ServiceMoment = isFinal ? "END" : "START";
+
+        if (isFinal)
+        {
+            var configuration = await database.SystemConfigurations.SingleOrDefaultAsync(item => item.Id == 1);
+            if (configuration is not null)
+            {
+                var catalog = Deserialize<List<CampaignVehicleRequest>>(configuration.VehicleCatalogJson) ?? [];
+                configuration.VehicleCatalogJson = JsonSerializer.Serialize(catalog.Select(vehicle =>
+                {
+                    var used = vehicles.LastOrDefault(item => string.Equals(item.VehicleName, vehicle.Indicatiu, StringComparison.OrdinalIgnoreCase));
+                    return used?.FinalKms is > 0 ? vehicle with { Kms = (decimal)used.FinalKms.Value } : vehicle;
+                }));
+            }
+        }
     }
 
     private async Task<List<CampaignUser>> EligibleUsersAsync(int convoId) =>
@@ -381,11 +440,11 @@ public sealed class ConvocatoriaService(
         return value.Value;
     }
     private static object MapConvocatoria(Convocatoria convo) => new { convo.Id, convo.Date, convo.Title, convo.UbiSortida, convo.ResponsableId, responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, convo.ConvoTypeId, convo.ConvoType, convo.StartTime, convo.FinalTime, convo.ActualStartTime, convo.ActualEndTime, convo.IsActive, convo.AutoAssignResponsable, convo.Sortida, convo.ResponseWindowMinutes, responseCount = 0 };
-    private static object MapForm(CampaignForm form) => new { form.Id, form.ConvocatoriaId, form.ServiceMoment, form.Dia, form.ResponsableId, form.ResponsableNCarnet, form.CreatedByNCarnet, form.CreatedAt, form.UpdatedAt, voluntaris = JsonSerializer.Deserialize<object>(form.VoluntarisJson), vehicles = JsonSerializer.Deserialize<object>(form.VehiclesJson), convocatoria = form.Convocatoria is null ? null : new { form.Convocatoria.Id, form.Convocatoria.Title, form.Convocatoria.Date } };
+    private static object MapForm(CampaignForm form) => new { form.Id, form.ConvocatoriaId, form.ServiceMoment, form.Dia, form.ResponsableId, form.ResponsableNCarnet, form.CreatedByNCarnet, form.CreatedAt, form.UpdatedAt, form.FinalObservations, voluntaris = JsonSerializer.Deserialize<object>(form.VoluntarisJson), vehicles = JsonSerializer.Deserialize<object>(form.VehiclesJson), convocatoria = form.Convocatoria is null ? null : new { form.Convocatoria.Id, form.Convocatoria.Title, form.Convocatoria.Date } };
     private static double GetDurationHours(Convocatoria convocatoria)
     {
-        var start = convocatoria.ActualStartTime ?? convocatoria.StartTime;
-        var end = convocatoria.ActualEndTime ?? convocatoria.FinalTime ?? start.AddHours(1);
+        var start = convocatoria.StartTime;
+        var end = convocatoria.FinalTime ?? start.AddHours(1);
         return Math.Max(0, (end - start).TotalHours);
     }
     private static bool IsWithinCampaign(DateTime date, HourComputationSettings settings)
@@ -396,6 +455,12 @@ public sealed class ConvocatoriaService(
     }
     private async Task SaveAsync() { try { await database.SaveChangesAsync(); } catch (DbUpdateException error) { throw new InvalidOperationException("No se ha podido guardar el recurso.", error); } }
     private sealed record CampaignUser(int Id, string NCarnet, string Name, string? LastName);
+    private sealed record ServiceVehicle(string VehicleName, double InitialKms, double? FinalKms, string Status, string? StatusNotes, int? ConductorUserId, IReadOnlyList<int> VolunteerUserIds);
+    private static T? Deserialize<T>(string json)
+    {
+        try { return JsonSerializer.Deserialize<T>(json); }
+        catch (JsonException) { return default; }
+    }
     private sealed record HoursSummaryRow(int UserId, string UserNCarnet, string UserName, double CampaignHours, double OffCampaignHours, int UnansweredCount, int NoShowCount, double UnansweredPenaltyHours, double NoShowPenaltyHours, double TotalHours);
     private sealed class HourComputationSettings
     {
