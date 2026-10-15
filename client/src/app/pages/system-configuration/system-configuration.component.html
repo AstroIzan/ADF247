@@ -183,6 +183,25 @@
           <label>Hores per no resposta <input type="number" min="0" max="24" step="0.5" [(ngModel)]="configuration.unansweredPenaltyHours"></label>
           <label>Hores per no assistència <input type="number" min="0" max="24" step="0.5" [(ngModel)]="configuration.noShowPenaltyHours"></label>
         </div>
+        <div class="panel-heading panel-heading-inline">
+          <div>
+            <p class="panel-kicker">Convocatòries computables</p>
+            <h3>Tipus inclosos al resum</h3>
+          </div>
+          <span class="selection-chip">{{ configuration.campaignHoursConvoTypeIds.length }} tipus actius</span>
+        </div>
+        <p>Selecciona els tipus de convocatòria que sumen hores i als quals s’apliquen les penalitzacions de campanya.</p>
+        <div class="weekly-types-list">
+          @for (type of convoTypes(); track type.id) {
+            <div class="weekly-type-row" [class.selected]="isCampaignHoursTypeSelected(type.id)">
+              <label class="toggle-option">
+                <input type="checkbox" [checked]="isCampaignHoursTypeSelected(type.id)" (change)="toggleCampaignHoursType(type.id, $any($event.target).checked)">
+                <span class="toggle-control" aria-hidden="true"></span>
+                <span>{{ type.name }}</span>
+              </label>
+            </div>
+          }
+        </div>
       </article>
     </section>
 

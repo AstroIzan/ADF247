@@ -20,7 +20,7 @@
   } @else if (loading()) {
     <div class="loading">Carregant resum d’hores...</div>
   } @else if (!isConfigured()) {
-    <div class="empty-state">Cal establir l’inici i la fi de campanya a Sistema abans de calcular el resum d’hores.</div>
+    <div class="empty-state">Cal establir l’inici, la fi de campanya i els tipus de convocatòria computables a Sistema abans de calcular el resum d’hores.</div>
   } @else if (rows().length === 0) {
     <div class="empty-state">No hi ha dades d’hores per mostrar.</div>
   } @else {

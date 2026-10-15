@@ -15,12 +15,14 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
     {
         Validate(request);
         var weeklyTypeIds = request.WeeklyConvoTypeIds?.Distinct().Order().ToArray() ?? [];
+        var campaignHoursTypeIds = request.CampaignHoursConvoTypeIds?.Distinct().Order().ToArray() ?? [];
         var weeklySchedules = Array.Empty<WeeklyConvocatoriaScheduleRequest>();
-        if (weeklyTypeIds.Length > 0)
+        var selectedTypeIds = weeklyTypeIds.Concat(campaignHoursTypeIds).Distinct().ToArray();
+        if (selectedTypeIds.Length > 0)
         {
-            var knownTypeCount = await database.ConvoTypes.CountAsync(type => weeklyTypeIds.Contains(type.Id), cancellationToken);
-            if (knownTypeCount != weeklyTypeIds.Length)
-                throw new ArgumentException("Hi ha tipus setmanals que no existeixen.");
+            var knownTypeCount = await database.ConvoTypes.CountAsync(type => selectedTypeIds.Contains(type.Id), cancellationToken);
+            if (knownTypeCount != selectedTypeIds.Length)
+                throw new ArgumentException("Hi ha tipus de convocatòria que no existeixen.");
         }
 
         var managers = request.AvailabilityManagerNCarnets?
@@ -46,6 +48,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         configuration.NotifyOnAutoAvailableResponse = request.NotifyOnAutoAvailableResponse;
         configuration.PviEnabled = request.PviEnabled;
         configuration.WeeklyConvoTypeIdsJson = JsonSerializer.Serialize(weeklyTypeIds);
+        configuration.CampaignHoursConvoTypeIdsJson = JsonSerializer.Serialize(campaignHoursTypeIds);
         configuration.WeeklyConvocatoriaSchedulesJson = JsonSerializer.Serialize(weeklySchedules);
         configuration.WeeklyRequestWeekday = request.WeeklyRequestWeekday;
         configuration.WeeklyRequestHour = request.WeeklyRequestHour;
@@ -79,6 +82,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
     {
         Id = 1,
         WeeklyConvoTypeIdsJson = "[]",
+        CampaignHoursConvoTypeIdsJson = "[]",
         WeeklyConvocatoriaSchedulesJson = "[]",
         AvailabilityManagerNCarnetsJson = "[]",
         VehicleCatalogJson = "[]",
@@ -98,6 +102,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         configuration.NotifyOnAutoAvailableResponse,
         configuration.PviEnabled,
         WeeklyConvoTypeIds = Deserialize<int>(configuration.WeeklyConvoTypeIdsJson),
+        CampaignHoursConvoTypeIds = Deserialize<int>(configuration.CampaignHoursConvoTypeIdsJson),
         WeeklyConvocatoriaSchedules = Deserialize<WeeklyConvocatoriaScheduleRequest>(configuration.WeeklyConvocatoriaSchedulesJson),
         configuration.WeeklyRequestWeekday,
         configuration.WeeklyRequestHour,

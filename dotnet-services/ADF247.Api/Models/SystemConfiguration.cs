@@ -7,6 +7,7 @@ public sealed class SystemConfiguration
     public bool NotifyOnAutoAvailableResponse { get; set; }
     public bool PviEnabled { get; set; }
     public required string WeeklyConvoTypeIdsJson { get; set; }
+    public required string CampaignHoursConvoTypeIdsJson { get; set; }
     public required string WeeklyConvocatoriaSchedulesJson { get; set; }
     public int WeeklyRequestWeekday { get; set; }
     public int WeeklyRequestHour { get; set; }

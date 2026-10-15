@@ -346,6 +346,7 @@ export interface SystemConfiguration {
   notifyOnAutoAvailableResponse: boolean;
   pviEnabled: boolean;
   weeklyConvoTypeIds: number[];
+  campaignHoursConvoTypeIds: number[];
   weeklyConvocatoriaSchedules: WeeklyConvocatoriaSchedule[];
   weeklyRequestWeekday: number;
   weeklyRequestHour: number;

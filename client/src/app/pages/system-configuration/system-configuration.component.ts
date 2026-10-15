@@ -128,6 +128,19 @@ export class SystemConfigurationComponent {
     }));
   }
 
+  isCampaignHoursTypeSelected(typeId: number) {
+    return this.configuration()?.campaignHoursConvoTypeIds.includes(typeId) ?? false;
+  }
+
+  toggleCampaignHoursType(typeId: number, selected: boolean) {
+    this.updateConfiguration((configuration) => ({
+      ...configuration,
+      campaignHoursConvoTypeIds: selected
+        ? [...new Set([...configuration.campaignHoursConvoTypeIds, typeId])]
+        : configuration.campaignHoursConvoTypeIds.filter((id) => id !== typeId),
+    }));
+  }
+
   isAvailabilityManagerSelected(nCarnet: string) {
     return this.configuration()?.availabilityManagerNCarnets.includes(nCarnet) ?? false;
   }

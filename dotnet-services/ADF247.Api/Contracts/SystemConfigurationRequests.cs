@@ -5,6 +5,7 @@ public sealed record SystemConfigurationRequest(
     bool NotifyOnAutoAvailableResponse,
     bool PviEnabled,
     IReadOnlyList<int>? WeeklyConvoTypeIds,
+    IReadOnlyList<int>? CampaignHoursConvoTypeIds,
     IReadOnlyList<WeeklyConvocatoriaScheduleRequest>? WeeklyConvocatoriaSchedules,
     int WeeklyRequestWeekday,
     int WeeklyRequestHour,

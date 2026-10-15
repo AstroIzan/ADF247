@@ -119,6 +119,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.ToTable("SystemConfiguration");
             entity.HasKey(configuration => configuration.Id);
             entity.Property(configuration => configuration.WeeklyConvoTypeIdsJson).IsRequired();
+            entity.Property(configuration => configuration.CampaignHoursConvoTypeIdsJson).IsRequired();
             entity.Property(configuration => configuration.WeeklyConvocatoriaSchedulesJson).IsRequired();
             entity.Property(configuration => configuration.AvailabilityManagerNCarnetsJson).IsRequired();
             entity.Property(configuration => configuration.VehicleCatalogJson).IsRequired();

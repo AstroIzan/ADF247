@@ -34,14 +34,14 @@ BEGIN TRANSACTION;
 DELETE response
 FROM dbo.Respuesta response
 INNER JOIN dbo.Convocatoria convo ON convo.id = response.convoId
-WHERE convo.title LIKE N'[VALIDACION HORAS]%';
+WHERE convo.title LIKE N'[[]VALIDACION HORAS]%';
 
 DELETE FROM dbo.FormulariCampanya
 WHERE convocatoriaId IN (
-    SELECT id FROM dbo.Convocatoria WHERE title LIKE N'[VALIDACION HORAS]%'
+    SELECT id FROM dbo.Convocatoria WHERE title LIKE N'[[]VALIDACION HORAS]%'
 );
 
-DELETE FROM dbo.Convocatoria WHERE title LIKE N'[VALIDACION HORAS]%';
+DELETE FROM dbo.Convocatoria WHERE title LIKE N'[[]VALIDACION HORAS]%';
 
 DELETE summary
 FROM dbo.UserHoursSummary summary
@@ -125,7 +125,7 @@ OPTION (MAXRECURSION 250);
         ((CHECKSUM(CONCAT(convo.id, N':', [user].nCarnet)) & 2147483647) % 5) AS responseCase
     FROM dbo.Convocatoria convo
     CROSS JOIN dbo.[User] [user]
-    WHERE convo.title LIKE N'[VALIDACION HORAS]%'
+    WHERE convo.title LIKE N'[[]VALIDACION HORAS]%'
       AND [user].nCarnet LIKE N'HVAL-%'
 )
 INSERT INTO dbo.Respuesta (
@@ -150,8 +150,8 @@ COMMIT TRANSACTION;
 
 SELECT
     (SELECT COUNT(*) FROM dbo.[User] WHERE nCarnet LIKE N'HVAL-%') AS seededUsers,
-    (SELECT COUNT(*) FROM dbo.Convocatoria WHERE title LIKE N'[VALIDACION HORAS]%') AS seededConvocatorias,
+    (SELECT COUNT(*) FROM dbo.Convocatoria WHERE title LIKE N'[[]VALIDACION HORAS]%') AS seededConvocatorias,
     (SELECT COUNT(*)
      FROM dbo.Respuesta response
      INNER JOIN dbo.Convocatoria convo ON convo.id = response.convoId
-     WHERE convo.title LIKE N'[VALIDACION HORAS]%') AS seededResponses;
+     WHERE convo.title LIKE N'[[]VALIDACION HORAS]%') AS seededResponses;
