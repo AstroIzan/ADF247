@@ -28,6 +28,8 @@ export class SystemConfigurationComponent {
   newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', litres: 0, kms: 0 });
   plaAlfaSimulation = signal<PlaAlfaSimulation | null>(null);
   simulationSaving = signal(false);
+  batchRunSubmitting = signal(false);
+  batchRunNotice = signal('');
   developerUpdatingUserId = signal<number | null>(null);
 
   constructor(private dataService: DataService, private authService: AuthService) {
@@ -101,6 +103,23 @@ export class SystemConfigurationComponent {
       error: (error) => {
         this.error.set(error.error?.message || error.message || 'No s’ha pogut desar la simulació de Pla Alfa.');
         this.simulationSaving.set(false);
+      },
+    });
+  }
+
+  runAllBatchJobs() {
+    if (this.batchRunSubmitting()) return;
+    this.batchRunSubmitting.set(true);
+    this.batchRunNotice.set('');
+    this.error.set('');
+    this.dataService.runAllBatchJobs().subscribe({
+      next: () => {
+        this.batchRunSubmitting.set(false);
+        this.batchRunNotice.set('S’ha sol·licitat l’execució de tots els runbooks. Es registrarà a Execucions en menys d’un minut.');
+      },
+      error: (error) => {
+        this.batchRunSubmitting.set(false);
+        this.error.set(error.error?.message || error.message || 'No s’han pogut iniciar els runbooks.');
       },
     });
   }

@@ -1428,7 +1428,23 @@
             </div>
           }
 
-          @if (!isGuardiaTypeSelected() && !isSemanalTypeSelected() && !isIncendiTypeSelected()) {
+          @if (isGuardiaOrPviTypeSelected()) {
+            <div class="form-group">
+              <label>Creació</label>
+              <div class="guardia-turns-grid">
+                <label class="checkbox-label">
+                  <input type="radio" name="recurringMode" [checked]="createConvoForm().recurringMode === 'single'" (change)="updateCreateConvoField('recurringMode', 'single')" />
+                  Per a un dia
+                </label>
+                <label class="checkbox-label">
+                  <input type="radio" name="recurringMode" [checked]="createConvoForm().recurringMode === 'weekly'" (change)="updateCreateConvoField('recurringMode', 'weekly')" />
+                  Setmanal amb franges
+                </label>
+              </div>
+            </div>
+          }
+
+          @if (!isGuardiaTypeSelected() && !isWeeklyCreationSelected() && !isIncendiTypeSelected()) {
             <div class="form-group">
               <label>Data (dia seleccionat)</label>
               <input
@@ -1448,7 +1464,7 @@
             />
           </div>
 
-          @if (isGuardiaTypeSelected()) {
+          @if (isGuardiaTypeSelected() && !isWeeklyCreationSelected()) {
             <div class="form-grid-2">
               <div class="form-group">
                 <label>Rang des de</label>
@@ -1494,7 +1510,7 @@
             <p class="guardia-help-text">
               Es generarà una convocatòria per torn i per cada dia laborable (de dilluns a divendres) dins del rang.
             </p>
-          } @else if (isSemanalTypeSelected()) {
+          } @else if (isWeeklyCreationSelected()) {
             <div class="form-grid-2">
               <div class="form-group">
                 <label>Dia d'inici</label>

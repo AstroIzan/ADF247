@@ -1,5 +1,6 @@
 using ADF247.Api.Contracts;
 using ADF247.Api.Data;
+using ADF247.Api.Models;
 using ADF247.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -66,6 +67,22 @@ public sealed class SystemConfigurationController(
             todayLevel = principal.SimulationTodayLevel,
             tomorrowLevel = principal.SimulationTomorrowLevel,
         });
+    }
+
+    [HttpPost("developer/run-all-batch")]
+    public async Task<IActionResult> RunAllBatch(CancellationToken cancellationToken)
+    {
+        var carnet = User.FindFirst("nCarnet")?.Value;
+        if (string.IsNullOrWhiteSpace(carnet) || !await IsDeveloperAsync(cancellationToken)) return Forbid();
+
+        var request = new ManualBatchRunRequest
+        {
+            RequestedByNCarnet = carnet,
+            RequestedAt = DateTime.UtcNow,
+        };
+        database.ManualBatchRunRequests.Add(request);
+        await database.SaveChangesAsync(cancellationToken);
+        return Accepted(new { request.Id, request.RequestedAt });
     }
 
     private Task<bool> IsAdminAsync(CancellationToken cancellationToken)

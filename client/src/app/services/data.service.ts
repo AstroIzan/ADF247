@@ -422,6 +422,10 @@ export class DataService {
     return this.http.put<PlaAlfaSimulation>('/system-configuration/developer/pla-alfa-simulation', payload);
   }
 
+  runAllBatchJobs(): Observable<{ id: number; requestedAt: string }> {
+    return this.http.post<{ id: number; requestedAt: string }>('/system-configuration/developer/run-all-batch', {});
+  }
+
   getConvoTypeById(id: number): Observable<ConvoType> {
     return this.http.get<ConvoType>(`/convos/types/${id}`);
   }

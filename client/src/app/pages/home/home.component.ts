@@ -131,6 +131,7 @@ export class HomeComponent implements OnInit {
     guardiaRangeEnd: this.toDateInputValue(new Date()),
     guardiaMorning: false,
     guardiaAfternoon: true,
+    recurringMode: 'single' as 'single' | 'weekly',
     semanalRangeStart: this.toDateInputValue(new Date()),
     semanalRangeEnd: this.toDateInputValue(new Date()),
     semanalSlots: [{ start: '', end: '' }],
@@ -2491,6 +2492,7 @@ export class HomeComponent implements OnInit {
       guardiaRangeEnd: this.selectedDate(),
       guardiaMorning: false,
       guardiaAfternoon: true,
+      recurringMode: 'single',
       semanalRangeStart: this.selectedDate(),
       semanalRangeEnd: this.selectedDate(),
       semanalSlots: [{ start: '', end: '' }],
@@ -2554,6 +2556,7 @@ export class HomeComponent implements OnInit {
       | 'guardiaRangeEnd'
       | 'guardiaMorning'
       | 'guardiaAfternoon'
+      | 'recurringMode'
       | 'semanalRangeStart'
       | 'semanalRangeEnd'
       | 'ubiSortida'
@@ -2593,6 +2596,12 @@ export class HomeComponent implements OnInit {
 
         if (!next.guardiaMorning && !next.guardiaAfternoon) {
           next.guardiaAfternoon = true;
+        }
+
+        if (field === 'convoTypeId' && this.isGuardiaOrPviTypeById(next.convoTypeId)) {
+          next.recurringMode = 'single';
+          next.semanalRangeStart = current.date || this.selectedDate();
+          next.semanalRangeEnd = current.date || this.selectedDate();
         }
       }
 
@@ -2659,7 +2668,24 @@ export class HomeComponent implements OnInit {
 
     let payloads: Partial<Convocatoria>[] = [];
 
-    if (isGuardiaType) {
+    if (this.isWeeklyCreationSelected()) {
+      if (!form.semanalRangeStart || !form.semanalRangeEnd) {
+        this.createConvoError.set('Per a setmanal has d\'indicar data d\'inici i de fi.');
+        return;
+      }
+
+      const validSlots = (form.semanalSlots || []).filter((slot) => slot.start && slot.end);
+      if (validSlots.length === 0 || validSlots.some((slot) => slot.start >= slot.end)) {
+        this.createConvoError.set('Afegeix almenys una franja horària vàlida.');
+        return;
+      }
+
+      payloads = this.buildSemanalPayloads({ ...form, title: titleToUse }, validSlots);
+      if (payloads.length === 0) {
+        this.createConvoError.set('No s\'han pogut generar convocatòries setmanals amb aquest rang.');
+        return;
+      }
+    } else if (isGuardiaType) {
       if (!form.guardiaRangeStart || !form.guardiaRangeEnd) {
         this.createConvoError.set('Per a guardia has d\'indicar un rang de dates.');
         return;
@@ -2785,6 +2811,16 @@ export class HomeComponent implements OnInit {
     return this.isSemanalTypeById(this.createConvoForm().convoTypeId);
   }
 
+  isGuardiaOrPviTypeSelected() {
+    return this.isGuardiaOrPviTypeById(this.createConvoForm().convoTypeId);
+  }
+
+  isWeeklyCreationSelected() {
+    const form = this.createConvoForm();
+    return this.isSemanalTypeById(form.convoTypeId)
+      || (this.isGuardiaOrPviTypeById(form.convoTypeId) && form.recurringMode === 'weekly');
+  }
+
   isIncendiTypeSelected() {
     return this.isIncendiTypeById(this.createConvoForm().convoTypeId);
   }
@@ -2857,6 +2893,12 @@ export class HomeComponent implements OnInit {
 
     const type = this.convoTypes().find((item) => item.id === convoTypeId);
     return Boolean(type?.name && /guardia/i.test(type.name));
+  }
+
+  private isGuardiaOrPviTypeById(convoTypeId: number | null) {
+    if (!convoTypeId) return false;
+    const type = this.convoTypes().find((item) => item.id === convoTypeId);
+    return Boolean(type?.name && /(guardia|pvi)/i.test(type.name));
   }
 
   private isGuardiaConvocatoria(convo: Convocatoria) {

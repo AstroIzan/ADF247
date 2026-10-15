@@ -311,6 +311,12 @@
                 <button class="btn btn-primary" type="button" [disabled]="simulationSaving()" (click)="savePlaAlfaSimulation()">
                   {{ simulationSaving() ? 'Desant simulació...' : 'Desar simulació' }}
                 </button>
+                <button class="btn btn-secondary" type="button" [disabled]="batchRunSubmitting()" (click)="runAllBatchJobs()">
+                  {{ batchRunSubmitting() ? 'Iniciant runbooks...' : 'Executar tots els runbooks' }}
+                </button>
+                @if (batchRunNotice()) {
+                  <p class="success-message">{{ batchRunNotice() }}</p>
+                }
               } @else {
                 <p class="empty-copy">Cal marcar un municipi com a principal a Pla Alfa abans de poder simular-ne el nivell.</p>
               }

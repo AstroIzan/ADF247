@@ -26,6 +26,7 @@ public sealed class BatchOrchestrator(
         }
 
         var localNow = TimeZoneInfo.ConvertTime(utcNow, LocalTimeZone);
+        await RunManualRequestsAsync(configuration, localNow, cancellationToken);
         if (localNow.DayOfWeek == (DayOfWeek)configuration.WeeklyRequestWeekday
             && localNow.Hour == configuration.WeeklyRequestHour
             && localNow.Minute == configuration.WeeklyRequestMinute)
@@ -37,6 +38,33 @@ public sealed class BatchOrchestrator(
             && localNow.Minute == configuration.DailyNotificationsMinute)
         {
             await RunDailyNotificationsAsync(localNow, cancellationToken);
+        }
+    }
+
+    private async Task RunManualRequestsAsync(
+        SystemConfiguration configuration,
+        DateTimeOffset localNow,
+        CancellationToken cancellationToken)
+    {
+        var request = await database.ManualBatchRunRequests
+            .OrderBy(item => item.RequestedAt)
+            .FirstOrDefaultAsync(item => !item.ProcessedAt.HasValue, cancellationToken);
+        if (request is null)
+            return;
+
+        try
+        {
+            await RunWeeklyConvosAsync(configuration, localNow, cancellationToken);
+            await RunDailyNotificationsAsync(localNow, cancellationToken);
+            request.ProcessedAt = DateTime.UtcNow;
+            await database.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            request.ProcessedAt = DateTime.UtcNow;
+            request.ErrorMessage = exception.Message;
+            await database.SaveChangesAsync(cancellationToken);
+            logger.LogError(exception, "Manual batch run request {RequestId} failed.", request.Id);
         }
     }
 

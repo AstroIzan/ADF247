@@ -22,6 +22,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
     public DbSet<TaskDefinition> TaskDefinitions => Set<TaskDefinition>();
     public DbSet<TaskExecution> TaskExecutions => Set<TaskExecution>();
     public DbSet<TaskExecutionDetail> TaskExecutionDetails => Set<TaskExecutionDetail>();
+    public DbSet<ManualBatchRunRequest> ManualBatchRunRequests => Set<ManualBatchRunRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -216,6 +217,14 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
                 .WithMany(execution => execution.Details)
                 .HasForeignKey(detail => detail.TaskExecutionId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ManualBatchRunRequest>(entity =>
+        {
+            entity.ToTable("ManualRunRequest", "Taskling");
+            entity.HasKey(request => request.Id);
+            entity.Property(request => request.RequestedByNCarnet).HasMaxLength(50);
+            entity.Property(request => request.RequestedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
         });
     }
 }
