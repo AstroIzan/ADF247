@@ -15,6 +15,7 @@ export class HoursSummaryComponent implements OnInit {
   loading = signal(false);
   error = signal('');
   generatedAt = signal<string | null>(null);
+  isConfigured = signal(true);
   rows = signal<UserHoursSummaryRow[]>([]);
   totalHours = computed(() => this.rows().reduce((total, row) => total + this.formatRoundedHours(row.totalHours), 0));
   totalPenalties = computed(() => this.rows().reduce(
@@ -51,11 +52,13 @@ export class HoursSummaryComponent implements OnInit {
       next: (summary) => {
         this.rows.set(Array.isArray(summary?.users) ? summary.users : []);
         this.generatedAt.set(summary?.generatedAt || null);
+        this.isConfigured.set(summary?.isConfigured !== false);
         this.loading.set(false);
       },
       error: (err) => {
         this.rows.set([]);
         this.generatedAt.set(null);
+        this.isConfigured.set(true);
         this.error.set(err.message || 'No s\'ha pogut carregar el resum d\'hores.');
         this.loading.set(false);
       },

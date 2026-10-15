@@ -696,7 +696,9 @@ export class HomeComponent implements OnInit {
                 volunteerUserIds: [...(vehicle.volunteerUserIds || [])],
               }))
             : [],
-          finalObservations: prefill?.finalObservations || '',
+          finalObservations: mode === 'finish'
+            ? prefill?.finalObservations || 'Sense novetats.'
+            : prefill?.finalObservations || '',
         });
         this.campaignFormLoading.set(false);
         this.showCampaignFormModal.set(true);
@@ -1368,6 +1370,11 @@ export class HomeComponent implements OnInit {
 
   private validateCampaignVehicleKms(requireFinalKms = this.campaignFormMode() === 'finish') {
     for (const vehicle of this.campaignForm().vehicles) {
+      if (vehicle.status !== 'withdrawn' && vehicle.conductorUserId == null) {
+        this.campaignFormError.set(`Assigna un conductor al vehicle ${vehicle.vehicleName} abans de desar-lo.`);
+        return false;
+      }
+
       const currentKms = this.getCampaignVehicleCurrentKms(vehicle.vehicleName);
       const nextKms = Number(vehicle.kms || 0);
 
@@ -3024,11 +3031,13 @@ export class HomeComponent implements OnInit {
       return true;
     }
 
-    return false;
+    return !convo.actualStartTime
+      && Boolean(convo.finalTime)
+      && new Date(convo.finalTime!).getTime() < Date.now();
   }
 
   isResponseWindowClosed(convo: Convocatoria) {
-    return Boolean(convo.actualStartTime);
+    return this.isConvocatoriaClosed(convo) || Boolean(convo.actualStartTime);
   }
 
   getConvocatoriaElapsedLabel(convo: Convocatoria) {

@@ -689,9 +689,13 @@
                         } @else {
                           @for (vehicle of form.vehicles; track vehicle.vehicleName) {
                             <details class="campaign-record-vehicle-item">
-                              <summary>{{ vehicle.vehicleName }} · {{ vehicle.kms || 0 }} km</summary>
+                              <summary>{{ vehicle.vehicleName }} · {{ vehicle.initialKms || 0 }} km @if (vehicle.finalKms != null) { → {{ vehicle.finalKms }} km }</summary>
                               <div class="campaign-record-collapsible-body">
+                                <p><strong>Estat:</strong> {{ vehicle.status === 'withdrawn' ? 'Baixa durant el servei' : 'En servei' }}</p>
                                 <p><strong>Conductor:</strong> {{ getCampaignFormVehicleConductorLabel(vehicle) }}</p>
+                                @if (vehicle.statusNotes) {
+                                  <p><strong>Incidència:</strong> {{ vehicle.statusNotes }}</p>
+                                }
 
                                 <details class="campaign-record-collapsible campaign-record-inner-collapsible">
                                   <summary>Voluntaris del vehicle ({{ getCampaignFormVehicleVolunteerLabels(vehicle).length }})</summary>
@@ -712,6 +716,9 @@
                           }
                         }
                       </div>
+                      @if (form.finalObservations) {
+                        <p><strong>Observacions finals:</strong> {{ form.finalObservations }}</p>
+                      }
                     </div>
                   }
 

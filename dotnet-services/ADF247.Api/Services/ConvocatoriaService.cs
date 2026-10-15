@@ -58,6 +58,7 @@ public sealed class ConvocatoriaService(
     public async Task<object> GetAllAsync(int? page, int? pageSize)
     {
         if (page.HasValue != pageSize.HasValue) throw new ArgumentException("Debes enviar \"page\" y \"pageSize\" juntos para usar paginacion.");
+        await CloseExpiredUnstartedConvocatoriasAsync();
         var query = IncludeConvocatoria(database.Convocatorias).OrderBy(convo => convo.Id);
         if (!page.HasValue) return (await query.ToListAsync()).Select(MapConvocatoria).ToList();
         if (page < 1 || pageSize < 1) throw new ArgumentException("Los parametros de paginacion deben ser numeros enteros positivos.");
@@ -68,6 +69,7 @@ public sealed class ConvocatoriaService(
 
     public async Task<object?> GetAsync(int id)
     {
+        await CloseExpiredUnstartedConvocatoriasAsync();
         var convo = await IncludeConvocatoria(database.Convocatorias).SingleOrDefaultAsync(item => item.Id == id);
         return convo is null ? null : MapConvocatoria(convo);
     }
@@ -255,10 +257,30 @@ public sealed class ConvocatoriaService(
             NoShowPenaltyHours = (double)(systemConfiguration?.NoShowPenaltyHours ?? 4),
         };
         var now = DateTime.UtcNow;
+        if (!settings.CampaignStartDate.HasValue || !settings.CampaignEndDate.HasValue)
+        {
+            return new
+            {
+                generatedAt = now,
+                isConfigured = false,
+                settings = new
+                {
+                    campaignStartDate = settings.CampaignStartDate,
+                    campaignEndDate = settings.CampaignEndDate,
+                    unansweredPenaltyThreshold = settings.UnansweredPenaltyThreshold,
+                    unansweredPenaltyHours = settings.UnansweredPenaltyHours,
+                    noShowPenaltyHours = settings.NoShowPenaltyHours,
+                },
+                users = Array.Empty<HoursSummaryRow>(),
+            };
+        }
+
         var users = await database.Users.Where(user => user.IsActive).OrderBy(user => user.NCarnet).ToListAsync();
         var convocatorias = await database.Convocatorias
             .Include(convo => convo.ConvoType)
-            .Where(convo => convo.StartTime <= now)
+            .Where(convo => convo.StartTime <= now
+                && convo.Date >= settings.CampaignStartDate.Value.ToDateTime(TimeOnly.MinValue)
+                && convo.Date < settings.CampaignEndDate.Value.AddDays(1).ToDateTime(TimeOnly.MinValue))
             .ToListAsync();
         var convocatoriaIds = convocatorias.Select(convo => convo.Id).ToList();
         var responses = await database.Respuestas
@@ -278,21 +300,20 @@ public sealed class ConvocatoriaService(
 
             foreach (var convocatoria in convocatorias)
             {
-                var inCampaign = IsWithinCampaign(convocatoria.Date, settings);
-                var isFire = convocatoria.ConvoType?.Name.Contains("incendi", StringComparison.OrdinalIgnoreCase) == true;
-                var durationHours = GetDurationHours(convocatoria);
+                if (!IsCountableCampaignType(convocatoria.ConvoType?.Name))
+                    continue;
+
                 if (!responsesByConvocatoriaAndUser.TryGetValue((convocatoria.Id, user.NCarnet), out var response))
                 {
-                    if (inCampaign && !isFire) unansweredCount++;
+                    unansweredCount++;
                     continue;
                 }
 
                 if (response.Response && response.AttendanceConfirmed)
                 {
-                    if (inCampaign) campaignHours += durationHours;
-                    else offCampaignHours += durationHours;
+                    campaignHours += 4;
                 }
-                else if (inCampaign && response.Response && !response.AttendanceConfirmed && !response.AttendanceJustified)
+                else if (response.Response && !response.AttendanceConfirmed && !response.AttendanceJustified)
                 {
                     noShowCount++;
                 }
@@ -333,6 +354,7 @@ public sealed class ConvocatoriaService(
         return new
         {
             generatedAt = now,
+            isConfigured = true,
             settings = new
             {
                 campaignStartDate = settings.CampaignStartDate,
@@ -393,6 +415,8 @@ public sealed class ConvocatoriaService(
             .ToArray();
         if (activeAssignments.Length != activeAssignments.Distinct().Count())
             throw new ArgumentException("Un voluntario no puede estar asignado a más de un vehículo activo.");
+        if (vehicles.Any(vehicle => !string.Equals(vehicle.Status, "withdrawn", StringComparison.OrdinalIgnoreCase) && !vehicle.ConductorUserId.HasValue))
+            throw new ArgumentException("Cada vehículo activo debe tener un conductor asignado.");
         if (isFinal && vehicles.Any(vehicle => !vehicle.FinalKms.HasValue))
             throw new ArgumentException("Indica los kilómetros finales de todos los vehículos utilizados antes de finalizar el servicio.");
         var form = await database.CampaignForms
@@ -409,7 +433,9 @@ public sealed class ConvocatoriaService(
         form.ResponsableNCarnet = convo.Responsable?.NCarnet;
         form.VoluntarisJson = JsonSerializer.Serialize(volunteers);
         form.VehiclesJson = JsonSerializer.Serialize(vehicles);
-        form.FinalObservations = Optional(request.FinalObservations);
+        form.FinalObservations = isFinal
+            ? Optional(request.FinalObservations) ?? "Sense novetats."
+            : Optional(request.FinalObservations);
         form.ServiceMoment = isFinal ? "END" : "START";
         form.UpdatedAt = DateTime.UtcNow;
 
@@ -449,19 +475,31 @@ public sealed class ConvocatoriaService(
         return value.Value;
     }
     private static object MapConvocatoria(Convocatoria convo) => new { convo.Id, convo.Date, convo.Title, convo.UbiSortida, convo.ResponsableId, responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, convo.ConvoTypeId, convo.ConvoType, convo.StartTime, convo.FinalTime, convo.ActualStartTime, convo.ActualEndTime, convo.IsActive, convo.AutoAssignResponsable, convo.Sortida, convo.ResponseWindowMinutes, responseCount = 0 };
-    private static object MapForm(CampaignForm form) => new { form.Id, form.ConvocatoriaId, form.ServiceMoment, form.Dia, form.ResponsableId, form.ResponsableNCarnet, form.CreatedByNCarnet, form.CreatedAt, form.UpdatedAt, form.FinalObservations, voluntaris = JsonSerializer.Deserialize<object>(form.VoluntarisJson), vehicles = JsonSerializer.Deserialize<object>(form.VehiclesJson), convocatoria = form.Convocatoria is null ? null : new { form.Convocatoria.Id, form.Convocatoria.Title, form.Convocatoria.Date } };
-    private static double GetDurationHours(Convocatoria convocatoria)
+    private async Task CloseExpiredUnstartedConvocatoriasAsync()
     {
-        var start = convocatoria.StartTime;
-        var end = convocatoria.FinalTime ?? start.AddHours(1);
-        return Math.Max(0, (end - start).TotalHours);
+        var now = DateTime.UtcNow;
+        var expired = await database.Convocatorias
+            .Where(convo => convo.IsActive && !convo.ActualStartTime.HasValue && convo.FinalTime.HasValue && convo.FinalTime.Value < now)
+            .ToListAsync();
+        if (expired.Count == 0) return;
+
+        var expiredIds = expired.Select(convo => convo.Id).ToArray();
+        foreach (var convo in expired)
+        {
+            convo.IsActive = false;
+            convo.Sortida = false;
+        }
+
+        database.Respuestas.RemoveRange(database.Respuestas.Where(response => expiredIds.Contains(response.ConvoId)));
+        await SaveAsync();
     }
-    private static bool IsWithinCampaign(DateTime date, HourComputationSettings settings)
-    {
-        if (!settings.CampaignStartDate.HasValue || !settings.CampaignEndDate.HasValue) return false;
-        var current = DateOnly.FromDateTime(date);
-        return current >= settings.CampaignStartDate.Value && current <= settings.CampaignEndDate.Value;
-    }
+
+    private static object MapForm(CampaignForm form) => new { form.Id, form.ConvocatoriaId, form.ServiceMoment, form.Dia, form.ResponsableId, form.ResponsableNCarnet, form.CreatedByNCarnet, form.CreatedAt, form.UpdatedAt, form.FinalObservations, voluntaris = Deserialize<int[]>(form.VoluntarisJson) ?? [], vehicles = Deserialize<List<ServiceVehicle>>(form.VehiclesJson) ?? [], convocatoria = form.Convocatoria is null ? null : new { form.Convocatoria.Id, form.Convocatoria.Title, form.Convocatoria.Date } };
+    private static bool IsCountableCampaignType(string? typeName) =>
+        !string.IsNullOrWhiteSpace(typeName)
+        && (typeName.Contains("guardia", StringComparison.OrdinalIgnoreCase)
+            || typeName.Contains("guàrdia", StringComparison.OrdinalIgnoreCase)
+            || typeName.Contains("pvi", StringComparison.OrdinalIgnoreCase));
     private async Task SaveAsync() { try { await database.SaveChangesAsync(); } catch (DbUpdateException error) { throw new InvalidOperationException("No se ha podido guardar el recurso.", error); } }
     private sealed record CampaignUser(int Id, string NCarnet, string Name, string? LastName);
     private sealed record ServiceVehicle(string VehicleName, double InitialKms, double? FinalKms, string Status, string? StatusNotes, int? ConductorUserId, IReadOnlyList<int> VolunteerUserIds);

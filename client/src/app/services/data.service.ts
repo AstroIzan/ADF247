@@ -163,6 +163,7 @@ export interface UserHoursSummaryRow {
 
 export interface UserHoursSummaryResponse {
   generatedAt: string;
+  isConfigured: boolean;
   settings: {
     campaignStartDate: string | null;
     campaignEndDate: string | null;
