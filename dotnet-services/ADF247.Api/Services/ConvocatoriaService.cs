@@ -72,7 +72,7 @@ public sealed class ConvocatoriaService(
         return convo is null ? null : MapConvocatoria(convo);
     }
 
-    public async Task<object> CreateAsync(ConvocatoriaRequest request)
+    public async Task<object> CreateAsync(ConvocatoriaRequest request, string actorCarnet, CancellationToken cancellationToken)
     {
         var type = await RequireTypeAsync(request.ConvoTypeId);
         if (request.ResponsableId.HasValue) await RequireUserAsync(request.ResponsableId.Value);
@@ -86,10 +86,17 @@ public sealed class ConvocatoriaService(
             Date = date, Title = Optional(request.Title) ?? $"{type.Name} - {date:yyyy-MM-dd}", UbiSortida = location,
             ResponsableId = request.ResponsableId, ConvoTypeId = type.Id, StartTime = start, FinalTime = request.FinalTime,
             IsActive = request.IsActive ?? true, AutoAssignResponsable = request.AutoAssignResponsable ?? false, Sortida = request.Sortida ?? false,
+            ResponseWindowMinutes = NormalizeResponseWindowMinutes(request.ResponseWindowMinutes),
         };
         database.Convocatorias.Add(convo);
         await SaveAsync();
         await calculations.ApplyAvailabilityAsync(convo);
+        await messaging.QueueConvocatoriaAsync(
+            actorCarnet,
+            convo.Id,
+            "response-request",
+            new ConvocatoriaNotificationRequest(null, null),
+            cancellationToken);
         return (await GetAsync(convo.Id))!;
     }
 
@@ -116,6 +123,7 @@ public sealed class ConvocatoriaService(
         if (request.IsActive.HasValue) convo.IsActive = request.IsActive.Value;
         if (request.AutoAssignResponsable.HasValue) convo.AutoAssignResponsable = request.AutoAssignResponsable.Value;
         if (request.Sortida.HasValue) convo.Sortida = request.Sortida.Value;
+        if (request.ResponseWindowMinutes.HasValue) convo.ResponseWindowMinutes = NormalizeResponseWindowMinutes(request.ResponseWindowMinutes);
 
         if (notifyConfirmedSortida)
         {
@@ -354,7 +362,13 @@ public sealed class ConvocatoriaService(
     private static string? Optional(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
     private static bool HasField<T>(T _, string __) => false;
     private static object MapType(ConvoType type) => new { type.Id, type.Name, type.MinGrocSortida, type.MinVerdSortida, type.DefaultLocation };
-    private static object MapConvocatoria(Convocatoria convo) => new { convo.Id, convo.Date, convo.Title, convo.UbiSortida, convo.ResponsableId, responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, convo.ConvoTypeId, convo.ConvoType, convo.StartTime, convo.FinalTime, convo.ActualStartTime, convo.ActualEndTime, convo.IsActive, convo.AutoAssignResponsable, convo.Sortida, responseCount = 0 };
+    private static int? NormalizeResponseWindowMinutes(int? value)
+    {
+        if (!value.HasValue) return null;
+        if (value.Value is < 1 or > 240) throw new ArgumentException("El marge de resposta ha d'estar entre 1 i 240 minuts.");
+        return value.Value;
+    }
+    private static object MapConvocatoria(Convocatoria convo) => new { convo.Id, convo.Date, convo.Title, convo.UbiSortida, convo.ResponsableId, responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, convo.ConvoTypeId, convo.ConvoType, convo.StartTime, convo.FinalTime, convo.ActualStartTime, convo.ActualEndTime, convo.IsActive, convo.AutoAssignResponsable, convo.Sortida, convo.ResponseWindowMinutes, responseCount = 0 };
     private static object MapForm(CampaignForm form) => new { form.Id, form.ConvocatoriaId, form.ServiceMoment, form.Dia, form.ResponsableId, form.ResponsableNCarnet, form.CreatedByNCarnet, form.CreatedAt, form.UpdatedAt, voluntaris = JsonSerializer.Deserialize<object>(form.VoluntarisJson), vehicles = JsonSerializer.Deserialize<object>(form.VehiclesJson), convocatoria = form.Convocatoria is null ? null : new { form.Convocatoria.Id, form.Convocatoria.Title, form.Convocatoria.Date } };
     private static double GetDurationHours(Convocatoria convocatoria)
     {

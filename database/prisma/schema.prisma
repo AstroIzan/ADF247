@@ -35,6 +35,7 @@ model Role {
   isCapColla    Boolean @default(false)
   isAdmin       Boolean @default(false)
   isGroc        Boolean @default(false)
+  isDeveloper   Boolean @default(false)
 }
 
 model ConvoType {
@@ -64,6 +65,7 @@ model Convocatoria {
   isActive      Boolean   @default(true)
   autoAssignResponsable Boolean @default(false)
   sortida       Boolean   @default(false)
+  responseWindowMinutes Int?
 
   respostas Respuesta[]
   formularisCampanya FormulariCampanya[]

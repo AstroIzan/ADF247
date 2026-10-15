@@ -238,5 +238,51 @@
         </div>
       </article>
     </section>
+
+    @if (isDeveloper()) {
+      <section id="developer-tools" class="system-section developer-section">
+        <div class="section-heading">
+          <div class="section-number">DEV</div>
+          <div>
+            <p class="section-kicker">Proves</p>
+            <h2>Eines de desenvolupament</h2>
+            <p>Opcions disponibles només per a usuaris amb permís de desenvolupador.</p>
+          </div>
+        </div>
+
+        <article class="settings-panel developer-panel">
+          <div class="panel-heading">
+            <p class="panel-kicker">Simulació Batch</p>
+            <h3>Pla Alfa del municipi principal</h3>
+          </div>
+          @if (plaAlfaSimulation(); as simulation) {
+            @if (simulation.principalMunicipality) {
+              <p>Les properes execucions Batch faran servir aquests nivells simulats per a <strong>{{ simulation.principalMunicipality }}</strong>, abans de consultar el servei extern.</p>
+              <div class="schedule-inputs schedule-inputs-two">
+                <label>Nivell avui
+                  <select [value]="simulation.todayLevel ?? ''" (change)="updatePlaAlfaSimulation('todayLevel', $any($event.target).value)">
+                    <option value="">Sense simulació</option>
+                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option>
+                  </select>
+                </label>
+                <label>Nivell demà
+                  <select [value]="simulation.tomorrowLevel ?? ''" (change)="updatePlaAlfaSimulation('tomorrowLevel', $any($event.target).value)">
+                    <option value="">Sense simulació</option>
+                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option>
+                  </select>
+                </label>
+              </div>
+              <button class="btn btn-primary" type="button" [disabled]="simulationSaving()" (click)="savePlaAlfaSimulation()">
+                {{ simulationSaving() ? 'Desant simulació...' : 'Desar simulació' }}
+              </button>
+            } @else {
+              <p class="empty-copy">Cal marcar un municipi com a principal a Pla Alfa abans de poder simular-ne el nivell.</p>
+            }
+          } @else {
+            <p class="empty-copy">Carregant la configuració de proves...</p>
+          }
+        </article>
+      </section>
+    }
   }
 </section>

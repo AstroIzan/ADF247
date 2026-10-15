@@ -1,8 +1,10 @@
 using System.Text.Json;
+using ADF247.Api.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace ADF247.Batch.Worker.Services;
 
-public sealed class PlaAlfaLevelProvider(HttpClient client)
+public sealed class PlaAlfaLevelProvider(HttpClient client, Adf247DbContext database)
 {
     private const string TodayUrl =
         "https://services7.arcgis.com/ZCqVt1fRXwwK6GF4/ArcGIS/rest/services/Pla_Alfa_Municipal_Avui_FL_alternatiu_VW/FeatureServer/0/query";
@@ -13,6 +15,14 @@ public sealed class PlaAlfaLevelProvider(HttpClient client)
     {
         if (municipalities.Count == 0)
             return null;
+
+        var simulatedLevel = await database.PlaAlfaMunicipalitySelections
+            .AsNoTracking()
+            .Where(selection => selection.IsPrincipal)
+            .Select(selection => selection.SimulationTodayLevel)
+            .SingleOrDefaultAsync(cancellationToken);
+        if (simulatedLevel.HasValue)
+            return simulatedLevel.Value;
 
         var quotedMunicipalities = string.Join(
             ',',

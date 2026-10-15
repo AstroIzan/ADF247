@@ -142,7 +142,7 @@ public sealed class UserService(Adf247DbContext database)
             {
                 var values = ParseCsvLine(lines[row]);
                 string? Value(string field) => indexes.TryGetValue(field, out var index) && index < values.Count ? values[index] : null;
-                await CreateAsync(new CreateUserRequest(Value("nCarnet"), Value("name"), Value("password"), Value("lastName"), Value("nIndicatiu"), Value("phone"), ParseBoolean(Value("isActive")), new UserRolesRequest(ParseBoolean(Value("isAdmin")), ParseBoolean(Value("isGroc")), ParseBoolean(Value("isCapColla")), ParseBoolean(Value("isCapOperatiu")))));
+                await CreateAsync(new CreateUserRequest(Value("nCarnet"), Value("name"), Value("password"), Value("lastName"), Value("nIndicatiu"), Value("phone"), ParseBoolean(Value("isActive")), new UserRolesRequest(ParseBoolean(Value("isAdmin")), ParseBoolean(Value("isGroc")), ParseBoolean(Value("isCapColla")), ParseBoolean(Value("isCapOperatiu")), ParseBoolean(Value("isDeveloper")))));
                 inserted++;
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException) { rejected.Add(new { row = row + 1, message = error.Message }); }
@@ -165,7 +165,8 @@ public sealed class UserService(Adf247DbContext database)
                 role?.IsAdmin ?? false,
                 role?.IsGroc ?? false,
                 role?.IsCapColla ?? false,
-                role?.IsCapOperatiu ?? false),
+                role?.IsCapOperatiu ?? false,
+                role?.IsDeveloper ?? false),
             user.CreatedAt,
             user.UpdatedAt);
     }
@@ -183,6 +184,7 @@ public sealed class UserService(Adf247DbContext database)
         if (request.IsGroc.HasValue) role.IsGroc = request.IsGroc.Value;
         if (request.IsCapColla.HasValue) role.IsCapColla = request.IsCapColla.Value;
         if (request.IsCapOperatiu.HasValue) role.IsCapOperatiu = request.IsCapOperatiu.Value;
+        if (request.IsDeveloper.HasValue) role.IsDeveloper = request.IsDeveloper.Value;
     }
 
     private static string RequireText(string value, string fieldName) =>

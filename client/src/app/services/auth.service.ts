@@ -23,6 +23,7 @@ export interface LoginResponse {
       isCapColla?: boolean;
       isAdmin?: boolean;
       isGroc?: boolean;
+      isDeveloper?: boolean;
     } | Array<{
       id: number;
       nCarnet: string;
@@ -30,6 +31,7 @@ export interface LoginResponse {
       isCapColla: boolean;
       isAdmin: boolean;
       isGroc: boolean;
+      isDeveloper: boolean;
     }>;
   };
 }
@@ -45,11 +47,13 @@ export interface CurrentUser {
     isCapColla?: boolean;
     isAdmin?: boolean;
     isGroc?: boolean;
+    isDeveloper?: boolean;
   } | Array<{
     isCapOperatiu?: boolean;
     isCapColla?: boolean;
     isAdmin?: boolean;
     isGroc?: boolean;
+    isDeveloper?: boolean;
   }>;
 }
 
@@ -194,6 +198,13 @@ export class AuthService {
 
   isAdmin(): boolean {
     return this.getCachedIsAdmin();
+  }
+
+  isDeveloper(): boolean {
+    const roles = this.getCurrentUser()?.roles;
+    return Array.isArray(roles)
+      ? roles.some((role) => Boolean(role.isDeveloper))
+      : Boolean(roles?.isDeveloper);
   }
 
   private getStoredUser(): CurrentUser | null {

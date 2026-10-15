@@ -131,6 +131,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
             .FirstOrDefaultAsync(cancellationToken);
         var lastExecution = await database.TaskExecutions
             .Include(execution => execution.TaskDefinition)
+            .Where(execution => execution.TaskDefinition!.Name.StartsWith("batch:"))
             .OrderByDescending(execution => execution.StartedAt)
             .Select(execution => new
             {
@@ -176,6 +177,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         if (carnet is null) return Unauthorized();
         if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
         var definitions = await database.TaskDefinitions
+            .Where(definition => definition.Name.StartsWith("batch:"))
             .OrderBy(definition => definition.Name)
             .Select(definition => new
             {
@@ -196,6 +198,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         var normalizedLimit = Math.Clamp(limit, 1, 200);
         var executions = await database.TaskExecutions
             .Include(execution => execution.TaskDefinition)
+            .Where(execution => execution.TaskDefinition!.Name.StartsWith("batch:"))
             .OrderByDescending(execution => execution.StartedAt)
             .Take(normalizedLimit)
             .Select(execution => new
@@ -221,7 +224,8 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         var execution = await database.TaskExecutions
             .Include(candidate => candidate.TaskDefinition)
             .Include(candidate => candidate.Details)
-            .SingleOrDefaultAsync(candidate => candidate.TaskExecutionId == taskExecutionId, cancellationToken);
+            .SingleOrDefaultAsync(candidate => candidate.TaskExecutionId == taskExecutionId
+                && candidate.TaskDefinition!.Name.StartsWith("batch:"), cancellationToken);
         if (execution is null) return NotFound(new { message = "No se ha encontrado la ejecución." });
         return Ok(new
         {

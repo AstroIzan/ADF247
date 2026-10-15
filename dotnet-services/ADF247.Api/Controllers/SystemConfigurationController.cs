@@ -29,11 +29,58 @@ public sealed class SystemConfigurationController(
         catch (ArgumentException exception) { return BadRequest(new { message = exception.Message }); }
     }
 
+    [HttpGet("developer/pla-alfa-simulation")]
+    public async Task<IActionResult> GetPlaAlfaSimulation(CancellationToken cancellationToken)
+    {
+        if (!await IsDeveloperAsync(cancellationToken)) return Forbid();
+        var principal = await database.PlaAlfaMunicipalitySelections
+            .AsNoTracking()
+            .SingleOrDefaultAsync(selection => selection.IsPrincipal, cancellationToken);
+        return Ok(new
+        {
+            principalMunicipality = principal?.Municipality,
+            todayLevel = principal?.SimulationTodayLevel,
+            tomorrowLevel = principal?.SimulationTomorrowLevel,
+        });
+    }
+
+    [HttpPut("developer/pla-alfa-simulation")]
+    public async Task<IActionResult> UpdatePlaAlfaSimulation(PlaAlfaSimulationRequest request, CancellationToken cancellationToken)
+    {
+        if (!await IsDeveloperAsync(cancellationToken)) return Forbid();
+        if (request.TodayLevel is < 0 or > 4 || request.TomorrowLevel is < 0 or > 4)
+            return BadRequest(new { message = "Els nivells simulats de Pla Alfa han d'estar entre 0 i 4." });
+
+        var principal = await database.PlaAlfaMunicipalitySelections
+            .SingleOrDefaultAsync(selection => selection.IsPrincipal, cancellationToken);
+        if (principal is null)
+            return BadRequest(new { message = "Cal marcar un municipi com a principal a Pla Alfa abans de configurar la simulació." });
+
+        principal.SimulationTodayLevel = request.TodayLevel;
+        principal.SimulationTomorrowLevel = request.TomorrowLevel;
+        principal.UpdatedAt = DateTime.UtcNow;
+        await database.SaveChangesAsync(cancellationToken);
+        return Ok(new
+        {
+            principalMunicipality = principal.Municipality,
+            todayLevel = principal.SimulationTodayLevel,
+            tomorrowLevel = principal.SimulationTomorrowLevel,
+        });
+    }
+
     private Task<bool> IsAdminAsync(CancellationToken cancellationToken)
     {
         var carnet = User.FindFirst("nCarnet")?.Value;
         return string.IsNullOrWhiteSpace(carnet)
             ? Task.FromResult(false)
             : database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin, cancellationToken);
+    }
+
+    private Task<bool> IsDeveloperAsync(CancellationToken cancellationToken)
+    {
+        var carnet = User.FindFirst("nCarnet")?.Value;
+        return string.IsNullOrWhiteSpace(carnet)
+            ? Task.FromResult(false)
+            : database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsDeveloper, cancellationToken);
     }
 }

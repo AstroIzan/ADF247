@@ -93,7 +93,7 @@
       @if (activeTab() === 'tasks' && authService.isAdmin()) {
         <section class="settings-section">
           <div class="section-title">
-            <div><h3>Execucions de missatgeria</h3><p class="section-help">Historial Taskling del processament de notificacions.</p></div>
+            <div><h3>Execucions Batch</h3><p class="section-help">Historial Taskling de les automatitzacions programades. Els enviaments es consulten al registre de notificacions.</p></div>
             <button class="btn" type="button" [disabled]="adminLoading()" (click)="loadAdminData()">Actualitzar</button>
           </div>
           @if (adminLoading()) { <div class="loading-state">Carregant execucions...</div> }

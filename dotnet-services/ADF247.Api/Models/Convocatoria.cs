@@ -15,6 +15,7 @@ public sealed class Convocatoria
     public bool IsActive { get; set; }
     public bool AutoAssignResponsable { get; set; }
     public bool Sortida { get; set; }
+    public int? ResponseWindowMinutes { get; set; }
     public User? Responsable { get; set; }
     public ConvoType? ConvoType { get; set; }
 }

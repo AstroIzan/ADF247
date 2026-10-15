@@ -26,7 +26,12 @@ public sealed class ConvocatoriasController(ConvocatoriaService convos, Adf247Db
 
     [HttpGet] public Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int? pageSize) => ExecuteCreatedAsync(() => convos.GetAllAsync(page, pageSize), false);
     [HttpGet("{id:int}")] public Task<IActionResult> Get(int id) => ExecuteAsync(() => convos.GetAsync(id));
-    [HttpPost] public Task<IActionResult> Create(ConvocatoriaRequest request) => ExecuteCreatedAsync(() => convos.CreateAsync(request));
+    [HttpPost]
+    public async Task<IActionResult> Create(ConvocatoriaRequest request, CancellationToken cancellationToken)
+    {
+        var identity = await IdentityAsync(); if (identity is null) return Unauthorized();
+        return await ExecuteCreatedAsync(() => convos.CreateAsync(request, identity.Value.Carnet, cancellationToken));
+    }
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, ConvocatoriaRequest request, CancellationToken cancellationToken)
     {

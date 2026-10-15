@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import {
   ConvoType,
   DataService,
+  PlaAlfaSimulation,
   SystemConfiguration,
   SystemConfigurationVehicle,
   User,
   WeeklyConvocatoriaSchedule,
 } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-system-configuration',
@@ -25,8 +27,10 @@ export class SystemConfigurationComponent {
   convoTypes = signal<ConvoType[]>([]);
   users = signal<User[]>([]);
   newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', litres: 0, kms: 0 });
+  plaAlfaSimulation = signal<PlaAlfaSimulation | null>(null);
+  simulationSaving = signal(false);
 
-  constructor(private dataService: DataService) {
+  constructor(private dataService: DataService, private authService: AuthService) {
     this.load();
   }
 
@@ -68,6 +72,45 @@ export class SystemConfigurationComponent {
         this.error.set(error.message || 'No s’han pogut carregar els usuaris.');
         complete();
       },
+    });
+    if (this.authService.isDeveloper()) {
+      this.dataService.getPlaAlfaSimulation().subscribe({
+        next: (simulation) => this.plaAlfaSimulation.set(simulation),
+        error: (error) => this.error.set(error.message || 'No s’ha pogut carregar la simulació de Pla Alfa.'),
+      });
+    }
+  }
+
+  isDeveloper() {
+    return this.authService.isDeveloper();
+  }
+
+  savePlaAlfaSimulation() {
+    const simulation = this.plaAlfaSimulation();
+    if (!simulation || this.simulationSaving()) return;
+    this.simulationSaving.set(true);
+    this.error.set('');
+    this.dataService.updatePlaAlfaSimulation({
+      todayLevel: simulation.todayLevel,
+      tomorrowLevel: simulation.tomorrowLevel,
+    }).subscribe({
+      next: (saved) => {
+        this.plaAlfaSimulation.set(saved);
+        this.simulationSaving.set(false);
+      },
+      error: (error) => {
+        this.error.set(error.error?.message || error.message || 'No s’ha pogut desar la simulació de Pla Alfa.');
+        this.simulationSaving.set(false);
+      },
+    });
+  }
+
+  updatePlaAlfaSimulation(field: 'todayLevel' | 'tomorrowLevel', value: string) {
+    const simulation = this.plaAlfaSimulation();
+    if (!simulation) return;
+    this.plaAlfaSimulation.set({
+      ...simulation,
+      [field]: value === '' ? null : Number(value),
     });
   }
 

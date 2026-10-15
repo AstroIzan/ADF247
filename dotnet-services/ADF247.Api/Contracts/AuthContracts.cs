@@ -7,7 +7,8 @@ public sealed record RoleResponse(
     bool IsAdmin,
     bool IsGroc,
     bool IsCapColla,
-    bool IsCapOperatiu);
+    bool IsCapOperatiu,
+    bool IsDeveloper);
 
 public sealed record UserResponse(
     int Id,

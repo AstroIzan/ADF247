@@ -4,7 +4,8 @@ public sealed record UserRolesRequest(
     bool? IsAdmin,
     bool? IsGroc,
     bool? IsCapColla,
-    bool? IsCapOperatiu);
+    bool? IsCapOperatiu,
+    bool? IsDeveloper);
 
 public sealed record CreateUserRequest(
     string? NCarnet,

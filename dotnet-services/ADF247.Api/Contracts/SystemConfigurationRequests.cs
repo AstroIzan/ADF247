@@ -26,3 +26,5 @@ public sealed record WeeklyConvocatoriaScheduleRequest(
     int DayOfWeek,
     TimeOnly StartTime,
     TimeOnly EndTime);
+
+public sealed record PlaAlfaSimulationRequest(int? TodayLevel, int? TomorrowLevel);

@@ -509,6 +509,16 @@ select:focus {
   gap: 18px;
 }
 
+.developer-section {
+  padding-bottom: 20px;
+}
+
+.developer-panel {
+  max-width: 600px;
+  border-color: #ead59a;
+  background: linear-gradient(135deg, #fffdf7, #fff);
+}
+
 .vehicle-form {
   grid-template-columns: minmax(120px, 1fr) minmax(160px, 1.4fr) 110px 130px auto;
   align-items: end;

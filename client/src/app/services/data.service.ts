@@ -18,6 +18,7 @@ export interface User {
     isCapColla: boolean;
     isAdmin: boolean;
     isGroc: boolean;
+    isDeveloper: boolean;
   };
 }
 
@@ -43,6 +44,7 @@ export interface Convocatoria {
   isActive: boolean;
   autoAssignResponsable: boolean;
   sortida: boolean;
+  responseWindowMinutes?: number | null;
   responseCount?: number;
   user?: User;
   convoType?: ConvoType;
@@ -346,6 +348,12 @@ export interface SystemConfiguration {
   updatedAt: string;
 }
 
+export interface PlaAlfaSimulation {
+  principalMunicipality: string | null;
+  todayLevel: number | null;
+  tomorrowLevel: number | null;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -389,6 +397,14 @@ export class DataService {
 
   updateSystemConfiguration(configuration: Omit<SystemConfiguration, 'updatedAt'>): Observable<SystemConfiguration> {
     return this.http.put<SystemConfiguration>('/system-configuration', configuration);
+  }
+
+  getPlaAlfaSimulation(): Observable<PlaAlfaSimulation> {
+    return this.http.get<PlaAlfaSimulation>('/system-configuration/developer/pla-alfa-simulation');
+  }
+
+  updatePlaAlfaSimulation(payload: { todayLevel: number | null; tomorrowLevel: number | null }): Observable<PlaAlfaSimulation> {
+    return this.http.put<PlaAlfaSimulation>('/system-configuration/developer/pla-alfa-simulation', payload);
   }
 
   getConvoTypeById(id: number): Observable<ConvoType> {

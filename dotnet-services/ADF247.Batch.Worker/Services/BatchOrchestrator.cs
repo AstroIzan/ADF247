@@ -1,6 +1,7 @@
 using System.Text.Json;
 using ADF247.Api.Data;
 using ADF247.Api.Models;
+using ADF247.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ADF247.Batch.Worker.Services;
@@ -396,23 +397,22 @@ public sealed class BatchOrchestrator(
 
         foreach (var group in windows.GroupBy(item => item.UserNCarnet))
         {
-            var hasAvailable = group.Any(item => item.AvailabilityType == "available");
-            var hasUnavailable = group.Any(item => item.AvailabilityType == "unavailable");
-            var response = hasUnavailable ? false : hasAvailable ? true : (bool?)null;
-            if (!response.HasValue)
+            var automaticResponse = AvailabilityResponsePolicy.Evaluate(convocatoria.StartTime, end, group);
+            if (automaticResponse is null)
                 continue;
 
             database.Respuestas.Add(new Respuesta
             {
                 ConvoId = convocatoria.Id,
                 UserNCarnet = group.Key,
-                Response = response.Value,
-                IsCustom = false,
-                FullHorari = response.Value,
+                Response = automaticResponse.Response,
+                IsCustom = automaticResponse.IsCustom,
+                CustomText = automaticResponse.CustomText,
+                FullHorari = automaticResponse.FullSchedule,
                 AttendanceConfirmed = true,
                 AttendanceJustified = false,
                 Source = "auto-window",
-                AutoAssignReason = response.Value ? "available-window-match" : "unavailable-window-match",
+                AutoAssignReason = automaticResponse.Reason,
             });
         }
 
@@ -471,7 +471,9 @@ public sealed class BatchOrchestrator(
             ["convocatoria.endTime"] = convocatoria.FinalTime?.ToString("HH:mm") ?? string.Empty,
             ["convocatoria.location"] = convocatoria.UbiSortida,
             ["convocatoria.responsable"] = responsable,
-            ["response.deadline"] = convocatoria.StartTime.ToString("dd/MM/yyyy HH:mm"),
+            ["response.deadline"] = convocatoria.ResponseWindowMinutes is > 0
+                ? $"{convocatoria.ResponseWindowMinutes} minuts"
+                : convocatoria.StartTime.ToString("dd/MM/yyyy HH:mm"),
             ["fire.location"] = convocatoria.UbiSortida,
         };
         foreach (var (key, value) in values)

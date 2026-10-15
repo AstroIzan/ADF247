@@ -2530,6 +2530,7 @@ export class HomeComponent implements OnInit {
           isActive: form.isActive,
           autoAssignResponsable: form.autoAssignResponsable,
           sortida: form.sortida,
+          responseWindowMinutes: readyIn,
         },
       ];
     } else {

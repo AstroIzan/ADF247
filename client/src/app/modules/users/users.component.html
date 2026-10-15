@@ -371,6 +371,16 @@
                 />
                 Cap Operatiu
               </label>
+
+              <label class="checkbox-label">
+                <input
+                  type="checkbox"
+                  [checked]="formData().roles?.isDeveloper"
+                  (change)="updateRoleField('isDeveloper', $any($event.target).checked)"
+                  [disabled]="formSubmitting()"
+                />
+                Desenvolupador
+              </label>
             </div>
           </div>
         </div>

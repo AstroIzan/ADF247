@@ -246,6 +246,7 @@ export class ConvosComponent implements OnDestroy {
       finalTime: data.finalTime || undefined,
       autoAssignResponsable: Boolean(data.autoAssignResponsable),
       isActive: Boolean(data.isActive),
+      responseWindowMinutes: isIncendiType ? Number(data.incendiReadyInMinutes) || 10 : null,
     };
 
     const nextSortida = Boolean(data.sortida);

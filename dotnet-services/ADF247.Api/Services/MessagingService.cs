@@ -207,11 +207,16 @@ public sealed class MessagingService(Adf247DbContext database)
             ["convocatoria.endTime"] = convocatoria.FinalTime?.ToString("HH:mm") ?? string.Empty,
             ["convocatoria.location"] = convocatoria.UbiSortida,
             ["convocatoria.responsable"] = responsable,
-            ["response.deadline"] = convocatoria.StartTime.ToString("dd/MM/yyyy HH:mm"),
+            ["response.deadline"] = FormatResponseWindow(convocatoria),
             ["fire.location"] = convocatoria.UbiSortida,
         };
         foreach (var (key, value) in values)
             template = template.Replace($"{{{{{key}}}}}", value, StringComparison.OrdinalIgnoreCase);
         return template;
     }
+
+    private static string FormatResponseWindow(Convocatoria convocatoria) =>
+        convocatoria.ResponseWindowMinutes is > 0
+            ? $"{convocatoria.ResponseWindowMinutes} minuts"
+            : convocatoria.StartTime.ToString("dd/MM/yyyy HH:mm");
 }

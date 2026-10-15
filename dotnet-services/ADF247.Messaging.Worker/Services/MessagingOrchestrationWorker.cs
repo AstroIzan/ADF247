@@ -19,12 +19,12 @@ public sealed class MessagingOrchestrationWorker(
 
         while (!stoppingToken.IsCancellationRequested)
         {
-            var pollInterval = TimeSpan.FromSeconds(30);
+            var pollInterval = TimeSpan.FromSeconds(2);
 
             try
             {
                 var effectiveWorkerOptions = configuredWorkerOptions.CurrentValue;
-                pollInterval = TimeSpan.FromSeconds(Math.Max(5, effectiveWorkerOptions.PollingIntervalSeconds));
+                pollInterval = TimeSpan.FromSeconds(Math.Max(1, effectiveWorkerOptions.PollingIntervalSeconds));
 
                 var readiness = await readinessProbe.CheckAsync(stoppingToken);
                 if (!readiness.IsReady)
@@ -65,19 +65,6 @@ public sealed class MessagingOrchestrationWorker(
 
         foreach (var notification in claimedNotifications)
         {
-            var executionDetails = JsonSerializer.Serialize(new
-            {
-                notification.Id,
-                notification.Trigger,
-                notification.ConvocatoriaId,
-            });
-            var execution = await repository.TryStartTaskExecutionAsync(
-                $"messaging-dispatch:{notification.Id}",
-                DateTimeOffset.Now,
-                $"Notification {notification.Id} dispatch started.",
-                executionDetails,
-                cancellationToken);
-
             try
             {
                 logger.LogInformation(
@@ -109,15 +96,6 @@ public sealed class MessagingOrchestrationWorker(
                 await ProcessNotificationDeliveriesAsync(notification, taggedPayload, workerOptions.DeliveryClaimBatchSize, cancellationToken);
                 await repository.MarkInactivePendingDeliveriesFailedAsync(notification.Id, cancellationToken);
                 await repository.FinalizeNotificationAsync(notification.Id, workerOptions.MaxDeliveryAttempts, cancellationToken);
-                if (execution.TaskExecutionId.HasValue)
-                {
-                    await repository.CompleteTaskExecutionAsync(
-                        execution.TaskExecutionId.Value,
-                        "succeeded",
-                        $"Notification {notification.Id} dispatch finished. Inspect Messaging.Notification for delivery totals.",
-                        executionDetails,
-                        cancellationToken);
-                }
                 logger.LogInformation(
                     "MessagingNotificationDispatchCompleted {NotificationId} {Trigger}",
                     notification.Id,
@@ -135,27 +113,6 @@ public sealed class MessagingOrchestrationWorker(
                     notification.Id,
                     notification.Trigger);
                 await repository.FailNotificationAsync(notification.Id, exception.Message, cancellationToken);
-                if (execution.TaskExecutionId.HasValue)
-                {
-                    var errorDetails = JsonSerializer.Serialize(new
-                    {
-                        notification.Id,
-                        notification.Trigger,
-                        error = exception.Message,
-                    });
-                    await repository.AddTaskExecutionDetailAsync(
-                        execution.TaskExecutionId.Value,
-                        TaskExecutionEventType.Error,
-                        $"Notification {notification.Id} dispatch failed: {exception.Message}",
-                        errorDetails,
-                        cancellationToken);
-                    await repository.CompleteTaskExecutionAsync(
-                        execution.TaskExecutionId.Value,
-                        "failed",
-                        $"Notification {notification.Id} dispatch finished with failure.",
-                        errorDetails,
-                        cancellationToken);
-                }
             }
         }
     }

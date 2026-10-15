@@ -300,7 +300,8 @@ public sealed class SqlNotificationDispatchRepository(
                     )
                 )
                 AND (
-                    @ConvocatoriaId IS NULL
+                    @SelectionMode <> @SelectionSortidaStatus
+                    OR @ConvocatoriaId IS NULL
                     OR NOT EXISTS (
                         SELECT 1
                         FROM [dbo].[Respuesta] rn
