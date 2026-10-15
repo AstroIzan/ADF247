@@ -21,6 +21,7 @@
     <nav class="system-anchor-nav" aria-label="Seccions de configuració">
       <a href="#automation">Automatitzacions</a>
       <a href="#availability">Disponibilitat</a>
+      <a href="#permissions">Permisos</a>
       <a href="#campaign">Campanya</a>
       <a href="#fleet">Flota</a>
     </nav>
@@ -179,9 +180,53 @@
       </div>
     </section>
 
-    <section id="campaign" class="system-section">
+    <section id="permissions" class="system-section">
       <div class="section-heading">
         <div class="section-number">03</div>
+        <div>
+          <p class="section-kicker">Accés</p>
+          <h2>Permisos de desenvolupament</h2>
+          <p>Selecciona els usuaris que poden accedir a les eines de proves i simulació de Pla Alfa.</p>
+        </div>
+      </div>
+
+      <article class="settings-panel">
+        <div class="panel-heading panel-heading-inline">
+          <div>
+            <p class="panel-kicker">Desenvolupament</p>
+            <h3>Usuaris Developer</h3>
+          </div>
+          <span class="selection-chip">{{ getDeveloperUsers().length }} seleccionats</span>
+        </div>
+        <p>El permís s’aplica en desar cada selecció. Si canvies el teu propi permís, torna a iniciar sessió per actualitzar la interfície.</p>
+        <details class="multi-select">
+          <summary>
+            <span class="multi-select-label">Seleccionar desenvolupadors</span>
+            <span class="multi-select-value">{{ getDeveloperUsers().length ? getDeveloperUsers().length + ' seleccionats' : 'Cap seleccionat' }}</span>
+            <span class="multi-select-chevron" aria-hidden="true"></span>
+          </summary>
+          <div class="checkbox-list multi-select-options">
+            @for (user of getActiveUsers(); track user.id) {
+              <label class="toggle-option">
+                <input
+                  type="checkbox"
+                  [checked]="isDeveloperSelected(user)"
+                  [disabled]="developerUpdatingUserId() === user.id"
+                  (change)="toggleDeveloper(user, $any($event.target).checked)">
+                <span class="toggle-control" aria-hidden="true"></span>
+                <span><strong>{{ user.nCarnet }}</strong> · {{ user.name }} {{ user.lastName || '' }}</span>
+              </label>
+            } @empty {
+              <span class="empty-copy">No hi ha usuaris actius.</span>
+            }
+          </div>
+        </details>
+      </article>
+    </section>
+
+    <section id="campaign" class="system-section">
+      <div class="section-heading">
+        <div class="section-number">04</div>
         <div>
           <p class="section-kicker">Còmput</p>
           <h2>Campanya i hores</h2>
@@ -202,7 +247,7 @@
 
     <section id="fleet" class="system-section">
       <div class="section-heading">
-        <div class="section-number">04</div>
+        <div class="section-number">05</div>
         <div>
           <p class="section-kicker">Recursos</p>
           <h2>Flota de l’agrupació</h2>

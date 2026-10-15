@@ -29,6 +29,7 @@ export class SystemConfigurationComponent {
   newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', litres: 0, kms: 0 });
   plaAlfaSimulation = signal<PlaAlfaSimulation | null>(null);
   simulationSaving = signal(false);
+  developerUpdatingUserId = signal<number | null>(null);
 
   constructor(private dataService: DataService, private authService: AuthService) {
     this.load();
@@ -188,6 +189,40 @@ export class SystemConfigurationComponent {
 
   getAdminUsers() {
     return this.users().filter((user) => user.isActive && user.roles.isAdmin);
+  }
+
+  getActiveUsers() {
+    return this.users().filter((user) => user.isActive);
+  }
+
+  getDeveloperUsers() {
+    return this.getActiveUsers().filter((user) => this.isDeveloperSelected(user));
+  }
+
+  isDeveloperSelected(user: User) {
+    return Boolean(user.roles?.isDeveloper);
+  }
+
+  toggleDeveloper(user: User, selected: boolean) {
+    if (this.developerUpdatingUserId() !== null) return;
+
+    this.developerUpdatingUserId.set(user.id);
+    this.error.set('');
+    this.dataService.updateUser(user.id, {
+      roles: {
+        ...user.roles,
+        isDeveloper: selected,
+      },
+    }).subscribe({
+      next: (updatedUser) => {
+        this.users.set(this.users().map((item) => item.id === updatedUser.id ? updatedUser : item));
+        this.developerUpdatingUserId.set(null);
+      },
+      error: (error) => {
+        this.error.set(error.error?.message || error.message || 'No s’ha pogut actualitzar el permís de desenvolupador.');
+        this.developerUpdatingUserId.set(null);
+      },
+    });
   }
 
   addVehicle() {

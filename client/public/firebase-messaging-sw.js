@@ -14,11 +14,11 @@ firebase.initializeApp({
 const messaging = firebase.messaging()
 
 messaging.onBackgroundMessage((payload) => {
-  const title = payload.notification?.title || 'ADF247'
-  const icon = payload.data?.notificationIcon || payload.notification?.image || '/icons/notification-icon-512.png'
+  const title = payload.data?.notificationTitle || 'ADF247'
+  const icon = payload.data?.notificationIcon || '/icons/notification-icon-512.png'
   const badge = payload.data?.notificationBadge || '/icons/favicon-64.png'
   const options = {
-    body: payload.notification?.body || '',
+    body: payload.data?.notificationBody || '',
     data: payload.data || {},
     icon,
     badge,

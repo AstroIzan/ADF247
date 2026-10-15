@@ -1,14 +1,16 @@
 using ADF247.Api.Contracts;
+using ADF247.Api.Data;
 using ADF247.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ADF247.Api.Controllers;
 
 [ApiController]
 [Authorize]
 [Route("api/users")]
-public sealed class UsersController(UserService users) : ControllerBase
+public sealed class UsersController(UserService users, Adf247DbContext database) : ControllerBase
 {
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int? pageSize)
@@ -30,6 +32,7 @@ public sealed class UsersController(UserService users) : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create(CreateUserRequest request)
     {
+        if (!await IsAdminAsync()) return Forbid();
         try
         {
             var user = await users.CreateAsync(request);
@@ -46,6 +49,7 @@ public sealed class UsersController(UserService users) : ControllerBase
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, UpdateUserRequest request)
     {
+        if (!await IsAdminAsync()) return Forbid();
         try
         {
             var user = await users.UpdateAsync(id, request);
@@ -63,6 +67,7 @@ public sealed class UsersController(UserService users) : ControllerBase
     [HttpPost("import")]
     public async Task<IActionResult> Import(ImportUsersRequest request)
     {
+        if (!await IsAdminAsync()) return Forbid();
         try { return Ok(await users.ImportAsync(request)); }
         catch (ArgumentException error) { return BadRequest(new { message = error.Message }); }
     }
@@ -70,9 +75,18 @@ public sealed class UsersController(UserService users) : ControllerBase
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id)
     {
+        if (!await IsAdminAsync()) return Forbid();
         var user = await users.DeleteAsync(id);
         return user is null
             ? NotFound(new { message = "No se ha encontrado el usuario solicitado." })
             : Ok(user);
+    }
+
+    private Task<bool> IsAdminAsync()
+    {
+        var carnet = User.FindFirst("nCarnet")?.Value;
+        return string.IsNullOrWhiteSpace(carnet)
+            ? Task.FromResult(false)
+            : database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin);
     }
 }

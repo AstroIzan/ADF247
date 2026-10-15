@@ -1817,8 +1817,7 @@ export class HomeComponent implements OnInit {
       (summary, respuesta) => {
         if (
           respuesta.convoId !== convoId ||
-          respuesta.response !== true ||
-          respuesta.attendanceConfirmed !== true
+          respuesta.response !== true
         ) {
           return summary;
         }

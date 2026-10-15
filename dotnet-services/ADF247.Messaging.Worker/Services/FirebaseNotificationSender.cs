@@ -22,15 +22,15 @@ public sealed class FirebaseNotificationSender(
     {
         _ = EnsureFirebaseApp();
 
+        var messageData = data?.ToDictionary(pair => pair.Key, pair => pair.Value)
+            ?? new Dictionary<string, string>();
+        messageData["notificationTitle"] = title;
+        messageData["notificationBody"] = body;
+
         var message = new Message
         {
             Token = token,
-            Notification = new Notification
-            {
-                Title = title,
-                Body = body,
-            },
-            Data = data?.ToDictionary(pair => pair.Key, pair => pair.Value) ?? new Dictionary<string, string>(),
+            Data = messageData,
         };
 
         return await FirebaseMessaging.DefaultInstance.SendAsync(message, cancellationToken);

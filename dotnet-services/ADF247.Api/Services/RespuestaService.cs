@@ -27,7 +27,7 @@ public sealed class RespuestaService(
         if (!request.ConvoId.HasValue) throw new ArgumentException("convoId es obligatorio.");
         var userCarnet = ResolveCarnet(request.UserNCarnet, currentCarnet, isAdmin);
         var convo = await GetConvocatoriaAsync(request.ConvoId.Value);
-        EnsureResponseWindow(convo, isAdmin);
+        EnsureResponseWindow(convo);
         if (await database.Respuestas.AnyAsync(item => item.ConvoId == convo.Id && item.UserNCarnet == userCarnet))
             throw new InvalidOperationException("Ya existe una respuesta para esta convocatoria y usuario.");
         if (!await database.Users.AnyAsync(user => user.NCarnet == userCarnet))
@@ -60,8 +60,9 @@ public sealed class RespuestaService(
         if (!isAdmin && respuesta.UserNCarnet != currentCarnet) throw new UnauthorizedAccessException();
         var canManageAttendance = isAdmin || respuesta.Convocatoria?.ResponsableId == await GetUserIdAsync(currentCarnet);
         var changesAttendance = request.AttendanceConfirmed.HasValue || request.AttendanceJustified.HasValue;
+        var changesResponse = request.Response.HasValue || request.IsCustom.HasValue || request.CustomText is not null || request.FullHorari.HasValue;
         if (changesAttendance && !canManageAttendance) throw new UnauthorizedAccessException();
-        EnsureResponseWindow(respuesta.Convocatoria!, isAdmin || canManageAttendance);
+        if (changesResponse) EnsureResponseWindow(respuesta.Convocatoria!);
 
         if (request.IsCustom.HasValue) respuesta.IsCustom = request.IsCustom.Value;
         if (request.CustomText is not null) respuesta.CustomText = Normalize(request.CustomText);
@@ -81,7 +82,7 @@ public sealed class RespuestaService(
         var respuesta = await database.Respuestas.Include(item => item.Convocatoria).SingleOrDefaultAsync(item => item.Id == id);
         if (respuesta is null) return null;
         if (!isAdmin && respuesta.UserNCarnet != currentCarnet) throw new UnauthorizedAccessException();
-        EnsureResponseWindow(respuesta.Convocatoria!, isAdmin);
+        EnsureResponseWindow(respuesta.Convocatoria!);
         database.Respuestas.Remove(respuesta);
         await database.SaveChangesAsync();
         await calculations.RecalculateResponsableAsync(respuesta.ConvoId);
@@ -95,9 +96,9 @@ public sealed class RespuestaService(
     private async Task<int?> GetUserIdAsync(string carnet) =>
         await database.Users.Where(user => user.NCarnet == carnet).Select(user => (int?)user.Id).SingleOrDefaultAsync();
 
-    private static void EnsureResponseWindow(Convocatoria convocatoria, bool privileged)
+    private static void EnsureResponseWindow(Convocatoria convocatoria)
     {
-        if (!privileged && convocatoria.StartTime <= DateTime.UtcNow)
+        if (convocatoria.StartTime <= DateTime.UtcNow)
             throw new InvalidOperationException("No puedes responder una convocatoria que ya ha empezado.");
     }
 

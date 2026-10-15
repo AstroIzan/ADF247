@@ -334,6 +334,18 @@ public sealed class ConvocatoriaService(
         if (moment == "START") convo.ActualStartTime = now; else { convo.ActualEndTime = now; convo.IsActive = false; }
         await CreateFormAsync(convo, request, moment, carnet);
         await SaveAsync();
+        await messaging.QueueServiceLifecycleAsync(
+            carnet,
+            convo.Id,
+            moment,
+            (request.Vehicles ?? [])
+                .Select(vehicle => vehicle.VehicleName?.Trim())
+                .Where(vehicle => !string.IsNullOrWhiteSpace(vehicle))
+                .Cast<string>()
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray(),
+            (request.VolunteerUserIds ?? []).Distinct().Count(),
+            CancellationToken.None);
         return MapConvocatoria(convo);
     }
 

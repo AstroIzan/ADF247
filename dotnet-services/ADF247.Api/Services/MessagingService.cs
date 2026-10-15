@@ -77,6 +77,64 @@ public sealed class MessagingService(Adf247DbContext database)
             new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() }, cancellationToken, configuration?.Id);
     }
 
+    public async Task<MessagingNotification> QueueServiceLifecycleAsync(
+        string carnet,
+        int convocatoriaId,
+        string serviceMoment,
+        IReadOnlyCollection<string> vehicleNames,
+        int volunteerCount,
+        CancellationToken cancellationToken)
+    {
+        var convocatoria = await database.Convocatorias
+            .Include(item => item.Responsable)
+            .SingleOrDefaultAsync(item => item.Id == convocatoriaId, cancellationToken)
+            ?? throw new KeyNotFoundException("No se ha encontrado la convocatoria.");
+
+        var respondingUsers = await (
+            from response in database.Respuestas
+            join role in database.Roles on response.UserNCarnet equals role.NCarnet into roles
+            from role in roles.DefaultIfEmpty()
+            where response.ConvoId == convocatoriaId && response.Response
+            select role != null && role.IsGroc)
+            .ToListAsync(cancellationToken);
+        var grocs = respondingUsers.Count(isGroc => isGroc);
+        var noGrocs = respondingUsers.Count - grocs;
+        var vehicles = vehicleNames.Count == 0
+            ? "Sense vehicles"
+            : string.Join(", ", vehicleNames);
+
+        if (serviceMoment == "START")
+        {
+            var responsable = convocatoria.Responsable is null
+                ? "Sense responsable assignat"
+                : $"{convocatoria.Responsable.NCarnet} {convocatoria.Responsable.Name} {convocatoria.Responsable.LastName}".Trim();
+            return await QueueAsync(
+                carnet,
+                convocatoriaId,
+                "service-start",
+                "Sabadell inicia servei",
+                $"Inici de servei a les {convocatoria.StartTime:HH:mm}, 🟡 {grocs} + 🟢 {noGrocs} + {vehicles}\nComunicacions {responsable}",
+                new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() },
+                cancellationToken);
+        }
+
+        if (serviceMoment == "END")
+        {
+            var localNow = GetBarcelonaNow();
+            var volunteerSummary = volunteerCount == 1 ? "1 voluntari" : $"{volunteerCount} voluntaris";
+            return await QueueAsync(
+                carnet,
+                convocatoriaId,
+                "service-finish",
+                "Sabadell finalitza servei",
+                $"Fi de servei a les {localNow:HH:mm}.\nResum del formulari: {volunteerSummary} · Vehicles: {vehicles}\nMoltes gracies!",
+                new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() },
+                cancellationToken);
+        }
+
+        throw new ArgumentException("El moment de servei ha de ser START o END.");
+    }
+
     public async Task<IReadOnlyList<MessagingNotification>> GetNotificationsAsync(CancellationToken cancellationToken) =>
         await database.MessagingNotifications.OrderByDescending(notification => notification.CreatedAt).Take(100).ToListAsync(cancellationToken);
 
@@ -219,4 +277,17 @@ public sealed class MessagingService(Adf247DbContext database)
         convocatoria.ResponseWindowMinutes is > 0
             ? $"{convocatoria.ResponseWindowMinutes} minuts"
             : convocatoria.StartTime.ToString("dd/MM/yyyy HH:mm");
+
+    private static DateTime GetBarcelonaNow()
+    {
+        var timeZone = TryGetTimeZone("Europe/Madrid") ?? TryGetTimeZone("Romance Standard Time") ?? TimeZoneInfo.Utc;
+        return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, timeZone);
+    }
+
+    private static TimeZoneInfo? TryGetTimeZone(string id)
+    {
+        try { return TimeZoneInfo.FindSystemTimeZoneById(id); }
+        catch (TimeZoneNotFoundException) { return null; }
+        catch (InvalidTimeZoneException) { return null; }
+    }
 }
