@@ -372,6 +372,9 @@ export class HomeComponent implements OnInit {
         }
 
         this.allRespuestas.set(items);
+        this.dataService.getConvocatorias().subscribe({
+          next: (convocatorias) => this.convocatorias.set(convocatorias),
+        });
       },
       error: () => {
         // En home no bloqueamos la UI si falla el listado de respuestas.
@@ -2829,13 +2832,7 @@ export class HomeComponent implements OnInit {
   }
 
   isResponseWindowClosed(convo: Convocatoria) {
-    const startDate = this.getConvocatoriaStartDate(convo);
-
-    if (!startDate) {
-      return false;
-    }
-
-    return Date.now() >= startDate.getTime();
+    return Boolean(convo.actualStartTime);
   }
 
   getConvocatoriaElapsedLabel(convo: Convocatoria) {

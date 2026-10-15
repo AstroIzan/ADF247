@@ -98,7 +98,7 @@ public sealed class RespuestaService(
 
     private static void EnsureResponseWindow(Convocatoria convocatoria)
     {
-        if (convocatoria.StartTime <= DateTime.UtcNow)
+        if (convocatoria.ActualStartTime.HasValue)
             throw new InvalidOperationException("No puedes responder una convocatoria que ya ha empezado.");
     }
 

@@ -8,7 +8,6 @@ import {
   SystemConfiguration,
   SystemConfigurationVehicle,
   User,
-  WeeklyConvocatoriaSchedule,
 } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
 
@@ -125,53 +124,8 @@ export class SystemConfigurationComponent {
       weeklyConvoTypeIds: selected
         ? [...new Set([...configuration.weeklyConvoTypeIds, typeId])]
         : configuration.weeklyConvoTypeIds.filter((id) => id !== typeId),
-      weeklyConvocatoriaSchedules: selected
-        ? [...configuration.weeklyConvocatoriaSchedules, { convoTypeId: typeId, dayOfWeek: 1, startTime: '08:00', endTime: '14:00' }]
-        : configuration.weeklyConvocatoriaSchedules.filter((schedule) => schedule.convoTypeId !== typeId),
+      weeklyConvocatoriaSchedules: [],
     }));
-  }
-
-  schedulesForType(typeId: number) {
-    return this.configuration()?.weeklyConvocatoriaSchedules.filter((schedule) => schedule.convoTypeId === typeId) ?? [];
-  }
-
-  updateWeeklySchedule(typeId: number, index: number, field: keyof WeeklyConvocatoriaSchedule, value: string | number) {
-    this.updateConfiguration((configuration) => {
-      let occurrence = 0;
-      return {
-        ...configuration,
-        weeklyConvocatoriaSchedules: configuration.weeklyConvocatoriaSchedules.map((schedule) => {
-          if (schedule.convoTypeId !== typeId) return schedule;
-          const currentIndex = occurrence++;
-          return currentIndex === index ? { ...schedule, [field]: value } : schedule;
-        }),
-      };
-    });
-  }
-
-  addWeeklySchedule(typeId: number) {
-    this.updateConfiguration((configuration) => ({
-      ...configuration,
-      weeklyConvocatoriaSchedules: [...configuration.weeklyConvocatoriaSchedules, {
-        convoTypeId: typeId,
-        dayOfWeek: 1,
-        startTime: '08:00',
-        endTime: '14:00',
-      }],
-    }));
-  }
-
-  removeWeeklySchedule(typeId: number, index: number) {
-    this.updateConfiguration((configuration) => {
-      let occurrence = 0;
-      return {
-        ...configuration,
-        weeklyConvocatoriaSchedules: configuration.weeklyConvocatoriaSchedules.filter((schedule) => {
-          if (schedule.convoTypeId !== typeId) return true;
-          return occurrence++ !== index;
-        }),
-      };
-    });
   }
 
   isAvailabilityManagerSelected(nCarnet: string) {

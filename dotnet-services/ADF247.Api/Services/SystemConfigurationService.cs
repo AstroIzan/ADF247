@@ -15,7 +15,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
     {
         Validate(request);
         var weeklyTypeIds = request.WeeklyConvoTypeIds?.Distinct().Order().ToArray() ?? [];
-        var weeklySchedules = NormalizeWeeklySchedules(request.WeeklyConvocatoriaSchedules, weeklyTypeIds.ToHashSet());
+        var weeklySchedules = Array.Empty<WeeklyConvocatoriaScheduleRequest>();
         if (weeklyTypeIds.Length > 0)
         {
             var knownTypeCount = await database.ConvoTypes.CountAsync(type => weeklyTypeIds.Contains(type.Id), cancellationToken);
@@ -128,25 +128,6 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
             .Select(group => group.First())
             .OrderBy(vehicle => vehicle.Indicatiu, StringComparer.OrdinalIgnoreCase)
             .ToArray();
-
-    private static WeeklyConvocatoriaScheduleRequest[] NormalizeWeeklySchedules(
-        IReadOnlyList<WeeklyConvocatoriaScheduleRequest>? schedules,
-        IReadOnlySet<int> weeklyTypeIds)
-    {
-        var normalized = (schedules ?? [])
-            .Where(schedule => weeklyTypeIds.Contains(schedule.ConvoTypeId))
-            .GroupBy(schedule => new { schedule.ConvoTypeId, schedule.DayOfWeek, schedule.StartTime })
-            .Select(group => group.First())
-            .OrderBy(schedule => schedule.ConvoTypeId)
-            .ThenBy(schedule => schedule.DayOfWeek)
-            .ThenBy(schedule => schedule.StartTime)
-            .ToArray();
-
-        if (normalized.Any(schedule => schedule.DayOfWeek is < 0 or > 6 || schedule.EndTime <= schedule.StartTime))
-            throw new ArgumentException("Cada pauta setmanal ha de tenir un dia i una franja horària vàlids.");
-
-        return normalized;
-    }
 
     private static void Validate(SystemConfigurationRequest request)
     {

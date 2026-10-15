@@ -325,9 +325,9 @@ export class PushNotificationsService {
     }
 
     onMessage(this.messaging, (payload) => {
-      const title = payload.data?.['notificationTitle'] || 'ADF247'
-      const body = payload.data?.['notificationBody'] || ''
-      const icon = payload.data?.['notificationIcon'] || '/icons/notification-icon-512.png'
+      const title = payload.notification?.title || payload.data?.['notificationTitle'] || 'ADF247'
+      const body = payload.notification?.body || payload.data?.['notificationBody'] || ''
+      const icon = payload.data?.['notificationIcon'] || payload.notification?.image || '/icons/notification-icon-512.png'
       const badge = payload.data?.['notificationBadge'] || '/icons/favicon-64.png'
 
       this.infoMessage.set(`Notificació rebuda: ${title}`)

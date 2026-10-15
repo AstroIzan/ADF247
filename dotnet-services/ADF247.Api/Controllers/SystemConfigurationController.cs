@@ -48,8 +48,8 @@ public sealed class SystemConfigurationController(
     public async Task<IActionResult> UpdatePlaAlfaSimulation(PlaAlfaSimulationRequest request, CancellationToken cancellationToken)
     {
         if (!await IsDeveloperAsync(cancellationToken)) return Forbid();
-        if (request.TodayLevel is < 0 or > 4 || request.TomorrowLevel is < 0 or > 4)
-            return BadRequest(new { message = "Els nivells simulats de Pla Alfa han d'estar entre 0 i 4." });
+        if (request.TodayLevel is < 0 or > 5 || request.TomorrowLevel is < 0 or > 5)
+            return BadRequest(new { message = "Els nivells simulats de Pla Alfa han d'estar entre 0 i 5." });
 
         var principal = await database.PlaAlfaMunicipalitySelections
             .SingleOrDefaultAsync(selection => selection.IsPrincipal, cancellationToken);

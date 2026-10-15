@@ -21,9 +21,9 @@
     <nav class="system-anchor-nav" aria-label="Seccions de configuració">
       <a href="#automation">Automatitzacions</a>
       <a href="#availability">Disponibilitat</a>
-      <a href="#permissions">Permisos</a>
       <a href="#campaign">Campanya</a>
       <a href="#fleet">Flota</a>
+      <a href="#developer-tools">Desenvolupament</a>
     </nav>
 
     <section id="automation" class="system-section">
@@ -85,11 +85,11 @@
         <div class="panel-heading panel-heading-inline">
           <div>
             <p class="panel-kicker">Planificació setmanal</p>
-            <h3>Tipus i franges</h3>
+            <h3>Tipus de convocatòria</h3>
           </div>
           <span class="selection-chip">{{ configuration.weeklyConvoTypeIds.length }} tipus actius</span>
         </div>
-        <p>Selecciona quins tipus es consideren setmanals i defineix una o més franges per a cadascun.</p>
+        <p>Selecciona els tipus que s’han de tractar com a convocatòries setmanals. Aquesta selecció només adapta el formulari de creació; no programa ni crea franges automàtiques.</p>
         <div class="weekly-types-list">
           @for (type of convoTypes(); track type.id) {
             <div class="weekly-type-row" [class.selected]="isWeeklyTypeSelected(type.id)">
@@ -98,21 +98,6 @@
                 <span class="toggle-control" aria-hidden="true"></span>
                 <span>{{ type.name }}</span>
               </label>
-              @if (isWeeklyTypeSelected(type.id)) {
-                <div class="weekly-schedule-list">
-                  @for (schedule of schedulesForType(type.id); track $index; let index = $index) {
-                    <div class="weekly-schedule-row">
-                      <select [ngModel]="schedule.dayOfWeek" (ngModelChange)="updateWeeklySchedule(type.id, index, 'dayOfWeek', $event)" aria-label="Dia de la franja">
-                        <option [ngValue]="0">Diumenge</option><option [ngValue]="1">Dilluns</option><option [ngValue]="2">Dimarts</option><option [ngValue]="3">Dimecres</option><option [ngValue]="4">Dijous</option><option [ngValue]="5">Divendres</option><option [ngValue]="6">Dissabte</option>
-                      </select>
-                      <label class="compact-field">Inici <input type="time" [ngModel]="schedule.startTime" (ngModelChange)="updateWeeklySchedule(type.id, index, 'startTime', $event)"></label>
-                      <label class="compact-field">Fi <input type="time" [ngModel]="schedule.endTime" (ngModelChange)="updateWeeklySchedule(type.id, index, 'endTime', $event)"></label>
-                      <button class="btn btn-danger btn-small" type="button" (click)="removeWeeklySchedule(type.id, index)">Eliminar</button>
-                    </div>
-                  }
-                  <button class="btn btn-add" type="button" (click)="addWeeklySchedule(type.id)">+ Afegir franja</button>
-                </div>
-              }
             </div>
           }
         </div>
@@ -180,53 +165,9 @@
       </div>
     </section>
 
-    <section id="permissions" class="system-section">
-      <div class="section-heading">
-        <div class="section-number">03</div>
-        <div>
-          <p class="section-kicker">Accés</p>
-          <h2>Permisos de desenvolupament</h2>
-          <p>Selecciona els usuaris que poden accedir a les eines de proves i simulació de Pla Alfa.</p>
-        </div>
-      </div>
-
-      <article class="settings-panel">
-        <div class="panel-heading panel-heading-inline">
-          <div>
-            <p class="panel-kicker">Desenvolupament</p>
-            <h3>Usuaris Developer</h3>
-          </div>
-          <span class="selection-chip">{{ getDeveloperUsers().length }} seleccionats</span>
-        </div>
-        <p>El permís s’aplica en desar cada selecció. Si canvies el teu propi permís, torna a iniciar sessió per actualitzar la interfície.</p>
-        <details class="multi-select">
-          <summary>
-            <span class="multi-select-label">Seleccionar desenvolupadors</span>
-            <span class="multi-select-value">{{ getDeveloperUsers().length ? getDeveloperUsers().length + ' seleccionats' : 'Cap seleccionat' }}</span>
-            <span class="multi-select-chevron" aria-hidden="true"></span>
-          </summary>
-          <div class="checkbox-list multi-select-options">
-            @for (user of getActiveUsers(); track user.id) {
-              <label class="toggle-option">
-                <input
-                  type="checkbox"
-                  [checked]="isDeveloperSelected(user)"
-                  [disabled]="developerUpdatingUserId() === user.id"
-                  (change)="toggleDeveloper(user, $any($event.target).checked)">
-                <span class="toggle-control" aria-hidden="true"></span>
-                <span><strong>{{ user.nCarnet }}</strong> · {{ user.name }} {{ user.lastName || '' }}</span>
-              </label>
-            } @empty {
-              <span class="empty-copy">No hi ha usuaris actius.</span>
-            }
-          </div>
-        </details>
-      </article>
-    </section>
-
     <section id="campaign" class="system-section">
       <div class="section-heading">
-        <div class="section-number">04</div>
+        <div class="section-number">03</div>
         <div>
           <p class="section-kicker">Còmput</p>
           <h2>Campanya i hores</h2>
@@ -247,7 +188,7 @@
 
     <section id="fleet" class="system-section">
       <div class="section-heading">
-        <div class="section-number">05</div>
+        <div class="section-number">04</div>
         <div>
           <p class="section-kicker">Recursos</p>
           <h2>Flota de l’agrupació</h2>
@@ -284,17 +225,46 @@
       </article>
     </section>
 
-    @if (isDeveloper()) {
-      <section id="developer-tools" class="system-section developer-section">
+    <section id="developer-tools" class="system-section developer-section">
         <div class="section-heading">
           <div class="section-number">DEV</div>
           <div>
-            <p class="section-kicker">Proves</p>
-            <h2>Eines de desenvolupament</h2>
-            <p>Opcions disponibles només per a usuaris amb permís de desenvolupador.</p>
+            <p class="section-kicker">Permisos i proves</p>
+            <h2>Secció de desenvolupament</h2>
+            <p>Gestiona els permisos Developer. Les eines de simulació només són visibles per als usuaris que ja tenen aquest rol.</p>
           </div>
         </div>
 
+        <article class="settings-panel">
+          <div class="panel-heading panel-heading-inline">
+            <div>
+              <p class="panel-kicker">Permisos</p>
+              <h3>Usuaris Developer</h3>
+            </div>
+            <span class="selection-chip">{{ getDeveloperUsers().length }} seleccionats</span>
+          </div>
+          <p>El permís s’aplica en desar cada selecció. Si canvies el teu propi permís, torna a iniciar sessió per actualitzar la interfície.</p>
+          <details class="multi-select">
+            <summary>
+              <span class="multi-select-label">Seleccionar desenvolupadors</span>
+              <span class="multi-select-value">{{ getDeveloperUsers().length ? getDeveloperUsers().length + ' seleccionats' : 'Cap seleccionat' }}</span>
+              <span class="multi-select-chevron" aria-hidden="true"></span>
+            </summary>
+            <div class="checkbox-list multi-select-options">
+              @for (user of getActiveUsers(); track user.id) {
+                <label class="toggle-option">
+                  <input type="checkbox" [checked]="isDeveloperSelected(user)" [disabled]="developerUpdatingUserId() === user.id" (change)="toggleDeveloper(user, $any($event.target).checked)">
+                  <span class="toggle-control" aria-hidden="true"></span>
+                  <span><strong>{{ user.nCarnet }}</strong> · {{ user.name }} {{ user.lastName || '' }}</span>
+                </label>
+              } @empty {
+                <span class="empty-copy">No hi ha usuaris actius.</span>
+              }
+            </div>
+          </details>
+        </article>
+
+        @if (isDeveloper()) {
         <article class="settings-panel developer-panel">
           <div class="panel-heading">
             <p class="panel-kicker">Simulació Batch</p>
@@ -307,13 +277,13 @@
                 <label>Nivell avui
                   <select [value]="simulation.todayLevel ?? ''" (change)="updatePlaAlfaSimulation('todayLevel', $any($event.target).value)">
                     <option value="">Sense simulació</option>
-                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option>
+                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
                   </select>
                 </label>
                 <label>Nivell demà
                   <select [value]="simulation.tomorrowLevel ?? ''" (change)="updatePlaAlfaSimulation('tomorrowLevel', $any($event.target).value)">
                     <option value="">Sense simulació</option>
-                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option>
+                    <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
                   </select>
                 </label>
               </div>
@@ -327,7 +297,7 @@
             <p class="empty-copy">Carregant la configuració de proves...</p>
           }
         </article>
+        }
       </section>
-    }
   }
 </section>
