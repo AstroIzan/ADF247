@@ -46,6 +46,12 @@ export interface Convocatoria {
   sortida: boolean;
   responseWindowMinutes?: number | null;
   responseCount?: number;
+  responsable?: {
+    id: number;
+    nCarnet: string;
+    name: string;
+    lastName?: string | null;
+  } | null;
   user?: User;
   convoType?: ConvoType;
   _count?: {

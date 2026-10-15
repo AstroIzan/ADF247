@@ -20,6 +20,7 @@ export class App {
   currentPath = '';
   notificationWarning = '';
   isMobileMenuOpen = false;
+  private notificationCheckInFlight: Promise<void> | null = null;
 
   constructor(
     public authService: AuthService,
@@ -88,25 +89,28 @@ export class App {
   }
 
   private async handleHomeNotificationCheck() {
+    if (this.notificationCheckInFlight) {
+      return this.notificationCheckInFlight
+    }
+
+    this.notificationCheckInFlight = this.validateNotificationDevice()
+
+    try {
+      await this.notificationCheckInFlight
+    } finally {
+      this.notificationCheckInFlight = null
+    }
+  }
+
+  private async validateNotificationDevice() {
     if (!this.authService.isLoggedIn()) {
       return
     }
 
-    if (!this.isHomeRoute()) {
-      try {
-        await this.pushNotificationsService.syncState({ openModalIfNeeded: false })
-      } catch {
-        // ignore sync errors outside home
-      }
-      this.updateNotificationWarning()
-      this.openNotificationSettingsIfNeeded()
-      return
-    }
-
     try {
-      await this.pushNotificationsService.ensurePermissionAndDeviceOnHomeEntry()
+      await this.pushNotificationsService.syncState({ openModalIfNeeded: true })
     } catch {
-      // ignore — updateNotificationWarning will reflect current state
+      // The existing state remains visible through the notification warning.
     }
     this.updateNotificationWarning()
     this.openNotificationSettingsIfNeeded()

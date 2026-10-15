@@ -69,7 +69,7 @@ export class PushNotificationsService {
       return false
     }
 
-    return !this.hasRegisteredCurrentToken()
+    return !this.hasRegisteredCurrentToken() && !this.hasKnownRegisteredDevice()
   })
 
   constructor(

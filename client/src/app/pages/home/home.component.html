@@ -161,7 +161,7 @@
                     }
                   </div>
                 </div>
-                <p><strong>Responsable:</strong> {{ getResponsableName(convo.responsableId) }}</p>
+                <p><strong>Responsable:</strong> {{ getConvocatoriaResponsableName(convo) }}</p>
                 <p><strong>Ubicació:</strong> {{ convo.ubiSortida }}</p>
                 <div class="convo-meta-row convo-meta-row-end">
                   <p class="convo-time-text">
@@ -431,186 +431,180 @@
 
   @if (showCampaignFormModal() && campaignFormConvo()) {
     <div class="modal-overlay">
-      <div class="modal modal-wide modal-allow-overflow" (click)="onCampaignFormModalClick($event)">
+      <div class="modal modal-service-form" (click)="onCampaignFormModalClick($event)">
         <div class="modal-header">
-          <h3>Part de servei - {{ campaignFormMode() === 'start' ? 'Inici de servei' : (campaignFormMode() === 'finish' ? 'Final de servei' : 'Actualització de servei') }}</h3>
+          <div>
+            <span class="service-form-eyebrow">Part de servei</span>
+            <h3>{{ getCampaignFormStatusLabel() }}</h3>
+          </div>
           <button class="close-btn" (click)="closeCampaignFormModal()">&times;</button>
         </div>
 
-        <div class="modal-body">
+        <div class="modal-body service-form-body">
           @if (campaignFormLoading()) {
             <div class="loading">Carregant dades del formulari...</div>
           } @else if (campaignFormContext(); as context) {
-            <p><strong>Convocatòria:</strong> {{ campaignFormConvo()!.title }}</p>
-            <p><strong>Responsable:</strong> {{ context.responsable ? (context.responsable.nCarnet + ' - ' + context.responsable.name + ' ' + (context.responsable.lastName || '')) : '-' }}</p>
+            @let responsable = getCampaignFormResponsable();
+            <section class="service-form-summary">
+              <div class="service-form-summary-title">
+                <span class="service-form-eyebrow">Convocatòria</span>
+                <strong>{{ campaignFormConvo()!.title }}</strong>
+                <span>{{ campaignFormConvo()!.startTime | date:'EEE d MMM · HH:mm' }}@if (campaignFormConvo()!.finalTime) { — {{ campaignFormConvo()!.finalTime | date:'HH:mm' }} }</span>
+              </div>
+              <div class="service-form-owner">
+                <span>Responsable</span>
+                @if (responsable) {
+                  <strong>{{ responsable.name }} {{ responsable.lastName || '' }}</strong>
+                  <small>{{ responsable.nCarnet }}</small>
+                } @else {
+                  <strong>Sense responsable assignat</strong>
+                  <small>Assigna'l des de la convocatòria</small>
+                }
+              </div>
+            </section>
 
-            <div class="form-group">
-              <label>Dia</label>
-              <input
-                type="datetime-local"
-                [value]="campaignForm().dia"
-                (change)="updateCampaignFormDia($any($event.target).value)"
-              />
-            </div>
-
-            <div class="form-group">
-              <label>Voluntaris assistents</label>
-              <div class="responsable-picker campaign-picker">
-                <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVolunteerMenu()">
+            <section class="service-form-section">
+              <div class="service-section-heading">
+                <div>
+                  <span class="service-step">01</span>
+                  <h4>Equip de servei</h4>
+                </div>
+                <span class="service-section-count">{{ campaignForm().volunteerUserIds.length }} seleccionats</span>
+              </div>
+              <p class="service-section-help">Selecciona les persones que han format part realment del servei.</p>
+              <div class="responsable-picker campaign-picker service-picker">
+                <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVolunteerMenu()" [attr.aria-expanded]="campaignVolunteerMenuOpen()">
                   <span class="responsable-picker-label">{{ getCampaignVolunteersSummary() }}</span>
+                  <span class="service-picker-chevron">⌄</span>
                 </button>
-
                 @if (campaignVolunteerMenuOpen()) {
-                  <div class="responsable-picker-menu">
+                  <div class="responsable-picker-menu service-picker-menu">
                     @for (user of context.eligibleUsers; track user.id) {
-                      <button
-                        type="button"
-                        class="responsable-picker-option"
-                        [class.active]="isCampaignVolunteerSelected(user.id)"
-                        (click)="toggleCampaignVolunteer(user.id)"
-                      >
-                        <span class="responsable-picker-option-name">{{ user.nCarnet }} - {{ user.name }} {{ user.lastName || '' }}</span>
-                      </button>
+                      <label class="service-picker-check">
+                        <input type="checkbox" [checked]="isCampaignVolunteerSelected(user.id)" (change)="toggleCampaignVolunteer(user.id, $any($event.target).checked)" />
+                        <span>{{ user.name }} {{ user.lastName || '' }}</span>
+                        <small>{{ user.nCarnet }}</small>
+                      </label>
                     }
                   </div>
                 }
               </div>
-            </div>
+            </section>
 
-            <div class="form-group">
-              <label>Vehicles disponibles</label>
-              <div class="responsable-picker campaign-picker campaign-picker-dropup">
-                <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVehicleMenu()">
-                  <span class="responsable-picker-label">{{ getCampaignVehiclesSummary() }}</span>
+            <section class="service-form-section">
+              <div class="service-section-heading">
+                <div>
+                  <span class="service-step">02</span>
+                  <h4>Vehicles utilitzats</h4>
+                </div>
+                <span class="service-section-count">{{ campaignForm().vehicles.length }} al part</span>
+              </div>
+              <p class="service-section-help">Afegeix els vehicles que intervenen. Una baixa els manté a l'històric del servei.</p>
+              <div class="responsable-picker campaign-picker service-picker">
+                <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVehicleMenu()" [attr.aria-expanded]="campaignVehicleMenuOpen()">
+                  <span class="responsable-picker-label">+ Afegir vehicle</span>
+                  <span class="service-picker-chevron">⌄</span>
                 </button>
-
                 @if (campaignVehicleMenuOpen()) {
-                  <div class="responsable-picker-menu">
-                    @for (vehicle of context.vehicleCatalog; track vehicle.indicativo) {
-                      <button
-                        type="button"
-                        class="responsable-picker-option"
-                        [class.active]="isCampaignVehicleSelected(vehicle.indicativo)"
-                        [disabled]="isCampaignVehicleLocked(vehicle.indicativo)"
-                        (click)="toggleCampaignVehicleSelection(vehicle.indicativo)"
-                      >
-                        <span class="responsable-picker-option-name">
-                          {{ getCampaignVehicleCatalogLabel(vehicle) }}
-                          @if (isCampaignVehicleLocked(vehicle.indicativo)) {
-                            · En servei
-                          }
-                        </span>
+                  <div class="responsable-picker-menu service-picker-menu">
+                    @for (catalogVehicle of context.vehicleCatalog; track catalogVehicle.indicativo) {
+                      <button type="button" class="service-picker-vehicle" [disabled]="isCampaignVehicleLocked(catalogVehicle.indicativo)" (click)="toggleCampaignVehicleSelection(catalogVehicle.indicativo)">
+                        <span>{{ getCampaignVehicleCatalogLabel(catalogVehicle) }}</span>
+                        <small>{{ isCampaignVehicleSelected(catalogVehicle.indicativo) ? (campaignFormMode() === 'start' ? 'Afegit' : 'Gestionar al part') : 'Afegir' }}</small>
                       </button>
                     }
                   </div>
                 }
               </div>
-            </div>
 
-            @if (campaignForm().vehicles.length > 0) {
-              <div class="vehicle-sections">
-                @for (vehicle of campaignForm().vehicles; track vehicle.vehicleName) {
-                  <section class="vehicle-section-card">
-                    <h4>{{ getCampaignVehicleDisplayName(vehicle.vehicleName) }}</h4>
+              @if (campaignForm().vehicles.length === 0) {
+                <div class="service-empty-vehicles">Encara no hi ha cap vehicle incorporat al part.</div>
+              } @else {
+                <div class="service-vehicle-list">
+                  @for (vehicle of campaignForm().vehicles; track vehicle.vehicleName) {
+                    <article class="service-vehicle-card" [class.is-withdrawn]="vehicle.status === 'withdrawn'">
+                      <header>
+                        <div>
+                          <span class="service-vehicle-code">{{ vehicle.vehicleName }}</span>
+                          <h5>{{ getCampaignVehicleDisplayName(vehicle.vehicleName) }}</h5>
+                        </div>
+                        <div class="service-vehicle-actions">
+                          <span class="service-status" [class.is-withdrawn]="vehicle.status === 'withdrawn'">{{ vehicle.status === 'withdrawn' ? 'De baixa' : 'En servei' }}</span>
+                          <button type="button" class="service-vehicle-state-btn" (click)="toggleCampaignVehicleServiceState(vehicle.vehicleName)">{{ getCampaignVehicleActionLabel(vehicle.vehicleName) }}</button>
+                        </div>
+                      </header>
 
-                    <div class="form-grid-2">
-                      <div class="form-group">
-                        <label>{{ campaignFormMode() === 'finish' ? 'KMs finals' : 'KMs inicials' }}</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          [value]="campaignFormMode() === 'finish' ? (vehicle.finalKms ?? '') : getCampaignVehicleKmsInputValue(vehicle.vehicleName)"
-                          [placeholder]="getCampaignVehicleKmsPlaceholder(vehicle.vehicleName)"
-                          (change)="campaignFormMode() === 'finish' ? updateCampaignVehicleFinalKms(vehicle.vehicleName, $any($event.target).value) : updateCampaignVehicleField(vehicle.vehicleName, 'kms', $any($event.target).value)"
-                        />
-                      </div>
-                      <div class="form-grid-2">
+                      <div class="service-vehicle-grid">
                         <div class="form-group">
-                          <label>Estat del vehicle</label>
-                          <select [value]="vehicle.status" (change)="updateCampaignVehicleStatus(vehicle.vehicleName, $any($event.target).value)">
-                            <option value="active">En servei</option>
-                            <option value="withdrawn">Baixa durant el servei</option>
-                          </select>
+                          <label>Kilometratge inicial</label>
+                          <input type="number" min="0" step="0.1" [value]="getCampaignVehicleKmsInputValue(vehicle.vehicleName)" [placeholder]="getCampaignVehicleKmsPlaceholder(vehicle.vehicleName)" [readonly]="campaignFormMode() === 'finish'" (change)="updateCampaignVehicleField(vehicle.vehicleName, 'kms', $any($event.target).value)" />
                         </div>
-                        <div class="form-group">
-                          <label>Incidència o canvi</label>
-                          <input [value]="vehicle.statusNotes" placeholder="Explica el canvi si n'hi ha" (change)="updateCampaignVehicleStatusNotes(vehicle.vehicleName, $any($event.target).value)" />
-                        </div>
-                      </div>
-
-                      <div class="form-group">
-                        <label>Conductor</label>
-                        <div class="responsable-picker campaign-picker">
-                          <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignConductorMenu(vehicle.vehicleName)">
-                            <span class="responsable-picker-label">{{ getCampaignVehicleConductorSummary(vehicle.vehicleName) }}</span>
-                          </button>
-
-                          @if (isCampaignConductorMenuOpen(vehicle.vehicleName)) {
-                            <div class="responsable-picker-menu">
-                              <button
-                                type="button"
-                                class="responsable-picker-option"
-                                [class.active]="!vehicle.conductorUserId"
-                                (click)="selectCampaignVehicleConductor(vehicle.vehicleName, null)"
-                              >
-                                <span class="responsable-picker-option-name">Sense conductor</span>
-                              </button>
-
-                              @for (userId of getCampaignAssignableConductorIds(vehicle.vehicleName); track userId) {
-                                <button
-                                  type="button"
-                                  class="responsable-picker-option"
-                                  [class.active]="vehicle.conductorUserId === userId"
-                                  (click)="selectCampaignVehicleConductor(vehicle.vehicleName, userId)"
-                                >
-                                  <span class="responsable-picker-option-name">{{ getCampaignUserLabel(userId) }}</span>
-                                </button>
-                              }
-                              @if (campaignFormMode() === 'finish') {
-                                <div class="form-group">
-                                  <label>Observacions finals (missatge de final de servei)</label>
-                                  <textarea [value]="campaignForm().finalObservations" (change)="updateCampaignFinalObservations($any($event.target).value)" placeholder="Resum del servei, incidències i observacions"></textarea>
-                                </div>
-                              }
-                            </div>
-                          }
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="form-group">
-                      <label>Voluntaris del vehicle</label>
-                      <div class="responsable-picker campaign-picker campaign-picker-dropup">
-                        <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVehicleVolunteerMenu(vehicle.vehicleName)">
-                          <span class="responsable-picker-label">{{ getCampaignVehicleVolunteersSummary(vehicle.vehicleName) }}</span>
-                        </button>
-
-                        @if (isCampaignVehicleVolunteerMenuOpen(vehicle.vehicleName)) {
-                          <div class="responsable-picker-menu">
-                            @if (getCampaignAssignableVolunteerIds(vehicle.vehicleName).length === 0) {
-                              <button type="button" class="responsable-picker-option" disabled>
-                                <span class="responsable-picker-option-name">No hi ha voluntaris disponibles</span>
-                              </button>
-                            } @else {
-                              @for (userId of getCampaignAssignableVolunteerIds(vehicle.vehicleName); track userId) {
-                                <button
-                                  type="button"
-                                  class="responsable-picker-option"
-                                  [class.active]="isCampaignVehicleVolunteerSelected(vehicle.vehicleName, userId)"
-                                  (click)="toggleCampaignVehicleVolunteer(vehicle.vehicleName, userId)"
-                                >
-                                  <span class="responsable-picker-option-name">{{ getCampaignUserLabel(userId) }}</span>
-                                </button>
-                              }
-                            }
+                        @if (campaignFormMode() === 'finish') {
+                          <div class="form-group">
+                            <label>Kilometratge final</label>
+                            <input type="number" min="0" step="0.1" [value]="vehicle.finalKms ?? ''" placeholder="Obligatori" (change)="updateCampaignVehicleFinalKms(vehicle.vehicleName, $any($event.target).value)" />
                           </div>
                         }
+                        <div class="form-group">
+                          <label>Conductor</label>
+                          <div class="responsable-picker campaign-picker">
+                            <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignConductorMenu(vehicle.vehicleName)">
+                              <span class="responsable-picker-label">{{ getCampaignVehicleConductorSummary(vehicle.vehicleName) }}</span>
+                            </button>
+                            @if (isCampaignConductorMenuOpen(vehicle.vehicleName)) {
+                              <div class="responsable-picker-menu service-picker-menu">
+                                <button type="button" class="service-picker-vehicle" (click)="selectCampaignVehicleConductor(vehicle.vehicleName, null)">Sense conductor</button>
+                                @for (userId of getCampaignAssignableConductorIds(vehicle.vehicleName); track userId) {
+                                  <button type="button" class="service-picker-vehicle" [class.active]="vehicle.conductorUserId === userId" (click)="selectCampaignVehicleConductor(vehicle.vehicleName, userId)">{{ getCampaignUserLabel(userId) }}</button>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
+                        <div class="form-group">
+                          <label>Tripulació</label>
+                          <div class="responsable-picker campaign-picker">
+                            <button type="button" class="responsable-picker-trigger" (click)="toggleCampaignVehicleVolunteerMenu(vehicle.vehicleName)">
+                              <span class="responsable-picker-label">{{ getCampaignVehicleVolunteersSummary(vehicle.vehicleName) }}</span>
+                            </button>
+                            @if (isCampaignVehicleVolunteerMenuOpen(vehicle.vehicleName)) {
+                              <div class="responsable-picker-menu service-picker-menu">
+                                @for (userId of getCampaignAssignableVolunteerIds(vehicle.vehicleName); track userId) {
+                                  <label class="service-picker-check">
+                                    <input type="checkbox" [checked]="isCampaignVehicleVolunteerSelected(vehicle.vehicleName, userId)" (change)="toggleCampaignVehicleVolunteer(vehicle.vehicleName, userId, $any($event.target).checked)" />
+                                    <span>{{ getCampaignUserLabel(userId) }}</span>
+                                  </label>
+                                }
+                              </div>
+                            }
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </section>
-                }
-              </div>
+
+                      <div class="form-group service-vehicle-note">
+                        <label>Incidència, baixa o canvi de vehicle</label>
+                        <input [value]="vehicle.statusNotes" placeholder="Descriu qualsevol incidència o canvi produït durant el servei" (change)="updateCampaignVehicleStatusNotes(vehicle.vehicleName, $any($event.target).value)" />
+                      </div>
+                    </article>
+                  }
+                </div>
+              }
+            </section>
+
+            @if (campaignFormMode() === 'finish') {
+              <section class="service-form-section service-close-section">
+                <div class="service-section-heading">
+                  <div>
+                    <span class="service-step">03</span>
+                    <h4>Tancament del servei</h4>
+                  </div>
+                </div>
+                <p class="service-section-help">Aquest resum s'enviarà a la notificació de finalització.</p>
+                <div class="form-group">
+                  <label>Observacions finals</label>
+                  <textarea rows="4" [value]="campaignForm().finalObservations" (change)="updateCampaignFinalObservations($any($event.target).value)" placeholder="Resumeix el servei, les incidències i qualsevol informació rellevant"></textarea>
+                </div>
+              </section>
             }
           }
         </div>

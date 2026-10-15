@@ -387,6 +387,8 @@ public sealed class ConvocatoriaService(
             vehicle.ConductorUserId,
             (vehicle.VolunteerUserIds ?? []).Distinct().ToArray())).ToList();
         if (vehicles.Any(vehicle => vehicle.InitialKms < 0 || vehicle.FinalKms < vehicle.InitialKms || vehicle.ConductorUserId.HasValue && !eligibleIds.Contains(vehicle.ConductorUserId.Value) || vehicle.VolunteerUserIds.Any(id => !eligibleIds.Contains(id)))) throw new ArgumentException("El formulario contiene vehiculos o voluntarios no validos.");
+        if (isFinal && vehicles.Any(vehicle => !vehicle.FinalKms.HasValue))
+            throw new ArgumentException("Indica los kilómetros finales de todos los vehículos utilizados antes de finalizar el servicio.");
         var form = await database.CampaignForms
             .Where(item => item.ConvocatoriaId == convo.Id)
             .OrderByDescending(item => item.Id)

@@ -997,7 +997,11 @@ export class HomeComponent implements OnInit {
     }
 
     if (this.isCampaignVehicleSelected(indicativo)) {
-      this.removeCampaignVehicleSection(indicativo);
+      if (this.campaignFormMode() === 'start') {
+        this.removeCampaignVehicleSection(indicativo);
+      } else {
+        this.updateCampaignVehicleStatus(indicativo, 'withdrawn');
+      }
       return;
     }
 
@@ -1109,6 +1113,57 @@ export class HomeComponent implements OnInit {
         ? { ...vehicle, status: status === 'withdrawn' ? 'withdrawn' : 'active' }
         : vehicle),
     });
+  }
+
+  getCampaignFormResponsable() {
+    const fromContext = this.campaignFormContext()?.responsable;
+    if (fromContext) {
+      return fromContext;
+    }
+
+    const convo = this.campaignFormConvo();
+    if (convo?.responsable) {
+      return convo.responsable;
+    }
+
+    const user = convo?.responsableId ? this.userById().get(convo.responsableId) : null;
+    return user
+      ? { id: user.id, nCarnet: user.nCarnet, name: user.name, lastName: user.lastName || null }
+      : null;
+  }
+
+  getCampaignFormStatusLabel() {
+    switch (this.campaignFormMode()) {
+      case 'start':
+        return 'Preparació del servei';
+      case 'finish':
+        return 'Tancament del servei';
+      default:
+        return 'Servei en curs';
+    }
+  }
+
+  getCampaignVehicleActionLabel(vehicleName: string) {
+    const vehicle = this.campaignForm().vehicles.find((item) => item.vehicleName === vehicleName);
+    if (vehicle?.status === 'withdrawn') {
+      return 'Tornar al servei';
+    }
+
+    return this.campaignFormMode() === 'start' ? 'Treure del part' : 'Donar de baixa';
+  }
+
+  toggleCampaignVehicleServiceState(vehicleName: string) {
+    const vehicle = this.campaignForm().vehicles.find((item) => item.vehicleName === vehicleName);
+    if (!vehicle) {
+      return;
+    }
+
+    if (this.campaignFormMode() === 'start') {
+      this.removeCampaignVehicleSection(vehicleName);
+      return;
+    }
+
+    this.updateCampaignVehicleStatus(vehicleName, vehicle.status === 'withdrawn' ? 'active' : 'withdrawn');
   }
 
   updateCampaignVehicleStatusNotes(vehicleName: string, statusNotes: string) {
@@ -1313,6 +1368,24 @@ export class HomeComponent implements OnInit {
       if ((nextKms - currentKms) > this.maxKmIncreasePerForm) {
         this.error.set(`L'increment de KM del vehicle ${vehicle.vehicleName} es massa alt. Revisa si hi ha un zero de mes.`);
         return false;
+      }
+
+      if (this.campaignFormMode() === 'finish') {
+        const finalKms = vehicle.finalKms;
+        if (finalKms == null || !Number.isFinite(finalKms)) {
+          this.error.set(`Indica els KM finals del vehicle ${vehicle.vehicleName}.`);
+          return false;
+        }
+
+        if (finalKms < nextKms) {
+          this.error.set(`Els KM finals del vehicle ${vehicle.vehicleName} no poden ser inferiors als inicials.`);
+          return false;
+        }
+
+        if ((finalKms - nextKms) > this.maxKmIncreasePerForm) {
+          this.error.set(`L'increment de KM final del vehicle ${vehicle.vehicleName} es massa alt. Revisa si hi ha un zero de mes.`);
+          return false;
+        }
       }
     }
 
@@ -2072,6 +2145,14 @@ export class HomeComponent implements OnInit {
     }
 
     return `${user.nCarnet} - ${user.name} ${user.lastName || ''}`.trim();
+  }
+
+  getConvocatoriaResponsableName(convo: Convocatoria) {
+    if (convo.responsable) {
+      return `${convo.responsable.nCarnet} - ${convo.responsable.name} ${convo.responsable.lastName || ''}`.trim();
+    }
+
+    return this.getResponsableName(convo.responsableId);
   }
 
   getConvoTypeName(convoTypeId?: number) {
