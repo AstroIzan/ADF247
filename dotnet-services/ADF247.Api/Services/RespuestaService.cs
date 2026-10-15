@@ -41,7 +41,7 @@ public sealed class RespuestaService(
             IsCustom = request.IsCustom ?? false,
             CustomText = Normalize(request.CustomText),
             FullHorari = request.FullHorari ?? false,
-            AttendanceConfirmed = request.AttendanceConfirmed ?? false,
+            AttendanceConfirmed = request.AttendanceConfirmed ?? true,
             AttendanceJustified = request.AttendanceJustified ?? false,
             Source = "manual",
         };
