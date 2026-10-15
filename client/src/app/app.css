@@ -286,6 +286,11 @@
 
 .app-content {
 	flex: 1 1 auto;
+	min-height: 100vh;
+	min-height: 100dvh;
+}
+
+.app-shell.authenticated .app-content {
 	min-height: calc(100vh - var(--top-nav-height));
 	min-height: calc(100dvh - var(--top-nav-height));
 	padding-top: var(--top-nav-height);

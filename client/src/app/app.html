@@ -1,4 +1,4 @@
-<div class="app-shell">
+<div class="app-shell" [class.authenticated]="authService.isLoggedIn()">
 	@if (authService.isLoggedIn()) {
 		<header class="top-nav">
 			<div class="top-nav-left">

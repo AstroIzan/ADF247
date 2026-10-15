@@ -422,7 +422,7 @@ public sealed class ConvocatoriaService(
     }
 
     private async Task<List<CampaignUser>> EligibleUsersAsync(int convoId) =>
-        (await database.Respuestas.Include(response => response.User).Where(response => response.ConvoId == convoId && response.Response && response.AttendanceConfirmed && response.User!.IsActive).OrderBy(response => response.UserNCarnet).ToListAsync())
+        (await database.Respuestas.Include(response => response.User).Where(response => response.ConvoId == convoId && response.Response && response.User!.IsActive).OrderBy(response => response.UserNCarnet).ToListAsync())
         .Select(response => new CampaignUser(response.User!.Id, response.User.NCarnet, response.User.Name, response.User.LastName)).ToList();
 
     private static IQueryable<Convocatoria> IncludeConvocatoria(IQueryable<Convocatoria> query) => query.Include(convo => convo.Responsable).Include(convo => convo.ConvoType);

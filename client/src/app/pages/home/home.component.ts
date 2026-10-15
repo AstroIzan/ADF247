@@ -275,7 +275,7 @@ export class HomeComponent implements OnInit {
     private router: Router
   ) {}
 
-  @HostListener('document:click', ['$event'])
+  @HostListener('document:pointerdown', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.showCampaignFormModal()) {
       return;
