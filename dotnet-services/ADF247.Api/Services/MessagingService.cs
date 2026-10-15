@@ -114,7 +114,7 @@ public sealed class MessagingService(Adf247DbContext database)
                 convocatoriaId,
                 "service-start",
                 "Sabadell inicia servei",
-                $"Inici de servei a les {convocatoria.StartTime:HH:mm}, 🟡 {grocs} + 🟢 {noGrocs} + {vehicles}\nComunicacions {responsable}",
+                $"Inici de servei a les {convocatoria.StartTime:HH:mm}, {grocs}🟡 + {noGrocs}🟢 + {vehicles}\nComunicacions {responsable}",
                 new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() },
                 cancellationToken);
         }

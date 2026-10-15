@@ -174,7 +174,7 @@
                   </p>
                 </div>
                 <p class="convo-sortida-row">
-                  @if (!canManageConvocatoriaLifecycle(convo)) {
+                  @if (!canManageConvocatoriaLifecycle(convo) && !hasServiceStarted(convo)) {
                     <span class="convo-sortida-label-group">
                       <strong>Sortida:</strong>
                       <span class="sortida-pill" [class.sortida-pill-on]="convo.sortida" [class.sortida-pill-off]="!convo.sortida">
@@ -223,31 +223,35 @@
                             </button>
                           }
 
-                          <button
-                            type="button"
-                            class="admin-convo-btn admin-convo-sortida-toggle"
-                            [class.sortida-action-enable]="!convo.sortida"
-                            [class.sortida-action-disable]="convo.sortida"
-                            [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
-                            (click)="toggleConvoSortida(convo)"
-                            [title]="getSortidaBadgeLabel(convo.sortida)"
-                            [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
-                          >
-                            {{ getSortidaBadgeLabel(convo.sortida) }}
-                          </button>
+                          @if (!hasServiceStarted(convo)) {
+                            <button
+                              type="button"
+                              class="admin-convo-btn admin-convo-sortida-toggle"
+                              [class.sortida-action-enable]="!convo.sortida"
+                              [class.sortida-action-disable]="convo.sortida"
+                              [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
+                              (click)="toggleConvoSortida(convo)"
+                              [title]="getSortidaBadgeLabel(convo.sortida)"
+                              [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
+                            >
+                              {{ getSortidaBadgeLabel(convo.sortida) }}
+                            </button>
+                          }
                         </div>
                       }
 
-                      <div class="answer-actions answer-actions-answered">
-                        <button
-                          type="button"
-                          class="btn btn-edit btn-xs"
-                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
-                          (click)="openCustomModal(convo)"
-                        >
-                          Modificar
-                        </button>
-                      </div>
+                      @if (!hasServiceStarted(convo)) {
+                        <div class="answer-actions answer-actions-answered">
+                          <button
+                            type="button"
+                            class="btn btn-edit btn-xs"
+                            [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
+                            (click)="openCustomModal(convo)"
+                          >
+                            Modificar
+                          </button>
+                        </div>
+                      }
                     </div>
                   } @else {
                     <div class="answer-actions-wrap">
@@ -265,18 +269,20 @@
                             </button>
                           }
 
-                          <button
-                            type="button"
-                            class="admin-convo-btn admin-convo-sortida-toggle"
-                            [class.sortida-action-enable]="!convo.sortida"
-                            [class.sortida-action-disable]="convo.sortida"
-                            [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
-                            (click)="toggleConvoSortida(convo)"
-                            [title]="getSortidaBadgeLabel(convo.sortida)"
-                            [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
-                          >
-                            {{ getSortidaBadgeLabel(convo.sortida) }}
-                          </button>
+                          @if (!hasServiceStarted(convo)) {
+                            <button
+                              type="button"
+                              class="admin-convo-btn admin-convo-sortida-toggle"
+                              [class.sortida-action-enable]="!convo.sortida"
+                              [class.sortida-action-disable]="convo.sortida"
+                              [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
+                              (click)="toggleConvoSortida(convo)"
+                              [title]="getSortidaBadgeLabel(convo.sortida)"
+                              [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
+                            >
+                              {{ getSortidaBadgeLabel(convo.sortida) }}
+                            </button>
+                          }
                         </div>
                       }
 
@@ -444,6 +450,12 @@
           @if (campaignFormLoading()) {
             <div class="loading">Carregant dades del formulari...</div>
           } @else if (campaignFormContext(); as context) {
+            @if (campaignFormError()) {
+              <div class="error-alert service-form-alert">{{ campaignFormError() }}</div>
+            }
+            @if (campaignFormNotice()) {
+              <div class="success-alert service-form-alert">{{ campaignFormNotice() }}</div>
+            }
             @let responsable = getCampaignFormResponsable();
             <section class="service-form-summary">
               <div class="service-form-summary-title">
@@ -611,6 +623,9 @@
 
         <div class="modal-footer">
           <button class="btn btn-secondary" (click)="closeCampaignFormModal()" [disabled]="campaignFormSubmitting()">Cancel·lar</button>
+          @if (campaignFormMode() === 'finish') {
+            <button class="btn btn-edit" (click)="saveCampaignFormChanges()" [disabled]="campaignFormLoading() || campaignFormSubmitting()">Desar canvis</button>
+          }
           <button class="btn btn-primary" (click)="executeCampaignLifecycleAction()" [disabled]="campaignFormLoading() || campaignFormSubmitting()">
             {{ campaignFormSubmitting() ? 'Desant...' : (campaignFormMode() === 'start' ? 'Desar i iniciar' : (campaignFormMode() === 'finish' ? 'Desar i finalitzar' : 'Desar canvis')) }}
           </button>

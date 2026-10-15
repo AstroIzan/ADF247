@@ -78,6 +78,8 @@ export class HomeComponent implements OnInit {
   campaignFormContext = signal<CampaignFormContext | null>(null);
   campaignFormLoading = signal(false);
   campaignFormSubmitting = signal(false);
+  campaignFormError = signal('');
+  campaignFormNotice = signal('');
   showCampaignRecordsModal = signal(false);
   campaignRecordsConvo = signal<Convocatoria | null>(null);
   campaignRecords = signal<CampaignFormRecord[]>([]);
@@ -531,6 +533,10 @@ export class HomeComponent implements OnInit {
     return this.toDateInputValue(convoDate) === this.todayDate;
   }
 
+  hasServiceStarted(convo: Convocatoria) {
+    return Boolean(convo.actualStartTime);
+  }
+
   getLifecycleAction(convo: Convocatoria): 'start' | 'finish' | 'edit' | null {
     if (!this.canManageConvocatoriaLifecycle(convo)) {
       return null;
@@ -555,7 +561,7 @@ export class HomeComponent implements OnInit {
     }
 
     if (action === 'finish') {
-      return 'Finalitzar';
+      return 'Finalitzar o editar';
     }
 
     if (action === 'edit') {
@@ -597,7 +603,8 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    this.error.set('');
+    this.campaignFormError.set('');
+    this.campaignFormNotice.set('');
     this.adminActionFeedback.set('');
     this.campaignFormSubmitting.set(true);
     this.runningConvoAdminActionKey.set(`start-${convo.id}`);
@@ -615,7 +622,7 @@ export class HomeComponent implements OnInit {
       error: (err) => {
         this.campaignFormSubmitting.set(false);
         this.runningConvoAdminActionKey.set(null);
-        this.error.set(err.message || 'No s\'ha pogut iniciar la convocatòria.');
+        this.campaignFormError.set(err.message || 'No s\'ha pogut iniciar la convocatòria.');
       },
     });
   }
@@ -629,7 +636,8 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    this.error.set('');
+    this.campaignFormError.set('');
+    this.campaignFormNotice.set('');
     this.adminActionFeedback.set('');
     this.campaignFormSubmitting.set(true);
     this.runningConvoAdminActionKey.set(`finish-${convo.id}`);
@@ -647,7 +655,7 @@ export class HomeComponent implements OnInit {
       error: (err) => {
         this.campaignFormSubmitting.set(false);
         this.runningConvoAdminActionKey.set(null);
-        this.error.set(err.message || 'No s\'ha pogut finalitzar la convocatòria.');
+        this.campaignFormError.set(err.message || 'No s\'ha pogut finalitzar la convocatòria.');
       },
     });
   }
@@ -660,6 +668,8 @@ export class HomeComponent implements OnInit {
     this.campaignFormConvo.set(convo);
     this.campaignFormMode.set(mode);
     this.campaignFormLoading.set(true);
+    this.campaignFormError.set('');
+    this.campaignFormNotice.set('');
     this.error.set('');
 
     this.dataService.getCampaignFormContext(convo.id, mode).subscribe({
@@ -693,7 +703,7 @@ export class HomeComponent implements OnInit {
       },
       error: (err) => {
         this.campaignFormLoading.set(false);
-        this.error.set(err.message || 'No s\'ha pogut preparar el formulari de campanya.');
+        this.campaignFormError.set(err.message || 'No s\'ha pogut preparar el formulari de campanya.');
       },
     });
   }
@@ -704,6 +714,8 @@ export class HomeComponent implements OnInit {
     this.campaignFormMode.set(null);
     this.campaignFormContext.set(null);
     this.campaignFormSubmitting.set(false);
+    this.campaignFormError.set('');
+    this.campaignFormNotice.set('');
     this.campaignForm.set({
       dia: this.toDateTimeLocalValue(new Date().toISOString()),
       volunteerUserIds: [],
@@ -1354,40 +1366,40 @@ export class HomeComponent implements OnInit {
     return String(this.getCampaignVehicleCurrentKms(vehicleName));
   }
 
-  private validateCampaignVehicleKms() {
+  private validateCampaignVehicleKms(requireFinalKms = this.campaignFormMode() === 'finish') {
     for (const vehicle of this.campaignForm().vehicles) {
       const currentKms = this.getCampaignVehicleCurrentKms(vehicle.vehicleName);
       const nextKms = Number(vehicle.kms || 0);
 
       if (!Number.isFinite(nextKms) || nextKms < 0) {
-        this.error.set(`Els KM del vehicle ${vehicle.vehicleName} no son valids.`);
+        this.campaignFormError.set(`Els KM del vehicle ${vehicle.vehicleName} no son valids.`);
         return false;
       }
 
       if (nextKms < currentKms) {
-        this.error.set(`Els KM del vehicle ${vehicle.vehicleName} no poden ser inferiors als actuals (${currentKms}).`);
+        this.campaignFormError.set(`Els KM del vehicle ${vehicle.vehicleName} no poden ser inferiors als actuals (${currentKms}).`);
         return false;
       }
 
       if ((nextKms - currentKms) > this.maxKmIncreasePerForm) {
-        this.error.set(`L'increment de KM del vehicle ${vehicle.vehicleName} es massa alt. Revisa si hi ha un zero de mes.`);
+        this.campaignFormError.set(`L'increment de KM del vehicle ${vehicle.vehicleName} es massa alt. Revisa si hi ha un zero de mes.`);
         return false;
       }
 
-      if (this.campaignFormMode() === 'finish') {
+      if (requireFinalKms) {
         const finalKms = vehicle.finalKms;
         if (finalKms == null || !Number.isFinite(finalKms)) {
-          this.error.set(`Indica els KM finals del vehicle ${vehicle.vehicleName}.`);
+          this.campaignFormError.set(`Indica els KM finals del vehicle ${vehicle.vehicleName}.`);
           return false;
         }
 
         if (finalKms < nextKms) {
-          this.error.set(`Els KM finals del vehicle ${vehicle.vehicleName} no poden ser inferiors als inicials.`);
+          this.campaignFormError.set(`Els KM finals del vehicle ${vehicle.vehicleName} no poden ser inferiors als inicials.`);
           return false;
         }
 
         if ((finalKms - nextKms) > this.maxKmIncreasePerForm) {
-          this.error.set(`L'increment de KM final del vehicle ${vehicle.vehicleName} es massa alt. Revisa si hi ha un zero de mes.`);
+          this.campaignFormError.set(`L'increment de KM final del vehicle ${vehicle.vehicleName} es massa alt. Revisa si hi ha un zero de mes.`);
           return false;
         }
       }
@@ -1496,6 +1508,8 @@ export class HomeComponent implements OnInit {
       return;
     }
 
+    this.campaignFormError.set('');
+    this.campaignFormNotice.set('');
     if (!this.validateCampaignVehicleKms()) {
       return;
     }
@@ -1513,19 +1527,34 @@ export class HomeComponent implements OnInit {
     this.finishConvocatoriaLifecycle(convo);
   }
 
-  private updateCampaignServiceForm(convo: Convocatoria) {
+  saveCampaignFormChanges() {
+    const convo = this.campaignFormConvo();
+    this.campaignFormError.set('');
+    this.campaignFormNotice.set('');
+    if (!convo || !this.validateCampaignVehicleKms(false)) {
+      return;
+    }
+
+    this.updateCampaignServiceForm(convo, false);
+  }
+
+  private updateCampaignServiceForm(convo: Convocatoria, closeOnSuccess = true) {
     if (this.campaignFormSubmitting()) return;
     this.campaignFormSubmitting.set(true);
     this.dataService.updateCampaignForm(convo.id, this.buildCampaignFormPayload()).subscribe({
       next: (updatedConvo) => {
         this.campaignFormSubmitting.set(false);
         this.replaceConvocatoriaInState(updatedConvo);
-        this.adminActionFeedback.set(`Part de servei actualitzat: ${updatedConvo.title}.`);
-        this.closeCampaignFormModal();
+        if (closeOnSuccess) {
+          this.adminActionFeedback.set(`Part de servei actualitzat: ${updatedConvo.title}.`);
+          this.closeCampaignFormModal();
+        } else {
+          this.campaignFormNotice.set('Canvis desats. El servei continua actiu.');
+        }
       },
       error: (err) => {
         this.campaignFormSubmitting.set(false);
-        this.error.set(err.message || 'No s’ha pogut actualitzar el part de servei.');
+        this.campaignFormError.set(err.message || 'No s’ha pogut actualitzar el part de servei.');
       },
     });
   }

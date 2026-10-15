@@ -4,6 +4,8 @@ using ADF247.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace ADF247.Api.Controllers;
 
@@ -94,5 +96,9 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
     }
 
     private bool IsCurrentUser(int id) =>
-        int.TryParse(User.FindFirst("sub")?.Value, out var currentUserId) && currentUserId == id;
+        int.TryParse(
+            User.FindFirst(JwtRegisteredClaimNames.Sub)?.Value
+            ?? User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
+            out var currentUserId)
+        && currentUserId == id;
 }
