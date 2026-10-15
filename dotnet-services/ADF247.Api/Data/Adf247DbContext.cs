@@ -111,7 +111,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.HasKey(summary => summary.Id);
             entity.HasIndex(summary => summary.UserId).IsUnique();
             entity.Property(summary => summary.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
-            entity.Property(summary => summary.UpdatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAddOrUpdate();
+            entity.Property(summary => summary.UpdatedAt).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<SystemConfiguration>(entity =>

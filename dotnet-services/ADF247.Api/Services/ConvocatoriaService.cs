@@ -286,9 +286,9 @@ public sealed class ConvocatoriaService(
         var responses = await database.Respuestas
             .Where(response => convocatoriaIds.Contains(response.ConvoId))
             .ToListAsync();
-        var responsesByConvocatoriaAndUser = responses.ToDictionary(
-            response => (response.ConvoId, response.UserNCarnet),
-            response => response);
+        var responsesByConvocatoriaAndUser = responses
+            .GroupBy(response => (response.ConvoId, response.UserNCarnet))
+            .ToDictionary(group => group.Key, group => group.OrderBy(response => response.Id).Last());
         var rows = new List<HoursSummaryRow>();
 
         foreach (var user in users)
@@ -337,7 +337,7 @@ public sealed class ConvocatoriaService(
             var summary = await database.UserHoursSummaries.SingleOrDefaultAsync(item => item.UserId == user.Id);
             if (summary is null)
             {
-                database.UserHoursSummaries.Add(new UserHoursSummary { UserId = user.Id });
+                database.UserHoursSummaries.Add(new UserHoursSummary { UserId = user.Id, UpdatedAt = now });
                 summary = database.UserHoursSummaries.Local.Last();
             }
             summary.CampaignHours = row.CampaignHours;
