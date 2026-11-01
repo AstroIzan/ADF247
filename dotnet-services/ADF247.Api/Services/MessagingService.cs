@@ -66,6 +66,14 @@ public sealed class MessagingService(Adf247DbContext database)
             .SingleOrDefaultAsync(item => item.Id == convocatoriaId, cancellationToken)
             ?? throw new KeyNotFoundException("No se ha encontrado la convocatoria.");
 
+        if (trigger is "response-request" or "sortida-status")
+        {
+            if (convocatoria.ActualStartTime.HasValue || convocatoria.ActualEndTime.HasValue)
+                throw new ArgumentException("La convocatoria ya se ha iniciado: solo se pueden enviar avisos de inicio y final de servei.");
+            if (!convocatoria.IsActive || convocatoria.FinalTime.HasValue && convocatoria.FinalTime.Value < GetBarcelonaNow())
+                throw new ArgumentException("La convocatoria ya ha finalizado: no se pueden enviar notificaciones.");
+        }
+
         var configuration = await FindConvocatoriaConfigurationAsync(convocatoria, trigger, cancellationToken);
         var title = request.Title ?? RenderTemplate(
             configuration?.TitleTemplate ?? (trigger == "sortida-status" ? "Confirmació de sortida" : "Convocatòria"),

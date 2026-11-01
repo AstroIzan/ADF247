@@ -455,6 +455,10 @@ export class DataService {
     return this.http.post<Convocatoria>('/convos', data);
   }
 
+  createConvocatorias(data: Partial<Convocatoria>[]): Observable<Convocatoria[]> {
+    return this.http.post<Convocatoria[]>('/convos/bulk', data);
+  }
+
   updateConvocatoria(id: number, data: Partial<Convocatoria>): Observable<Convocatoria> {
     return this.http.put<Convocatoria>(`/convos/${id}`, data);
   }

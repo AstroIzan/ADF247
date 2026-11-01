@@ -76,6 +76,33 @@ public sealed class ConvocatoriaService(
 
     public async Task<object> CreateAsync(ConvocatoriaRequest request, string actorCarnet, CancellationToken cancellationToken)
     {
+        var id = await CreateRecordAsync(request);
+        await TryQueueResponseRequestAsync(actorCarnet, id, null, cancellationToken);
+        return (await GetAsync(id))!;
+    }
+
+    public async Task<object> CreateManyAsync(IReadOnlyList<ConvocatoriaRequest> requests, string actorCarnet, CancellationToken cancellationToken)
+    {
+        if (requests.Count == 0) throw new ArgumentException("Debes enviar al menos una convocatoria.");
+        var ids = new List<int>();
+        foreach (var request in requests) ids.Add(await CreateRecordAsync(request));
+        var summary = ids.Count > 1
+            ? new ConvocatoriaNotificationRequest("Tens diverses convocatòries per respondre", $"Hi ha {ids.Count} convocatòries noves pendents de resposta.")
+            : null;
+        await TryQueueResponseRequestAsync(actorCarnet, ids[0], summary, cancellationToken);
+        var created = new List<object>();
+        foreach (var id in ids) created.Add((await GetAsync(id))!);
+        return created;
+    }
+
+    private async Task TryQueueResponseRequestAsync(string actorCarnet, int convoId, ConvocatoriaNotificationRequest? request, CancellationToken cancellationToken)
+    {
+        try { await messaging.QueueConvocatoriaAsync(actorCarnet, convoId, "response-request", request ?? new ConvocatoriaNotificationRequest(null, null), cancellationToken); }
+        catch (ArgumentException) { }
+    }
+
+    private async Task<int> CreateRecordAsync(ConvocatoriaRequest request)
+    {
         var type = await RequireTypeAsync(request.ConvoTypeId);
         if (request.ResponsableId.HasValue) await RequireUserAsync(request.ResponsableId.Value);
         var start = request.StartTime ?? throw new ArgumentException("El campo \"startTime\" es obligatorio.");
@@ -93,13 +120,7 @@ public sealed class ConvocatoriaService(
         database.Convocatorias.Add(convo);
         await SaveAsync();
         await calculations.ApplyAvailabilityAsync(convo);
-        await messaging.QueueConvocatoriaAsync(
-            actorCarnet,
-            convo.Id,
-            "response-request",
-            new ConvocatoriaNotificationRequest(null, null),
-            cancellationToken);
-        return (await GetAsync(convo.Id))!;
+        return convo.Id;
     }
 
     public async Task<object?> UpdateAsync(

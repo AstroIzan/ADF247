@@ -130,6 +130,7 @@ export class HomeComponent implements OnInit {
     guardiaRangeStart: this.toDateInputValue(new Date()),
     guardiaRangeEnd: this.toDateInputValue(new Date()),
     guardiaMorning: false,
+    guardiaEarlyMorning: false,
     guardiaAfternoon: true,
     recurringMode: 'single' as 'single' | 'weekly',
     semanalRangeStart: this.toDateInputValue(new Date()),
@@ -2491,6 +2492,7 @@ export class HomeComponent implements OnInit {
       guardiaRangeStart: this.selectedDate(),
       guardiaRangeEnd: this.selectedDate(),
       guardiaMorning: false,
+      guardiaEarlyMorning: false,
       guardiaAfternoon: true,
       recurringMode: 'single',
       semanalRangeStart: this.selectedDate(),
@@ -2555,6 +2557,7 @@ export class HomeComponent implements OnInit {
       | 'guardiaRangeStart'
       | 'guardiaRangeEnd'
       | 'guardiaMorning'
+      | 'guardiaEarlyMorning'
       | 'guardiaAfternoon'
       | 'recurringMode'
       | 'semanalRangeStart'
@@ -2594,7 +2597,7 @@ export class HomeComponent implements OnInit {
         next.guardiaRangeEnd = current.date || this.selectedDate();
         next.ubiSortida = this.getConvoTypeDefaultLocation(next.convoTypeId) || 'Brigadas';
 
-        if (!next.guardiaMorning && !next.guardiaAfternoon) {
+        if (!next.guardiaEarlyMorning && !next.guardiaMorning && !next.guardiaAfternoon) {
           next.guardiaAfternoon = true;
         }
 
@@ -2675,34 +2678,45 @@ export class HomeComponent implements OnInit {
       }
 
       const validSlots = (form.semanalSlots || []).filter((slot) => slot.start && slot.end);
-      if (validSlots.length === 0 || validSlots.some((slot) => slot.start >= slot.end)) {
-        this.createConvoError.set('Afegeix almenys una franja horària vàlida.');
+      if (validSlots.some((slot) => slot.start >= slot.end)) {
+        this.createConvoError.set('Cada franja ha de tenir una hora d\'inici menor que l\'hora final.');
         return;
       }
 
-      payloads = this.buildSemanalPayloads({ ...form, title: titleToUse }, validSlots);
+      const guardiaShifts = isGuardiaType ? this.getSelectedGuardiaShifts(form) : [];
+      const allSlots = [...guardiaShifts, ...validSlots];
+      if (allSlots.length === 0) {
+        this.createConvoError.set(isGuardiaType
+          ? 'Selecciona almenys un torn de guàrdia o afegeix una franja horària.'
+          : 'Afegeix almenys una franja horària vàlida.');
+        return;
+      }
+
+      payloads = this.buildSemanalPayloads({ ...form, title: titleToUse }, allSlots);
       if (payloads.length === 0) {
         this.createConvoError.set('No s\'han pogut generar convocatòries setmanals amb aquest rang.');
         return;
       }
     } else if (isGuardiaType) {
-      if (!form.guardiaRangeStart || !form.guardiaRangeEnd) {
-        this.createConvoError.set('Per a guardia has d\'indicar un rang de dates.');
+      if (!form.date) {
+        this.createConvoError.set('Per a guàrdia has d\'indicar el dia.');
         return;
       }
 
-      if (!form.guardiaMorning && !form.guardiaAfternoon) {
-        this.createConvoError.set('Selecciona almenys un torn de guardia (mati o tarda).');
+      if (this.getSelectedGuardiaShifts(form).length === 0) {
+        this.createConvoError.set('Selecciona almenys un torn de guàrdia.');
         return;
       }
 
       payloads = this.buildGuardiaPayloads({
         ...form,
+        guardiaRangeStart: form.date,
+        guardiaRangeEnd: form.date,
         title: titleToUse,
       });
 
       if (payloads.length === 0) {
-        this.createConvoError.set('No hi ha dies laborables al rang seleccionat per crear guardies.');
+        this.createConvoError.set('No s\'han pogut generar guàrdies per al dia seleccionat.');
         return;
       }
     } else if (this.isSemanalTypeById(form.convoTypeId)) {
@@ -2788,7 +2802,7 @@ export class HomeComponent implements OnInit {
 
     this.creatingConvo.set(true);
 
-    forkJoin(payloads.map((payload) => this.dataService.createConvocatoria(payload))).subscribe({
+    this.dataService.createConvocatorias(payloads).subscribe({
       next: () => {
         this.creatingConvo.set(false);
         this.createConvoError.set('');
@@ -2957,10 +2971,23 @@ export class HomeComponent implements OnInit {
     return type?.defaultLocation?.trim() || '';
   }
 
+  private getSelectedGuardiaShifts(form: {
+    guardiaEarlyMorning: boolean;
+    guardiaMorning: boolean;
+    guardiaAfternoon: boolean;
+  }) {
+    const shifts: Array<{ start: string; end: string }> = [];
+    if (form.guardiaEarlyMorning) shifts.push({ start: '10:00', end: '14:00' });
+    if (form.guardiaMorning) shifts.push({ start: '12:00', end: '16:00' });
+    if (form.guardiaAfternoon) shifts.push({ start: '16:00', end: '20:00' });
+    return shifts;
+  }
+
   private buildGuardiaPayloads(form: {
     title: string;
     guardiaRangeStart: string;
     guardiaRangeEnd: string;
+    guardiaEarlyMorning: boolean;
     guardiaMorning: boolean;
     guardiaAfternoon: boolean;
     ubiSortida: string;
@@ -2977,16 +3004,7 @@ export class HomeComponent implements OnInit {
       return [];
     }
 
-    const shifts: Array<{ start: string; end: string }> = [];
-
-    if (form.guardiaMorning) {
-      shifts.push({ start: '12:00', end: '16:00' });
-    }
-
-    if (form.guardiaAfternoon) {
-      shifts.push({ start: '16:00', end: '20:00' });
-    }
-
+    const shifts = this.getSelectedGuardiaShifts(form);
     const payloads: Partial<Convocatoria>[] = [];
     const cursor = new Date(start);
     const endKey = this.toDateInputValue(end);

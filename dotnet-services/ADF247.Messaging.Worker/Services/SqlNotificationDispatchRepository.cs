@@ -291,6 +291,17 @@ public sealed class SqlNotificationDispatchRepository(
             WHERE r.[isActive] = 1
                 AND r.[invalidatedAt] IS NULL
                 AND d.[id] IS NULL
+                AND NOT EXISTS (
+                    SELECT 1
+                    FROM [Messaging].[DeviceRegistration] newer
+                    WHERE newer.[nCarnet] = r.[nCarnet]
+                        AND newer.[isActive] = 1
+                        AND newer.[invalidatedAt] IS NULL
+                        AND newer.[platform] = r.[platform]
+                        AND ISNULL(newer.[userAgent], N'') = ISNULL(r.[userAgent], N'')
+                        AND (newer.[lastSeenAt] > r.[lastSeenAt]
+                            OR (newer.[lastSeenAt] = r.[lastSeenAt] AND newer.[id] > r.[id]))
+                )
                 AND (
                     @SelectionMode <> @SelectionExplicitRecipients
                     OR EXISTS (

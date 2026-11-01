@@ -135,7 +135,7 @@
                       }
                     }
 
-                    @if (authService.isAdmin()) {
+                    @if (authService.isAdmin() && !isResponseWindowClosed(convo)) {
                       <button
                         type="button"
                         class="admin-convo-btn"
@@ -223,7 +223,7 @@
                             </button>
                           }
 
-                          @if (!hasServiceStarted(convo)) {
+                          @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
                             <button
                               type="button"
                               class="admin-convo-btn admin-convo-sortida-toggle"
@@ -240,7 +240,7 @@
                         </div>
                       }
 
-                      @if (!hasServiceStarted(convo)) {
+                      @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
                         <div class="answer-actions answer-actions-answered">
                           <button
                             type="button"
@@ -269,7 +269,7 @@
                             </button>
                           }
 
-                          @if (!hasServiceStarted(convo)) {
+                          @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
                             <button
                               type="button"
                               class="admin-convo-btn admin-convo-sortida-toggle"
@@ -1444,7 +1444,7 @@
             </div>
           }
 
-          @if (!isGuardiaTypeSelected() && !isWeeklyCreationSelected() && !isIncendiTypeSelected()) {
+          @if (!isWeeklyCreationSelected() && !isIncendiTypeSelected()) {
             <div class="form-group">
               <label>Data (dia seleccionat)</label>
               <input
@@ -1465,28 +1465,18 @@
           </div>
 
           @if (isGuardiaTypeSelected() && !isWeeklyCreationSelected()) {
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Rang des de</label>
-                <input
-                  type="date"
-                  [value]="createConvoForm().guardiaRangeStart"
-                  (change)="updateCreateConvoField('guardiaRangeStart', $any($event.target).value)"
-                />
-              </div>
-              <div class="form-group">
-                <label>Rang fins a</label>
-                <input
-                  type="date"
-                  [value]="createConvoForm().guardiaRangeEnd"
-                  (change)="updateCreateConvoField('guardiaRangeEnd', $any($event.target).value)"
-                />
-              </div>
-            </div>
-
             <div class="form-group">
               <label>Torns de guàrdia</label>
               <div class="guardia-turns-grid">
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="createConvoForm().guardiaEarlyMorning"
+                    (change)="updateCreateConvoField('guardiaEarlyMorning', $any($event.target).checked)"
+                  />
+                  Matí (10:00 a 14:00)
+                </label>
+
                 <label class="checkbox-label">
                   <input
                     type="checkbox"
@@ -1508,7 +1498,7 @@
             </div>
 
             <p class="guardia-help-text">
-              Es generarà una convocatòria per torn i per cada dia laborable (de dilluns a divendres) dins del rang.
+              Es generarà una convocatòria per cada torn seleccionat al dia indicat.
             </p>
           } @else if (isWeeklyCreationSelected()) {
             <div class="form-grid-2">
@@ -1530,9 +1520,43 @@
               </div>
             </div>
 
+            @if (isGuardiaTypeSelected()) {
+              <div class="form-group">
+                <label>Torns de guàrdia</label>
+                <div class="guardia-turns-grid">
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="createConvoForm().guardiaEarlyMorning"
+                      (change)="updateCreateConvoField('guardiaEarlyMorning', $any($event.target).checked)"
+                    />
+                    Matí (10:00 a 14:00)
+                  </label>
+
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="createConvoForm().guardiaMorning"
+                      (change)="updateCreateConvoField('guardiaMorning', $any($event.target).checked)"
+                    />
+                    Matí (12:00 - 16:00)
+                  </label>
+
+                  <label class="checkbox-label">
+                    <input
+                      type="checkbox"
+                      [checked]="createConvoForm().guardiaAfternoon"
+                      (change)="updateCreateConvoField('guardiaAfternoon', $any($event.target).checked)"
+                    />
+                    Tarda (16:00 - 20:00)
+                  </label>
+                </div>
+              </div>
+            }
+
             <div class="form-group">
               <div class="weekly-slots-header">
-                <label>Franges horàries</label>
+                <label>{{ isGuardiaTypeSelected() ? 'Franges addicionals (opcional)' : 'Franges horàries' }}</label>
                 <button type="button" class="btn btn-sm btn-edit" (click)="addSemanalSlot()">+ Fila</button>
               </div>
 
