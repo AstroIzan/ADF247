@@ -1,7 +1,8 @@
 using ADF247.Database.Migrator;
 using Microsoft.Data.SqlClient;
 
-var command = args.FirstOrDefault()?.ToLowerInvariant() ?? "migrate";
+// Los despliegues antiguos invocaban el contenedor con argumentos de Prisma; cualquier comando desconocido equivale a migrate.
+var command = args.FirstOrDefault()?.ToLowerInvariant() == "seed-dev" ? "seed-dev" : "migrate";
 
 try
 {
@@ -22,9 +23,6 @@ try
             await MigrationRunner.RunAsync(connectionString);
             await DevSeeder.RunAsync(connectionString);
             break;
-        default:
-            Console.Error.WriteLine("Uso: ADF247.Database.Migrator [migrate | seed-dev --confirm]");
-            return 2;
     }
 
     return 0;
