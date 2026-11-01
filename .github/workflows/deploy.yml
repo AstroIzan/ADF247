@@ -40,40 +40,6 @@ jobs:
         run: npm run build
 
 
-  # ============================================================
-  # DATABASE / PRISMA
-  # ============================================================
-  database:
-    name: Database - Prisma
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: database
-
-    env:
-      DATABASE_URL: "sqlserver://localhost:1433;database=ADF247;user=ci;password=ci;encrypt=false"
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: database/package-lock.json
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Prisma validate
-        run: npx prisma validate
-
-      - name: Prisma generate
-        run: npx prisma generate
-
   dotnet:
     name: .NET - Build
     runs-on: ubuntu-latest
@@ -87,7 +53,7 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Build API and Messaging worker
+      - name: Build services and database migrator
         run: dotnet build dotnet-services/ADF247.slnx --configuration Release
 
 
@@ -95,7 +61,6 @@ jobs:
     name: Deploy PRE
     needs:
       - angular
-      - database
       - dotnet
 
     runs-on:

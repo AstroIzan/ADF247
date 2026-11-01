@@ -2,7 +2,7 @@
 
 Monorepo con 3 partes:
 
-- `database`: historial de migraciones Prisma + Microsoft SQL Server
+- `database`: migraciones SQL versionadas + migrador .NET (Microsoft SQL Server)
 - `dotnet-services`: API y worker de mensajería .NET 10
 - `client`: Angular
 
@@ -45,22 +45,18 @@ npm run install:all
 Que hace esto:
 
 - Instala dependencias de la raiz (incluye `concurrently`)
-- Instala dependencias de `database` y `client`
+- Instala dependencias de `client`
 
 ## 4) Configuracion de entorno
 
-### Base de datos (Prisma)
+### Base de datos
 
-Archivos de entorno disponibles:
+El migrador (`database/ADF247.Database.Migrator`) lee la conexion de variables de entorno, igual que los servicios .NET:
 
-- `database/.env.example` (plantilla versionada)
-- `database/.env.development`
-- `database/.env.pro`
-- `database/.env` (fallback)
-
-Variable usada:
-
+- `ConnectionStrings__Adf247`, o
 - `DATABASE_URL="sqlserver://HOST:1433;database=DATABASE;user=USER;password=PASSWORD;encrypt=true;trustServerCertificate=true"`
+
+Exporta la variable antes de ejecutar `npm run db:migrate`. En produccion, usa un certificado confiable y configura `trustServerCertificate` segun la politica del entorno.
 
 Copia la plantilla al archivo del entorno correspondiente y sustituye sus valores ficticios. En produccion, usa un certificado confiable y configura `trustServerCertificate` segun la politica del entorno.
 
@@ -84,32 +80,21 @@ Variables principales:
 
 Notas importantes:
 
-- La API .NET acepta `DATABASE_URL` en formato Prisma SQL Server para conservar los secretos de despliegue existentes.
+- El migrador y la API .NET aceptan `DATABASE_URL` en formato `sqlserver://...` para conservar los secretos de despliegue existentes.
 - Si faltan secretos JWT en producción, la API falla al iniciar auth (esperado).
 
 ## 5) Preparar la base de datos
 
-Desde `database`:
+Desde la raiz:
 
 ```bash
-npm run prisma:generate
-npm run prisma:migrate:deploy
-npm run prisma:seed
+npm run db:migrate
+npm run db:seed:dev   # opcional, solo desarrollo
 ```
 
-La base de datos indicada por `database` en `DATABASE_URL` debe existir y estar vacia en una instalacion inicial. `prisma migrate deploy` crea el modelo completo bajo el esquema `dbo`.
+La base de datos indicada por `database` en la cadena de conexion debe existir y estar vacia en una instalacion inicial. El migrador crea el modelo completo bajo el esquema `dbo`.
 
-Alternativa recomendada desde raiz (entorno ya existente):
-
-```bash
-npm run db:prepare
-```
-
-Opcional para inspeccionar datos:
-
-```bash
-npm run prisma:studio
-```
+Equivalente directo: `dotnet run --project database/ADF247.Database.Migrator -- migrate`.
 
 ## 6) Arranque en desarrollo
 
@@ -134,7 +119,7 @@ Comprobacion API:
 
 ## 7) Credenciales de prueba (seed)
 
-El seed crea usuarios de ejemplo con password en claro definida en `database/prisma/seed.js`.
+El seed crea usuarios de ejemplo con password en claro definida en `database/ADF247.Database.Migrator/DevSeeder.cs`.
 
 Ejemplos:
 
@@ -145,14 +130,9 @@ Ejemplos:
 
 ### Raiz
 
-- `npm run install:all`: instala dependencias en `database` y `client`
-- `npm run db:migrate:deploy`: aplica migraciones pendientes sobre la DB actual
-- `npm run db:migrate:deploy:dev`: aplica migraciones en DB de desarrollo (`database/.env.development`)
-- `npm run db:migrate:deploy:pro`: aplica migraciones en DB de produccion (`database/.env.pro`)
-- `npm run db:sync`: sincroniza schema Prisma contra la DB (`prisma db push`)
-- `npm run db:prepare`: genera cliente Prisma y aplica migraciones (`prisma migrate deploy`)
-- `npm run db:prepare:dev`: genera cliente y aplica migraciones en desarrollo
-- `npm run db:prepare:pro`: genera cliente y aplica migraciones en produccion
+- `npm run install:all`: instala dependencias del `client`
+- `npm run db:migrate` / `npm run db:prepare`: aplica migraciones pendientes con el migrador .NET
+- `npm run db:seed:dev`: ejecuta migraciones y carga datos de ejemplo (borra datos existentes)
 - `npm start`: arranca entorno de desarrollo completo (API + cliente)
 - `npm run start:dev`: igual que `npm start`
 - `npm run start:pro`: aplica DB, compila Angular y arranca la API .NET en modo producción
@@ -173,19 +153,6 @@ Ejemplos:
 - `npm run build:dev`: build desarrollo
 - `npm run test`: tests en modo interactivo
 - `npm run test:ci`: tests en modo no-watch
-
-### Database (`database/package.json`)
-
-- `npm run prisma:generate`
-- `npm run prisma:generate:dev`
-- `npm run prisma:generate:pro`
-- `npm run prisma:migrate`
-- `npm run prisma:migrate:deploy`
-- `npm run prisma:migrate:deploy:dev`
-- `npm run prisma:migrate:deploy:pro`
-- `npm run prisma:baseline` (genera una baseline para el datasource del schema)
-- `npm run prisma:seed`
-- `npm run prisma:studio`
 
 ## 9) API Auth (resumen)
 
@@ -284,7 +251,7 @@ Configuracion versionada (json):
 1. Clonar repo
 2. `npm install`
 3. `npm run install:all`
-4. Preparar DB (`prisma:generate`, `migrate`, `seed`)
+4. Preparar DB (`npm run db:prepare` y, opcionalmente, `npm run db:seed:dev`)
 5. `npm run dev`
 6. Abrir `http://localhost:4200`
 
@@ -294,9 +261,6 @@ Configuracion versionada (json):
 
 - Cambia el puerto del perfil local de ASP.NET Core o libera el puerto.
 
-### Error de Prisma Client no generado
-
-- Ejecuta en `database`: `npm run prisma:generate`
 
 ### Login falla por JWT en produccion
 
@@ -310,10 +274,11 @@ Si aparece un error tipo `The table main.AvailabilityWindow does not exist`:
 
 ### Microsoft SQL Server (estado actual)
 
-- Prisma usa exclusivamente `DATABASE_URL` para conectarse a SQL Server.
-- El historico contiene una baseline SQL Server para crear el modelo completo desde cero.
-- El flujo recomendado es `prisma migrate deploy` (`npm run db:prepare`) para crear o actualizar el esquema.
-- Puedes generar una nueva baseline desde el schema con `npm run prisma:baseline --prefix database`.
+- El migrador .NET usa `ConnectionStrings__Adf247` o `DATABASE_URL` (formato `sqlserver://host:puerto;database=...;user=...;password=...`).
+- Las migraciones SQL versionadas estan en `database/migrations` y se incrustan en el migrador; el historial se guarda en `dbo.SchemaMigration`.
+- En bases ya migradas con Prisma, el migrador importa automaticamente las migraciones completadas de `dbo._prisma_migrations`.
+- Flujo recomendado: `npm run db:prepare` (equivale a `migrate`).
+- Para anadir una migracion crea `database/migrations/<yyyyMMddHHmmss>_<nombre>/migration.sql` con el SQL idempotente y transaccional.
 
 ### PM2 en Raspberry
 
@@ -329,7 +294,7 @@ pm2 save
 
 Importante:
 
-- No uses `npx prisma ...` desde la raiz del repo, porque puede tomar una version global distinta y mostrar errores de schema incompatibles.
+- La base de datos se gestiona con `database/ADF247.Database.Migrator`; no hay herramientas Node para el esquema.
 
 ## 13) Postman
 

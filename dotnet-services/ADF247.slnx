@@ -2,4 +2,5 @@
   <Project Path="ADF247.Api/ADF247.Api.csproj" />
   <Project Path="ADF247.Batch.Worker/ADF247.Batch.Worker.csproj" />
   <Project Path="ADF247.Messaging.Worker/ADF247.Messaging.Worker.csproj" />
+  <Project Path="../database/ADF247.Database.Migrator/ADF247.Database.Migrator.csproj" />
 </Solution>

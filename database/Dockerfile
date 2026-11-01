@@ -1,14 +1,21 @@
-FROM node:24-bookworm-slim
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 
-WORKDIR /app/database
+WORKDIR /src
 
-RUN apt-get update \
-    && apt-get install --yes --no-install-recommends openssl \
-    && rm -rf /var/lib/apt/lists/*
+COPY database/ADF247.Database.Migrator/ADF247.Database.Migrator.csproj database/ADF247.Database.Migrator/
+RUN dotnet restore database/ADF247.Database.Migrator/ADF247.Database.Migrator.csproj
 
-COPY database/package*.json ./
-RUN npm ci
+COPY database/ADF247.Database.Migrator database/ADF247.Database.Migrator
+COPY database/migrations database/migrations
+RUN dotnet publish database/ADF247.Database.Migrator/ADF247.Database.Migrator.csproj \
+    --configuration Release \
+    --no-restore \
+    --output /app/publish
 
-COPY database/prisma ./prisma
+FROM mcr.microsoft.com/dotnet/runtime:10.0
 
-CMD ["npx", "prisma", "migrate", "deploy", "--schema", "prisma/schema.prisma"]
+WORKDIR /app
+COPY --from=build /app/publish .
+
+ENTRYPOINT ["dotnet", "ADF247.Database.Migrator.dll"]
+CMD ["migrate"]
