@@ -225,7 +225,7 @@ public sealed class ConvocatoriaService(
     {
         var form = await database.CampaignForms.Include(item => item.Convocatoria).SingleOrDefaultAsync(item => item.Id == id);
         if (form is null) return null;
-        EnsureManager(form.Convocatoria!, userId, isAdmin);
+        if (!isAdmin) throw new UnauthorizedAccessException();
         database.CampaignForms.Remove(form);
         await SaveAsync();
         return MapForm(form);

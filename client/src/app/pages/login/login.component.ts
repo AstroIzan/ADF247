@@ -27,7 +27,7 @@ export class LoginComponent implements OnInit {
   ngOnInit() {
     // Si ja esta autenticat, redirigir segons el rol
     if (this.authService.isLoggedIn()) {
-      this.router.navigate([this.authService.isAdmin() ? '/dashboard' : '/home']);
+      this.router.navigate([this.authService.isManager() ? '/dashboard' : '/home']);
       return;
     }
 

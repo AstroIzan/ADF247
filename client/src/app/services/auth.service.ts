@@ -201,10 +201,22 @@ export class AuthService {
   }
 
   isDeveloper(): boolean {
+    return this.hasRole('isDeveloper');
+  }
+
+  isCapOperatiu(): boolean {
+    return this.hasRole('isCapOperatiu');
+  }
+
+  isManager(): boolean {
+    return this.isAdmin() || this.hasRole('isCapOperatiu') || this.hasRole('isCapColla');
+  }
+
+  private hasRole(flag: 'isDeveloper' | 'isCapOperatiu' | 'isCapColla'): boolean {
     const roles = this.getCurrentUser()?.roles;
     return Array.isArray(roles)
-      ? roles.some((role) => Boolean(role.isDeveloper))
-      : Boolean(roles?.isDeveloper);
+      ? roles.some((role) => Boolean(role[flag]))
+      : Boolean(roles?.[flag]);
   }
 
   private getStoredUser(): CurrentUser | null {

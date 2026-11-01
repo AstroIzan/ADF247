@@ -36,7 +36,7 @@ export class HoursSummaryComponent implements OnInit {
       return;
     }
 
-    if (!this.authService.isAdmin()) {
+    if (!this.authService.isManager()) {
       this.router.navigate(['/home']);
       return;
     }

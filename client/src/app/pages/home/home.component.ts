@@ -514,7 +514,7 @@ export class HomeComponent implements OnInit {
   }
 
   canManageConvocatoriaLifecycle(convo: Convocatoria) {
-    if (this.authService.isAdmin()) {
+    if (this.authService.isManager()) {
       return true;
     }
 
@@ -1732,7 +1732,7 @@ export class HomeComponent implements OnInit {
   }
 
   sendResponseRequestNotification(convo: Convocatoria) {
-    if (!this.authService.isAdmin()) {
+    if (!this.authService.isManager()) {
       return;
     }
 
@@ -2038,7 +2038,7 @@ export class HomeComponent implements OnInit {
   }
 
   canOpenGuardiaResponses(convo: Convocatoria) {
-    if (this.authService.isAdmin()) {
+    if (this.authService.isManager()) {
       return true;
     }
 
@@ -2051,7 +2051,7 @@ export class HomeComponent implements OnInit {
       return false;
     }
 
-    if (this.authService.isAdmin()) {
+    if (this.authService.isManager()) {
       return true;
     }
 
@@ -2164,7 +2164,7 @@ export class HomeComponent implements OnInit {
   }
 
   canViewConvocatoriaSummary(convo: Convocatoria) {
-    if (this.authService.isAdmin()) {
+    if (this.authService.isManager()) {
       return true;
     }
 
@@ -2482,7 +2482,7 @@ export class HomeComponent implements OnInit {
   }
 
   openCreateConvoModal() {
-    if (!this.authService.isAdmin()) {
+    if (!this.authService.isManager()) {
       return;
     }
 
@@ -2515,7 +2515,7 @@ export class HomeComponent implements OnInit {
   }
 
   openCreateIncendiConvoModal() {
-    if (!this.authService.isAdmin()) {
+    if (!this.authService.isManager()) {
       return;
     }
 
@@ -3344,7 +3344,7 @@ export class HomeComponent implements OnInit {
   }
 
   goToDashboard() {
-    if (this.authService.isAdmin()) {
+    if (this.authService.isManager()) {
       this.router.navigate(['/dashboard']);
     }
   }

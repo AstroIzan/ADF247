@@ -152,8 +152,12 @@ export class ProfileComponent implements OnInit {
       if (form.isActive !== undefined) {
         payload.isActive = form.isActive;
       }
+    } else if (this.authService.isCapOperatiu()) {
+      if (form.nIndicatiu !== undefined) {
+        payload.nIndicatiu = form.nIndicatiu?.trim() || undefined;
+      }
       if (form.roles) {
-        payload.roles = form.roles;
+        payload.roles = { ...form.roles, isAdmin: false };
       }
     }
 

@@ -61,7 +61,7 @@ public sealed class DispoController(RespuestaService respuestas, Adf247DbContext
     {
         var carnet = User.FindFirst("nCarnet")?.Value;
         if (string.IsNullOrWhiteSpace(carnet)) return null;
-        return (carnet, await database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin));
+        return (carnet, await database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsCapOperatiu || role.IsCapColla)));
     }
 
     private async Task<IActionResult> ExecuteAsync<T>(Func<Task<T?>> operation) where T : class

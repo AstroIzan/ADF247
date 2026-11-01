@@ -48,7 +48,7 @@ export class PlaAlfaComponent implements OnInit {
       return;
     }
 
-    this.isAdminUser.set(this.authService.isAdmin());
+    this.isAdminUser.set((this.authService.isAdmin() || this.authService.isCapOperatiu()));
 
     if (this.isAdminUser()) {
       this.loadPlaAlfaData();

@@ -6,7 +6,7 @@
     </div>
 
     <div class="home-header-actions">
-      @if (authService.isAdmin()) {
+      @if (authService.isManager()) {
         <button type="button" class="btn btn-primary" (click)="openCreateConvoModal()">
           + Crear Convocatòria
         </button>
@@ -135,7 +135,7 @@
                       }
                     }
 
-                    @if (authService.isAdmin() && !isResponseWindowClosed(convo)) {
+                    @if (authService.isManager() && !isResponseWindowClosed(convo)) {
                       <button
                         type="button"
                         class="admin-convo-btn"

@@ -95,7 +95,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
-        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        if (!await IsManagerAsync(carnet, cancellationToken)) return Forbid();
         try { return StatusCode(StatusCodes.Status201Created, await messaging.QueueConvocatoriaAsync(carnet, convocatoriaId, action, request, cancellationToken)); }
         catch (KeyNotFoundException exception) { return NotFound(new { message = exception.Message }); }
         catch (ArgumentException exception) { return BadRequest(new { message = exception.Message }); }
@@ -283,6 +283,9 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     }
 
     private string? GetCarnet() => User.FindFirst("nCarnet")?.Value;
+
+    private Task<bool> IsManagerAsync(string carnet, CancellationToken cancellationToken) =>
+        database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsCapOperatiu || role.IsCapColla), cancellationToken);
 
     private Task<bool> IsAdminAsync(string carnet, CancellationToken cancellationToken) =>
         database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin, cancellationToken);

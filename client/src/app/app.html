@@ -6,9 +6,11 @@
 				<button class="nav-btn desktop-nav-btn" routerLink="/home" routerLinkActive="active">Inici</button>
 				<button class="nav-btn desktop-nav-btn" routerLink="/availability" routerLinkActive="active">Disponibilitat</button>
 				<button class="nav-btn desktop-nav-btn" routerLink="/pla-alfa" routerLinkActive="active">Pla Alfa</button>
-				@if (authService.isAdmin()) {
+				@if (authService.isManager()) {
 					<button class="nav-btn desktop-nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
 					<button class="nav-btn desktop-nav-btn" routerLink="/hours-summary" routerLinkActive="active">Hores</button>
+				}
+				@if (authService.isAdmin()) {
 					<button class="nav-btn desktop-nav-btn" routerLink="/system" routerLinkActive="active">Sistema</button>
 				}
 			</div>
@@ -65,9 +67,11 @@
 				<button class="mobile-menu-item" routerLink="/home" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" (click)="closeMobileMenu()">Inici</button>
 				<button class="mobile-menu-item" routerLink="/availability" routerLinkActive="active" (click)="closeMobileMenu()">Disponibilitat</button>
 				<button class="mobile-menu-item" routerLink="/pla-alfa" routerLinkActive="active" (click)="closeMobileMenu()">Pla Alfa</button>
-				@if (authService.isAdmin()) {
+				@if (authService.isManager()) {
 					<button class="mobile-menu-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">Panell</button>
 					<button class="mobile-menu-item mobile-menu-item-tablet-up" routerLink="/hours-summary" routerLinkActive="active" (click)="closeMobileMenu()">Hores</button>
+				}
+				@if (authService.isAdmin()) {
 					<button class="mobile-menu-item" routerLink="/system" routerLinkActive="active" (click)="closeMobileMenu()">Sistema</button>
 				}
 				<button class="mobile-menu-item" (click)="openNotificationsFromMenu()">Notificacions</button>

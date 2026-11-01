@@ -18,7 +18,7 @@ public sealed class PlaAlfaController(PlaAlfaService plaAlfa, Adf247DbContext da
     public async Task<IActionResult> Update([FromBody] PlaAlfaRequest request)
     {
         var carnet = User.FindFirst("nCarnet")?.Value;
-        if (string.IsNullOrWhiteSpace(carnet) || !await database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin)) return Forbid();
+        if (string.IsNullOrWhiteSpace(carnet) || !await database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsCapOperatiu))) return Forbid();
         return Ok(await plaAlfa.UpdateAsync(request.Municipalities, request.PrincipalMunicipality));
     }
     private static bool IsTrue(string? value) => value is not null && value.Trim().ToLowerInvariant() is "1" or "true" or "yes";

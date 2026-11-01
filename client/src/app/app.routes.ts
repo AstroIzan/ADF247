@@ -8,6 +8,7 @@ import { HoursSummaryComponent } from './pages/hours-summary/hours-summary.compo
 import { SystemConfigurationComponent } from './pages/system-configuration/system-configuration.component';
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { managerGuard } from './guards/manager.guard';
 
 export const routes: Routes = [
   {
@@ -27,7 +28,7 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [authGuard, adminGuard]
+    canActivate: [authGuard, managerGuard]
   },
   {
     path: 'availability',
@@ -42,7 +43,7 @@ export const routes: Routes = [
   {
     path: 'hours-summary',
     component: HoursSummaryComponent,
-    canActivate: [authGuard, adminGuard]
+    canActivate: [authGuard, managerGuard]
   },
   {
     path: 'system',

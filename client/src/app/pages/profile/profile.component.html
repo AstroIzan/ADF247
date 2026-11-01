@@ -37,7 +37,9 @@
               readonly
             />
           </div>
+        }
 
+        @if (authService.isAdmin() || authService.isCapOperatiu()) {
           <div class="form-group">
             <label>Indicatiu (opcional)</label>
             <input
@@ -45,7 +47,7 @@
               class="form-control"
               [(ngModel)]="formData().nIndicatiu"
               name="nIndicatiu"
-              placeholder="Ex: 123A"
+              placeholder="Ex: S401"
             />
           </div>
         }
@@ -90,10 +92,11 @@
         }
 
         <!-- Admin: Roles (Permisos) -->
-        @if (authService.isAdmin()) {
+        @if (authService.isAdmin() || authService.isCapOperatiu()) {
           <div class="roles-section">
             <h4>Permisos (Rols)</h4>
             <div class="checkbox-group">
+              @if (authService.isAdmin()) {
               <label class="checkbox-label">
                 <input
                   type="checkbox"
@@ -103,6 +106,7 @@
                 />
                 {{ getRoleLabel('isAdmin') }}
               </label>
+              }
               <label class="checkbox-label">
                 <input
                   type="checkbox"

@@ -72,7 +72,7 @@ export class DashboardComponent implements OnInit {
       this.username.set(currentUser.name);
     }
 
-    this.isAdmin.set(this.authService.isAdmin());
+    this.isAdmin.set(this.authService.isManager());
   }
 
   ngOnInit() {

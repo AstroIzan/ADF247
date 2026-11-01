@@ -110,7 +110,7 @@ export class ConvosComponent implements OnDestroy {
   ) {}
 
   isAdmin() {
-    return this.authService.isAdmin();
+    return this.authService.isManager();
   }
 
   openFilters() {

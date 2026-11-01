@@ -95,7 +95,7 @@ public sealed class ConvocatoriasController(ConvocatoriaService convos, Adf247Db
         if (string.IsNullOrWhiteSpace(carnet)) return null;
         var user = await database.Users.Where(item => item.NCarnet == carnet).Select(item => new { item.Id }).SingleOrDefaultAsync();
         if (user is null) return null;
-        return (user.Id, carnet, await database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin));
+        return (user.Id, carnet, await database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsCapOperatiu || role.IsCapColla)));
     }
 
     private async Task<IActionResult> ExecuteAsync<T>(Func<Task<T?>> action) where T : class
