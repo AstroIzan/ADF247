@@ -74,9 +74,40 @@
           Formularis
         </button>
       }
+      @if (isRealAdmin()) {
+        <button
+          (click)="openTemplatesTab()"
+          [class.active]="activeTab() === 'templates'"
+          class="tab-btn"
+        >
+          Plantilles
+        </button>
+      }
     </nav>
 
     <div class="tab-content">
+      @if (activeTab() === 'templates' && isRealAdmin()) {
+        <section class="content-card">
+          <h3>Plantilles de missatgeria</h3>
+          <p>Activa només les plantilles que s’han d’aplicar als enviaments.</p>
+          @if (templatesError()) { <div class="alert alert-danger">{{ templatesError() }}</div> }
+          <div class="table-wrap">
+            <table class="logs-table">
+              <thead><tr><th>Clau</th><th>Nom</th><th>Títol</th><th>Activa</th></tr></thead>
+              <tbody>
+                @for (template of templates(); track template.id) {
+                  <tr>
+                    <td>{{ template.key }}</td><td>{{ template.name }}</td><td>{{ template.titleTemplate }}</td>
+                    <td><button class="btn btn-small" type="button" (click)="toggleTemplate(template)">{{ template.enabled ? 'Desactivar' : 'Activar' }}</button></td>
+                  </tr>
+                } @empty {
+                  <tr><td colspan="4">No hi ha plantilles configurades.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
       @if (activeTab() === 'users') {
         <app-users 
           [users]="users()"

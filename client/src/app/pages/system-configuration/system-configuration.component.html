@@ -142,7 +142,7 @@
             </div>
             <span class="selection-chip">{{ configuration.availabilityManagerNCarnets.length }} seleccionats</span>
           </div>
-          <p>Els administradors seleccionats tenen responsabilitat operativa sobre disponibilitat i convocatòries.</p>
+          <p>Els usuaris seleccionats tenen responsabilitat operativa sobre disponibilitat i convocatòries.</p>
           <details class="multi-select">
             <summary>
               <span class="multi-select-label">Seleccionar responsables</span>
@@ -150,14 +150,14 @@
               <span class="multi-select-chevron" aria-hidden="true"></span>
             </summary>
             <div class="checkbox-list multi-select-options">
-              @for (user of getAdminUsers(); track user.id) {
+              @for (user of getActiveUsers(); track user.id) {
                 <label class="toggle-option">
                   <input type="checkbox" [checked]="isAvailabilityManagerSelected(user.nCarnet)" (change)="toggleAvailabilityManager(user.nCarnet, $any($event.target).checked)">
                   <span class="toggle-control" aria-hidden="true"></span>
                   <span><strong>{{ user.nCarnet }}</strong> · {{ user.name }} {{ user.lastName || '' }}</span>
                 </label>
               } @empty {
-                <span class="empty-copy">No hi ha admins disponibles.</span>
+                <span class="empty-copy">No hi ha usuaris disponibles.</span>
               }
             </div>
           </details>

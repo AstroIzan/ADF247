@@ -1,4 +1,4 @@
-import { Component, ViewChild, effect } from '@angular/core';
+import { Component, HostListener, ViewChild, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs';
@@ -21,6 +21,18 @@ export class App {
   notificationWarning = '';
   isMobileMenuOpen = false;
   private notificationCheckInFlight: Promise<void> | null = null;
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    const target = event.target as HTMLElement | null;
+    if (!target?.classList.contains('modal-overlay')) return;
+    const closeButton = target.querySelector<HTMLElement>('.modal-header .close-btn, .close-btn');
+    if (!closeButton) return;
+    const hasData = Array.from(target.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('textarea, input[type="text"], input[type="number"]'))
+      .some((field) => field.value.trim().length > 0 && !field.readOnly && !field.disabled);
+    if (hasData && !window.confirm('Hi ha dades escrites que es perdran. Vols tancar?')) return;
+    closeButton.click();
+  }
 
   constructor(
     public authService: AuthService,

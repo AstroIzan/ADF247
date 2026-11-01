@@ -11,6 +11,7 @@ import {
   Respuesta,
   UserHoursSummaryRow,
   CampaignFormRecord,
+  MessagingConfiguration,
 } from '../../services/data.service';
 import { UsersModule } from '../../modules/users/users.module';
 import { ConvosModule } from '../../modules/convos/convos.module';
@@ -56,6 +57,31 @@ export class DashboardComponent implements OnInit {
   campaignFormToDelete = signal<CampaignFormRecord | null>(null);
   deletingCampaignForm = signal(false);
 
+  isRealAdmin = signal(false);
+  templates = signal<MessagingConfiguration[]>([]);
+  templatesError = signal('');
+
+  loadTemplates() {
+    this.templatesError.set('');
+    this.dataService.getMessagingConfigurations().subscribe({
+      next: (items) => this.templates.set(items),
+      error: (error) => this.templatesError.set(error.message || 'No s’han pogut carregar les plantilles.'),
+    });
+  }
+
+  toggleTemplate(template: MessagingConfiguration) {
+    this.templatesError.set('');
+    this.dataService.updateMessagingConfiguration({ ...template, enabled: !template.enabled }).subscribe({
+      next: (saved) => this.templates.set(this.templates().map((item) => item.id === saved.id ? saved : item)),
+      error: (error) => this.templatesError.set(error.message || 'No s’ha pogut actualitzar la plantilla.'),
+    });
+  }
+
+  openTemplatesTab() {
+    this.activeTab.set('templates');
+    this.loadTemplates();
+  }
+
   constructor(
     private authService: AuthService,
     private dataService: DataService,
@@ -73,6 +99,7 @@ export class DashboardComponent implements OnInit {
     }
 
     this.isAdmin.set(this.authService.isManager());
+    this.isRealAdmin.set(this.authService.isAdmin());
   }
 
   ngOnInit() {
