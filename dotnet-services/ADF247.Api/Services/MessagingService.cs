@@ -242,8 +242,9 @@ public sealed class MessagingService(Adf247DbContext database)
             return $"{prefix}-weekly";
 
         var date = DateOnly.FromDateTime(convocatoria.Date);
-        var today = DateOnly.FromDateTime(DateTime.Today);
-        if (date < today || date == today && convocatoria.StartTime <= DateTime.Now)
+        var barcelonaNow = GetBarcelonaNow();
+        var today = DateOnly.FromDateTime(barcelonaNow);
+        if (date < today || date == today && convocatoria.StartTime <= barcelonaNow)
             return $"{prefix}-now";
         return date == today ? $"{prefix}-today"
             : date == today.AddDays(1) ? $"{prefix}-tomorrow"

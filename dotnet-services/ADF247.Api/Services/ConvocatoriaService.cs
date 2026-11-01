@@ -279,7 +279,7 @@ public sealed class ConvocatoriaService(
         var users = await database.Users.Where(user => user.IsActive).OrderBy(user => user.NCarnet).ToListAsync();
         var convocatorias = await database.Convocatorias
             .Include(convo => convo.ConvoType)
-            .Where(convo => convo.StartTime <= now
+            .Where(convo => convo.StartTime <= LocalNow()
                 && convo.Date >= settings.CampaignStartDate.Value.ToDateTime(TimeOnly.MinValue)
                 && convo.Date < settings.CampaignEndDate.Value.AddDays(1).ToDateTime(TimeOnly.MinValue)
                 && settings.CampaignHoursConvoTypeIds.Contains(convo.ConvoTypeId))
@@ -474,9 +474,11 @@ public sealed class ConvocatoriaService(
         return value.Value;
     }
     private static object MapConvocatoria(Convocatoria convo) => new { convo.Id, convo.Date, convo.Title, convo.UbiSortida, convo.ResponsableId, responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, convo.ConvoTypeId, convo.ConvoType, convo.StartTime, convo.FinalTime, convo.ActualStartTime, convo.ActualEndTime, convo.IsActive, convo.AutoAssignResponsable, convo.Sortida, convo.ResponseWindowMinutes, responseCount = 0 };
+    // StartTime/FinalTime se guardan como hora local de Madrid, no UTC.
+    private static DateTime LocalNow() => TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("Europe/Madrid"));
     private async Task CloseExpiredUnstartedConvocatoriasAsync()
     {
-        var now = DateTime.UtcNow;
+        var now = LocalNow();
         var expired = await database.Convocatorias
             .Where(convo => convo.IsActive && !convo.ActualStartTime.HasValue && convo.FinalTime.HasValue && convo.FinalTime.Value < now)
             .ToListAsync();
