@@ -334,3 +334,17 @@
 .iv-sub{margin:4px 0 0;color:#6b7686;font-size:13px}
 .iv-link{display:inline-block;margin-top:6px;font-size:13px}
 @media (max-width:600px){.iv-grid{grid-template-columns:1fr}}
+
+.iv-timeline{display:flex;align-items:center;gap:8px;padding:12px 14px;margin-bottom:12px;border:1px solid #e1e6ec;border-radius:12px;background:#fafbfc}
+.iv-step{display:flex;flex-direction:column;align-items:center;min-width:52px}
+.iv-step small{color:#6b7686;font-size:11px;text-transform:uppercase}
+.iv-step strong{font-size:18px}
+.iv-line{flex:1;height:2px;background:#cfd6df;border-radius:2px}
+.iv-duration{margin-left:6px;padding:3px 9px;border-radius:999px;background:#273445;color:#fff;font-size:12px;font-weight:700;white-space:nowrap}
+.iv-vehicles{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.iv-vehicles li{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.iv-tag{padding:2px 8px;border-radius:6px;background:#e6eaf0;color:#3a4657;font-size:11px;font-weight:700}
+.iv-tag-own{background:#d8f0dc;color:#0b5a14}
+.iv-tag-bombers{background:#fde8e8;color:#a30824}
+.iv-first{color:#b07a00;font-size:12px;font-weight:700}
+.iv-resp{margin:0 0 12px;color:#6b7686;font-size:12px}

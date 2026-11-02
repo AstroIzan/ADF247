@@ -164,27 +164,26 @@
         </div>
         <div class="iv-chips">
           <span class="iv-chip iv-chip-type">{{ intervencioType(iv) }}</span>
-          @if (iv.level != null) { <span class="iv-chip iv-chip-level">Nivell {{ iv.level }}</span> }
+          @if (iv.level === 0) { <span class="iv-chip iv-chip-level">Pla Alfa</span> }
+          @else if (iv.level != null) { <span class="iv-chip iv-chip-level">Nivell {{ iv.level }}</span> }
           @if (iv.surface != null) { <span class="iv-chip">{{ iv.surface }} m²</span> }
         </div>
+
+        <div class="iv-timeline">
+          <div class="iv-step"><small>Avís</small><strong>{{ iv.noticeTime || '—' }}</strong></div>
+          <span class="iv-line"></span>
+          <div class="iv-step"><small>Inici</small><strong>{{ iv.startTime || '—' }}</strong></div>
+          <span class="iv-line"></span>
+          <div class="iv-step"><small>Fi</small><strong>{{ iv.endTime || '—' }}</strong></div>
+          @if (intervencioDuration(iv)) { <span class="iv-duration">{{ intervencioDuration(iv) }}</span> }
+        </div>
+
         <div class="iv-grid">
-          <section class="iv-box">
-            <h4>Horari</h4>
-            <div class="iv-times">
-              <div><small>Avís</small><strong>{{ iv.noticeTime || '—' }}</strong></div>
-              <div><small>Inici</small><strong>{{ iv.startTime || '—' }}</strong></div>
-              <div><small>Fi</small><strong>{{ iv.endTime || '—' }}</strong></div>
-            </div>
-          </section>
           <section class="iv-box">
             <h4>Ubicació</h4>
             <p class="iv-main">{{ iv.municipality || 'Sense ubicació' }}</p>
             @if (iv.comarca || iv.sector) { <p class="iv-sub">{{ iv.comarca }}{{ iv.comarca && iv.sector ? ' · ' : '' }}{{ iv.sector }}</p> }
             @if (iv.mapsUrl) { <a class="iv-link" [href]="iv.mapsUrl" target="_blank" rel="noopener">Obrir a Google Maps</a> }
-          </section>
-          <section class="iv-box">
-            <h4>Responsable</h4>
-            <p class="iv-main">{{ iv.responsableDisplay || '—' }}</p>
           </section>
           <section class="iv-box">
             <h4>Voluntaris</h4>
@@ -195,24 +194,28 @@
             <p class="iv-sub">Propis {{ iv.ownGrocs }}/{{ iv.ownVerds }} · Altres ADF {{ iv.otherAdfsGrocs }}/{{ iv.otherAdfsVerds }}</p>
           </section>
           <section class="iv-box iv-wide">
-            <h4>Vehicles propis</h4>
-            @if (iv.ownVehicles.length) {
-              <div class="iv-chips">@for (v of iv.ownVehicles; track v) { <span class="iv-chip">{{ v }}</span> }</div>
-            } @else { <p class="iv-sub">Cap vehicle</p> }
+            <h4>Vehicles</h4>
+            <ul class="iv-vehicles">
+              @for (v of iv.ownVehicles; track v) {
+                <li><span class="iv-tag iv-tag-own">Nostre</span><strong>{{ v }}</strong>@if (!hasBomberFirst(iv) && $first) { <span class="iv-first">★ Primera intervenció</span> }</li>
+              }
+              @if (iv.otherAdfsAttended) {
+                @for (e of iv.otherAdfs; track $index) {
+                  <li><span class="iv-tag">{{ e.adf }}</span><strong>{{ e.vehicle }}</strong></li>
+                }
+              }
+              @if (iv.bombersAttended) {
+                @for (e of iv.bombers; track $index) {
+                  <li><span class="iv-tag iv-tag-bombers">Bombers</span><strong>{{ e.vehicle }}</strong>@if (e.firstIntervention) { <span class="iv-first">★ Primera intervenció</span> }</li>
+                }
+              }
+              @if (!iv.ownVehicles.length && !(iv.otherAdfsAttended && iv.otherAdfs.length) && !(iv.bombersAttended && iv.bombers.length)) {
+                <li class="iv-sub">Cap vehicle</li>
+              }
+            </ul>
           </section>
-          @if (iv.otherAdfsAttended && iv.otherAdfs.length) {
-            <section class="iv-box iv-wide">
-              <h4>Altres ADF</h4>
-              <div class="iv-chips">@for (e of iv.otherAdfs; track $index) { <span class="iv-chip">{{ e.adf }} · {{ e.vehicle }}</span> }</div>
-            </section>
-          }
-          @if (iv.bombersAttended && iv.bombers.length) {
-            <section class="iv-box iv-wide">
-              <h4>Bombers</h4>
-              <div class="iv-chips">@for (e of iv.bombers; track $index) { <span class="iv-chip">{{ e.vehicle }}{{ e.firstIntervention ? ' · 1a intervenció' : '' }}</span> }</div>
-            </section>
-          }
-        </div>        <div class="iv-detail-actions">
+        </div>
+        <p class="iv-resp">Responsable: {{ iv.responsableDisplay || '—' }}</p>        <div class="iv-detail-actions">
           <button type="button" class="btn btn-secondary" (click)="editIntervencio.set(iv); viewIntervencio.set(null)">Editar</button>
         </div>
       </div>

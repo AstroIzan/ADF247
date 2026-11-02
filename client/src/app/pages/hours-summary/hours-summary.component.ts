@@ -41,6 +41,22 @@ export class HoursSummaryComponent implements OnInit {
     return this.intervencioTypes().find((type) => type.id === item.typeIncendiId)?.name ?? '—';
   }
 
+  hasBomberFirst(item: Intervencio) {
+    return item.bombersAttended && item.bombers.some((entry) => entry.firstIntervention);
+  }
+
+  intervencioDuration(item: Intervencio) {
+    const toMinutes = (value: string | null) => {
+      const [h, m] = String(value ?? '').split(':').map(Number);
+      return Number.isFinite(h) && Number.isFinite(m) ? h * 60 + m : null;
+    };
+    const start = toMinutes(item.startTime ?? item.noticeTime);
+    const end = toMinutes(item.endTime);
+    if (start === null || end === null) return '';
+    const diff = (end - start + 1440) % 1440;
+    return diff >= 60 ? `${Math.floor(diff / 60)} h ${diff % 60} min` : `${diff} min`;
+  }
+
   closeIntervencioEdit() {
     this.editIntervencio.set(null);
     this.loadIntervencions();
