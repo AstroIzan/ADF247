@@ -89,6 +89,19 @@ export class DashboardComponent implements OnInit {
   vehicleSaving = signal(false);
   newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 });
 
+  showVehicleModal = signal(false);
+
+  openNewVehicle() {
+    this.vehicleError.set('');
+    this.newVehicle.set({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 });
+    this.showVehicleModal.set(true);
+  }
+
+  closeNewVehicle() {
+    this.showVehicleModal.set(false);
+    this.vehicleError.set('');
+  }
+
   openVehiclesTab() {
     this.activeTab.set('vehicles');
     this.vehicleError.set('');
@@ -111,7 +124,7 @@ export class DashboardComponent implements OnInit {
       return;
     }
     this.saveVehicles([...catalog, this.normalizeVehicle({ ...vehicle, indicatiu })], () =>
-      this.newVehicle.set({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 }));
+      { this.newVehicle.set({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 }); this.showVehicleModal.set(false); });
   }
 
   updateVehicle(indicatiu: string, patch: Partial<SystemConfigurationVehicle>) {

@@ -765,3 +765,18 @@ body app-respuestas .modal-body textarea:focus {
   .modal-service-form .service-vehicle-note { padding: 0 12px 12px; }
   .modal-service-form .service-vehicle-note input { padding: 10px; font-size: 16px; }
 }
+
+/* Segmented control */
+.seg-control { display: flex; gap: 4px; padding: 4px; border: 1px solid #d8dfe6; border-radius: 12px; background: #f0f3f6; }
+.seg-control .seg-btn { flex: 1; border: 0; border-radius: 9px; background: transparent; color: #536276; font: inherit; font-size: 13px; font-weight: 750; padding: 10px 8px; cursor: pointer; }
+.seg-control .seg-btn.active { background: #273445; color: #fff; box-shadow: 0 3px 7px rgba(28, 42, 57, .2); }
+
+/* Switch toggles (convocatories) */
+body .automation-toggle.automation-toggle { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #d8dfe6; border-radius: 12px; background: #fff; cursor: pointer; }
+body .automation-toggle.automation-toggle:hover { border-color: #f0b000; background: #fff; }
+body .automation-toggle.automation-toggle input { position: absolute; opacity: 0; width: 0; height: 0; display: block; }
+body .automation-toggle.automation-toggle .toggle-indicator { position: relative; display: block; width: 44px; height: 24px; border: 0; border-radius: 999px; background: #c5ccd6; flex-shrink: 0; transition: background .2s; }
+body .automation-toggle.automation-toggle .toggle-indicator::before { content: ''; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: transform .2s; font-size: 0; }
+body .automation-toggle.automation-toggle input:checked + .toggle-indicator { background: #f0b000; }
+body .automation-toggle.automation-toggle input:checked + .toggle-indicator::before { content: ''; transform: translateX(20px); }
+body .automation-toggle.automation-toggle .toggle-text { flex: 1; font-size: 14px; font-weight: 650; color: #263243; }

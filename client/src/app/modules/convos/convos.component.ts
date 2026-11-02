@@ -584,7 +584,7 @@ export class ConvosComponent implements OnDestroy {
   }
 
   getSortidaCardLabel(sortida?: boolean): string {
-    return sortida ? 'Se surt' : 'No se surt';
+    return sortida ? 'Anul·lar sortida' : 'Activar sortida';
   }
 
   openTimePicker(input: HTMLInputElement, field: 'startTime' | 'finalTime') {

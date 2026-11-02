@@ -1355,15 +1355,9 @@
           @if (isGuardiaOrPviTypeSelected()) {
             <div class="form-group">
               <label>Creació</label>
-              <div class="guardia-turns-grid">
-                <label class="checkbox-label">
-                  <input type="radio" name="recurringMode" [checked]="createConvoForm().recurringMode === 'single'" (change)="updateCreateConvoField('recurringMode', 'single')" />
-                  Per a un dia
-                </label>
-                <label class="checkbox-label">
-                  <input type="radio" name="recurringMode" [checked]="createConvoForm().recurringMode === 'weekly'" (change)="updateCreateConvoField('recurringMode', 'weekly')" />
-                  Setmanal amb franges
-                </label>
+              <div class="seg-control" role="group" aria-label="Creació">
+                <button type="button" class="seg-btn" [class.active]="createConvoForm().recurringMode === 'single'" (click)="updateCreateConvoField('recurringMode', 'single')">Per a un dia</button>
+                <button type="button" class="seg-btn" [class.active]="createConvoForm().recurringMode === 'weekly'" (click)="updateCreateConvoField('recurringMode', 'weekly')">Setmanal amb franges</button>
               </div>
             </div>
           }

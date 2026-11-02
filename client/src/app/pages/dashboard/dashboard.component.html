@@ -95,18 +95,15 @@
     <div class="tab-content">
       @if (activeTab() === 'vehicles' && isRealAdmin()) {
         <section class="content-card">
-          <h3>Vehicles de l'ADF</h3>
-          <p>Vehicles disponibles en els formularis de campanya d'aquesta ADF.</p>
+          <div class="card-head">
+            <div>
+              <h3>Vehicles de l'ADF</h3>
+              <p>Vehicles disponibles en els formularis de campanya d'aquesta ADF.</p>
+            </div>
+            <button class="btn btn-primary" type="button" (click)="openNewVehicle()">+ Afegir vehicle</button>
+          </div>
           @if (vehicleError()) { <div class="alert alert-danger">{{ vehicleError() }}</div> }
           @if (vehicleConfig(); as config) {
-            <div class="vehicle-add">
-              <input placeholder="Indicatiu (Ex. S401)" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })">
-              <input placeholder="Model" [ngModel]="newVehicle().modelo" (ngModelChange)="newVehicle.set({ ...newVehicle(), modelo: $event })">
-              <input placeholder="Matrícula" [ngModel]="newVehicle().matricula" (ngModelChange)="newVehicle.set({ ...newVehicle(), matricula: $event })">
-              <input type="number" min="0" placeholder="Litres" [ngModel]="newVehicle().litres" (ngModelChange)="newVehicle.set({ ...newVehicle(), litres: $event })">
-              <input type="number" min="0" placeholder="Km" [ngModel]="newVehicle().kms" (ngModelChange)="newVehicle.set({ ...newVehicle(), kms: $event })">
-              <button class="btn btn-primary" type="button" [disabled]="vehicleSaving()" (click)="addVehicle()">Afegir</button>
-            </div>
             <div class="table-wrap">
               <table class="logs-table">
                 <thead><tr><th>Indicatiu</th><th>Model</th><th>Matrícula</th><th>Litres</th><th>Km</th><th></th></tr></thead>
@@ -147,6 +144,28 @@
             <p>Carregant...</p>
           }
         </section>
+      }
+      @if (showVehicleModal()) {
+        <div class="modal-overlay" (click)="closeNewVehicle()">
+          <div class="modal" (click)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h3>Nou vehicle</h3>
+              <button class="close-btn" type="button" (click)="closeNewVehicle()">&times;</button>
+            </div>
+            <div class="modal-body">
+              @if (vehicleError()) { <div class="alert alert-danger">{{ vehicleError() }}</div> }
+              <div class="form-group"><label>Indicatiu *</label><input placeholder="Ex. S401" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })"></div>
+              <div class="form-group"><label>Model</label><input [ngModel]="newVehicle().modelo" (ngModelChange)="newVehicle.set({ ...newVehicle(), modelo: $event })"></div>
+              <div class="form-group"><label>Matrícula</label><input [ngModel]="newVehicle().matricula" (ngModelChange)="newVehicle.set({ ...newVehicle(), matricula: $event })"></div>
+              <div class="form-group"><label>Litres</label><input type="number" min="0" [ngModel]="newVehicle().litres" (ngModelChange)="newVehicle.set({ ...newVehicle(), litres: $event })"></div>
+              <div class="form-group"><label>Km</label><input type="number" min="0" [ngModel]="newVehicle().kms" (ngModelChange)="newVehicle.set({ ...newVehicle(), kms: $event })"></div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" type="button" (click)="closeNewVehicle()">Cancel·lar</button>
+              <button class="btn btn-primary" type="button" [disabled]="vehicleSaving()" (click)="addVehicle()">{{ vehicleSaving() ? 'Desant...' : 'Crear vehicle' }}</button>
+            </div>
+          </div>
+        </div>
       }
       @if (activeTab() === 'templates' && isRealAdmin()) {
         <section class="content-card">

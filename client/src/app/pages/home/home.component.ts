@@ -448,7 +448,7 @@ export class HomeComponent implements OnInit {
   }
 
   getSortidaBadgeLabel(sortida?: boolean) {
-    return sortida ? 'Se surt' : 'No se surt';
+    return sortida ? 'Anul·lar sortida' : 'Activar sortida';
   }
 
   getResponsableRoleLabel(userId: number | null): 'groc' | 'verd' | '' {
