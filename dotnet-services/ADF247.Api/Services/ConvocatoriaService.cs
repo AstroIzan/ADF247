@@ -147,7 +147,16 @@ public sealed class ConvocatoriaService(
         if (request.StartTime.HasValue) convo.StartTime = request.StartTime.Value;
         if (request.FinalTime.HasValue || request.FinalTime is null && HasField(request, nameof(request.FinalTime))) convo.FinalTime = request.FinalTime;
         if (convo.FinalTime.HasValue && convo.FinalTime < convo.StartTime) throw new ArgumentException("El campo \"finalTime\" no puede ser anterior a \"startTime\".");
-        if (request.IsActive.HasValue) convo.IsActive = request.IsActive.Value;
+        if (request.IsActive.HasValue)
+        {
+            var reactivating = request.IsActive.Value && !convo.IsActive;
+            convo.IsActive = request.IsActive.Value;
+            if (reactivating)
+            {
+                convo.ActualEndTime = null;
+                if (!convo.ActualStartTime.HasValue && convo.FinalTime.HasValue && convo.FinalTime.Value < LocalNow()) convo.FinalTime = null;
+            }
+        }
         if (request.AutoAssignResponsable.HasValue) convo.AutoAssignResponsable = request.AutoAssignResponsable.Value;
         if (request.Sortida.HasValue) convo.Sortida = request.Sortida.Value;
         if (request.ResponseWindowMinutes.HasValue) convo.ResponseWindowMinutes = NormalizeResponseWindowMinutes(request.ResponseWindowMinutes);

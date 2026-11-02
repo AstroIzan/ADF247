@@ -30,10 +30,10 @@
           <tbody>
             @for (row of overview(); track row.adf.id) {
               <tr>
-                <td><strong>{{ row.adf.number }}</strong> - {{ row.adf.name }}</td>
-                <td>{{ row.adf.municipalities.join(', ') || '-' }}</td>
-                <td>{{ row.activeUsers }}</td>
-                <td>{{ row.vehicles }}</td>
+                <td data-label="ADF"><strong>{{ row.adf.number }}</strong> - {{ row.adf.name }}</td>
+                <td data-label="Poblacions">{{ row.adf.municipalities.join(', ') || '-' }}</td>
+                <td data-label="Voluntaris actius">{{ row.activeUsers }}</td>
+                <td data-label="Vehicles actius">{{ row.vehicles }}</td>
                 <td class="adf-actions">
                   <button class="adf-btn adf-btn-small" (click)="select(row.adf)">Veure</button>
                   <button class="adf-btn adf-btn-small" (click)="openForm(row.adf)">Editar</button>
@@ -141,10 +141,10 @@
                 <tbody>
                   @for (vehicle of vehicles(); track vehicle.id) {
                     <tr>
-                      <td><strong>{{ vehicle.indicatiu }}</strong></td>
-                      <td>{{ vehicle.modelo || '-' }}</td>
-                      <td>{{ vehicle.matricula || '-' }}</td>
-                      <td>{{ vehicle.litres > 0 ? vehicle.litres + ' L' : '-' }}</td>
+                      <td data-label="Indicatiu"><strong>{{ vehicle.indicatiu }}</strong></td>
+                      <td data-label="Model">{{ vehicle.modelo || '-' }}</td>
+                      <td data-label="Matrícula">{{ vehicle.matricula || '-' }}</td>
+                      <td data-label="Litres">{{ vehicle.litres > 0 ? vehicle.litres + ' L' : '-' }}</td>
                     </tr>
                   }
                 </tbody>
@@ -164,6 +164,8 @@
                     <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isGroc" /> Groc</label>
                     <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isCapColla" /> Cap de Colla</label>
                     <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isCapOperatiu" /> Cap Operatiu</label>
+                    <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isAdmin" /> Admin</label>
+                    <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isSecretariat" /> Secretariat</label>
                   </div>
                 </div>
                 <div class="adf-form-actions">
@@ -178,9 +180,9 @@
                 <tbody>
                   @for (user of sortedUsers(); track user.id) {
                     <tr>
-                      <td>{{ user.nCarnet }}@if (user.nIndicatiu) { · {{ user.nIndicatiu }} }</td>
-                      <td>{{ user.name }} {{ user.lastName }}</td>
-                      <td class="role-badges">
+                      <td data-label="Carnet">{{ user.nCarnet }}@if (user.nIndicatiu) { · {{ user.nIndicatiu }} }</td>
+                      <td data-label="Nom">{{ user.name }} {{ user.lastName }}</td>
+                      <td class="role-badges" data-label="Rols">
                         @if (user.isAdmin) { <span class="role-badge dark">Admin</span> }
                         @if (user.isDeveloper) { <span class="role-badge dark">Dev</span> }
                         @if (user.isSecretariat) { <span class="role-badge cyan">Secretariat</span> }
@@ -188,7 +190,7 @@
                         @if (user.isCapColla) { <span class="role-badge colla">Cap de Colla</span> }
                         @if (user.isGroc) { <span class="role-badge groc">Groc</span> } @else { <span class="role-badge verd">Verd</span> }
                       </td>
-                      <td>{{ user.isActive ? 'Actiu' : 'Inactiu' }}</td>
+                      <td data-label="Estat">{{ user.isActive ? 'Actiu' : 'Inactiu' }}</td>
                     </tr>
                   }
                 </tbody>

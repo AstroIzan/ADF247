@@ -725,3 +725,28 @@ body app-respuestas .modal-body textarea:focus {
 		transform: translateY(0) scale(1);
 	}
 }
+
+/* Menús de Inici (formularis, horari, convocatòria, respostes) */
+.hm-sheet { background: rgba(15, 23, 34, .62); }
+.hm-sheet .modal { border: 0; border-radius: 22px; box-shadow: 0 30px 70px rgba(10, 18, 30, .4); background: #fff; }
+.hm-sheet .modal-header { padding: 18px 20px; border: 0; background: linear-gradient(135deg, #1f2a3a, #34465e); }
+.hm-sheet .modal-header h3 { color: #fff; font-size: 1.05rem; font-weight: 800; letter-spacing: .01em; }
+.hm-sheet .modal-header .close-btn { width: 34px; height: 34px; border-radius: 50%; background: rgba(255, 255, 255, .14); color: #fff; line-height: 1; }
+.hm-sheet .modal-body { padding: 18px 20px; background: #f6f8fb; }
+.hm-sheet .modal-body > p { margin: 0 0 6px; color: #4a5a70; font-size: .9rem; }
+.hm-sheet .form-group { margin-bottom: 14px; padding: 12px 14px; border: 1px solid #e3e8ef; border-radius: 14px; background: #fff; }
+.hm-sheet .form-group > label { display: block; margin-bottom: 6px; color: #5b6b80; font-size: .72rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.hm-sheet .form-group input:not([type="checkbox"]), .hm-sheet .form-group select, .hm-sheet .form-group textarea { width: 100%; padding: 11px 12px; border: 1px solid #d5dce6; border-radius: 12px; background: #f9fafc; font: inherit; }
+.hm-sheet .form-group input:focus, .hm-sheet .form-group select:focus, .hm-sheet .form-group textarea:focus { border-color: #f0b000; outline: 0; box-shadow: 0 0 0 3px rgba(240, 176, 0, .22); }
+.hm-sheet .modal-footer { position: sticky; bottom: 0; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid #e3e8ef; background: #fff; }
+.hm-sheet .modal-footer .btn { min-height: 42px; border-radius: 12px; font-weight: 800; }
+.hm-sheet .btn-primary { border-color: #f0b000; background: #f0b000; color: #1c1b18; }
+.hm-sheet .btn-danger { border-color: #f1c1c1; background: #fdeeee; color: #a32a30; }
+.hm-sheet .custom-choice-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hm-sheet .custom-choice-row .btn { min-height: 42px; border-radius: 12px; }
+.hm-sheet .choice-active { border-color: #1f9d55 !important; background: #1f9d55 !important; color: #fff !important; }
+.hm-sheet .table-wrap, .hm-sheet .table-wrapper { border-radius: 14px; overflow: auto; }
+@media (max-width: 640px) {
+  .hm-sheet .modal-footer { flex-direction: column-reverse; }
+  .hm-sheet .modal-footer .btn { width: 100%; }
+}

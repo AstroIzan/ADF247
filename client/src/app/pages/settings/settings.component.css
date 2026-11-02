@@ -25,9 +25,9 @@ th, td { padding: 9px 10px; border-bottom: 1px solid #edf0f3; text-align: left; 
 th { background: #f7f8fa; color: #586373; }
 .btn-small { padding: 6px 9px; font-size: 12px; }
 .btn:disabled { cursor: default; opacity: .65; }
-@media (max-width: 620px) { .settings-dialog { inset: 0; width: 100vw; max-height: none; transform: none; border: 0; border-radius: 0; } .settings-header, .settings-tabs, .settings-body { padding-left: 14px; padding-right: 14px; } .section-title { flex-direction: column; } }
+@media (max-width: 620px) { .settings-dialog { width: calc(100vw - 20px); max-height: calc(100dvh - 24px); border-radius: 16px; } .settings-header, .settings-tabs, .settings-body { padding-left: 14px; padding-right: 14px; } .section-title { flex-direction: column; } }
 
-.settings-dialog { width: min(520px, calc(100vw - 32px)); }
+.settings-dialog { width: min(520px, calc(100vw - 20px)); }
 .device-hero { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 14px; border: 1px solid #d8dde3; }
 .device-hero.ok { background: #e9f8ee; border-color: #b9e2c6; }
 .device-hero.warn { background: #fff7e0; border-color: #f3d57a; }

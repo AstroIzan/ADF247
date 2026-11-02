@@ -158,9 +158,6 @@ export class ProfileComponent implements OnInit {
       if (form.nIndicatiu !== undefined) {
         payload.nIndicatiu = form.nIndicatiu?.trim() || undefined;
       }
-      if (form.roles) {
-        payload.roles = { ...form.roles, isAdmin: false };
-      }
     }
 
     // Agregar contraseña si se cambió

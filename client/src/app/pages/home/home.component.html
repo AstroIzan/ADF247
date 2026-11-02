@@ -1,4 +1,7 @@
 <div class="hm-page">
+  @if (error()) {
+    <div class="error-alert" role="alert" style="position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:3000;max-width:min(92vw,520px);box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer" (click)="error.set('')">{{ error() }}</div>
+  }
   <header class="hm-hero">
     <div class="hm-hero-text">
       <span class="hm-eyebrow"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Inici</span>
@@ -20,6 +23,9 @@
         >
           <img class="hm-fire-icon" src="/icons/fire-button.png" alt="" aria-hidden="true" />
           <span>Incendi</span>
+        </button>
+        <button type="button" class="hm-btn" (click)="openIntervencions(null)" title="Intervencions" aria-label="Intervencions">
+          <i class="fa-solid fa-truck-droplet" aria-hidden="true"></i> Intervencions
         </button>
       </div>
     }
@@ -86,15 +92,13 @@
     <section class="hm-convos">
       <div class="hm-convos-head">
         <h2>Convocatòries</h2>
-        @if (!loading() && !error()) {
+        @if (!loading()) {
           <span class="hm-count">{{ dayConvos().length }}</span>
         }
       </div>
 
       @if (loading()) {
         <div class="loading">Carregant convocatòries...</div>
-      } @else if (error()) {
-        <div class="error-alert">{{ error() }}</div>
       } @else if (dayConvos().length === 0) {
         <div class="hm-empty">
           <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
@@ -134,6 +138,9 @@
                     </button>
                     <button type="button" class="hm-tool" (click)="openCampaignRecordsModal(convo)" title="Gestionar formularis de campanya" aria-label="Gestionar formularis de campanya">
                       <i class="fa-regular fa-file-lines" aria-hidden="true"></i><span>Formularis</span>
+                    </button>
+                    <button type="button" class="hm-tool" (click)="openIntervencions(convo)" title="Intervencions" aria-label="Intervencions">
+                      <i class="fa-solid fa-truck-droplet" aria-hidden="true"></i><span>Intervencions</span>
                     </button>
                   }
                   @if (canOpenGuardiaResponses(convo)) {
@@ -263,7 +270,7 @@
   </section>
 
   @if (showCustomModal() && customConvo()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Resposta personalitzada</h3>
@@ -375,7 +382,7 @@
   }
 
   @if (showCampaignFormModal() && campaignFormConvo()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal modal-service-form" (click)="onCampaignFormModalClick($event)">
         <div class="modal-header">
           <div>
@@ -574,7 +581,7 @@
   }
 
   @if (showCampaignRecordsModal() && campaignRecordsConvo()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal modal-wide" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Formularis - {{ campaignRecordsConvo()!.title }}</h3>
@@ -692,7 +699,7 @@
   }
 
   @if (showLifecycleModal() && lifecycleConvo()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Editar hores reals</h3>
@@ -742,7 +749,7 @@
   }
 
   @if (showAdminConvoModal() && adminConvo()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal modal-wide modal-allow-overflow" (click)="onAdminConvoModalClick($event)">
         <div class="modal-header">
           <h3>Gestió de Convocatòria</h3>
@@ -1089,7 +1096,7 @@
   }
 
   @if (showGuardiaResponsesModal() && guardiaResponsesConvo()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Respostes de la convocatòria</h3>
@@ -1178,7 +1185,7 @@
   }
 
   @if (showRespuestaInfoModal() && respuestaInfo()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Detall resposta</h3>
@@ -1209,7 +1216,7 @@
   }
 
   @if (showAdminResponseEditModal() && adminResponseEditTarget()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Editar resposta</h3>
@@ -1300,7 +1307,7 @@
   }
 
   @if (showCustomTextModal()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Text personalitzat</h3>
@@ -1317,7 +1324,7 @@
   }
 
   @if (showCreateConvoModal()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal modal-allow-overflow" (click)="onCreateConvoModalClick($event)">
         <div class="modal-header">
           <h3>{{ createConvoModalKind() === 'incendi-sortida' ? 'Nova convocatòria d\'incendi/sortida' : 'Nova convocatòria' }}</h3>
@@ -1710,7 +1717,7 @@
   }
 
   @if (showTimeMenu()) {
-    <div class="modal-overlay">
+    <div class="modal-overlay hm-sheet">
       <div class="modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h3>Seleccionar hora</h3>
@@ -1747,3 +1754,7 @@
     </div>
   }
 </div>
+
+@if (intervencionsOpen()) {
+  <app-intervencions-modal [convocatoria]="intervencionsConvo()" (closed)="intervencionsOpen.set(false)" />
+}

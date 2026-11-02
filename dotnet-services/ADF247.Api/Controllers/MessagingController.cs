@@ -107,7 +107,24 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
         if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
-        return Ok(await messaging.GetNotificationsAsync(cancellationToken));
+        return Ok(await database.MessagingNotifications.AsNoTracking()
+            .OrderByDescending(notification => notification.CreatedAt)
+            .Take(100)
+            .Select(notification => new
+            {
+                notification.Id,
+                notification.ConvocatoriaId,
+                notification.Trigger,
+                notification.Status,
+                notification.Title,
+                notification.Body,
+                notification.CreatedAt,
+                notification.RequestedCount,
+                notification.SuccessCount,
+                notification.FailureCount,
+                notification.ErrorMessage,
+            })
+            .ToListAsync(cancellationToken));
     }
 
     [HttpGet("system-status")]
@@ -196,8 +213,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
         if (carnet is null) return Unauthorized();
         if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
         var normalizedLimit = Math.Clamp(limit, 1, 200);
-        var executions = await database.TaskExecutions
-            .Include(execution => execution.TaskDefinition)
+        var executions = await database.TaskExecutions.AsNoTracking()
             .Where(execution => execution.TaskDefinition!.Name.StartsWith("batch:"))
             .OrderByDescending(execution => execution.StartedAt)
             .Take(normalizedLimit)

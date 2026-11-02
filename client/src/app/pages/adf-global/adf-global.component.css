@@ -72,3 +72,28 @@
 .adf-stats strong { font-size: 22px; }
 .adf-stats span { font-size: 12px; color: #667080; }
 @media (max-width: 600px) { .adf-stats { grid-template-columns: repeat(2, 1fr); } }
+
+@media (max-width: 700px) {
+  .adf-page { padding: 10px; gap: 10px; }
+  .adf-card { padding: 12px; }
+  .adf-hero { padding: 14px; }
+  .adf-hero h1 { font-size: 21px; }
+  .adf-card-head { align-items: stretch; }
+  .adf-card-head > .adf-btn { width: 100%; }
+  .adf-table thead { display: none; }
+  .adf-table, .adf-table tbody, .adf-table tr, .adf-table td { display: block; width: 100%; }
+  .adf-table tr { margin-bottom: 10px; padding: 8px 10px; border: 1px solid #e0e5eb; border-radius: 12px; background: #fff; }
+  .adf-table td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 5px 0; border: 0; text-align: right; }
+  .adf-table td::before { content: attr(data-label); flex: none; color: #667080; font-size: 11px; font-weight: 800; text-transform: uppercase; text-align: left; }
+  .adf-table td.adf-actions { display: grid; grid-template-columns: repeat(3, 1fr); padding-top: 8px; }
+  .adf-table td.adf-actions::before { display: none; }
+  .adf-table td.adf-actions .adf-btn { width: 100%; }
+  .adf-table td.role-badges { flex-wrap: wrap; justify-content: flex-end; }
+  .adf-modal { inset: 0; top: 0; left: 0; transform: none; width: 100vw; max-width: none; height: 100dvh; max-height: none; border-radius: 0; }
+  .adf-modal-body { padding: 12px; }
+  .adf-form { grid-template-columns: 1fr; }
+  .adf-tabs { overflow-x: auto; }
+  .adf-tabs button { flex: none; }
+  .adf-form-actions { flex-direction: column-reverse; }
+  .adf-form-actions .adf-btn { width: 100%; }
+}

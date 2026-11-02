@@ -6,10 +6,11 @@ import { AuthService } from '../../services/auth.service';
 import { CampaignVehicleCatalogItem, DataService, CampaignFormContext, CampaignFormRecord, CampaignFormSubmitPayload, CampaignFormVehicleInput, Convocatoria, ConvoType, Respuesta, User } from '../../services/data.service';
 import { DateFormatService } from '../../services/date-format.service';
 
+import { IntervencionsModalComponent } from '../../modules/intervencions/intervencions-modal.component';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IntervencionsModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
@@ -740,6 +741,14 @@ export class HomeComponent implements OnInit {
     this.campaignVehicleMenuOpen.set(false);
     this.campaignVehicleVolunteerMenuVehicle.set(null);
     this.campaignConductorMenuVehicle.set(null);
+  }
+
+  intervencionsOpen = signal(false);
+  intervencionsConvo = signal<Convocatoria | null>(null);
+
+  openIntervencions(convo: Convocatoria | null) {
+    this.intervencionsConvo.set(convo);
+    this.intervencionsOpen.set(true);
   }
 
   openCampaignRecordsModal(convo: Convocatoria) {
@@ -2281,6 +2290,12 @@ export class HomeComponent implements OnInit {
   openAdminResponseEditModal(respuesta: Respuesta) {
     if (!this.canManageAttendanceForConvo(this.adminConvo())) {
       this.error.set('No tens permisos per editar aquesta resposta.');
+      return;
+    }
+
+    const editConvo = this.adminConvo();
+    if (editConvo && this.isResponseWindowClosed(editConvo)) {
+      this.error.set('Aquesta convocatòria ja no permet canviar l\'horari.');
       return;
     }
 

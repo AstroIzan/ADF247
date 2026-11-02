@@ -418,3 +418,7 @@
     padding: 8px;
   }
 }
+
+.vehicle-add { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin: 12px 0; }
+.vehicle-add input, .logs-table td input { width: 100%; min-width: 70px; padding: 7px 8px; border: 1px solid #cfd6de; border-radius: 8px; font: inherit; }
+.vehicle-actions { display: flex; gap: 6px; white-space: nowrap; }

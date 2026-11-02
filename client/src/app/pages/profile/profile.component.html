@@ -53,32 +53,6 @@
           }
         </section>
 
-        @if (authService.isAdmin() || authService.isCapOperatiu()) {
-          <section class="card">
-            <h4>Permisos</h4>
-            <div class="chips">
-              @if (authService.isAdmin()) {
-                <label class="chip" [class.on]="formData().roles?.isAdmin">
-                  <input type="checkbox" [checked]="formData().roles?.isAdmin" (change)="toggleRole('isAdmin')" name="isAdmin" />
-                  {{ getRoleLabel('isAdmin') }}
-                </label>
-              }
-              <label class="chip" [class.on]="formData().roles?.isGroc">
-                <input type="checkbox" [checked]="formData().roles?.isGroc" (change)="toggleRole('isGroc')" name="isGroc" />
-                {{ getRoleLabel('isGroc') }}
-              </label>
-              <label class="chip" [class.on]="formData().roles?.isCapColla">
-                <input type="checkbox" [checked]="formData().roles?.isCapColla" (change)="toggleRole('isCapColla')" name="isCapColla" />
-                {{ getRoleLabel('isCapColla') }}
-              </label>
-              <label class="chip" [class.on]="formData().roles?.isCapOperatiu">
-                <input type="checkbox" [checked]="formData().roles?.isCapOperatiu" (change)="toggleRole('isCapOperatiu')" name="isCapOperatiu" />
-                {{ getRoleLabel('isCapOperatiu') }}
-              </label>
-            </div>
-          </section>
-        }
-
         <section class="card">
           <h4>Contrasenya</h4>
           <p class="hint">Deixa-ho en blanc si no la vols canviar.</p>

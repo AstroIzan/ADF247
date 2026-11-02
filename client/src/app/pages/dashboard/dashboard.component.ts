@@ -12,6 +12,8 @@ import {
   UserHoursSummaryRow,
   CampaignFormRecord,
   MessagingConfiguration,
+  SystemConfiguration,
+  SystemConfigurationVehicle,
 } from '../../services/data.service';
 import { UsersModule } from '../../modules/users/users.module';
 import { ConvosModule } from '../../modules/convos/convos.module';
@@ -80,6 +82,81 @@ export class DashboardComponent implements OnInit {
   openTemplatesTab() {
     this.activeTab.set('templates');
     this.loadTemplates();
+  }
+
+  vehicleConfig = signal<SystemConfiguration | null>(null);
+  vehicleError = signal('');
+  vehicleSaving = signal(false);
+  newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 });
+
+  openVehiclesTab() {
+    this.activeTab.set('vehicles');
+    this.vehicleError.set('');
+    this.dataService.getSystemConfiguration().subscribe({
+      next: (configuration) => this.vehicleConfig.set(configuration),
+      error: (error) => this.vehicleError.set(error.error?.message || error.message || 'No s’han pogut carregar els vehicles.'),
+    });
+  }
+
+  addVehicle() {
+    const vehicle = this.newVehicle();
+    const indicatiu = vehicle.indicatiu.trim();
+    const catalog = this.vehicleConfig()?.vehicleCatalog ?? [];
+    if (!indicatiu) {
+      this.vehicleError.set('L’indicatiu del vehicle és obligatori.');
+      return;
+    }
+    if (catalog.some((item) => item.indicatiu.toLowerCase() === indicatiu.toLowerCase())) {
+      this.vehicleError.set('Ja existeix un vehicle amb aquest indicatiu.');
+      return;
+    }
+    this.saveVehicles([...catalog, this.normalizeVehicle({ ...vehicle, indicatiu })], () =>
+      this.newVehicle.set({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 }));
+  }
+
+  updateVehicle(indicatiu: string, patch: Partial<SystemConfigurationVehicle>) {
+    const catalog = this.vehicleConfig()?.vehicleCatalog ?? [];
+    this.vehicleConfig.update((config) => config && {
+      ...config,
+      vehicleCatalog: catalog.map((item) => item.indicatiu === indicatiu ? { ...item, ...patch } : item),
+    });
+  }
+
+  saveVehicle() {
+    this.saveVehicles((this.vehicleConfig()?.vehicleCatalog ?? []).map((item) => this.normalizeVehicle(item)));
+  }
+
+  removeVehicle(indicatiu: string) {
+    this.saveVehicles((this.vehicleConfig()?.vehicleCatalog ?? []).filter((item) => item.indicatiu !== indicatiu));
+  }
+
+  private normalizeVehicle(vehicle: SystemConfigurationVehicle): SystemConfigurationVehicle {
+    return {
+      indicatiu: vehicle.indicatiu.trim(),
+      modelo: vehicle.modelo?.trim() || null,
+      matricula: vehicle.matricula?.trim().toUpperCase() || null,
+      litres: Number(vehicle.litres) || 0,
+      kms: Number(vehicle.kms) || 0,
+    };
+  }
+
+  private saveVehicles(vehicleCatalog: SystemConfigurationVehicle[], onSaved?: () => void) {
+    const configuration = this.vehicleConfig();
+    if (!configuration || this.vehicleSaving()) return;
+    this.vehicleSaving.set(true);
+    this.vehicleError.set('');
+    const { updatedAt: _, ...request } = configuration;
+    this.dataService.updateSystemConfiguration({ ...request, vehicleCatalog }).subscribe({
+      next: (saved) => {
+        this.vehicleConfig.set(saved);
+        this.vehicleSaving.set(false);
+        onSaved?.();
+      },
+      error: (error) => {
+        this.vehicleError.set(error.error?.message || error.message || 'No s’han pogut desar els vehicles.');
+        this.vehicleSaving.set(false);
+      },
+    });
   }
 
   constructor(

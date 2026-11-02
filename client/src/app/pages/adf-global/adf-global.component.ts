@@ -155,7 +155,7 @@ export class AdfGlobalComponent implements OnInit {
   }
 
   private emptyUserForm() {
-    return { nCarnet: '', name: '', lastName: '', nIndicatiu: '', password: '', isGroc: false, isCapColla: false, isCapOperatiu: false };
+    return { nCarnet: '', name: '', lastName: '', nIndicatiu: '', password: '', isGroc: false, isCapColla: false, isCapOperatiu: false, isAdmin: false, isSecretariat: false };
   }
 
   private emptyVehicleForm() {
@@ -190,7 +190,7 @@ export class AdfGlobalComponent implements OnInit {
       password: form.password,
       isActive: true,
       adfId: adf.id,
-      roles: { isGroc: form.isGroc, isCapColla: form.isCapColla, isCapOperatiu: form.isCapOperatiu },
+      roles: { isGroc: form.isGroc, isCapColla: form.isCapColla, isCapOperatiu: form.isCapOperatiu, isAdmin: form.isAdmin, isSecretariat: form.isSecretariat },
     } as any).subscribe({
       next: () => {
         this.detailSaving.set(false);

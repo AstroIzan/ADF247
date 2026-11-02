@@ -100,6 +100,8 @@ public sealed class RespuestaService(
     {
         if (convocatoria.ActualStartTime.HasValue)
             throw new InvalidOperationException("No puedes responder una convocatoria que ya ha empezado.");
+        if (!convocatoria.IsActive || convocatoria.ActualEndTime.HasValue)
+            throw new InvalidOperationException("Esta convocatoria ya no permite cambios.");
     }
 
     private static void ValidateAttendance(Respuesta respuesta)

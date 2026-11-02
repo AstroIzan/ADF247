@@ -22,7 +22,6 @@
       <a href="#automation">Automatitzacions</a>
       <a href="#availability">Disponibilitat</a>
       <a href="#campaign">Campanya</a>
-      <a href="#fleet">Flota</a>
       <a href="#developer-tools">Desenvolupament</a>
     </nav>
 
@@ -205,46 +204,6 @@
       </article>
     </section>
 
-    <section id="fleet" class="system-section">
-      <div class="section-heading">
-        <div class="section-number">04</div>
-        <div>
-          <p class="section-kicker">Recursos</p>
-          <h2>Flota de l’agrupació</h2>
-          <p>Gestiona els vehicles disponibles en els formularis de campanya.</p>
-        </div>
-      </div>
-
-      <article class="settings-panel fleet-panel">
-        <div class="vehicle-form">
-          <label>Indicatiu <input placeholder="Ex. S401" [ngModel]="newVehicle().indicatiu" (ngModelChange)="newVehicle.set({ ...newVehicle(), indicatiu: $event })"></label>
-          <label>Model <input placeholder="Model del vehicle" [ngModel]="newVehicle().modelo" (ngModelChange)="newVehicle.set({ ...newVehicle(), modelo: $event })"></label>
-          <label>Matrícula <input placeholder="Ex. 1234ABC" [ngModel]="newVehicle().matricula" (ngModelChange)="newVehicle.set({ ...newVehicle(), matricula: $event })"></label>
-          <label>Litres <input type="number" min="0" placeholder="0" [ngModel]="newVehicle().litres" (ngModelChange)="newVehicle.set({ ...newVehicle(), litres: $event })"></label>
-          <label>Kilòmetres <input type="number" min="0" placeholder="0" [ngModel]="newVehicle().kms" (ngModelChange)="newVehicle.set({ ...newVehicle(), kms: $event })"></label>
-          <button class="btn btn-primary" type="button" (click)="addVehicle()">Afegir vehicle</button>
-        </div>
-        <div class="table-wrapper">
-          <table>
-            <thead><tr><th>Indicatiu</th><th>Model</th><th>Matrícula</th><th>Litres</th><th>Kilòmetres</th><th aria-label="Accions"></th></tr></thead>
-            <tbody>
-              @for (vehicle of configuration.vehicleCatalog; track vehicle.indicatiu) {
-                <tr>
-                  <td><strong>{{ vehicle.indicatiu }}</strong></td>
-                  <td>{{ vehicle.modelo || '—' }}</td>
-                  <td>{{ vehicle.matricula || '—' }}</td>
-                  <td>{{ vehicle.litres }} L</td>
-                  <td>{{ vehicle.kms }} km</td>
-                  <td><button class="btn btn-danger btn-small" type="button" (click)="removeVehicle(vehicle.indicatiu)">Eliminar</button></td>
-                </tr>
-              } @empty {
-                <tr><td colspan="5" class="empty-copy">No hi ha vehicles configurats.</td></tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </article>
-    </section>
 
     <section id="developer-tools" class="system-section developer-section">
         <div class="section-heading">
