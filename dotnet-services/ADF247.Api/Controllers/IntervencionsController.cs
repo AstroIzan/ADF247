@@ -315,6 +315,7 @@ public sealed class IntervencionsController(Adf247DbContext database, CurrentAdf
         entity.Sector = Clean(request.Sector);
         entity.Comarca = Clean(request.Comarca);
         entity.OwnVehiclesJson = JsonSerializer.Serialize(request.OwnVehicles ?? [], Json);
+        entity.FirstInterventionVehicle = request.OwnVehicles is not null && !string.IsNullOrWhiteSpace(request.FirstInterventionVehicle) && request.OwnVehicles.Contains(request.FirstInterventionVehicle) ? request.FirstInterventionVehicle.Trim() : null;
         entity.OtherAdfsAttended = request.OtherAdfsAttended;
         entity.OtherAdfsJson = JsonSerializer.Serialize(request.OtherAdfsAttended ? request.OtherAdfs ?? [] : [], Json);
         entity.OtherAdfsGrocs = request.OtherAdfsAttended ? Math.Max(0, request.OtherAdfsGrocs) : 0;
@@ -363,6 +364,7 @@ public sealed class IntervencionsController(Adf247DbContext database, CurrentAdf
         sector = item.Sector,
         comarca = item.Comarca,
         ownVehicles = Parse<List<string>>(item.OwnVehiclesJson) ?? [],
+        firstInterventionVehicle = item.FirstInterventionVehicle,
         otherAdfsAttended = item.OtherAdfsAttended,
         otherAdfs = Parse<List<OtherAdfEntry>>(item.OtherAdfsJson) ?? [],
         otherAdfsGrocs = item.OtherAdfsGrocs,
@@ -421,4 +423,5 @@ public sealed record IntervencioRequest(
     int CustomGrocs,
     int CustomVerds,
     decimal? Surface,
-    int? TypeIncendiId);
+    int? TypeIncendiId,
+    string? FirstInterventionVehicle = null);

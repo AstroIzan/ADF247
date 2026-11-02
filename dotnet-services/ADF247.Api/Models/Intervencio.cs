@@ -26,6 +26,7 @@ public sealed class Intervencio
     public string? Sector { get; set; }
     public string? Comarca { get; set; }
     public string OwnVehiclesJson { get; set; } = "[]";
+    public string? FirstInterventionVehicle { get; set; }
     public bool OtherAdfsAttended { get; set; }
     public string OtherAdfsJson { get; set; } = "[]";
     public int OtherAdfsGrocs { get; set; }

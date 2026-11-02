@@ -109,6 +109,14 @@
                 <label><input type="checkbox" [checked]="f.ownVehicles.includes(v)" (change)="onVehiclesChange(v, $any($event.target).checked)" /> {{ v }}</label>
               } @empty { <span class="iv-muted">Cap vehicle donat d'alta a la convocatòria.</span> }
             </div>
+            @if (f.ownVehicles.length > 1) {
+              <label class="iv-field">Vehicle de primera intervenció
+                <select [ngModel]="f.firstInterventionVehicle ?? ''" (ngModelChange)="update('firstInterventionVehicle', $event || null)">
+                  <option value="">Sense indicar</option>
+                  @for (v of f.ownVehicles; track v) { <option [value]="v">{{ v }}</option> }
+                </select>
+              </label>
+            }
           </section>
 
           <section>

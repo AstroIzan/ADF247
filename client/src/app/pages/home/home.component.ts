@@ -562,6 +562,11 @@ export class HomeComponent implements OnInit {
     return 'edit';
   }
 
+  getFinishActionLabel() {
+    const name = (this.campaignFormConvo()?.convoType?.name || 'servei').trim().toLowerCase();
+    return `Finalitzar ${name}`;
+  }
+
   getLifecycleActionLabel(convo: Convocatoria) {
     const action = this.getLifecycleAction(convo);
 
@@ -889,6 +894,21 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  getCampaignFormVehicleCrew(form: CampaignFormRecord, vehicle: CampaignFormVehicleInput) {
+    const ids = Array.from(new Set([
+      ...(vehicle.conductorUserId != null ? [vehicle.conductorUserId] : []),
+      ...(Array.isArray(vehicle.volunteerUserIds) ? vehicle.volunteerUserIds : []),
+    ]));
+    return ids.map((userId) => {
+      const user = this.userById().get(userId);
+      return {
+        label: user ? `${user.name} ${user.lastName || ''}`.trim() : String(userId),
+        carnet: user?.nCarnet || '',
+        isDriver: vehicle.conductorUserId === userId,
+        isResponsable: form.responsableId === userId,
+      };
+    });
+  }
   deleteCampaignFormRecord(form: CampaignFormRecord) {
     const convo = this.campaignRecordsConvo();
     if (!convo || !this.canManageConvocatoriaLifecycle(convo)) {
@@ -1564,7 +1584,7 @@ export class HomeComponent implements OnInit {
       return;
     }
 
-    this.updateCampaignServiceForm(convo, false);
+    this.updateCampaignServiceForm(convo, true);
   }
 
   private updateCampaignServiceForm(convo: Convocatoria, closeOnSuccess = true) {
@@ -1759,10 +1779,15 @@ export class HomeComponent implements OnInit {
     this.error.set('');
     this.adminActionFeedback.set('');
     this.runningConvoAdminActionKey.set(`notify-${convo.id}`);
-    this.dataService.sendConvocatoriaResponseRequest(convo.id).subscribe({
+    const request = convo.sortida
+      ? this.dataService.sendConvocatoriaSortidaStatus(convo.id)
+      : this.dataService.sendConvocatoriaResponseRequest(convo.id);
+    request.subscribe({
       next: () => {
         this.runningConvoAdminActionKey.set(null);
-        this.adminActionFeedback.set(`Notificació de resposta enviada per a ${convo.title}.`);
+        this.adminActionFeedback.set(convo.sortida
+          ? `Notificació de sortida enviada per a ${convo.title}.`
+          : `Notificació de resposta enviada per a ${convo.title}.`);
       },
       error: (err) => {
         this.runningConvoAdminActionKey.set(null);

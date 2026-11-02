@@ -200,7 +200,7 @@
             <h4>Vehicles</h4>
             <ul class="iv-vehicles">
               @for (v of iv.ownVehicles; track v) {
-                <li><span class="iv-tag iv-tag-own">Nostre</span><strong>{{ v }}</strong>@if (!hasBomberFirst(iv) && $first) { <span class="iv-first">★ Primera intervenció</span> }</li>
+                <li><span class="iv-tag iv-tag-own">Nostre</span><strong>{{ v }}</strong>@if (!hasBomberFirst(iv) && (iv.firstInterventionVehicle ? iv.firstInterventionVehicle === v : $first)) { <span class="iv-first">★ Primera intervenció</span> }</li>
               }
               @if (iv.otherAdfsAttended) {
                 @for (e of iv.otherAdfs; track $index) {

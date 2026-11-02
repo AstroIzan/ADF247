@@ -182,6 +182,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
     this.form.update(f => ({
       ...f,
       ownVehicles: checked ? [...f.ownVehicles, vehicle] : f.ownVehicles.filter(v => v !== vehicle),
+      firstInterventionVehicle: !checked && f.firstInterventionVehicle === vehicle ? null : f.firstInterventionVehicle,
     }));
     this.applyOwnVehicleTotals();
   }
@@ -396,7 +397,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
       convocatoriaId: null, responsableUserId: null, responsableName: null, responsableAdf: null,
       date: this.today(), noticeTime: null, startTime: null, endTime: null, level: null,
       latitude: null, longitude: null, municipality: null, sector: null, comarca: null,
-      ownVehicles: [], otherAdfsAttended: false, otherAdfs: [], otherAdfsGrocs: 0, otherAdfsVerds: 0,
+      ownVehicles: [], firstInterventionVehicle: null, otherAdfsAttended: false, otherAdfs: [], otherAdfsGrocs: 0, otherAdfsVerds: 0,
       bombersAttended: false, bombers: [], ownGrocs: 0, ownVerds: 0, customGrocs: 0, customVerds: 0,
       surface: null, typeIncendiId: null,
     };

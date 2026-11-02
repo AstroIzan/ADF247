@@ -103,7 +103,7 @@ public sealed class MessagingService(Adf247DbContext database)
             from response in database.Respuestas
             join role in database.Roles on response.UserNCarnet equals role.NCarnet into roles
             from role in roles.DefaultIfEmpty()
-            where response.ConvoId == convocatoriaId && response.Response
+            where response.ConvoId == convocatoriaId && response.Response && response.AttendanceConfirmed
             select role != null && role.IsGroc)
             .ToListAsync(cancellationToken);
         var grocs = respondingUsers.Count(isGroc => isGroc);
