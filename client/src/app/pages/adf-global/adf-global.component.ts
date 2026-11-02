@@ -1,7 +1,7 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Adf, AdfConvocatoria, AdfOverview, AdfUser, DataService } from '../../services/data.service';
+import { Adf, PlaAlfaMunicipalityCatalogItem, AdfConvocatoria, AdfOverview, AdfUser, DataService } from '../../services/data.service';
 
 type DetailTab = 'convocatories' | 'usuaris';
 
@@ -22,7 +22,14 @@ export class AdfGlobalComponent implements OnInit {
   editingId = signal<number | null>(null);
   formNumber = signal<number | null>(null);
   formName = signal('');
-  formMunicipalities = signal('');
+  formMunicipalities = signal<string[]>([]);
+  municipalityCatalog = signal<PlaAlfaMunicipalityCatalogItem[]>([]);
+  municipalitySearch = signal('');
+  filteredCatalog = computed(() => {
+    const query = this.normalize(this.municipalitySearch());
+    const items = this.municipalityCatalog();
+    return (query ? items.filter((item) => this.normalize(item.municipality + ' ' + (item.comarca ?? '')).includes(query)) : items).slice(0, 200);
+  });
   saving = signal(false);
 
   selected = signal<Adf | null>(null);
@@ -35,6 +42,24 @@ export class AdfGlobalComponent implements OnInit {
 
   ngOnInit() {
     this.load();
+    this.dataService.getPlaAlfaCatalog().subscribe({
+      next: (catalog) => this.municipalityCatalog.set(catalog.municipalities ?? []),
+      error: () => this.municipalityCatalog.set([]),
+    });
+  }
+
+  private normalize(value: string) {
+    return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  }
+
+  isSelected(name: string) {
+    return this.formMunicipalities().some((item) => item.toLowerCase() === name.toLowerCase());
+  }
+
+  toggleMunicipality(name: string) {
+    this.formMunicipalities.update((list) => this.isSelected(name)
+      ? list.filter((item) => item.toLowerCase() !== name.toLowerCase())
+      : [...list, name].sort((a, b) => a.localeCompare(b)));
   }
 
   load() {
@@ -56,7 +81,8 @@ export class AdfGlobalComponent implements OnInit {
     this.editingId.set(adf?.id ?? null);
     this.formNumber.set(adf?.number ?? null);
     this.formName.set(adf?.name ?? '');
-    this.formMunicipalities.set((adf?.municipalities ?? []).join(', '));
+    this.formMunicipalities.set([...(adf?.municipalities ?? [])]);
+    this.municipalitySearch.set('');
     this.editing.set(true);
   }
 
@@ -72,7 +98,7 @@ export class AdfGlobalComponent implements OnInit {
     }
     this.saving.set(true);
     this.error.set('');
-    const municipalities = this.formMunicipalities().split(',').map((item) => item.trim()).filter(Boolean);
+    const municipalities = this.formMunicipalities();
     this.dataService.saveAdf(this.editingId(), { number, name: this.formName().trim(), municipalities }).subscribe({
       next: () => {
         this.saving.set(false);

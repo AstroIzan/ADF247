@@ -1,8 +1,8 @@
 <div class="adf-page">
   <div class="adf-hero">
     <img class="adf-logo" src="secretariat-logo.png" alt="Secretariat ADF de Catalunya" />
-    <span class="adf-kicker">Vista global</span>
-    <h1>Panell global d'ADFs</h1>
+    <span class="adf-kicker">Secretariat ADF de Catalunya</span>
+    <h1>Secretariat</h1>
     <p>Resum de totes les ADFs, les seves convocatòries i els seus usuaris.</p>
   </div>
 
@@ -60,9 +60,28 @@
         <label>Nom
           <input type="text" [ngModel]="formName()" (ngModelChange)="formName.set($event)" />
         </label>
-        <label class="adf-wide">Poblacions (separades per comes)
-          <input type="text" [ngModel]="formMunicipalities()" (ngModelChange)="formMunicipalities.set($event)" />
-        </label>
+        <div class="adf-wide">
+          <label>Poblacions de l'ADF ({{ formMunicipalities().length }} seleccionades)
+            <input type="search" placeholder="Cercar població o comarca..." [ngModel]="municipalitySearch()" (ngModelChange)="municipalitySearch.set($event)" />
+          </label>
+          @if (formMunicipalities().length) {
+            <div class="adf-chips">
+              @for (name of formMunicipalities(); track name) {
+                <button type="button" class="adf-chip" (click)="toggleMunicipality(name)">{{ name }} ×</button>
+              }
+            </div>
+          }
+          <div class="adf-picker">
+            @for (item of filteredCatalog(); track item.municipality) {
+              <label class="adf-check">
+                <input type="checkbox" [checked]="isSelected(item.municipality)" (change)="toggleMunicipality(item.municipality)" />
+                {{ item.municipality }} <small>{{ item.comarca }}</small>
+              </label>
+            } @empty {
+              <p>Cap població trobada.</p>
+            }
+          </div>
+        </div>
       </div>
       <div class="adf-form-actions">
         <button class="adf-btn" (click)="closeForm()" [disabled]="saving()">Cancel·lar</button>

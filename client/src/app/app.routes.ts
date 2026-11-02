@@ -55,7 +55,7 @@ export const routes: Routes = [
     canActivate: [authGuard, adminGuard]
   },
   {
-    path: 'adf-global',
+    path: 'secretariat',
     component: AdfGlobalComponent,
     canActivate: [authGuard, globalGuard]
   },
