@@ -426,11 +426,17 @@ export class UsersComponent implements OnDestroy {
     });
   }
 
+  getRoleClass(label: string): string {
+    const map: Record<string, string> = { Admin: 'rc-dark', Dev: 'rc-dark', Secretariat: 'rc-sec', 'Cap Operatiu': 'rc-op', 'Cap Colla': 'rc-colla', Groc: 'rc-groc', Verd: 'rc-verd' };
+    return map[label] ?? '';
+  }
+
   getRoleLabels(user: User): string[] {
     const labels: string[] = [];
 
     if (user.roles?.isAdmin) labels.push('Admin');
     if (user.roles?.isGroc) labels.push('Groc');
+    else if (!user.roles?.isAdmin && !user.roles?.isDeveloper) labels.push('Verd');
     if (user.roles?.isCapColla) labels.push('Cap Colla');
     if (user.roles?.isCapOperatiu) labels.push('Cap Operatiu');
     if (user.roles?.isSecretariat) labels.push('Secretariat');

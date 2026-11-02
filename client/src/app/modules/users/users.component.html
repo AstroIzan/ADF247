@@ -46,7 +46,7 @@
               <td>
                 <div class="role-chips">
                   @for (label of getRoleLabels(user); track label) {
-                    <span class="role-chip">{{ label }}</span>
+                    <span [class]="'role-chip '+getRoleClass(label)">{{ label }}</span>
                   }
                 </div>
               </td>
@@ -95,7 +95,7 @@
                 </span>
                 @if (getRoleLabels(user).length > 0) {
                   @for (label of getRoleLabels(user); track label) {
-                    <span class="role-chip">{{ label }}</span>
+                    <span [class]="'role-chip '+getRoleClass(label)">{{ label }}</span>
                   }
                 }
               </div>
