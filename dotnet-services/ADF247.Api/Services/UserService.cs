@@ -145,9 +145,10 @@ public sealed class UserService(Adf247DbContext database)
     public async Task<object> ImportAsync(ImportUsersRequest request, bool canAssignAdf = false)
     {
         if (string.IsNullOrWhiteSpace(request.CsvContent)) throw new ArgumentException("csvContent es obligatorio.");
-        var lines = request.CsvContent.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n', StringSplitOptions.RemoveEmptyEntries);
+        var lines = request.CsvContent.TrimStart('\uFEFF').Replace("\r\n", "\n").Replace('\r', '\n').Split('\n', StringSplitOptions.RemoveEmptyEntries);
         if (lines.Length < 2) throw new ArgumentException("El CSV debe incluir cabecera y al menos una fila.");
-        var header = ParseCsvLine(lines[0]).Select(value => value.Trim()).ToArray();
+        var delimiter = lines[0].Count(c => c == ';') > lines[0].Count(c => c == ',') ? ';' : ',';
+        var header = ParseCsvLine(lines[0], delimiter).Select(value => value.Trim()).ToArray();
         var required = new[] { "nCarnet", "name", "password" };
         if (required.Any(field => !header.Contains(field, StringComparer.OrdinalIgnoreCase))) throw new ArgumentException("El CSV debe contener nCarnet, name y password.");
         var indexes = header.Select((value, index) => new { value, index }).ToDictionary(item => item.value, item => item.index, StringComparer.OrdinalIgnoreCase);
@@ -156,9 +157,9 @@ public sealed class UserService(Adf247DbContext database)
         {
             try
             {
-                var values = ParseCsvLine(lines[row]);
+                var values = ParseCsvLine(lines[row], delimiter);
                 string? Value(string field) => indexes.TryGetValue(field, out var index) && index < values.Count ? values[index] : null;
-                await CreateAsync(new CreateUserRequest(Value("nCarnet"), Value("name"), Value("password"), Value("lastName"), Value("nIndicatiu"), Value("phone"), ParseBoolean(Value("isActive")), new UserRolesRequest(ParseBoolean(Value("isAdmin")), ParseBoolean(Value("isGroc")), ParseBoolean(Value("isCapColla")), ParseBoolean(Value("isCapOperatiu")), ParseBoolean(Value("isDeveloper")), ParseBoolean(Value("isSecretariat"))), null), canAssignAdf);
+                await CreateAsync(new CreateUserRequest(Value("nCarnet"), Value("name"), Value("password"), Value("lastName"), Value("nIndicatiu"), Value("phone"), ParseBoolean(Value("isActive")), new UserRolesRequest(ParseBoolean(Value("isAdmin")), ParseBoolean(Value("isGroc")), ParseBoolean(Value("isCapColla")), ParseBoolean(Value("isCapOperatiu")), ParseBoolean(Value("isDeveloper")), ParseBoolean(Value("isSecretariat"))), int.TryParse(Value("adfId"), out var adfId) ? adfId : null), canAssignAdf);
                 inserted++;
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException) { rejected.Add(new { row = row + 1, message = error.Message }); }
@@ -214,14 +215,20 @@ public sealed class UserService(Adf247DbContext database)
     private static string? NormalizeOptional(string? value) =>
         string.IsNullOrWhiteSpace(value) ? null : value.Trim();
 
-    private static bool? ParseBoolean(string? value) => string.IsNullOrWhiteSpace(value) ? null : bool.TryParse(value.Trim(), out var parsed) ? parsed : throw new ArgumentException("Los campos booleanos del CSV deben ser true o false.");
-    private static List<string> ParseCsvLine(string line)
+    private static bool? ParseBoolean(string? value) => string.IsNullOrWhiteSpace(value) ? null : ParseBooleanValue(value.Trim());
+    private static bool ParseBooleanValue(string value) => value.ToLowerInvariant() switch
+    {
+        "true" or "1" or "si" or "sí" or "s" or "yes" or "x" => true,
+        "false" or "0" or "no" or "n" => false,
+        _ => throw new ArgumentException("Los campos booleanos del CSV deben ser true/false o 1/0."),
+    };
+    private static List<string> ParseCsvLine(string line, char delimiter = ',')
     {
         var values = new List<string>(); var current = new System.Text.StringBuilder(); var quoted = false;
         foreach (var character in line)
         {
             if (character == '"') quoted = !quoted;
-            else if (character == ',' && !quoted) { values.Add(current.ToString().Trim()); current.Clear(); }
+            else if (character == delimiter && !quoted) { values.Add(current.ToString().Trim()); current.Clear(); }
             else current.Append(character);
         }
         if (quoted) throw new ArgumentException("El CSV contiene comillas sin cerrar.");

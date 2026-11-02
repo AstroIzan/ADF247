@@ -9,6 +9,7 @@ interface EditForm {
   lastName: string;
   nCarnet?: string;
   nIndicatiu?: string;
+  phone?: string;
   password: string;
   passwordConfirm: string;
   isActive?: boolean;
@@ -60,6 +61,7 @@ export class ProfileComponent implements OnInit {
         lastName: user.lastName || '',
         nCarnet: user.nCarnet,
         nIndicatiu: user.nIndicatiu || '',
+        phone: user.phone || '',
         password: '',
         passwordConfirm: '',
         isActive: true,
@@ -141,6 +143,7 @@ export class ProfileComponent implements OnInit {
     const payload: any = {
       name: form.name.trim(),
       lastName: form.lastName?.trim() || undefined,
+      phone: form.phone?.trim() ?? '',
     };
 
     // Si es admin, permet editar més camps
@@ -154,7 +157,7 @@ export class ProfileComponent implements OnInit {
       if (form.isActive !== undefined) {
         payload.isActive = form.isActive;
       }
-    } else if (this.authService.isCapOperatiu()) {
+    } else if (this.authService.isCapOperatiu() || this.authService.isCapColla()) {
       if (form.nIndicatiu !== undefined) {
         payload.nIndicatiu = form.nIndicatiu?.trim() || undefined;
       }

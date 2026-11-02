@@ -221,9 +221,10 @@ export class UsersComponent implements OnDestroy {
 
   downloadCsvTemplate() {
     const template = [
-      'nCarnet,nIndicatiu,phone,name,lastName,password,isActive,isAdmin,isGroc,isCapOperatiu,isCapColla,isDeveloper',
-      '247001,BR-01,600000001,Izan,Admin,Passw0rd!,true,true,false,false,false,true',
-      '247002,BR-12,600000002,Joan,Perez,Passw0rd!,true,false,true,false,false,false',
+      'nCarnet,name,lastName,password,nIndicatiu,phone,isActive,isGroc,isCapColla,isCapOperatiu,isSecretariat,isAdmin,isDeveloper',
+      '247/GI/301,Joan,Perez Soler,301Password,BR-12,600000001,1,1,0,0,0,0,0',
+      '247/302,Anna,Puig Roca,302Password,,600000002,1,0,0,0,0,0,0',
+      '247/GI/303,Marc,Vila Mas,303Password,BR-01,,1,1,1,0,0,0,0',
     ].join('\n');
 
     const blob = new Blob([template], { type: 'text/csv;charset=utf-8;' });

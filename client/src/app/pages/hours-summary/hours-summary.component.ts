@@ -3,17 +3,18 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { DataService, Intervencio, TypeIncendi, UserHoursDetail, UserHoursSummaryRow } from '../../services/data.service';
+import { CampaignFormsComponent } from '../../modules/campaign-forms/campaign-forms.component';
 import { IntervencionsModalComponent } from '../../modules/intervencions/intervencions-modal.component';
 
 @Component({
   selector: 'app-hours-summary',
   standalone: true,
-  imports: [CommonModule, IntervencionsModalComponent],
+  imports: [CommonModule, IntervencionsModalComponent, CampaignFormsComponent],
   templateUrl: './hours-summary.component.html',
   styleUrl: './hours-summary.component.css',
 })
 export class HoursSummaryComponent implements OnInit {
-  activeTab = signal<'hores' | 'intervencions'>('hores');
+  activeTab = signal<'hores' | 'intervencions' | 'formularis'>('hores');
   intervencions = signal<Intervencio[]>([]);
   intervencionsLoading = signal(false);
   intervencionsError = signal('');

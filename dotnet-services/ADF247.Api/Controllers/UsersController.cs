@@ -54,9 +54,10 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
         var isAdmin = await IsAdminAsync();
         if (!isAdmin && !IsCurrentUser(id)) return Forbid();
         var isCapOperatiu = !isAdmin && await IsCapOperatiuAsync();
+        var isCapColla = !isAdmin && await IsCapCollaAsync();
         var rolesAllowed = isCapOperatiu && request.Roles is { IsAdmin: not true, IsDeveloper: not true, IsSecretariat: not true };
-        if (!isAdmin && (request.NCarnet is not null || request.Phone is not null || request.IsActive.HasValue
-            || request.NIndicatiu is not null && !isCapOperatiu
+        if (!isAdmin && (request.NCarnet is not null || request.IsActive.HasValue
+            || request.NIndicatiu is not null && !isCapOperatiu && !isCapColla
             || request.Roles is not null && !rolesAllowed))
             return Forbid();
         try
@@ -97,6 +98,14 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
         return string.IsNullOrWhiteSpace(carnet)
             ? Task.FromResult(false)
             : database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsSecretariat));
+    }
+
+    private Task<bool> IsCapCollaAsync()
+    {
+        var carnet = User.FindFirst("nCarnet")?.Value;
+        return string.IsNullOrWhiteSpace(carnet)
+            ? Task.FromResult(false)
+            : database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsCapColla);
     }
 
     private Task<bool> IsCapOperatiuAsync()

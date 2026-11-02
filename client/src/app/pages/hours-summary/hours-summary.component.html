@@ -18,6 +18,7 @@
   <nav class="tabs-navigation" aria-label="Seccions del resum">
     <button type="button" class="tab-btn" [class.active]="activeTab() === 'hores'" (click)="activeTab.set('hores')">Hores</button>
     <button type="button" class="tab-btn" [class.active]="activeTab() === 'intervencions'" (click)="activeTab.set('intervencions')">Intervencions</button>
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'formularis'" (click)="activeTab.set('formularis')">Formularis</button>
   </nav>
 
   @if (activeTab() === 'hores') {
@@ -97,6 +98,9 @@
       </div>
     </section>
   }
+  }
+  @if (activeTab() === 'formularis') {
+    <app-campaign-forms></app-campaign-forms>
   }
   @if (activeTab() === 'intervencions') {
   <section class="hours-table-card">

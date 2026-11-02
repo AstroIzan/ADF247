@@ -16,6 +16,7 @@ export interface LoginResponse {
     id: number;
     nCarnet: string;
     nIndicatiu?: string;
+    phone?: string | null;
     name: string;
     lastName?: string;
     roles: {
@@ -42,6 +43,7 @@ export interface CurrentUser {
   id: number;
   nCarnet: string;
   nIndicatiu?: string;
+  phone?: string | null;
   name: string;
   lastName?: string;
   roles: {
@@ -216,6 +218,10 @@ export class AuthService {
     return this.isAdmin() || this.isSecretariat();
   }
 
+  isCapColla(): boolean {
+    return this.hasRole('isCapColla');
+  }
+
   isCapOperatiu(): boolean {
     return this.hasRole('isCapOperatiu');
   }
@@ -299,6 +305,7 @@ export class AuthService {
         name: updatedUser.name || user.name,
         lastName: updatedUser.lastName || user.lastName,
         nIndicatiu: updatedUser.nIndicatiu !== undefined ? updatedUser.nIndicatiu : user.nIndicatiu,
+        phone: updatedUser.phone !== undefined ? updatedUser.phone : user.phone,
         nCarnet: updatedUser.nCarnet || user.nCarnet,
         roles: updatedUser.roles || user.roles,
       };

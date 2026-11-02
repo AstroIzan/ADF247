@@ -177,7 +177,7 @@
               <div class="hm-badges">
                 @if (!canManageConvocatoriaLifecycle(convo) && !hasServiceStarted(convo)) {
                   <span class="hm-sortida" [class.is-on]="convo.sortida">
-                    <i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Sortida: {{ getSortidaBadgeLabel(convo.sortida) }}
+                    <i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Sortida: {{ convo.sortida ? 'Activa' : 'No activa' }}
                   </span>
                 }
                 @if (canViewConvocatoriaSummary(convo)) {

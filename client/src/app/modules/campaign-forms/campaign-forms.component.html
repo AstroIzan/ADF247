@@ -1,0 +1,131 @@
+<section class="content-card">
+          <div class="card-head">
+            <div>
+              <p class="card-kicker">Registre operatiu</p>
+              <h3>Formularis de campanya</h3>
+            </div>
+            <button class="btn btn-secondary btn-sm" (click)="loadCampaignForms()" [disabled]="loadingCampaignForms()">
+              {{ loadingCampaignForms() ? 'Actualitzant...' : 'Actualitzar' }}
+            </button>
+          </div>
+
+          @if (campaignFormsError()) {
+            <div class="error-alert">{{ campaignFormsError() }}</div>
+          } @else if (loadingCampaignForms()) {
+            <div class="loading">Carregant formularis...</div>
+          } @else if (campaignForms().length === 0) {
+            <div class="empty-state">No hi ha formularis registrats encara.</div>
+          } @else {
+            <div class="table-wrap">
+              <table class="logs-table">
+                <thead>
+                  <tr>
+                    <th>Data</th>
+                    <th>Moment</th>
+                    <th>Convocatòria</th>
+                    <th>Responsable</th>
+                    <th>Voluntaris</th>
+                    <th>Vehicles</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of campaignForms(); track row.id) {
+                    <tr>
+                      <td>{{ row.dia | date:'short' }}</td>
+                      <td>{{ row.serviceMoment === 'START' ? 'Inici de servei' : 'Final de servei' }}</td>
+                      <td>{{ row.convocatoria?.title || ('#' + row.convocatoriaId) }}</td>
+                      <td>{{ row.responsableNCarnet || '-' }}</td>
+                      <td>{{ row.voluntaris.length }}</td>
+                      <td>{{ row.vehicles.length }}</td>
+                      <td>
+                        <div class="campaign-form-actions">
+                          <button class="btn btn-secondary btn-sm" (click)="toggleCampaignFormDetails(row.id)">
+                            {{ isCampaignFormDetailsOpen(row.id) ? 'Menys info' : '+ info' }}
+                          </button>
+                          <button class="btn btn-danger btn-sm" (click)="requestCampaignFormDelete(row)">
+                            Eliminar
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+
+                    @if (isCampaignFormDetailsOpen(row.id)) {
+                      <tr class="campaign-forms-detail-row">
+                        <td colspan="7">
+                          <div class="campaign-forms-detail-grid">
+                            <div>
+                              <strong>Voluntaris assignats</strong>
+                              @if (getCampaignFormVolunteerLabels(row).length === 0) {
+                                <p>Sense voluntaris.</p>
+                              } @else {
+                                <ul>
+                                  @for (label of getCampaignFormVolunteerLabels(row); track label) {
+                                    <li>{{ label }}</li>
+                                  }
+                                </ul>
+                              }
+                            </div>
+
+                            <div>
+                              <strong>Vehicles</strong>
+                              @if (row.vehicles.length === 0) {
+                                <p>Sense vehicles.</p>
+                              } @else {
+                                @for (vehicle of row.vehicles; track vehicle.vehicleName) {
+                                  <details class="campaign-forms-vehicle-item">
+                                    <summary>{{ vehicle.vehicleName }} · {{ vehicle.kms || 0 }} km</summary>
+                                    <div>
+                                      <p><strong>Conductor:</strong> {{ getCampaignFormVehicleConductorLabel(vehicle) }}</p>
+                                      @if (getCampaignFormVehicleVolunteerLabels(vehicle).length === 0) {
+                                        <p><strong>Voluntaris vehicle:</strong> Sense voluntaris.</p>
+                                      } @else {
+                                        <p><strong>Voluntaris vehicle:</strong></p>
+                                        <ul>
+                                          @for (label of getCampaignFormVehicleVolunteerLabels(vehicle); track label) {
+                                            <li>{{ label }}</li>
+                                          }
+                                        </ul>
+                                      }
+                                    </div>
+                                  </details>
+                                }
+                              }
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+
+    @if (campaignFormToDelete(); as formToDelete) {
+      <div class="modal-overlay">
+        <div class="modal" (click)="$event.stopPropagation()">
+          <div class="modal-header">
+            <h3>Eliminar formulari de campanya</h3>
+            <button class="close-btn" (click)="cancelCampaignFormDelete()" [disabled]="deletingCampaignForm()">&times;</button>
+          </div>
+
+          <div class="modal-body">
+            <p>
+              Vols eliminar el formulari
+              <strong>{{ formToDelete.serviceMoment === 'START' ? 'd\'inici de servei' : 'de final de servei' }}</strong>
+              de la convocatòria <strong>{{ formToDelete.convocatoria?.title || ('#' + formToDelete.convocatoriaId) }}</strong>?
+            </p>
+            <p>Aquesta acció no es pot desfer.</p>
+          </div>
+
+          <div class="modal-footer">
+            <button class="btn btn-secondary" (click)="cancelCampaignFormDelete()" [disabled]="deletingCampaignForm()">Cancel·lar</button>
+            <button class="btn btn-danger" (click)="confirmCampaignFormDelete()" [disabled]="deletingCampaignForm()">
+              {{ deletingCampaignForm() ? 'Eliminant...' : 'Eliminar' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }

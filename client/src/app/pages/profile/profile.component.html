@@ -33,13 +33,17 @@
               <input type="text" class="form-control" [(ngModel)]="formData().lastName" name="lastName" placeholder="Els teus cognoms" />
             </div>
           </div>
+          <div class="form-group">
+            <label>Telèfon</label>
+            <input type="tel" class="form-control" [(ngModel)]="formData().phone" name="phone" placeholder="Ex: 600000000" />
+          </div>
           @if (authService.isAdmin()) {
             <div class="form-group">
               <label>Número de carnet (no editable)</label>
               <input type="text" class="form-control" [value]="formData().nCarnet" disabled readonly />
             </div>
           }
-          @if (authService.isAdmin() || authService.isCapOperatiu()) {
+          @if (authService.isAdmin() || authService.isCapOperatiu() || authService.isCapColla()) {
             <div class="form-group">
               <label>Indicatiu</label>
               <input type="text" class="form-control" [(ngModel)]="formData().nIndicatiu" name="nIndicatiu" placeholder="Ex: S401" />
