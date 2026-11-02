@@ -492,7 +492,7 @@ export class DataService {
   }
 
   getAdfVehicles(id: number): Observable<AdfVehicle[]> {
-    return this.http.get<AdfVehicle[]>("/adf/${id}/vehicles");
+    return this.http.get<AdfVehicle[]>(`/adf/${id}/vehicles`);
   }
 
   getAdfUsers(id: number): Observable<AdfUser[]> {
