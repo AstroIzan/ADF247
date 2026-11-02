@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Adf, PlaAlfaMunicipalityCatalogItem, AdfConvocatoria, AdfOverview, AdfUser, AdfVehicle, DataService } from '../../services/data.service';
 
@@ -8,7 +8,7 @@ type DetailTab = 'convocatories' | 'usuaris' | 'vehicles';
 @Component({
   selector: 'app-adf-global',
   standalone: true,
-  imports: [CommonModule, FormsModule, DatePipe],
+  imports: [CommonModule, FormsModule],
   templateUrl: './adf-global.component.html',
   styleUrl: './adf-global.component.css',
 })

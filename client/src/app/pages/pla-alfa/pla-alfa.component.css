@@ -762,3 +762,50 @@
     width: 100%;
   }
 }
+
+/* ===== Redisseny modern ===== */
+.pla-alfa-page { background: #f3f5f8; }
+.pla-alfa-header { padding: 20px 24px; border-radius: 18px; background: linear-gradient(135deg, #273445 0%, #3a4a60 100%); color: #fff; box-shadow: 0 8px 24px rgba(39, 52, 69, .22); position: relative; overflow: hidden; margin-bottom: 16px; }
+.pla-alfa-header::after { content: ''; position: absolute; right: -40px; top: -40px; width: 160px; height: 160px; border-radius: 50%; background: rgba(240, 176, 0, .22); }
+.pla-alfa-header h1 { color: #fff; letter-spacing: -.01em; }
+.pla-alfa-header p { color: #cfd8e3; max-width: 640px; position: relative; z-index: 1; }
+.error-alert { border-radius: 12px; }
+.pla-alfa-layout { gap: 16px; }
+.pla-alfa-selector-panel, .pla-alfa-table-panel { border: 1px solid #e3e8ee; border-radius: 18px; padding: 16px; box-shadow: 0 4px 18px rgba(30, 41, 59, .06); }
+.pla-alfa-selector-title, .pla-alfa-table-head h4 { font-size: 16px; font-weight: 800; color: #1f2a37; margin: 0; }
+.pla-alfa-selector-label { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: #64748b; }
+.pla-alfa-search-input, .pla-alfa-filter-select { border: 1px solid #d7dee7; border-radius: 12px; padding: 10px 12px; background: #f8fafc; transition: border-color .15s, box-shadow .15s, background .15s; }
+.pla-alfa-search-input:focus, .pla-alfa-filter-select:focus { outline: none; background: #fff; border-color: #f0b000; box-shadow: 0 0 0 3px rgba(240, 176, 0, .2); }
+.pla-alfa-checkbox-list { border: 1px solid #e3e8ee; border-radius: 14px; background: #fff; }
+.pla-alfa-checkbox-item { border-bottom: 1px solid #f1f4f8; transition: background .12s; }
+.pla-alfa-checkbox-item:hover { background: #fffaf0; }
+.pla-alfa-checkbox-item input { accent-color: #f0b000; width: 16px; height: 16px; }
+.pla-alfa-checkbox-item .municipality-name { color: #1f2a37; }
+.pla-alfa-checkbox-item .municipality-comarca { color: #94a3b8; }
+.pla-alfa-checkbox-item .municipality-principal-chip { border-radius: 8px; border-color: #cbd5e1; }
+.pla-alfa-selected-count { background: #fff4d6; color: #8a5d00; padding: 3px 10px; border-radius: 999px; font-size: 12px; }
+.pla-alfa-selected-preview { background: #f8fafc; border: 1px solid #e3e8ee; border-radius: 12px; }
+.pla-alfa-selected-pill { background: #eef2f7; border: 0; color: #334155; padding: 4px 10px; }
+.pla-alfa-selected-pill-more { background: #e2e8f0; }
+.pla-alfa-help { color: #94a3b8; }
+.pla-alfa-actions .btn, .pla-alfa-bulk-actions .btn { border-radius: 12px; font-weight: 700; padding: 10px 14px; }
+.pla-alfa-actions .btn-primary { box-shadow: 0 4px 12px rgba(240, 176, 0, .35); }
+.pla-alfa-table-head { padding-bottom: 12px; border-bottom: 1px solid #eef1f5; margin-bottom: 12px; }
+.pla-alfa-table-head > span { background: #eef2f7; color: #475569; padding: 4px 12px; border-radius: 999px; }
+.pla-alfa-updated-at { color: #94a3b8; }
+.pla-alfa-table-wrapper { border: 1px solid #e3e8ee; border-radius: 14px; }
+.pla-alfa-table th { background: #f1f5f9; color: #64748b; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; padding: 11px 12px; border-bottom: 1px solid #e3e8ee; }
+.pla-alfa-table td { padding: 12px; border-bottom: 1px solid #f1f4f8; vertical-align: top; }
+.pla-alfa-table tbody tr { transition: background .12s; }
+.pla-alfa-table tbody tr:hover { background: #fafbfd; }
+.pla-col-municipality { font-weight: 700; color: #1f2a37; }
+.pla-col-comarca { color: #64748b; }
+.pla-col-municipality .pla-alfa-selected-pill { margin-left: 6px; background: #f0b000; color: #1c1b18; }
+.pla-alfa-level { border-radius: 10px; padding: 5px 12px; font-size: 12px; letter-spacing: .02em; box-shadow: 0 1px 2px rgba(0, 0, 0, .08); }
+.pla-alfa-level-missing, .pla-alfa-weather-missing { font-size: 12px; }
+.pla-alfa-weather-block { background: #f8fafc; border: 1px solid #e9eef4; border-radius: 12px; padding: 10px; gap: 7px; }
+.weather-item > strong { color: #94a3b8; font-weight: 600; }
+.weather-item > span { color: #1f2a37; }
+.wind-direction-name-badge { border-radius: 999px; }
+@media (min-width: 901px) { .pla-alfa-day-cell { justify-items: center; } .pla-alfa-weather-block { width: 100%; max-width: 220px; } }
+@media (max-width: 600px) { .pla-alfa-header { padding: 14px 16px; border-radius: 14px; } .pla-alfa-table .pla-alfa-row { border-radius: 14px; box-shadow: 0 2px 8px rgba(30, 41, 59, .06); } }
