@@ -75,6 +75,7 @@ public sealed class MessagingOrchestrationWorker(
                 var payload = ParsePayload(notification.PayloadJson);
                 var recipientSelection = ResolveRecipientSelection(notification, payload);
                 var taggedPayload = TagPayload(payload, notification.Trigger, recipientSelection.Tag);
+                var collapseTag = $"adf247-{notification.Id}";
                 var createdDeliveries = await repository.EnsureNotificationDeliveriesAsync(
                     notification.Id,
                     notification.ConvocatoriaId,
@@ -94,7 +95,7 @@ public sealed class MessagingOrchestrationWorker(
                     createdDeliveries,
                     requeuedDeliveries);
 
-                await ProcessNotificationDeliveriesAsync(notification, taggedPayload, workerOptions.DeliveryClaimBatchSize, cancellationToken);
+                await ProcessNotificationDeliveriesAsync(notification, taggedPayload, collapseTag, workerOptions.DeliveryClaimBatchSize, cancellationToken);
                 await repository.MarkInactivePendingDeliveriesFailedAsync(notification.Id, cancellationToken);
                 await repository.FinalizeNotificationAsync(notification.Id, workerOptions.MaxDeliveryAttempts, cancellationToken);
                 logger.LogInformation(
@@ -121,6 +122,7 @@ public sealed class MessagingOrchestrationWorker(
     private async Task ProcessNotificationDeliveriesAsync(
         ClaimedNotification notification,
         IReadOnlyDictionary<string, string> payload,
+        string collapseTag,
         int batchSize,
         CancellationToken cancellationToken)
     {
@@ -143,6 +145,7 @@ public sealed class MessagingOrchestrationWorker(
                         notification.Title,
                         notification.Body,
                         payload,
+                        collapseTag,
                         cancellationToken);
                     await repository.MarkDeliverySentAsync(delivery.Id, cancellationToken);
                     logger.LogInformation(

@@ -73,7 +73,7 @@
 
               @if (plaAlfaSelected().length) {
                 <div class="pa-chips" aria-label="Municipis seleccionats">
-                  @for (municipality of plaAlfaSelected().slice(0, 20); track municipality) {
+                  @for (municipality of sortedSelectedMunicipalities().slice(0, 20); track municipality) {
                     <span class="pa-chip">{{ municipality }}</span>
                   }
                   @if (plaAlfaSelected().length > 20) {
@@ -133,7 +133,7 @@
           </div>
         } @else {
           <div class="pa-cards">
-            @for (item of plaAlfaStatus(); track item.municipality) {
+            @for (item of sortedPlaAlfaStatus(); track item.municipality) {
               <article class="pa-card" [class.is-principal]="item.isPrincipal">
                 <div class="pa-card-head">
                   <div>

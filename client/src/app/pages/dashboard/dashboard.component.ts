@@ -122,7 +122,15 @@ export class DashboardComponent implements OnInit {
     });
   }
 
+  editingVehicle = signal<string | null>(null);
+
+  cancelEditVehicle() {
+    this.editingVehicle.set(null);
+    this.openVehiclesTab();
+  }
+
   saveVehicle() {
+    this.editingVehicle.set(null);
     this.saveVehicles((this.vehicleConfig()?.vehicleCatalog ?? []).map((item) => this.normalizeVehicle(item)));
   }
 

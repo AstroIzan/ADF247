@@ -112,17 +112,31 @@
                 <thead><tr><th>Indicatiu</th><th>Model</th><th>Matrícula</th><th>Litres</th><th>Km</th><th></th></tr></thead>
                 <tbody>
                   @for (vehicle of config.vehicleCatalog; track vehicle.indicatiu) {
-                    <tr>
-                      <td><strong>{{ vehicle.indicatiu }}</strong></td>
-                      <td><input [ngModel]="vehicle.modelo" (ngModelChange)="updateVehicle(vehicle.indicatiu, { modelo: $event })"></td>
-                      <td><input [ngModel]="vehicle.matricula" (ngModelChange)="updateVehicle(vehicle.indicatiu, { matricula: $event })"></td>
-                      <td><input type="number" min="0" [ngModel]="vehicle.litres" (ngModelChange)="updateVehicle(vehicle.indicatiu, { litres: $event })"></td>
-                      <td><input type="number" min="0" [ngModel]="vehicle.kms" (ngModelChange)="updateVehicle(vehicle.indicatiu, { kms: $event })"></td>
-                      <td class="vehicle-actions">
-                        <button class="btn btn-small btn-primary" type="button" [disabled]="vehicleSaving()" (click)="saveVehicle()">Desar</button>
-                        <button class="btn btn-small btn-danger" type="button" [disabled]="vehicleSaving()" (click)="removeVehicle(vehicle.indicatiu)">Eliminar</button>
-                      </td>
-                    </tr>
+                    @if (editingVehicle() === vehicle.indicatiu) {
+                      <tr>
+                        <td><strong>{{ vehicle.indicatiu }}</strong></td>
+                        <td><input [ngModel]="vehicle.modelo" (ngModelChange)="updateVehicle(vehicle.indicatiu, { modelo: $event })"></td>
+                        <td><input [ngModel]="vehicle.matricula" (ngModelChange)="updateVehicle(vehicle.indicatiu, { matricula: $event })"></td>
+                        <td><input type="number" min="0" [ngModel]="vehicle.litres" (ngModelChange)="updateVehicle(vehicle.indicatiu, { litres: $event })"></td>
+                        <td><input type="number" min="0" [ngModel]="vehicle.kms" (ngModelChange)="updateVehicle(vehicle.indicatiu, { kms: $event })"></td>
+                        <td class="vehicle-actions">
+                          <button class="btn btn-small btn-primary" type="button" [disabled]="vehicleSaving()" (click)="saveVehicle()">Desar</button>
+                          <button class="btn btn-small btn-secondary" type="button" [disabled]="vehicleSaving()" (click)="cancelEditVehicle()">Cancel·lar</button>
+                        </td>
+                      </tr>
+                    } @else {
+                      <tr>
+                        <td><strong>{{ vehicle.indicatiu }}</strong></td>
+                        <td>{{ vehicle.modelo || '-' }}</td>
+                        <td>{{ vehicle.matricula || '-' }}</td>
+                        <td>{{ vehicle.litres ? vehicle.litres + ' L' : '-' }}</td>
+                        <td>{{ vehicle.kms ? vehicle.kms + ' km' : '-' }}</td>
+                        <td class="vehicle-actions">
+                          <button class="btn btn-small btn-edit" type="button" [disabled]="vehicleSaving()" (click)="editingVehicle.set(vehicle.indicatiu)">Editar</button>
+                          <button class="btn btn-small btn-danger" type="button" [disabled]="vehicleSaving()" (click)="removeVehicle(vehicle.indicatiu)">Eliminar</button>
+                        </td>
+                      </tr>
+                    }
                   } @empty {
                     <tr><td colspan="6">No hi ha vehicles configurats.</td></tr>
                   }

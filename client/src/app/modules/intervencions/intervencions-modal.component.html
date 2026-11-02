@@ -117,13 +117,13 @@
             @if (f.otherAdfsAttended) {
               @for (e of f.otherAdfs; track $index) {
                 <div class="iv-row">
-                  <input type="text" placeholder="ADF" [ngModel]="e.adf" (ngModelChange)="patchOtherAdf($index, { adf: $event })" />
+                  <select [ngModel]="e.adf" (ngModelChange)="patchOtherAdf($index, { adf: $event })"><option value="">ADF…</option>@for (o of adfOptions(e.adf); track o) { <option [value]="o">{{ o }}</option> }</select>
                   <input type="text" placeholder="Vehicle" [ngModel]="e.vehicle" (ngModelChange)="patchOtherAdf($index, { vehicle: $event })" />
                   <label class="iv-inline"><input type="checkbox" [ngModel]="e.firstIntervention" (ngModelChange)="patchOtherAdf($index, { firstIntervention: $event })" /> Primera intervenció</label>
                   <button type="button" class="iv-btn iv-danger" (click)="removeOtherAdf($index)">×</button>
                 </div>
               }
-              <button type="button" class="iv-btn" (click)="addOtherAdf()">+ ADF</button>
+              <button type="button" class="iv-add" (click)="addOtherAdf()"><span>+</span> Afegir ADF</button>
               <div class="iv-grid">
                 <label>Grocs<input type="number" min="0" [ngModel]="f.otherAdfsGrocs" (ngModelChange)="update('otherAdfsGrocs', num($event))" /></label>
                 <label>Verds<input type="number" min="0" [ngModel]="f.otherAdfsVerds" (ngModelChange)="update('otherAdfsVerds', num($event))" /></label>
@@ -142,35 +142,38 @@
                   <button type="button" class="iv-btn iv-danger" (click)="removeBomber($index)">×</button>
                 </div>
               }
-              <button type="button" class="iv-btn" (click)="addBomber()">+ Vehicle</button>
+              <button type="button" class="iv-add" (click)="addBomber()"><span>+</span> Afegir vehicle</button>
             }
           </section>
 
           <section>
             <h3>Voluntaris que han actuat</h3>
-            <div class="iv-grid">
-              <label>Propis grocs<input type="number" min="0" [ngModel]="f.ownGrocs" (ngModelChange)="update('ownGrocs', num($event))" /></label>
-              <label>Propis verds<input type="number" min="0" [ngModel]="f.ownVerds" (ngModelChange)="update('ownVerds', num($event))" /></label>
-              <label>Addicionals grocs<input type="number" min="0" [ngModel]="f.customGrocs" (ngModelChange)="update('customGrocs', num($event))" /></label>
-              <label>Addicionals verds<input type="number" min="0" [ngModel]="f.customVerds" (ngModelChange)="update('customVerds', num($event))" /></label>
-            </div>
+            @if (vehicleVolunteers().length) {
+              <p class="iv-muted">Actius al vehicle (desmarca els que no han actuat):</p>
+              <div class="iv-checks">
+                @for (v of vehicleVolunteers(); track v.id) {
+                  <label><input type="checkbox" [checked]="!excludedVolunteers().has(v.id)" (change)="toggleVolunteer(v.id, $any($event.target).checked)" /> {{ v.name }}@if (v.nIndicatiu) { · {{ v.nIndicatiu }} } <small>({{ v.isGroc ? 'groc' : 'verd' }})</small></label>
+                }
+              </div>
+            } @else {
+              <div class="iv-grid">
+                <label>Grocs<input type="number" min="0" [ngModel]="f.ownGrocs" (ngModelChange)="update('ownGrocs', num($event))" /></label>
+                <label>Verds<input type="number" min="0" [ngModel]="f.ownVerds" (ngModelChange)="update('ownVerds', num($event))" /></label>
+              </div>
+            }
             <p class="iv-total">Total: {{ totalGrocs() }} grocs · {{ totalVerds() }} verds ({{ totalGrocs() + totalVerds() }})</p>
           </section>
 
           <section>
             <h3>Incendi</h3>
             <div class="iv-grid">
-              <label>Superfície (ha)<input type="number" min="0" step="0.01" [ngModel]="f.surface" (ngModelChange)="update('surface', $event)" /></label>
+              <label>Superfície (m²)<input type="number" min="0" step="1" [ngModel]="f.surface" (ngModelChange)="update('surface', $event)" /></label>
               <label>Tipus
                 <select [ngModel]="f.typeIncendiId" (ngModelChange)="update('typeIncendiId', $event)">
                   <option [ngValue]="null">—</option>
                   @for (t of types(); track t.id) { <option [ngValue]="t.id">{{ t.name }}</option> }
                 </select>
               </label>
-            </div>
-            <div class="iv-row">
-              <input type="text" placeholder="Nou tipus d'incendi" [ngModel]="newTypeName()" (ngModelChange)="newTypeName.set($event)" />
-              <button type="button" class="iv-btn" (click)="addType()">Afegir tipus</button>
             </div>
           </section>
         </div>

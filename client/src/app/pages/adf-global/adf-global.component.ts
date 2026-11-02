@@ -38,7 +38,7 @@ export class AdfGlobalComponent implements OnInit {
   convocatories = signal<AdfConvocatoria[]>([]);
   users = signal<AdfUser[]>([]);
   sortedUsers = computed(() => {
-    const rank = (user: AdfUser) => user.isAdmin ? 0 : user.isCapOperatiu ? 1 : user.isCapColla ? 2 : user.isGroc ? 4 : 3;
+    const rank = (user: AdfUser) => user.isAdmin || user.isSecretariat || user.isDeveloper ? 0 : user.isCapOperatiu ? 1 : user.isCapColla ? 2 : user.isGroc ? 3 : 4;
     return [...this.users()].sort((a, b) => rank(a) - rank(b) || a.nCarnet.localeCompare(b.nCarnet, undefined, { numeric: true }));
   });
   vehicles = signal<AdfVehicle[]>([]);

@@ -265,24 +265,12 @@
             </div>
           }
 
-          <div class="form-group">
-            <label>Data *</label>
-            @if (isIncendiTypeSelected()) {
-              <input
-                type="date"
-                [value]="todayDate"
-                disabled
-              />
-            } @else {
-              <input
-                type="date"
-                [value]="formData().date || ''"
-                (change)="updateFormField('date', $any($event.target).value)"
-                [disabled]="formSubmitting()"
-              />
-            }
-          </div>
-
+          @if (isIncendiTypeSelected()) {
+            <div class="form-group">
+              <label>Data *</label>
+              <input type="date" [value]="todayDate" disabled />
+            </div>
+          }
           <div class="form-group">
             <label>Ubicació Sortida</label>
             <input
@@ -380,56 +368,28 @@
             </div>
           } @else {
             <div class="form-group">
-              <label>Hora d'Inici</label>
-              <div class="time-field">
-                <input
-                  #convoStartTimeInput
-                  type="text"
-                  [value]="formData().startTime || ''"
-                  (input)="updateFormField('startTime', $any($event.target).value)"
-                  [disabled]="formSubmitting()"
-                  placeholder="HH:MM"
-                  maxlength="5"
-                />
-                <button
-                  type="button"
-                  class="time-picker-btn"
-                  title="Obrir selector d'hora"
-                  aria-label="Obrir selector d'hora"
-                  [disabled]="formSubmitting()"
-                  (click)="openTimePicker(convoStartTimeInput, 'startTime')"
-                >
-                  <span class="time-picker-icon" aria-hidden="true"></span>
-                </button>
-              </div>
+              <label>Inici (data i hora) *</label>
+              <input
+                type="datetime-local"
+                step="300"
+                [value]="startDateTimeValue()"
+                (change)="setStartDateTime($any($event.target).value)"
+                [disabled]="formSubmitting()"
+              />
             </div>
 
             <div class="form-group">
               <label>Hora de Fi</label>
-              <div class="time-field">
-                <input
-                  #convoEndTimeInput
-                  type="text"
-                  [value]="formData().finalTime || ''"
-                  (input)="updateFormField('finalTime', $any($event.target).value)"
-                  [disabled]="formSubmitting()"
-                  placeholder="HH:MM"
-                  maxlength="5"
-                />
-                <button
-                  type="button"
-                  class="time-picker-btn"
-                  title="Obrir selector d'hora"
-                  aria-label="Obrir selector d'hora"
-                  [disabled]="formSubmitting()"
-                  (click)="openTimePicker(convoEndTimeInput, 'finalTime')"
-                >
-                  <span class="time-picker-icon" aria-hidden="true"></span>
-                </button>
-              </div>
+              <input
+                type="time"
+                step="300"
+                [min]="formData().startTime || ''"
+                [value]="formData().finalTime || ''"
+                (change)="updateFormField('finalTime', $any($event.target).value)"
+                [disabled]="formSubmitting()"
+              />
             </div>
           }
-
           <div class="form-group">
             <label class="automation-toggle" [class.is-disabled]="formSubmitting()">
               <input

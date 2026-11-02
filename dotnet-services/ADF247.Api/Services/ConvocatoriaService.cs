@@ -153,6 +153,7 @@ public sealed class ConvocatoriaService(
             convo.IsActive = request.IsActive.Value;
             if (reactivating)
             {
+                if (convo.ActualEndTime.HasValue || convo.ActualStartTime.HasValue && convo.StartTime > LocalNow()) convo.ActualStartTime = null;
                 convo.ActualEndTime = null;
                 if (!convo.ActualStartTime.HasValue && convo.FinalTime.HasValue && convo.FinalTime.Value < LocalNow()) convo.FinalTime = null;
             }

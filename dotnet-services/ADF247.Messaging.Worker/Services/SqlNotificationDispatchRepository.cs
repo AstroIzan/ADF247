@@ -299,7 +299,10 @@ public sealed class SqlNotificationDispatchRepository(
                         AND newer.[isActive] = 1
                         AND newer.[invalidatedAt] IS NULL
                         AND newer.[platform] = r.[platform]
-                        AND ISNULL(newer.[userAgent], N'') = ISNULL(r.[userAgent], N'')
+                        AND (
+                            newer.[platform] IN (N'android', N'ios')
+                            OR ISNULL(newer.[userAgent], N'') = ISNULL(r.[userAgent], N'')
+                        )
                         AND (newer.[lastSeenAt] > r.[lastSeenAt]
                             OR (newer.[lastSeenAt] = r.[lastSeenAt] AND newer.[id] > r.[id]))
                 )

@@ -36,7 +36,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
   formOpen = signal(false);
   form = signal<IntervencioPayload>(this.emptyForm());
   manualResponsable = signal(false);
-  newTypeName = signal('');
+  excludedVolunteers = signal<Set<number>>(new Set());
   geocoding = signal(false);
   levelHint = signal('');
   suggestion = signal('');
@@ -46,8 +46,8 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
     const f = this.form();
     return f.latitude != null && f.longitude != null ? `https://www.google.com/maps?q=${f.latitude},${f.longitude}` : '';
   });
-  totalGrocs = computed(() => this.form().ownGrocs + this.form().otherAdfsGrocs + this.form().customGrocs);
-  totalVerds = computed(() => this.form().ownVerds + this.form().otherAdfsVerds + this.form().customVerds);
+  totalGrocs = computed(() => this.form().ownGrocs + this.form().otherAdfsGrocs);
+  totalVerds = computed(() => this.form().ownVerds + this.form().otherAdfsVerds);
 
   private map: L.Map | null = null;
   private marker: L.CircleMarker | null = null;
@@ -100,6 +100,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
   }
 
   private openForm(): void {
+    this.excludedVolunteers.set(new Set());
     this.destroyMap();
     this.suggestion.set('');
     this.levelHint.set('');
@@ -123,7 +124,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
 
   private loadContext(applyDefaults: boolean): void {
     const f = this.form();
-    this.data.getIntervencionsContext({ date: f.date, time: f.noticeTime ?? f.startTime ?? undefined, convocatoriaId: this.convocatoria?.id }).subscribe({
+    this.data.getIntervencionsContext({ date: f.date, time: f.noticeTime ?? f.startTime ?? undefined, convocatoriaId: this.form().convocatoriaId ?? this.convocatoria?.id }).subscribe({
       next: ctx => {
         this.context.set(ctx);
         this.types.set(ctx.types);
@@ -139,7 +140,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
 
   refreshContext(): void {
     const f = this.form();
-    this.data.getIntervencionsContext({ date: f.date, time: f.noticeTime ?? f.startTime ?? undefined, convocatoriaId: this.convocatoria?.id }).subscribe({
+    this.data.getIntervencionsContext({ date: f.date, time: f.noticeTime ?? f.startTime ?? undefined, convocatoriaId: this.form().convocatoriaId ?? this.convocatoria?.id }).subscribe({
       next: ctx => {
         this.context.set(ctx);
         if (!this.convocatoria && !this.editing()) this.applyResponsableSuggestion(ctx);
@@ -178,17 +179,40 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
   }
 
   private applyOwnVehicleTotals(): void {
-    const ctx = this.context();
-    if (!ctx) return;
-    const selected = new Set(this.form().ownVehicles);
-    const match = ctx.convocatoriaVehicles.filter(v => selected.has(v.vehicleName));
+    const volunteers = this.vehicleVolunteers().filter(v => !this.excludedVolunteers().has(v.id));
+    if (!this.vehicleVolunteers().length) return;
     this.form.update(f => ({
       ...f,
-      ownGrocs: match.reduce((s, v) => s + v.grocs, 0),
-      ownVerds: match.reduce((s, v) => s + v.verds, 0),
+      ownGrocs: volunteers.filter(v => v.isGroc).length,
+      ownVerds: volunteers.filter(v => !v.isGroc).length,
     }));
   }
 
+  vehicleVolunteers(): { id: number; nCarnet: string; name: string; nIndicatiu: string | null; isGroc: boolean }[] {
+    const ctx = this.context();
+    if (!ctx) return [];
+    const selected = new Set(this.form().ownVehicles);
+    const seen = new Map<number, { id: number; nCarnet: string; name: string; nIndicatiu: string | null; isGroc: boolean }>();
+    for (const vehicle of ctx.convocatoriaVehicles) {
+      if (!selected.has(vehicle.vehicleName)) continue;
+      for (const volunteer of vehicle.volunteers ?? []) seen.set(volunteer.id, volunteer);
+    }
+    return [...seen.values()];
+  }
+
+  toggleVolunteer(id: number, checked: boolean): void {
+    this.excludedVolunteers.update(set => {
+      const next = new Set(set);
+      if (checked) next.delete(id); else next.add(id);
+      return next;
+    });
+    this.applyOwnVehicleTotals();
+  }
+
+  adfOptions(current?: string | null): string[] {
+    const options = (this.context()?.adfs ?? []).map(adf => `${adf.number} · ${adf.name}`);
+    return current && !options.includes(current) ? [...options, current] : options;
+  }
   vehicleOptions(): string[] {
     const ctx = this.context();
     if (!ctx) return this.form().ownVehicles;
@@ -243,19 +267,6 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
     this.update('bombers', this.form().bombers.filter((_, i) => i !== index));
   }
 
-  addType(): void {
-    const name = this.newTypeName().trim();
-    if (!name) return;
-    this.data.createTypeIncendi(name).subscribe({
-      next: type => {
-        this.types.update(list => list.some(t => t.id === type.id) ? list : [...list, type].sort((a, b) => a.name.localeCompare(b.name)));
-        this.update('typeIncendiId', type.id);
-        this.newTypeName.set('');
-      },
-      error: err => this.error.set(err?.error?.message ?? 'No s\'ha pogut crear el tipus.'),
-    });
-  }
-
   save(): void {
     const f = this.form();
     if (!f.date) { this.error.set('La data és obligatòria.'); return; }
@@ -265,6 +276,8 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
       ...f,
       ownGrocs: f.ownGrocs,
       ownVerds: f.ownVerds,
+      customGrocs: 0,
+      customVerds: 0,
       noticeTime: f.noticeTime || null,
       startTime: f.startTime || null,
       endTime: f.endTime || null,

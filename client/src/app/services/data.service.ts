@@ -849,8 +849,9 @@ export interface IntervencioConvoCandidate {
 export interface IntervencioContext {
   users: { id: number; nCarnet: string; name: string; lastName: string; nIndicatiu: string | null }[];
   types: TypeIncendi[];
+  adfs: { id: number; number: number; name: string }[];
   vehicleCatalog: string[];
   matched: IntervencioConvoCandidate | null;
   candidates: IntervencioConvoCandidate[];
-  convocatoriaVehicles: { vehicleName: string; grocs: number; verds: number }[];
+  convocatoriaVehicles: { vehicleName: string; grocs: number; verds: number; volunteers: { id: number; nCarnet: string; name: string; nIndicatiu: string | null; isGroc: boolean }[] }[];
 }

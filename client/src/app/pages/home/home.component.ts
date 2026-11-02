@@ -3315,6 +3315,33 @@ export class HomeComponent implements OnInit {
     this.closeTimeMenu();
   }
 
+  setCreateConvoStart(value: string) {
+    const [date = '', time = ''] = String(value || '').split('T');
+    if (!date || !time) return;
+    this.updateCreateConvoField('date', date);
+    this.updateCreateConvoField('startTime', time.slice(0, 5));
+    const end = this.createConvoForm().finalTime;
+    if (!end || end <= time.slice(0, 5)) {
+      this.updateCreateConvoField('finalTime', this.addHoursToTime(time.slice(0, 5), 1));
+    }
+  }
+
+  setAdminConvoStart(value: string) {
+    const [date = '', time = ''] = String(value || '').split('T');
+    if (!date || !time) return;
+    this.updateAdminConvoField('date', date);
+    this.updateAdminConvoField('startTime', time.slice(0, 5));
+    const end = this.adminConvoForm().finalTime;
+    if (end && end <= time.slice(0, 5)) {
+      this.updateAdminConvoField('finalTime', this.addHoursToTime(time.slice(0, 5), 1));
+    }
+  }
+
+  private addHoursToTime(time: string, hours: number) {
+    const [h, m] = time.split(':').map(Number);
+    const total = Math.min(h * 60 + m + hours * 60, 23 * 60 + 59);
+    return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+  }
   private normalizeTimeValue(value?: string) {
     if (!value) {
       return '';

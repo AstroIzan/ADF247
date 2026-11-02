@@ -15,6 +15,20 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
+    private static readonly string[] StandardIncendiTypes =
+    [
+        "IF.A – Incendi Forestal d'Arbrat",
+        "IF.M – Incendi Forestal de Matollar",
+        "IF.P – Incendi Forestal de Pastures",
+        "IF.R – Incendi Forestal de Ribera i Canyars",
+        "IV.AGR – Incendi de Vegetació Agrícola",
+        "IV.AGR-C – Camps de Cereals o Restolls",
+        "IV.AGR-F – Arbres Fruiters o Conreus Llenyosos",
+        "IV.URB – Incendi de Vegetació Urbana",
+        "IV.IUF – Incendi d'Interfície Urbano-Forestal",
+        "IV.VIA – Incendi de Marges de Vies de Comunicació",
+    ];
+
     [HttpGet]
     public async Task<IActionResult> List([FromQuery] int? convocatoriaId, [FromQuery] string? date)
     {
@@ -51,7 +65,23 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
             .OrderBy(user => user.NIndicatiu).ThenBy(user => user.Name)
             .Select(user => new { id = user.Id, nCarnet = user.NCarnet, name = user.Name, lastName = user.LastName, nIndicatiu = user.NIndicatiu })
             .ToListAsync();
-        var types = await database.TypeIncendis.AsNoTracking().OrderBy(type => type.Name).Select(type => new { id = type.Id, name = type.Name }).ToListAsync();
+        var existingTypes = await database.TypeIncendis.ToListAsync();
+        var missingTypes = StandardIncendiTypes.Where(name => existingTypes.All(type => type.Name != name)).ToList();
+        if (missingTypes.Count > 0)
+        {
+            foreach (var name in missingTypes)
+            {
+                var created = new TypeIncendi { Name = name };
+                database.TypeIncendis.Add(created);
+                existingTypes.Add(created);
+            }
+            await database.SaveChangesAsync();
+        }
+        var types = existingTypes
+            .Where(type => StandardIncendiTypes.Contains(type.Name))
+            .OrderBy(type => Array.IndexOf(StandardIncendiTypes, type.Name))
+            .Select(type => new { id = type.Id, name = type.Name }).ToList();
+        var adfs = await database.Adfs.AsNoTracking().OrderBy(adf => adf.Number).Select(adf => new { id = adf.Id, number = adf.Number, name = adf.Name }).ToListAsync();
         var vehicleNames = await database.Vehicles.AsNoTracking().OrderBy(vehicle => vehicle.Indicatiu).Select(vehicle => vehicle.Indicatiu).ToListAsync();
 
         object? matched = null;
@@ -93,7 +123,7 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
         object[] convocatoriaVehicles = [];
         if (convocatoriaId.HasValue) convocatoriaVehicles = await ConvocatoriaVehiclesAsync(convocatoriaId.Value);
 
-        return Ok(new { users, types, vehicleCatalog = vehicleNames, matched, candidates, convocatoriaVehicles });
+        return Ok(new { users, types, adfs, vehicleCatalog = vehicleNames, matched, candidates, convocatoriaVehicles });
     }
 
     [HttpGet("convocatoria-vehicles/{convocatoriaId:int}")]
@@ -207,7 +237,7 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
         catch (JsonException) { return []; }
 
         var userIds = vehicles.SelectMany(vehicle => (vehicle.VolunteerUserIds ?? []).Concat(vehicle.ConductorUserId.HasValue ? [vehicle.ConductorUserId.Value] : [])).Distinct().ToList();
-        var carnets = await database.Users.AsNoTracking().Where(user => userIds.Contains(user.Id)).Select(user => new { user.Id, user.NCarnet }).ToListAsync();
+        var carnets = await database.Users.AsNoTracking().Where(user => userIds.Contains(user.Id)).Select(user => new { user.Id, user.NCarnet, user.Name, user.LastName, user.NIndicatiu }).ToListAsync();
         var grocCarnets = (await database.Roles.AsNoTracking().Where(role => role.IsGroc).Select(role => role.NCarnet).ToListAsync()).ToHashSet();
         var grocIds = carnets.Where(item => grocCarnets.Contains(item.NCarnet)).Select(item => item.Id).ToHashSet();
 
@@ -215,7 +245,9 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
         {
             var members = (vehicle.VolunteerUserIds ?? []).Concat(vehicle.ConductorUserId.HasValue ? [vehicle.ConductorUserId.Value] : []).Distinct().ToList();
             var grocs = members.Count(grocIds.Contains);
-            return (object)new { vehicleName = vehicle.VehicleName, grocs, verds = members.Count - grocs };
+            var volunteers = members.Select(id => carnets.FirstOrDefault(item => item.Id == id)).Where(item => item is not null)
+                .Select(item => new { id = item!.Id, nCarnet = item.NCarnet, name = $"{item.Name} {item.LastName}".Trim(), nIndicatiu = item.NIndicatiu, isGroc = grocIds.Contains(item.Id) }).ToList();
+            return (object)new { vehicleName = vehicle.VehicleName, grocs, verds = members.Count - grocs, volunteers };
         }).ToArray();
     }
 

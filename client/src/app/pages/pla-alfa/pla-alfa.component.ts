@@ -147,6 +147,15 @@ export class PlaAlfaComponent implements OnInit {
     return Array.from(options).sort((a, b) => a.localeCompare(b, 'ca'));
   }
 
+  sortedSelectedMunicipalities() {
+    const principal = this.plaAlfaPrincipal();
+    return [...this.plaAlfaSelected()].sort((a, b) => Number(b === principal) - Number(a === principal));
+  }
+
+  sortedPlaAlfaStatus() {
+    return [...this.plaAlfaStatus()].sort((a, b) => Number(!!b.isPrincipal) - Number(!!a.isPrincipal));
+  }
+
   getFilteredPlaAlfaCatalog() {
     const search = this.plaAlfaSearch();
     const comarca = this.plaAlfaComarcaFilter();
@@ -171,6 +180,12 @@ export class PlaAlfaComponent implements OnInit {
 
       if (aSelected !== bSelected) {
         return aSelected - bSelected;
+      }
+
+      const aPrincipal = this.isPrincipalMunicipality(a.municipality) ? 0 : 1;
+      const bPrincipal = this.isPrincipalMunicipality(b.municipality) ? 0 : 1;
+      if (aPrincipal !== bPrincipal) {
+        return aPrincipal - bPrincipal;
       }
 
       return a.municipality.localeCompare(b.municipality, 'ca');

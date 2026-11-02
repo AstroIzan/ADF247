@@ -408,6 +408,24 @@ export class ConvosComponent implements OnDestroy {
     return convoDay >= threshold;
   }
 
+  startDateTimeValue() {
+    const data = this.formData();
+    const date = String(data.date || '').slice(0, 10);
+    return date ? `${date}T${data.startTime || '00:00'}` : '';
+  }
+
+  setStartDateTime(value: string) {
+    const [date = '', time = ''] = String(value || '').split('T');
+    if (!date || !time) return;
+    this.updateFormField('date', date);
+    this.updateFormField('startTime', time.slice(0, 5));
+    const end = this.formData().finalTime;
+    if (end && end <= time.slice(0, 5)) {
+      const [h, m] = time.split(':').map(Number);
+      const total = Math.min(h * 60 + m + 60, 23 * 60 + 59);
+      this.updateFormField('finalTime', `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`);
+    }
+  }
   updateFormField(field: string, value: any) {
     const data = this.formData();
     if (field === 'convoTypeId') {

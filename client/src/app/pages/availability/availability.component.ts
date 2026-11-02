@@ -210,6 +210,12 @@ export class AvailabilityComponent implements OnInit {
       next.toDateTimeMobile = `${next.toDate}T${next.toTime}`;
     }
 
+    if (field === 'fromDateTimeMobile' && next.toDateTimeMobile <= next.fromDateTimeMobile) {
+      next.toDate = next.fromDate;
+      next.toTime = next.fromTime < '20:00' ? '20:00' : '23:59';
+      next.toDateTimeMobile = `${next.toDate}T${next.toTime}`;
+    }
+
     this.form.set(next);
   }
 

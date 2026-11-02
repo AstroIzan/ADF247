@@ -7,5 +7,6 @@ public interface IFirebaseNotificationSender
         string title,
         string body,
         IReadOnlyDictionary<string, string> data,
+        string collapseTag,
         CancellationToken cancellationToken);
 }

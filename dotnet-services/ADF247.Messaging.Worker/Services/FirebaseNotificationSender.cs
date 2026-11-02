@@ -18,6 +18,7 @@ public sealed class FirebaseNotificationSender(
         string title,
         string body,
         IReadOnlyDictionary<string, string> data,
+        string collapseTag,
         CancellationToken cancellationToken)
     {
         _ = EnsureFirebaseApp();
@@ -30,6 +31,8 @@ public sealed class FirebaseNotificationSender(
                 Title = title,
                 Body = body,
             },
+            Webpush = new WebpushConfig { Notification = new WebpushNotification { Title = title, Body = body, Tag = collapseTag } },
+            Android = new AndroidConfig { CollapseKey = collapseTag, Notification = new AndroidNotification { Tag = collapseTag } },
             Data = data?.ToDictionary(pair => pair.Key, pair => pair.Value) ?? new Dictionary<string, string>(),
         };
 

@@ -768,48 +768,25 @@
             </div>
 
             <div class="form-group">
-              <label>Data</label>
+              <label>Inici (data i hora)</label>
               <input
-                type="date"
-                [value]="adminConvoForm().date"
-                (change)="updateAdminConvoField('date', $any($event.target).value)"
+                type="datetime-local"
+                step="300"
+                [value]="adminConvoForm().date + 'T' + adminConvoForm().startTime"
+                (change)="setAdminConvoStart($any($event.target).value)"
               />
             </div>
 
             <div class="form-group">
-              <label>Hora d'inici</label>
-              <div class="time-field">
-                <input
-                  #adminStartTimeInput
-                  type="text"
-                  [value]="adminConvoForm().startTime"
-                  (input)="updateAdminConvoField('startTime', $any($event.target).value)"
-                  placeholder="HH:MM"
-                  maxlength="5"
-                />
-                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminStartTimeInput, 'adminStartTime')">
-                  <span class="time-picker-icon" aria-hidden="true"></span>
-                </button>
-              </div>
-            </div>
-
-            <div class="form-group">
               <label>Hora de fi</label>
-              <div class="time-field">
-                <input
-                  #adminEndTimeInput
-                  type="text"
-                  [value]="adminConvoForm().finalTime"
-                  (input)="updateAdminConvoField('finalTime', $any($event.target).value)"
-                  placeholder="HH:MM"
-                  maxlength="5"
-                />
-                <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(adminEndTimeInput, 'adminEndTime')">
-                  <span class="time-picker-icon" aria-hidden="true"></span>
-                </button>
-              </div>
+              <input
+                type="time"
+                step="300"
+                [min]="adminConvoForm().startTime"
+                [value]="adminConvoForm().finalTime"
+                (change)="updateAdminConvoField('finalTime', $any($event.target).value)"
+              />
             </div>
-
             <div class="form-group">
               <label>Ubicació</label>
               <input
@@ -1390,7 +1367,7 @@
             </div>
           }
 
-          @if (!isWeeklyCreationSelected() && !isIncendiTypeSelected()) {
+          @if (!isWeeklyCreationSelected() && !isIncendiTypeSelected() && isGuardiaTypeSelected()) {
             <div class="form-group">
               <label>Data (dia seleccionat)</label>
               <input
@@ -1582,38 +1559,26 @@
           } @else {
             <div class="form-grid-2">
               <div class="form-group">
-                <label>Hora d'inici</label>
-                <div class="time-field">
-                  <input
-                    #createStartTimeInput
-                    type="time"
-                    step="60"
-                    [value]="createConvoForm().startTime"
-                    (change)="updateCreateConvoField('startTime', $any($event.target).value)"
-                  />
-                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(createStartTimeInput, 'createStartTime')">
-                    <span class="time-picker-icon" aria-hidden="true"></span>
-                  </button>
-                </div>
+                <label>Inici (data i hora)</label>
+                <input
+                  type="datetime-local"
+                  step="300"
+                  [value]="createConvoForm().date + 'T' + createConvoForm().startTime"
+                  (change)="setCreateConvoStart($any($event.target).value)"
+                />
               </div>
               <div class="form-group">
                 <label>Hora de fi</label>
-                <div class="time-field">
-                  <input
-                    #createEndTimeInput
-                    type="time"
-                    step="60"
-                    [value]="createConvoForm().finalTime"
-                    (change)="updateCreateConvoField('finalTime', $any($event.target).value)"
-                  />
-                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(createEndTimeInput, 'createEndTime')">
-                    <span class="time-picker-icon" aria-hidden="true"></span>
-                  </button>
-                </div>
+                <input
+                  type="time"
+                  step="300"
+                  [min]="createConvoForm().startTime"
+                  [value]="createConvoForm().finalTime"
+                  (change)="updateCreateConvoField('finalTime', $any($event.target).value)"
+                />
               </div>
             </div>
           }
-
           <div class="form-group">
             <label>Responsable</label>
             <div class="responsable-picker">
