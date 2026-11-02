@@ -85,7 +85,9 @@ public sealed class ConvocatoriaService(
     {
         if (requests.Count == 0) throw new ArgumentException("Debes enviar al menos una convocatoria.");
         var ids = new List<int>();
-        foreach (var request in requests) ids.Add(await CreateRecordAsync(request));
+        var autoResponded = new List<string>();
+        foreach (var request in requests) ids.Add(await CreateRecordAsync(request, autoResponded));
+        await AutoResponseNotifier.QueueAsync(database, autoResponded, cancellationToken);
         var summary = ids.Count > 1
             ? new ConvocatoriaNotificationRequest("Tens diverses convocatòries per respondre", $"Hi ha {ids.Count} convocatòries noves pendents de resposta.")
             : null;
@@ -101,7 +103,7 @@ public sealed class ConvocatoriaService(
         catch (ArgumentException) { }
     }
 
-    private async Task<int> CreateRecordAsync(ConvocatoriaRequest request)
+    private async Task<int> CreateRecordAsync(ConvocatoriaRequest request, List<string>? autoResponded = null)
     {
         var type = await RequireTypeAsync(request.ConvoTypeId);
         if (request.ResponsableId.HasValue) await RequireUserAsync(request.ResponsableId.Value);
@@ -119,7 +121,9 @@ public sealed class ConvocatoriaService(
         };
         database.Convocatorias.Add(convo);
         await SaveAsync();
-        await calculations.ApplyAvailabilityAsync(convo);
+        var responded = await calculations.ApplyAvailabilityAsync(convo);
+        if (autoResponded is null) await AutoResponseNotifier.QueueAsync(database, responded);
+        else autoResponded.AddRange(responded);
         return convo.Id;
     }
 

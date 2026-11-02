@@ -174,8 +174,10 @@ public sealed class BatchOrchestrator(
             if (created.Count > 0)
             {
                 await database.SaveChangesAsync(cancellationToken);
+                var autoResponded = new List<string>();
                 foreach (var convocatoria in created)
-                    await ApplyAvailabilityAsync(convocatoria, configuration, cancellationToken);
+                    autoResponded.AddRange(await ApplyAvailabilityAsync(convocatoria, configuration, cancellationToken));
+                await AutoResponseNotifier.QueueAsync(database, autoResponded, cancellationToken);
             }
 
             var weekEnd = nextMonday.AddDays(7).ToDateTime(TimeOnly.MinValue);
@@ -431,11 +433,12 @@ public sealed class BatchOrchestrator(
         return notification.Id;
     }
 
-    private async Task ApplyAvailabilityAsync(
+    private async Task<IReadOnlyCollection<string>> ApplyAvailabilityAsync(
         Convocatoria convocatoria,
         SystemConfiguration configuration,
         CancellationToken cancellationToken)
     {
+        var autoResponded = new List<string>();
         var end = convocatoria.FinalTime ?? convocatoria.StartTime.AddMinutes(1);
         var windows = await (
             from window in database.AvailabilityWindows
@@ -464,6 +467,7 @@ public sealed class BatchOrchestrator(
                 Source = "auto-window",
                 AutoAssignReason = automaticResponse.Reason,
             });
+            autoResponded.Add(group.Key);
         }
 
         if (configuration.AutoCreateUnavailableForUsersWithoutWindow)
@@ -491,6 +495,7 @@ public sealed class BatchOrchestrator(
         }
 
         await database.SaveChangesAsync(cancellationToken);
+        return autoResponded;
     }
 
     private static string GetConfigurationKey(string prefix, Convocatoria convocatoria)

@@ -112,7 +112,9 @@ public sealed class AvailabilityService(
             .Where(convo => convo.IsActive && convo.StartTime < window.ToDateTime
                 && (convo.FinalTime == null ? convo.StartTime >= window.FromDateTime : convo.FinalTime > window.FromDateTime))
             .ToListAsync();
-        foreach (var convo in convos) await calculations.ApplyAvailabilityAsync(convo);
+        var autoResponded = new List<string>();
+        foreach (var convo in convos) autoResponded.AddRange(await calculations.ApplyAvailabilityAsync(convo));
+        await AutoResponseNotifier.QueueAsync(database, autoResponded);
 
         return Map(window);
     }

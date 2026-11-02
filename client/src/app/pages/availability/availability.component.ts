@@ -583,14 +583,8 @@ export class AvailabilityComponent implements OnInit {
       fromDateTimeMobile: `${fromDate}T${fromTime}`,
       toDateTimeMobile: `${toDate}T${toTime}`,
     });
+    this.formError.set('');
     this.closeDateModal();
-    // Scroll to form
-    setTimeout(() => {
-      const formElement = document.querySelector('.card');
-      if (formElement) {
-        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 100);
   }
 
   deleteWindowFromModal(windowId: number) {

@@ -6,8 +6,9 @@ namespace ADF247.Api.Services;
 
 public sealed class ConvocatoriaCalculationService(Adf247DbContext database)
 {
-    public async Task ApplyAvailabilityAsync(Convocatoria convocatoria)
+    public async Task<IReadOnlyCollection<string>> ApplyAvailabilityAsync(Convocatoria convocatoria)
     {
+        var autoResponded = new List<string>();
         var systemConfiguration = await database.SystemConfigurations
             .AsNoTracking()
             .SingleOrDefaultAsync(configuration => configuration.Id == 1);
@@ -49,6 +50,7 @@ public sealed class ConvocatoriaCalculationService(Adf247DbContext database)
                 Source = "auto-window",
                 AutoAssignReason = automaticResponse.Reason,
             });
+            autoResponded.Add(group.Key);
         }
 
         if (systemConfiguration?.AutoCreateUnavailableForUsersWithoutWindow == true)
@@ -80,6 +82,7 @@ public sealed class ConvocatoriaCalculationService(Adf247DbContext database)
 
         await database.SaveChangesAsync();
         await RecalculateResponsableAsync(convocatoria.Id);
+        return autoResponded;
     }
 
     public async Task RecalculateResponsableAsync(int convocatoriaId)
