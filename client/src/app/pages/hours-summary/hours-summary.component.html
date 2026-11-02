@@ -15,6 +15,12 @@
     </div>
   </header>
 
+  <nav class="tabs-navigation" aria-label="Seccions del resum">
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'hores'" (click)="activeTab.set('hores')">Hores</button>
+    <button type="button" class="tab-btn" [class.active]="activeTab() === 'intervencions'" (click)="activeTab.set('intervencions')">Intervencions</button>
+  </nav>
+
+  @if (activeTab() === 'hores') {
   @if (error()) {
     <div class="error-alert">{{ error() }}</div>
   } @else if (loading()) {
@@ -91,6 +97,8 @@
       </div>
     </section>
   }
+  }
+\n  @if (activeTab() === 'intervencions') {
   <section class="hours-table-card">
     <div class="hours-table-head">
       <div>
@@ -145,6 +153,7 @@
       </div>
     }
   </section>
+  }
 
   @if (viewIntervencio(); as iv) {
     <div class="hours-overlay" (click)="viewIntervencio.set(null)">
@@ -153,24 +162,57 @@
           <h3>Intervenció · {{ iv.date | date:'dd/MM/yyyy' }}</h3>
           <button type="button" class="eye-btn" (click)="viewIntervencio.set(null)">&times;</button>
         </div>
-        <dl class="iv-detail">
-          <dt>Horari</dt><dd>Avís {{ iv.noticeTime || '—' }} · Inici {{ iv.startTime || '—' }} · Fi {{ iv.endTime || '—' }}</dd>
-          <dt>Responsable</dt><dd>{{ iv.responsableDisplay || '—' }}</dd>
-          <dt>Ubicació</dt><dd>{{ iv.municipality || '—' }}@if (iv.comarca) { · {{ iv.comarca }} }@if (iv.sector) { · {{ iv.sector }} }
-            @if (iv.mapsUrl) { <a [href]="iv.mapsUrl" target="_blank" rel="noopener">Google Maps</a> }</dd>
-          <dt>Tipus d'incendi</dt><dd>{{ intervencioType(iv) }}</dd>
-          <dt>Nivell</dt><dd>{{ iv.level ?? '—' }}</dd>
-          <dt>Superfície</dt><dd>{{ iv.surface != null ? iv.surface + ' m²' : '—' }}</dd>
-          <dt>Vehicles propis</dt><dd>{{ iv.ownVehicles.length ? iv.ownVehicles.join(', ') : '—' }}</dd>
-          <dt>Grocs / Verds</dt><dd>{{ iv.totalGrocs }} / {{ iv.totalVerds }} (propis {{ iv.ownGrocs }} / {{ iv.ownVerds }}, altres ADF {{ iv.otherAdfsGrocs }} / {{ iv.otherAdfsVerds }})</dd>
+        <div class="iv-chips">
+          <span class="iv-chip iv-chip-type">{{ intervencioType(iv) }}</span>
+          @if (iv.level != null) { <span class="iv-chip iv-chip-level">Nivell {{ iv.level }}</span> }
+          @if (iv.surface != null) { <span class="iv-chip">{{ iv.surface }} m²</span> }
+        </div>
+        <div class="iv-grid">
+          <section class="iv-box">
+            <h4>Horari</h4>
+            <div class="iv-times">
+              <div><small>Avís</small><strong>{{ iv.noticeTime || '—' }}</strong></div>
+              <div><small>Inici</small><strong>{{ iv.startTime || '—' }}</strong></div>
+              <div><small>Fi</small><strong>{{ iv.endTime || '—' }}</strong></div>
+            </div>
+          </section>
+          <section class="iv-box">
+            <h4>Ubicació</h4>
+            <p class="iv-main">{{ iv.municipality || 'Sense ubicació' }}</p>
+            @if (iv.comarca || iv.sector) { <p class="iv-sub">{{ iv.comarca }}{{ iv.comarca && iv.sector ? ' · ' : '' }}{{ iv.sector }}</p> }
+            @if (iv.mapsUrl) { <a class="iv-link" [href]="iv.mapsUrl" target="_blank" rel="noopener">Obrir a Google Maps</a> }
+          </section>
+          <section class="iv-box">
+            <h4>Responsable</h4>
+            <p class="iv-main">{{ iv.responsableDisplay || '—' }}</p>
+          </section>
+          <section class="iv-box">
+            <h4>Voluntaris</h4>
+            <div class="iv-times">
+              <div><small>Grocs</small><strong>{{ iv.totalGrocs }}</strong></div>
+              <div><small>Verds</small><strong>{{ iv.totalVerds }}</strong></div>
+            </div>
+            <p class="iv-sub">Propis {{ iv.ownGrocs }}/{{ iv.ownVerds }} · Altres ADF {{ iv.otherAdfsGrocs }}/{{ iv.otherAdfsVerds }}</p>
+          </section>
+          <section class="iv-box iv-wide">
+            <h4>Vehicles propis</h4>
+            @if (iv.ownVehicles.length) {
+              <div class="iv-chips">@for (v of iv.ownVehicles; track v) { <span class="iv-chip">{{ v }}</span> }</div>
+            } @else { <p class="iv-sub">Cap vehicle</p> }
+          </section>
           @if (iv.otherAdfsAttended && iv.otherAdfs.length) {
-            <dt>Altres ADF</dt><dd>@for (e of iv.otherAdfs; track $index) {<span>{{ e.adf }} · {{ e.vehicle }}</span><br>}</dd>
+            <section class="iv-box iv-wide">
+              <h4>Altres ADF</h4>
+              <div class="iv-chips">@for (e of iv.otherAdfs; track $index) { <span class="iv-chip">{{ e.adf }} · {{ e.vehicle }}</span> }</div>
+            </section>
           }
           @if (iv.bombersAttended && iv.bombers.length) {
-            <dt>Bombers</dt><dd>@for (e of iv.bombers; track $index) {<span>{{ e.vehicle }}{{ e.firstIntervention ? ' (primera intervenció)' : '' }}</span><br>}</dd>
+            <section class="iv-box iv-wide">
+              <h4>Bombers</h4>
+              <div class="iv-chips">@for (e of iv.bombers; track $index) { <span class="iv-chip">{{ e.vehicle }}{{ e.firstIntervention ? ' · 1a intervenció' : '' }}</span> }</div>
+            </section>
           }
-        </dl>
-        <div class="iv-detail-actions">
+        </div>        <div class="iv-detail-actions">
           <button type="button" class="btn btn-secondary" (click)="editIntervencio.set(iv); viewIntervencio.set(null)">Editar</button>
         </div>
       </div>

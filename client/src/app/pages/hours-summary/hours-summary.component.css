@@ -312,3 +312,25 @@
 .iv-detail dt{font-weight:700;opacity:.75}
 .iv-detail dd{margin:0;word-break:break-word}
 .iv-detail-actions{display:flex;justify-content:flex-end}
+
+.tabs-navigation{display:flex;gap:6px;overflow-x:auto;margin-bottom:14px;padding:7px;border:1px solid #d8dfe6;border-radius:14px;background:#fff;box-shadow:0 3px 9px rgba(24,34,48,.035)}
+.tab-btn{flex:0 0 auto;border:1px solid transparent;border-radius:9px;background:transparent;color:#536276;cursor:pointer;font:inherit;font-size:13px;font-weight:750;padding:10px 13px}
+.tab-btn:hover{background:#f0f3f6;color:#263243}
+.tab-btn.active{background:#273445;color:#fff;box-shadow:0 3px 7px rgba(28,42,57,.2)}
+.iv-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.iv-box .iv-chips{margin-bottom:0}
+.iv-chip{padding:4px 10px;border-radius:999px;background:#eef1f5;color:#273445;font-size:12px;font-weight:700}
+.iv-chip-type{background:#273445;color:#fff}
+.iv-chip-level{background:#fde8e8;color:#a30824}
+.iv-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.iv-box{border:1px solid #e1e6ec;border-radius:12px;padding:10px 12px;background:#fafbfc;min-width:0}
+.iv-box h4{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:#6b7686}
+.iv-wide{grid-column:1/-1}
+.iv-times{display:flex;gap:16px}
+.iv-times div{display:flex;flex-direction:column}
+.iv-times small{color:#6b7686;font-size:11px}
+.iv-times strong{font-size:18px}
+.iv-main{margin:0;font-weight:700}
+.iv-sub{margin:4px 0 0;color:#6b7686;font-size:13px}
+.iv-link{display:inline-block;margin-top:6px;font-size:13px}
+@media (max-width:600px){.iv-grid{grid-template-columns:1fr}}

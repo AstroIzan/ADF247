@@ -13,6 +13,7 @@ import { IntervencionsModalComponent } from '../../modules/intervencions/interve
   styleUrl: './hours-summary.component.css',
 })
 export class HoursSummaryComponent implements OnInit {
+  activeTab = signal<'hores' | 'intervencions'>('hores');
   intervencions = signal<Intervencio[]>([]);
   intervencionsLoading = signal(false);
   intervencionsError = signal('');
