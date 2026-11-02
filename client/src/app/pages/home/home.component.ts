@@ -147,6 +147,12 @@ export class HomeComponent implements OnInit {
     sortida: false,
   });
 
+  selectedDateLabel = computed(() => {
+    const [y, m, d] = this.selectedDate().split('-').map(Number);
+    const label = new Date(y, m - 1, d).toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  });
+
   monthLabel = computed(() => {
     return new Intl.DateTimeFormat('ca-ES', {
       month: 'long',

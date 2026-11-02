@@ -1,326 +1,265 @@
-<div class="home-container">
-  <header class="home-header">
-    <div class="home-header-left">
-      <h1>Inici</h1>
-      <p>Selecciona una data i revisa les convocatòries del dia.</p>
+<div class="hm-page">
+  <header class="hm-hero">
+    <div class="hm-hero-text">
+      <span class="hm-eyebrow"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Inici</span>
+      <h1>{{ selectedDateLabel() }}</h1>
+      <p>Convocatòries del dia seleccionat</p>
     </div>
 
-    <div class="home-header-actions">
-      @if (authService.isManager()) {
-        <button type="button" class="btn btn-primary" (click)="openCreateConvoModal()">
-          + Crear Convocatòria
+    @if (authService.isManager()) {
+      <div class="hm-hero-actions">
+        <button type="button" class="hm-btn hm-btn-gold" (click)="openCreateConvoModal()">
+          <i class="fa-solid fa-plus" aria-hidden="true"></i> Crear convocatòria
         </button>
         <button
           type="button"
-          class="incendi-shortcut-btn"
+          class="hm-btn hm-btn-fire"
           (click)="openCreateIncendiConvoModal()"
           title="Crear convocatòria d'incendi/sortida"
           aria-label="Crear convocatòria d'incendi/sortida"
         >
-          <img class="incendi-shortcut-icon" src="/icons/fire-button.png" alt="" aria-hidden="true" />
+          <img class="hm-fire-icon" src="/icons/fire-button.png" alt="" aria-hidden="true" />
+          <span>Incendi</span>
         </button>
-      }
-    </div>
+      </div>
+    }
   </header>
 
-  <section class="home-grid">
-    <article class="calendar-card">
-      <h2>Calendari</h2>
-      <div class="calendar-widget">
-        <div class="calendar-toolbar">
-          <button type="button" class="month-btn" (click)="previousMonth()">&lt;</button>
-          <h3>{{ monthLabel() }}</h3>
-          <button type="button" class="month-btn" (click)="nextMonth()">&gt;</button>
-        </div>
+  <section class="hm-grid">
+    <article class="hm-calendar">
+      <div class="hm-cal-bar">
+        <button type="button" class="hm-nav" aria-label="Mes anterior" (click)="previousMonth()">
+          <i class="fa-solid fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <h2>{{ monthLabel() }}</h2>
+        <button type="button" class="hm-nav" aria-label="Mes següent" (click)="nextMonth()">
+          <i class="fa-solid fa-chevron-right" aria-hidden="true"></i>
+        </button>
+      </div>
 
-        <div class="weekdays">
-          @for (day of weekDays; track day) {
-            <span>{{ day }}</span>
-          }
-        </div>
+      <div class="hm-weekdays">
+        @for (day of weekDays; track day) {
+          <span>{{ day }}</span>
+        }
+      </div>
 
-        <div class="days-grid">
-          @for (cell of calendarDays(); track cell.key) {
-            @let daySummary = getDaySummary(cell.key);
-            @let dayAvailability = getDayAvailability(cell.key);
-            <button
-              type="button"
-              class="day-cell"
-              [class.out-month]="!cell.inCurrentMonth"
-              [class.selected]="cell.isSelected"
-              [class.today]="cell.isToday"
-              [class.day-closed]="dayAvailability.total > 0 && dayAvailability.open === 0"
-              (click)="selectCalendarDate(cell.date)"
-            >
-              <span class="day-number">{{ cell.date.getDate() }}</span>
+      <div class="hm-days">
+        @for (cell of calendarDays(); track cell.key) {
+          @let daySummary = getDaySummary(cell.key);
+          @let dayAvailability = getDayAvailability(cell.key);
+          <button
+            type="button"
+            class="hm-day"
+            [class.is-out]="!cell.inCurrentMonth"
+            [class.is-selected]="cell.isSelected"
+            [class.is-today]="cell.isToday"
+            [class.is-closed]="dayAvailability.total > 0 && dayAvailability.open === 0"
+            (click)="selectCalendarDate(cell.date)"
+          >
+            <span class="hm-day-num">{{ cell.date.getDate() }}</span>
 
-              @if (dayAvailability.total > 0) {
-                <span class="day-markers" title="{{ daySummary.pending }} pendents / {{ daySummary.responded }} respostes / {{ dayAvailability.closed }} tancades">
-                  @if (dayAvailability.open === 0) {
-                    <span class="marker marker-closed" aria-label="Tancada">{{ dayAvailability.closed }}</span>
-                  } @else {
-                    @if (daySummary.pending > 0) {
-                      <span class="marker marker-pending" aria-label="Pendent">{{ daySummary.pending }}</span>
-                    }
-                    @if (daySummary.responded > 0) {
-                      <span class="marker marker-responded" aria-label="Resposta rebuda">{{ daySummary.responded }}</span>
-                    }
+            @if (dayAvailability.total > 0) {
+              <span class="hm-day-marks" title="{{ daySummary.pending }} pendents / {{ daySummary.responded }} respostes / {{ dayAvailability.closed }} tancades">
+                @if (dayAvailability.open === 0) {
+                  <span class="hm-mark hm-mark-closed" aria-label="Tancada">{{ dayAvailability.closed }}</span>
+                } @else {
+                  @if (daySummary.pending > 0) {
+                    <span class="hm-mark hm-mark-pending" aria-label="Pendent">{{ daySummary.pending }}</span>
                   }
-                </span>
-              }
-            </button>
-          }
-        </div>
+                  @if (daySummary.responded > 0) {
+                    <span class="hm-mark hm-mark-responded" aria-label="Resposta rebuda">{{ daySummary.responded }}</span>
+                  }
+                }
+              </span>
+            }
+          </button>
+        }
+      </div>
 
-        <div class="calendar-legend">
-          <span class="legend-item legend-pending"><span class="legend-dot"></span>Pendents</span>
-          <span class="legend-item legend-responded"><span class="legend-dot"></span>Respostes rebudes</span>
-          <span class="legend-item legend-closed"><span class="legend-dot"></span>Tancades</span>
-        </div>
+      <div class="hm-legend">
+        <span><i class="hm-dot hm-dot-pending"></i>Pendents</span>
+        <span><i class="hm-dot hm-dot-responded"></i>Respostes</span>
+        <span><i class="hm-dot hm-dot-closed"></i>Tancades</span>
       </div>
     </article>
 
-    <article class="convos-card">
-      <h2>Convocatòries del dia</h2>
+    <section class="hm-convos">
+      <div class="hm-convos-head">
+        <h2>Convocatòries</h2>
+        @if (!loading() && !error()) {
+          <span class="hm-count">{{ dayConvos().length }}</span>
+        }
+      </div>
 
       @if (loading()) {
         <div class="loading">Carregant convocatòries...</div>
       } @else if (error()) {
         <div class="error-alert">{{ error() }}</div>
       } @else if (dayConvos().length === 0) {
-        <div class="empty-state">No hi ha convocatòries per a aquest dia.</div>
+        <div class="hm-empty">
+          <i class="fa-regular fa-calendar-check" aria-hidden="true"></i>
+          <p>No hi ha convocatòries per a aquest dia.</p>
+        </div>
       } @else {
         @if (adminActionFeedback()) {
           <div class="success-alert">{{ adminActionFeedback() }}</div>
         }
-        <div class="convos-list-scroll" [class.scroll-active]="dayConvos().length > 3">
-          <ul class="convos-list">
-            @for (convo of dayConvos(); track convo.id) {
-              @let roleSummary = getConvocatoriaRoleSummary(convo.id);
-              <li [class.convo-locked]="isConvocatoriaClosed(convo)">
-                <div class="convo-top">
-                  <h3>{{ convo.title }}</h3>
-                  <div class="convo-top-right">
-                    @if (canManageConvocatoriaLifecycle(convo) || canOpenGuardiaResponses(convo)) {
-                      @if (canManageConvocatoriaLifecycle(convo)) {
-                      <button
-                        type="button"
-                        class="admin-convo-btn"
-                        (click)="openAdminConvoModal(convo)"
-                        title="Gestionar convocatòria"
-                      >
-                        ✎
-                      </button>
-                      <button
-                        type="button"
-                        class="admin-convo-btn admin-convo-forms"
-                        (click)="openCampaignRecordsModal(convo)"
-                        title="Gestionar formularis de campanya"
-                        aria-label="Gestionar formularis de campanya"
-                      >
-                        📝
-                      </button>
-                      }
 
-                      @if (canOpenGuardiaResponses(convo)) {
-                        <button
-                          type="button"
-                          class="admin-convo-btn admin-convo-responses"
-                          (click)="openGuardiaResponsesModal(convo)"
-                          title="Veure respostes positives"
-                          aria-label="Veure respostes positives"
-                        >
-                          👥
-                        </button>
-                      }
-                    }
+        <div class="hm-list">
+          @for (convo of dayConvos(); track convo.id) {
+            @let roleSummary = getConvocatoriaRoleSummary(convo.id);
+            @let myRespuesta = getMyRespuesta(convo.id);
+            <article
+              class="hm-card"
+              [class.is-locked]="isConvocatoriaClosed(convo)"
+              [class.is-yes]="myRespuesta?.response === true"
+              [class.is-no]="myRespuesta?.response === false"
+            >
+              <div class="hm-card-head">
+                <h3>{{ convo.title }}</h3>
+                @if (isResponseWindowClosed(convo) && !myRespuesta) {
+                  <span class="hm-status hm-status-no">No disponible</span>
+                } @else {
+                  <span class="hm-status" [class.hm-status-yes]="myRespuesta?.response === true" [class.hm-status-no]="myRespuesta?.response === false">
+                    {{ getMyRespuestaLabel(convo.id) }}
+                  </span>
+                }
+              </div>
 
-                    @if (authService.isManager() && !isResponseWindowClosed(convo)) {
-                      <button
-                        type="button"
-                        class="admin-convo-btn"
-                        [disabled]="isRunningConvoAdminAction('notify', convo.id)"
-                        (click)="sendResponseRequestNotification(convo)"
-                        title="Notificar i demanar resposta"
-                        aria-label="Notificar i demanar resposta"
-                      >
-                        🔔
-                      </button>
-                    }
-
-                    @if (isResponseWindowClosed(convo) && !getMyRespuesta(convo.id)) {
-                      <span class="answer-status unavailable">No disponible</span>
-                    } @else {
-                      <span
-                        class="answer-status"
-                        [class.available]="getMyRespuesta(convo.id)?.response === true"
-                        [class.unavailable]="getMyRespuesta(convo.id)?.response === false"
-                      >
-                        {{ getMyRespuestaLabel(convo.id) }}
-                      </span>
-                    }
-                  </div>
+              @if (canManageConvocatoriaLifecycle(convo) || canOpenGuardiaResponses(convo) || (authService.isManager() && !isResponseWindowClosed(convo))) {
+                <div class="hm-tools">
+                  @if (canManageConvocatoriaLifecycle(convo)) {
+                    <button type="button" class="hm-tool" (click)="openAdminConvoModal(convo)" title="Gestionar convocatòria">
+                      <i class="fa-solid fa-pen" aria-hidden="true"></i><span>Editar</span>
+                    </button>
+                    <button type="button" class="hm-tool" (click)="openCampaignRecordsModal(convo)" title="Gestionar formularis de campanya" aria-label="Gestionar formularis de campanya">
+                      <i class="fa-regular fa-file-lines" aria-hidden="true"></i><span>Formularis</span>
+                    </button>
+                  }
+                  @if (canOpenGuardiaResponses(convo)) {
+                    <button type="button" class="hm-tool" (click)="openGuardiaResponsesModal(convo)" title="Veure respostes positives" aria-label="Veure respostes positives">
+                      <i class="fa-solid fa-user-group" aria-hidden="true"></i><span>Respostes</span>
+                    </button>
+                  }
+                  @if (authService.isManager() && !isResponseWindowClosed(convo)) {
+                    <button
+                      type="button"
+                      class="hm-tool"
+                      [disabled]="isRunningConvoAdminAction('notify', convo.id)"
+                      (click)="sendResponseRequestNotification(convo)"
+                      title="Notificar i demanar resposta"
+                      aria-label="Notificar i demanar resposta"
+                    >
+                      <i class="fa-regular fa-bell" aria-hidden="true"></i><span>Notificar</span>
+                    </button>
+                  }
                 </div>
-                <p><strong>Responsable:</strong> {{ getConvocatoriaResponsableName(convo) }}</p>
-                <p><strong>Ubicació:</strong> {{ convo.ubiSortida }}</p>
-                <div class="convo-meta-row convo-meta-row-end">
-                  <p class="convo-time-text">
-                    <strong>Horari:</strong>
-                    <span class="convo-time-value">{{ convo.startTime | date:'shortTime' }}</span>
+              }
+
+              <ul class="hm-meta">
+                <li><i class="fa-solid fa-user-shield" aria-hidden="true"></i><span class="hm-meta-label">Responsable</span><strong>{{ getConvocatoriaResponsableName(convo) }}</strong></li>
+                <li><i class="fa-solid fa-location-dot" aria-hidden="true"></i><span class="hm-meta-label">Ubicació</span><strong>{{ convo.ubiSortida }}</strong></li>
+                <li>
+                  <i class="fa-regular fa-clock" aria-hidden="true"></i><span class="hm-meta-label">Horari</span>
+                  <strong>
+                    {{ convo.startTime | date:'shortTime' }}
                     @if (convo.finalTime) {
-                      <span class="convo-time-separator">a</span>
-                      <span class="convo-time-value">{{ convo.finalTime | date:'shortTime' }}</span>
+                      – {{ convo.finalTime | date:'shortTime' }}
                     }
-                  </p>
-                </div>
-                <p class="convo-sortida-row">
-                  @if (!canManageConvocatoriaLifecycle(convo) && !hasServiceStarted(convo)) {
-                    <span class="convo-sortida-label-group">
-                      <strong>Sortida:</strong>
-                      <span class="sortida-pill" [class.sortida-pill-on]="convo.sortida" [class.sortida-pill-off]="!convo.sortida">
-                        {{ getSortidaBadgeLabel(convo.sortida) }}
-                      </span>
-                    </span>
+                  </strong>
+                </li>
+              </ul>
+
+              <div class="hm-badges">
+                @if (!canManageConvocatoriaLifecycle(convo) && !hasServiceStarted(convo)) {
+                  <span class="hm-sortida" [class.is-on]="convo.sortida">
+                    <i class="fa-solid fa-truck-fast" aria-hidden="true"></i> Sortida: {{ getSortidaBadgeLabel(convo.sortida) }}
+                  </span>
+                }
+                @if (canViewConvocatoriaSummary(convo)) {
+                  <div class="hm-counters" [class.is-disabled]="isResponseWindowClosed(convo)">
+                    <span class="hm-counter hm-counter-green" title="No groc">{{ roleSummary.noGroc }}</span>
+                    <span class="hm-counter hm-counter-yellow" title="Groc">{{ roleSummary.groc }}</span>
+                  </div>
+                }
+              </div>
+
+              @if (canManageConvocatoriaLifecycle(convo)) {
+                <div class="hm-manage">
+                  @if (getLifecycleAction(convo); as lifecycleAction) {
+                    <button
+                      type="button"
+                      class="hm-manage-btn hm-manage-primary"
+                      [disabled]="isRunningConvoAdminAction(lifecycleAction, convo.id)"
+                      (click)="onLifecycleAction(convo)"
+                      [title]="getLifecycleActionLabel(convo)"
+                    >
+                      {{ getLifecycleActionLabel(convo) }}
+                    </button>
                   }
-
-                  @if (canViewConvocatoriaSummary(convo)) {
-                    <div class="convo-response-counters convo-response-counters-mobile" [class.disabled]="isResponseWindowClosed(convo)">
-                      <span class="response-counter response-counter-green" title="No groc">
-                        {{ roleSummary.noGroc }}
-                      </span>
-                      <span class="response-counter response-counter-yellow" title="Groc">
-                        {{ roleSummary.groc }}
-                      </span>
-                    </div>
-                  }
-                </p>
-
-                <div class="convo-bottom-row">
-                  @if (canViewConvocatoriaSummary(convo)) {
-                    <div class="convo-response-counters convo-response-counters-desktop" [class.disabled]="isResponseWindowClosed(convo)">
-                      <span class="response-counter response-counter-green" title="No groc">
-                        {{ roleSummary.noGroc }}
-                      </span>
-                      <span class="response-counter response-counter-yellow" title="Groc">
-                        {{ roleSummary.groc }}
-                      </span>
-                    </div>
-                  }
-
-                  @if (getMyRespuesta(convo.id); as myRespuesta) {
-                    <div class="answer-actions-wrap">
-                      @if (canManageConvocatoriaLifecycle(convo)) {
-                        <div class="convo-management-actions">
-                          @if (getLifecycleAction(convo); as lifecycleAction) {
-                            <button
-                              type="button"
-                              class="admin-convo-btn admin-convo-lifecycle"
-                              [disabled]="isRunningConvoAdminAction(lifecycleAction, convo.id)"
-                              (click)="onLifecycleAction(convo)"
-                              [title]="getLifecycleActionLabel(convo)"
-                            >
-                              {{ getLifecycleActionLabel(convo) }}
-                            </button>
-                          }
-
-                          @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
-                            <button
-                              type="button"
-                              class="admin-convo-btn admin-convo-sortida-toggle"
-                              [class.sortida-action-enable]="!convo.sortida"
-                              [class.sortida-action-disable]="convo.sortida"
-                              [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
-                              (click)="toggleConvoSortida(convo)"
-                              [title]="getSortidaBadgeLabel(convo.sortida)"
-                              [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
-                            >
-                              {{ getSortidaBadgeLabel(convo.sortida) }}
-                            </button>
-                          }
-                        </div>
-                      }
-
-                      @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
-                        <div class="answer-actions answer-actions-answered">
-                          <button
-                            type="button"
-                            class="btn btn-edit btn-xs"
-                            [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
-                            (click)="openCustomModal(convo)"
-                          >
-                            Modificar
-                          </button>
-                        </div>
-                      }
-                    </div>
-                  } @else {
-                    <div class="answer-actions-wrap">
-                      @if (canManageConvocatoriaLifecycle(convo)) {
-                        <div class="convo-management-actions">
-                          @if (getLifecycleAction(convo); as lifecycleAction) {
-                            <button
-                              type="button"
-                              class="admin-convo-btn admin-convo-lifecycle"
-                              [disabled]="isRunningConvoAdminAction(lifecycleAction, convo.id)"
-                              (click)="onLifecycleAction(convo)"
-                              [title]="getLifecycleActionLabel(convo)"
-                            >
-                              {{ getLifecycleActionLabel(convo) }}
-                            </button>
-                          }
-
-                          @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
-                            <button
-                              type="button"
-                              class="admin-convo-btn admin-convo-sortida-toggle"
-                              [class.sortida-action-enable]="!convo.sortida"
-                              [class.sortida-action-disable]="convo.sortida"
-                              [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
-                              (click)="toggleConvoSortida(convo)"
-                              [title]="getSortidaBadgeLabel(convo.sortida)"
-                              [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
-                            >
-                              {{ getSortidaBadgeLabel(convo.sortida) }}
-                            </button>
-                          }
-                        </div>
-                      }
-
-                      <div class="answer-actions">
-                        <button
-                          type="button"
-                          class="btn btn-primary btn-sm"
-                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
-                          (click)="respondToConvocatoria(convo.id, true)"
-                        >
-                          ACCEPTAR
-                        </button>
-                        <button
-                          type="button"
-                          class="btn btn-secondary btn-sm"
-                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
-                          (click)="respondToConvocatoria(convo.id, false)"
-                        >
-                          REBUTJAR
-                        </button>
-                        <button
-                          type="button"
-                          class="btn btn-edit btn-sm"
-                          [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
-                          (click)="openCustomModal(convo)"
-                        >
-                          PERSONALITZAR
-                        </button>
-                      </div>
-                    </div>
+                  @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
+                    <button
+                      type="button"
+                      class="hm-manage-btn"
+                      [class.is-enable]="!convo.sortida"
+                      [class.is-disable]="convo.sortida"
+                      [disabled]="isRunningConvoAdminAction('sortida', convo.id) || isConvocatoriaClosed(convo)"
+                      (click)="toggleConvoSortida(convo)"
+                      [title]="getSortidaBadgeLabel(convo.sortida)"
+                      [attr.aria-label]="getSortidaBadgeLabel(convo.sortida)"
+                    >
+                      {{ getSortidaBadgeLabel(convo.sortida) }}
+                    </button>
                   }
                 </div>
-              </li>
-            }
-          </ul>
+              }
+
+              @if (myRespuesta) {
+                @if (!hasServiceStarted(convo) && !isConvocatoriaClosed(convo)) {
+                  <div class="hm-answer">
+                    <button
+                      type="button"
+                      class="hm-answer-btn hm-answer-edit hm-answer-wide"
+                      [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
+                      (click)="openCustomModal(convo)"
+                    >
+                      <i class="fa-solid fa-pen" aria-hidden="true"></i> Modificar resposta
+                    </button>
+                  </div>
+                }
+              } @else {
+                <div class="hm-answer">
+                  <button
+                    type="button"
+                    class="hm-answer-btn hm-answer-yes"
+                    [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
+                    (click)="respondToConvocatoria(convo.id, true)"
+                  >
+                    <i class="fa-solid fa-check" aria-hidden="true"></i> Acceptar
+                  </button>
+                  <button
+                    type="button"
+                    class="hm-answer-btn hm-answer-no"
+                    [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
+                    (click)="respondToConvocatoria(convo.id, false)"
+                  >
+                    <i class="fa-solid fa-xmark" aria-hidden="true"></i> Rebutjar
+                  </button>
+                  <button
+                    type="button"
+                    class="hm-answer-btn hm-answer-edit hm-answer-wide"
+                    [disabled]="respondingConvoId() === convo.id || isResponseWindowClosed(convo)"
+                    (click)="openCustomModal(convo)"
+                  >
+                    <i class="fa-solid fa-sliders" aria-hidden="true"></i> Personalitzar
+                  </button>
+                </div>
+              }
+            </article>
+          }
         </div>
       }
-    </article>
+    </section>
   </section>
 
   @if (showCustomModal() && customConvo()) {
