@@ -499,6 +499,10 @@ export class DataService {
     return this.http.get<AdfUser[]>(`/adf/${id}/users`);
   }
 
+  createAdfVehicle(id: number, data: { indicatiu: string; modelo?: string; matricula?: string; litres?: number; kms?: number }): Observable<AdfVehicle> {
+    return this.http.post<AdfVehicle>(`/adf/${id}/vehicles`, data);
+  }
+
   // === USERS ===
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>('/users');

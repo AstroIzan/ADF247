@@ -37,7 +37,17 @@ export class AdfGlobalComponent implements OnInit {
   detailLoading = signal(false);
   convocatories = signal<AdfConvocatoria[]>([]);
   users = signal<AdfUser[]>([]);
+  sortedUsers = computed(() => {
+    const rank = (user: AdfUser) => user.isAdmin ? 0 : user.isCapOperatiu ? 1 : user.isCapColla ? 2 : user.isGroc ? 4 : 3;
+    return [...this.users()].sort((a, b) => rank(a) - rank(b) || a.nCarnet.localeCompare(b.nCarnet, undefined, { numeric: true }));
+  });
   vehicles = signal<AdfVehicle[]>([]);
+
+  showUserForm = signal(false);
+  showVehicleForm = signal(false);
+  detailSaving = signal(false);
+  userForm = this.emptyUserForm();
+  vehicleForm = this.emptyVehicleForm();
   summary = computed(() => {
     const adf = this.selected();
     return adf ? this.overview().find((row) => row.adf.id === adf.id) ?? null : null;
@@ -133,11 +143,98 @@ export class AdfGlobalComponent implements OnInit {
   select(adf: Adf) {
     this.selected.set(adf);
     this.detailTab.set('usuaris');
+    this.showUserForm.set(false);
+    this.showVehicleForm.set(false);
     this.loadDetail(adf);
   }
 
   setTab(tab: DetailTab) {
     this.detailTab.set(tab);
+    this.showUserForm.set(false);
+    this.showVehicleForm.set(false);
+  }
+
+  private emptyUserForm() {
+    return { nCarnet: '', name: '', lastName: '', nIndicatiu: '', password: '', isGroc: false, isCapColla: false, isCapOperatiu: false };
+  }
+
+  private emptyVehicleForm() {
+    return { indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 };
+  }
+
+  openUserForm() {
+    this.userForm = this.emptyUserForm();
+    this.showUserForm.set(true);
+  }
+
+  openVehicleForm() {
+    this.vehicleForm = this.emptyVehicleForm();
+    this.showVehicleForm.set(true);
+  }
+
+  saveUser() {
+    const adf = this.selected();
+    const form = this.userForm;
+    if (!adf) return;
+    if (!form.nCarnet.trim() || !form.name.trim() || !form.password) {
+      this.error.set('Carnet, nom i contrasenya són obligatoris.');
+      return;
+    }
+    this.detailSaving.set(true);
+    this.error.set('');
+    this.dataService.createUser({
+      nCarnet: form.nCarnet.trim(),
+      name: form.name.trim(),
+      lastName: form.lastName.trim() || undefined,
+      nIndicatiu: form.nIndicatiu.trim() || undefined,
+      password: form.password,
+      isActive: true,
+      adfId: adf.id,
+      roles: { isGroc: form.isGroc, isCapColla: form.isCapColla, isCapOperatiu: form.isCapOperatiu },
+    } as any).subscribe({
+      next: () => {
+        this.detailSaving.set(false);
+        this.showUserForm.set(false);
+        this.notice.set('Usuari creat.');
+        this.loadDetail(adf);
+        this.load();
+      },
+      error: (err) => {
+        this.detailSaving.set(false);
+        this.error.set(err?.error?.message || 'No s\'ha pogut crear l\'usuari.');
+      },
+    });
+  }
+
+  saveVehicle() {
+    const adf = this.selected();
+    const form = this.vehicleForm;
+    if (!adf) return;
+    if (!form.indicatiu.trim()) {
+      this.error.set('L\'indicatiu del vehicle és obligatori.');
+      return;
+    }
+    this.detailSaving.set(true);
+    this.error.set('');
+    this.dataService.createAdfVehicle(adf.id, {
+      indicatiu: form.indicatiu.trim(),
+      modelo: form.modelo.trim(),
+      matricula: form.matricula.trim(),
+      litres: Number(form.litres) || 0,
+      kms: Number(form.kms) || 0,
+    }).subscribe({
+      next: () => {
+        this.detailSaving.set(false);
+        this.showVehicleForm.set(false);
+        this.notice.set('Vehicle creat.');
+        this.loadDetail(adf);
+        this.load();
+      },
+      error: (err) => {
+        this.detailSaving.set(false);
+        this.error.set(err?.error?.message || 'No s\'ha pogut crear el vehicle.');
+      },
+    });
   }
 
   private loadDetail(adf: Adf) {

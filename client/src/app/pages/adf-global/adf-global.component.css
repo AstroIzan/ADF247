@@ -56,6 +56,12 @@
 .role-badge.dark { background: #374151; color: #fff; }
 .role-badge.cyan { background: #cffafe; color: #155e75; }
 .adf-modal-overlay { position: fixed; inset: 0; background: rgba(18,25,35,.58); z-index: 1400; }
+.adf-modal-overlay.adf-modal-top { z-index: 1500; }
+.adf-modal.adf-modal-top { z-index: 1501; }
+.adf-tab-actions { display: flex; justify-content: flex-end; }
+.adf-subform { padding: 12px; border: 1px solid #d9e0e7; border-radius: 12px; background: #f6f8fa; }
+.adf-checks { display: flex; flex-wrap: wrap; gap: 14px; }
+.adf-checks .adf-check { display: flex; align-items: center; gap: 6px; }
 .adf-modal { position: fixed; z-index: 1401; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(820px, calc(100vw - 24px)); max-height: calc(100vh - 24px); display: flex; flex-direction: column; background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 24px 48px rgba(0,0,0,.28); }
 .adf-modal-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: #273445; color: #fff; }
 .adf-modal-head h2 { margin: 0; font-size: 1.1rem; }

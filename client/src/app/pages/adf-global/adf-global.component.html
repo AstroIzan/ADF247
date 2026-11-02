@@ -48,9 +48,15 @@
   </div>
 
   @if (editing()) {
-    <div class="adf-card">
-      <h2>{{ editingId() ? 'Editar ADF' : 'Nova ADF' }}</h2>
-      <div class="adf-form">
+    <div class="adf-modal-overlay adf-modal-top" (click)="closeForm()"></div>
+    <section class="adf-modal adf-modal-top" role="dialog" [attr.aria-label]="editingId() ? 'Editar ADF' : 'Nova ADF'">
+      <header class="adf-modal-head">
+        <h2>{{ editingId() ? 'Editar ADF' : 'Nova ADF' }}</h2>
+        <button class="adf-modal-close" (click)="closeForm()" aria-label="Tancar">&times;</button>
+      </header>
+      <div class="adf-modal-body">
+        @if (error()) { <div class="adf-alert adf-alert-error">{{ error() }}</div> }
+        <div class="adf-form">
         <label>Número
           <input type="number" min="1" [ngModel]="formNumber()" (ngModelChange)="formNumber.set($event)" />
         </label>
@@ -80,11 +86,12 @@
           </div>
         </div>
       </div>
-      <div class="adf-form-actions">
-        <button class="adf-btn" (click)="closeForm()" [disabled]="saving()">Cancel·lar</button>
-        <button class="adf-btn adf-btn-primary" (click)="save()" [disabled]="saving()">Desar</button>
+        <div class="adf-form-actions">
+          <button class="adf-btn" (click)="closeForm()" [disabled]="saving()">Cancel·lar</button>
+          <button class="adf-btn adf-btn-primary" (click)="save()" [disabled]="saving()">Desar</button>
+        </div>
       </div>
-    </div>
+    </section>
   }
 
   @if (selected(); as adf) {
@@ -106,11 +113,28 @@
               <div><strong>{{ s.users }}</strong><span>Usuaris</span></div>
             </div>
           }
+          @if (error()) { <div class="adf-alert adf-alert-error">{{ error() }}</div> }
           <div class="adf-tabs">
             <button [class.active]="detailTab() === 'usuaris'" (click)="setTab('usuaris')">Voluntaris ({{ users().length }})</button>
             <button [class.active]="detailTab() === 'vehicles'" (click)="setTab('vehicles')">Vehicles ({{ vehicles().length }})</button>
           </div>
           @if (detailTab() === 'vehicles') {
+            <div class="adf-tab-actions"><button class="adf-btn adf-btn-small adf-btn-primary" (click)="openVehicleForm()">Nou vehicle</button></div>
+            @if (showVehicleForm()) {
+              <div class="adf-subform">
+                <div class="adf-form">
+                  <label>Indicatiu<input type="text" [(ngModel)]="vehicleForm.indicatiu" /></label>
+                  <label>Model<input type="text" [(ngModel)]="vehicleForm.modelo" /></label>
+                  <label>Matrícula<input type="text" [(ngModel)]="vehicleForm.matricula" /></label>
+                  <label>Litres<input type="number" min="0" [(ngModel)]="vehicleForm.litres" /></label>
+                  <label>Kms<input type="number" min="0" [(ngModel)]="vehicleForm.kms" /></label>
+                </div>
+                <div class="adf-form-actions">
+                  <button class="adf-btn" (click)="showVehicleForm.set(false)" [disabled]="detailSaving()">Cancel·lar</button>
+                  <button class="adf-btn adf-btn-primary" (click)="saveVehicle()" [disabled]="detailSaving()">Crear vehicle</button>
+                </div>
+              </div>
+            }
             @if (!vehicles().length) { <p>Sense vehicles.</p> } @else {
               <div class="adf-table-wrap"><table class="adf-table">
                 <thead><tr><th>Indicatiu</th><th>Model</th><th>Matrícula</th><th>Litres</th></tr></thead>
@@ -127,11 +151,32 @@
               </table></div>
             }
           } @else {
+            <div class="adf-tab-actions"><button class="adf-btn adf-btn-small adf-btn-primary" (click)="openUserForm()">Nou usuari</button></div>
+            @if (showUserForm()) {
+              <div class="adf-subform">
+                <div class="adf-form">
+                  <label>Carnet<input type="text" placeholder="247/GI/1 (groc) o 247/1 (verd)" [(ngModel)]="userForm.nCarnet" /></label>
+                  <label>Nom<input type="text" [(ngModel)]="userForm.name" /></label>
+                  <label>Cognoms<input type="text" [(ngModel)]="userForm.lastName" /></label>
+                  <label>Indicatiu<input type="text" [(ngModel)]="userForm.nIndicatiu" /></label>
+                  <label>Contrasenya<input type="text" [(ngModel)]="userForm.password" /></label>
+                  <div class="adf-wide adf-checks">
+                    <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isGroc" /> Groc</label>
+                    <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isCapColla" /> Cap de Colla</label>
+                    <label class="adf-check"><input type="checkbox" [(ngModel)]="userForm.isCapOperatiu" /> Cap Operatiu</label>
+                  </div>
+                </div>
+                <div class="adf-form-actions">
+                  <button class="adf-btn" (click)="showUserForm.set(false)" [disabled]="detailSaving()">Cancel·lar</button>
+                  <button class="adf-btn adf-btn-primary" (click)="saveUser()" [disabled]="detailSaving()">Crear usuari</button>
+                </div>
+              </div>
+            }
             @if (!users().length) { <p>Sense usuaris.</p> } @else {
               <div class="adf-table-wrap"><table class="adf-table">
                 <thead><tr><th>Carnet</th><th>Nom</th><th>Rols</th><th>Estat</th></tr></thead>
                 <tbody>
-                  @for (user of users(); track user.id) {
+                  @for (user of sortedUsers(); track user.id) {
                     <tr>
                       <td>{{ user.nCarnet }}@if (user.nIndicatiu) { · {{ user.nIndicatiu }} }</td>
                       <td>{{ user.name }} {{ user.lastName }}</td>

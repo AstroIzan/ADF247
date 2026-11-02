@@ -191,6 +191,30 @@ public sealed class AdfController(Adf247DbContext database, CurrentAdf currentAd
         return Ok(items);
     }
 
+    [HttpPost("{id:int}/vehicles")]
+    public async Task<IActionResult> CreateVehicle(int id, [FromBody] AdfVehicleRequest request)
+    {
+        if (!await IsPrivilegedAsync()) return Forbid();
+        currentAdf.AdfId = null;
+        var indicatiu = request.Indicatiu?.Trim();
+        if (string.IsNullOrWhiteSpace(indicatiu)) return BadRequest(new { message = "El indicatiu del vehicle és obligatori." });
+        if (!await database.Adfs.AnyAsync(adf => adf.Id == id)) return NotFound(new { message = "No se ha encontrado la ADF." });
+        if (await database.Vehicles.AnyAsync(vehicle => vehicle.AdfId == id && vehicle.Indicatiu == indicatiu))
+            return BadRequest(new { message = "Ya existe un vehículo con ese indicativo en la ADF." });
+        var vehicle = new Vehicle
+        {
+            AdfId = id,
+            Indicatiu = indicatiu,
+            Modelo = string.IsNullOrWhiteSpace(request.Modelo) ? null : request.Modelo.Trim(),
+            Matricula = string.IsNullOrWhiteSpace(request.Matricula) ? null : request.Matricula.Trim().ToUpperInvariant(),
+            Litres = request.Litres ?? 0,
+            Kms = request.Kms ?? 0,
+        };
+        database.Vehicles.Add(vehicle);
+        await database.SaveChangesAsync();
+        return Ok(new { id = vehicle.Id, indicatiu = vehicle.Indicatiu, modelo = vehicle.Modelo, matricula = vehicle.Matricula, litres = vehicle.Litres });
+    }
+
     private async Task<bool> IsPrivilegedAsync()
     {
         var carnet = User.FindFirst("nCarnet")?.Value;
@@ -222,3 +246,5 @@ public sealed class AdfController(Adf247DbContext database, CurrentAdf currentAd
 }
 
 public sealed record AdfRequest(int? Number, string? Name, IReadOnlyList<string>? Municipalities);
+
+public sealed record AdfVehicleRequest(string? Indicatiu, string? Modelo, string? Matricula, decimal? Litres, decimal? Kms);
