@@ -98,7 +98,7 @@
     </section>
   }
   }
-\n  @if (activeTab() === 'intervencions') {
+  @if (activeTab() === 'intervencions') {
   <section class="hours-table-card">
     <div class="hours-table-head">
       <div>
@@ -164,8 +164,7 @@
         </div>
         <div class="iv-chips">
           <span class="iv-chip iv-chip-type">{{ intervencioType(iv) }}</span>
-          @if (iv.level === 0) { <span class="iv-chip iv-chip-level">Pla Alfa</span> }
-          @else if (iv.level != null) { <span class="iv-chip iv-chip-level">Nivell {{ iv.level }}</span> }
+          @if (iv.level != null) { <span class="iv-chip iv-chip-level">Pla Alfa {{ iv.level }}</span> }
           @if (iv.surface != null) { <span class="iv-chip">{{ iv.surface }} m²</span> }
         </div>
 
