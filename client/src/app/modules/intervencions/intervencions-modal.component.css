@@ -28,6 +28,28 @@
 .iv-hint, .iv-muted { color: #64748b; font-size: .82rem; margin: 4px 0; }
 .iv-total { font-weight: 600; color: #273445; }
 
-.iv-add{display:inline-flex;align-items:center;gap:.4rem;margin-top:.5rem;padding:.5rem .9rem;border:1.5px dashed #9aa4b2;border-radius:999px;background:transparent;color:inherit;font:inherit;font-size:.85rem;cursor:pointer}
-.iv-add span{font-weight:700}
-.iv-add:hover{background:rgba(0,110,204,.08);border-color:#006ecc}
+.iv-add { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-top: 10px; padding: 11px 14px; border: 1.5px dashed #94a3b8; border-radius: 10px; background: #f8fafc; color: #273445; font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; }
+.iv-add span { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #273445; color: #fff; font-size: 1rem; line-height: 1; }
+.iv-add:hover { background: #eef2f7; border-color: #273445; }
+.iv-x { padding: 7px 12px; line-height: 1; }
+.iv-row { padding: 10px; border: 1px solid #e5e7eb; border-radius: 10px; background: #fafafa; }
+.iv-row select, .iv-row input[type='text'] { flex: 1 1 160px; min-width: 0; }
+.iv-checks label { display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 1px solid #e5e7eb; border-radius: 999px; font-size: .88rem; }
+
+@media (max-width: 640px) {
+  .iv-overlay { padding: 0; align-items: stretch; }
+  .iv-modal { width: 100%; max-height: 100dvh; height: 100dvh; border-radius: 0; }
+  .iv-header { padding: 12px 14px; }
+  .iv-body { padding: 12px; }
+  .iv-footer { padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); }
+  .iv-footer .iv-btn { flex: 1; padding: 12px; }
+  .iv-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .iv-modal input[type='text'], .iv-modal input[type='number'], .iv-modal input[type='date'], .iv-modal input[type='time'], .iv-modal select { font-size: 16px; padding: 10px; }
+  .iv-row { flex-direction: column; align-items: stretch; gap: 8px; }
+  .iv-row select, .iv-row input[type='text'] { flex: none; width: 100%; }
+  .iv-row .iv-x { align-self: flex-end; }
+  .iv-map { height: 260px; }
+  .iv-toolbar .iv-btn { width: 100%; padding: 12px; }
+  .iv-checks { gap: 6px; }
+  .iv-card-actions .iv-btn { flex: 1; }
+}

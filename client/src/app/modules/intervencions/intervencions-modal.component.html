@@ -107,7 +107,7 @@
             <div class="iv-checks">
               @for (v of vehicleOptions(); track v) {
                 <label><input type="checkbox" [checked]="f.ownVehicles.includes(v)" (change)="onVehiclesChange(v, $any($event.target).checked)" /> {{ v }}</label>
-              } @empty { <span class="iv-muted">Cap vehicle al catàleg.</span> }
+              } @empty { <span class="iv-muted">Cap vehicle donat d'alta a la convocatòria.</span> }
             </div>
           </section>
 
@@ -117,10 +117,10 @@
             @if (f.otherAdfsAttended) {
               @for (e of f.otherAdfs; track $index) {
                 <div class="iv-row">
-                  <select [ngModel]="e.adf" (ngModelChange)="patchOtherAdf($index, { adf: $event })"><option value="">ADF…</option>@for (o of adfOptions(e.adf); track o) { <option [value]="o">{{ o }}</option> }</select>
-                  <input type="text" placeholder="Vehicle" [ngModel]="e.vehicle" (ngModelChange)="patchOtherAdf($index, { vehicle: $event })" />
+                  <select [ngModel]="e.adf" (ngModelChange)="onOtherAdfChange($index, $event)"><option value="">ADF…</option>@for (o of adfOptions(e.adf); track o) { <option [value]="o">{{ o }}</option> }</select>
+                  <select [ngModel]="e.vehicle" (ngModelChange)="patchOtherAdf($index, { vehicle: $event })" [disabled]="!e.adf"><option value="">Vehicle…</option>@for (v of adfVehicles(e.adf); track v) { <option [value]="v">{{ v }}</option> }</select>
                   <label class="iv-inline"><input type="checkbox" [ngModel]="e.firstIntervention" (ngModelChange)="patchOtherAdf($index, { firstIntervention: $event })" /> Primera intervenció</label>
-                  <button type="button" class="iv-btn iv-danger" (click)="removeOtherAdf($index)">×</button>
+                  <button type="button" class="iv-btn iv-danger iv-x" (click)="removeOtherAdf($index)" aria-label="Eliminar">×</button>
                 </div>
               }
               <button type="button" class="iv-add" (click)="addOtherAdf()"><span>+</span> Afegir ADF</button>
@@ -139,7 +139,7 @@
                 <div class="iv-row">
                   <input type="text" placeholder="Vehicle" [ngModel]="e.vehicle" (ngModelChange)="patchBomber($index, { vehicle: $event })" />
                   <label class="iv-inline"><input type="checkbox" [ngModel]="e.firstIntervention" (ngModelChange)="patchBomber($index, { firstIntervention: $event })" /> Primera intervenció</label>
-                  <button type="button" class="iv-btn iv-danger" (click)="removeBomber($index)">×</button>
+                  <button type="button" class="iv-btn iv-danger iv-x" (click)="removeBomber($index)" aria-label="Eliminar">×</button>
                 </div>
               }
               <button type="button" class="iv-add" (click)="addBomber()"><span>+</span> Afegir vehicle</button>

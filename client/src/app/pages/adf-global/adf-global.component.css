@@ -99,6 +99,7 @@
 }
 
 .role-badge.cyan { background: #006ecc; color: #fff; }
-.role-badge.op, .role-badge.colla { background: #003485; color: #fff; }
+.role-badge.op { background: #003485; color: #fff; }
+.role-badge.colla { background: #a30824; color: #fff; }
 .role-badge.groc { background: #e5a500; color: #1c1b18; }
 .role-badge.verd { background: #107c10; color: #fff; }

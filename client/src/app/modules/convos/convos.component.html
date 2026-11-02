@@ -9,9 +9,6 @@
       <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Obrir filtres de convocatòries">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
-      @if (isAdmin()) {
-        <button (click)="openIntervencions(null)" class="btn btn-secondary">Intervencions</button>
-      }
       <button (click)="openForm()" class="btn btn-primary">+ Nova Convocatòria</button>
     </div>
   </div>

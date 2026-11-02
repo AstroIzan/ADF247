@@ -750,3 +750,18 @@ body app-respuestas .modal-body textarea:focus {
   .hm-sheet .modal-footer { flex-direction: column-reverse; }
   .hm-sheet .modal-footer .btn { width: 100%; }
 }
+
+.modal-service-form .service-vehicle-card input,
+.modal-service-form .service-vehicle-note input { width: 100%; box-sizing: border-box; min-width: 0; }
+.modal-service-form .service-vehicle-note label { display: block; line-height: 1.3; margin-bottom: 6px; }
+@media (max-width: 1024px) {
+  .modal-service-form .service-vehicle-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .modal-service-form .service-vehicle-grid { grid-template-columns: 1fr; padding: 12px 12px 2px; }
+  .modal-service-form .service-vehicle-card > header { flex-direction: column; align-items: stretch; padding: 12px; gap: 10px; }
+  .modal-service-form .service-vehicle-actions { justify-content: space-between; width: 100%; }
+  .modal-service-form .service-vehicle-state-btn { padding: 8px 12px; font-size: 12px; }
+  .modal-service-form .service-vehicle-note { padding: 0 12px 12px; }
+  .modal-service-form .service-vehicle-note input { padding: 10px; font-size: 16px; }
+}

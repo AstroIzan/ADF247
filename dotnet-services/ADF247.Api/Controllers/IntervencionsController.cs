@@ -1,5 +1,6 @@
 using ADF247.Api.Data;
 using ADF247.Api.Models;
+using ADF247.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace ADF247.Api.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/intervencions")]
-public sealed class IntervencionsController(Adf247DbContext database) : ControllerBase
+public sealed class IntervencionsController(Adf247DbContext database, CurrentAdf currentAdf) : ControllerBase
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -81,7 +82,18 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
             .Where(type => StandardIncendiTypes.Contains(type.Name))
             .OrderBy(type => Array.IndexOf(StandardIncendiTypes, type.Name))
             .Select(type => new { id = type.Id, name = type.Name }).ToList();
-        var adfs = await database.Adfs.AsNoTracking().OrderBy(adf => adf.Number).Select(adf => new { id = adf.Id, number = adf.Number, name = adf.Name }).ToListAsync();
+        var adfRows = await database.Adfs.AsNoTracking().OrderBy(adf => adf.Number).ToListAsync();
+        var vehicleRows = await database.Vehicles.IgnoreQueryFilters().AsNoTracking().OrderBy(vehicle => vehicle.Indicatiu).Select(vehicle => new { vehicle.AdfId, vehicle.Indicatiu }).ToListAsync();
+        var adfs = adfRows.Select(adf => new
+        {
+            id = adf.Id,
+            number = adf.Number,
+            name = adf.Name,
+            municipalities = ReadMunicipalities(adf.MunicipalitiesJson),
+            vehicles = vehicleRows.Where(vehicle => vehicle.AdfId == adf.Id).Select(vehicle => vehicle.Indicatiu).ToList(),
+        }).ToList();
+        var ownAdfId = currentAdf.AdfId;
+        if (convocatoriaId.HasValue) ownAdfId = await database.Convocatorias.AsNoTracking().Where(convo => convo.Id == convocatoriaId.Value).Select(convo => (int?)convo.AdfId).FirstOrDefaultAsync() ?? ownAdfId;
         var vehicleNames = await database.Vehicles.AsNoTracking().OrderBy(vehicle => vehicle.Indicatiu).Select(vehicle => vehicle.Indicatiu).ToListAsync();
 
         object? matched = null;
@@ -123,7 +135,7 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
         object[] convocatoriaVehicles = [];
         if (convocatoriaId.HasValue) convocatoriaVehicles = await ConvocatoriaVehiclesAsync(convocatoriaId.Value);
 
-        return Ok(new { users, types, adfs, vehicleCatalog = vehicleNames, matched, candidates, convocatoriaVehicles });
+        return Ok(new { users, types, adfs, ownAdfId, vehicleCatalog = vehicleNames, matched, candidates, convocatoriaVehicles });
     }
 
     [HttpGet("convocatoria-vehicles/{convocatoriaId:int}")]
@@ -249,6 +261,13 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
                 .Select(item => new { id = item!.Id, nCarnet = item.NCarnet, name = $"{item.Name} {item.LastName}".Trim(), nIndicatiu = item.NIndicatiu, isGroc = grocIds.Contains(item.Id) }).ToList();
             return (object)new { vehicleName = vehicle.VehicleName, grocs, verds = members.Count - grocs, volunteers };
         }).ToArray();
+    }
+
+    private static List<string> ReadMunicipalities(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return [];
+        try { return JsonSerializer.Deserialize<List<string>>(json, Json) ?? []; }
+        catch (JsonException) { return []; }
     }
 
     private static List<string> ReadVehicleCatalog(string? json)

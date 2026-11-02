@@ -50,6 +50,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
   totalVerds = computed(() => this.form().ownVerds + this.form().otherAdfsVerds);
 
   private map: L.Map | null = null;
+  private centered = false;
   private marker: L.CircleMarker | null = null;
 
   ngOnInit(): void {
@@ -128,6 +129,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
       next: ctx => {
         this.context.set(ctx);
         this.types.set(ctx.types);
+        this.centerMap();
         if (applyDefaults) {
           this.applyResponsableSuggestion(ctx);
           this.applyOwnVehicleTotals();
@@ -215,11 +217,18 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
   }
   vehicleOptions(): string[] {
     const ctx = this.context();
-    if (!ctx) return this.form().ownVehicles;
-    const names = new Set([...ctx.vehicleCatalog, ...ctx.convocatoriaVehicles.map(v => v.vehicleName), ...this.form().ownVehicles]);
+    const names = new Set([...(ctx?.convocatoriaVehicles ?? []).map(v => v.vehicleName), ...this.form().ownVehicles]);
     return [...names].filter(Boolean);
   }
 
+  adfVehicles(adfLabel: string | null | undefined): string[] {
+    const adf = (this.context()?.adfs ?? []).find(a => `${a.number} · ${a.name}` === adfLabel);
+    return adf?.vehicles ?? [];
+  }
+
+  onOtherAdfChange(index: number, adf: string): void {
+    this.patchOtherAdf(index, { adf, vehicle: '' });
+  }
   refreshLevel(): void {
     const date = this.form().date;
     const today = this.today();
@@ -307,6 +316,38 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
     if (has) this.setMarker(f.latitude!, f.longitude!);
     this.map.on('click', (event: L.LeafletMouseEvent) => this.pick(event.latlng.lat, event.latlng.lng));
     setTimeout(() => this.map?.invalidateSize(), 150);
+    if (!has) this.centerMap();
+  }
+
+  private centerMap(): void {
+    const ctx = this.context();
+    const f = this.form();
+    if (!this.map || !ctx || this.centered || (f.latitude != null && f.longitude != null)) return;
+    this.centered = true;
+    const own = ctx.adfs.find(adf => adf.id === ctx.ownAdfId);
+    const municipalities = own?.municipalities ?? [];
+    if (!municipalities.length) return;
+    this.data.getPlaAlfaMunicipalitiesStatus().subscribe({
+      next: status => this.zoomToMunicipalities(municipalities, status.principalMunicipality ?? status.municipalities.find(m => m.isPrincipal)?.municipality ?? null),
+      error: () => this.zoomToMunicipalities(municipalities, null),
+    });
+  }
+
+  private async zoomToMunicipalities(municipalities: string[], principal: string | null): Promise<void> {
+    const norm = (value: string) => value.trim().toLowerCase();
+    const main = principal && municipalities.some(m => norm(m) === norm(principal)) ? principal : null;
+    const targets = main ? [main] : municipalities.slice(0, 8);
+    const points: L.LatLngTuple[] = [];
+    for (const name of targets) {
+      try {
+        const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=es&accept-language=ca&q=${encodeURIComponent(name + ', Catalunya')}`;
+        const result = await (await fetch(url)).json();
+        if (result?.[0]) points.push([Number(result[0].lat), Number(result[0].lon)]);
+      } catch { /* sense geocodificació, es manté la vista per defecte */ }
+    }
+    if (!this.map || !points.length) return;
+    if (points.length === 1) this.map.setView(points[0], 13);
+    else this.map.fitBounds(L.latLngBounds(points), { padding: [30, 30], maxZoom: 13 });
   }
 
   private setMarker(lat: number, lon: number): void {
@@ -341,6 +382,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
     this.map?.remove();
     this.map = null;
     this.marker = null;
+    this.centered = false;
   }
 
   private emptyForm(): IntervencioPayload {
