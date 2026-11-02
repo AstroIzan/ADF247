@@ -24,6 +24,15 @@ public sealed class ConvocatoriasController(ConvocatoriaService convos, Adf247Db
         return identity.Value.IsAdmin ? Ok(await convos.GetHoursSummaryAsync()) : Forbid();
     }
 
+    [HttpGet("hours/summary/{userId:int}")]
+    public async Task<IActionResult> HoursDetail(int userId)
+    {
+        var identity = await IdentityAsync(); if (identity is null) return Unauthorized();
+        if (!identity.Value.IsAdmin) return Forbid();
+        var detail = await convos.GetUserHoursDetailAsync(userId);
+        return detail is null ? NotFound() : Ok(detail);
+    }
+
     [HttpGet] public Task<IActionResult> GetAll([FromQuery] int? page, [FromQuery] int? pageSize) => ExecuteCreatedAsync(() => convos.GetAllAsync(page, pageSize), false);
     [HttpGet("{id:int}")] public Task<IActionResult> Get(int id) => ExecuteAsync(() => convos.GetAsync(id));
     [HttpPost]

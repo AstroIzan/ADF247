@@ -65,6 +65,7 @@ public sealed class ConvocatoriaCalculationService(Adf247DbContext database)
 
             foreach (var carnet in usersWithoutWindow)
             {
+                autoResponded.Add(carnet);
                 database.Respuestas.Add(new Respuesta
                 {
                     ConvoId = convocatoria.Id,

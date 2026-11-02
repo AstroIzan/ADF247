@@ -479,6 +479,7 @@ public sealed class BatchOrchestrator(
                 .ToListAsync(cancellationToken);
             foreach (var carnet in usersWithoutWindow)
             {
+                autoResponded.Add(carnet);
                 database.Respuestas.Add(new Respuesta
                 {
                     ConvoId = convocatoria.Id,

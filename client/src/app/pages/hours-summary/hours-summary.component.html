@@ -64,6 +64,7 @@
               <th class="hours-penalty-header"><span>Penalització<br>no resposta</span></th>
               <th class="hours-penalty-header"><span>Penalització<br>no assistència</span></th>
               <th>Total</th>
+              <th class="hours-eye-col"></th>
             </tr>
           </thead>
           <tbody>
@@ -78,11 +79,45 @@
                 <td class="hours-penalty-cell">-{{ formatRoundedHours(row.unansweredPenaltyHours) }}</td>
                 <td class="hours-penalty-cell">-{{ formatRoundedHours(row.noShowPenaltyHours) }}</td>
                 <td class="hours-total-cell"><strong>{{ formatRoundedHours(row.totalHours) }}</strong></td>
+                <td class="hours-eye-col">
+                  <button type="button" class="eye-btn" title="Veure detall" (click)="openDetail(row)">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  </button>
+                </td>
               </tr>
             }
           </tbody>
         </table>
       </div>
     </section>
+  }
+  @if (detailUser(); as user) {
+    <div class="hours-overlay" (click)="closeDetail()">
+      <div class="hours-modal" (click)="$event.stopPropagation()">
+        <div class="hours-modal-head">
+          <h3>{{ user.userName }} · {{ user.userNCarnet }}</h3>
+          <button type="button" class="eye-btn" (click)="closeDetail()">&times;</button>
+        </div>
+        @if (detailLoading()) { <p>Carregant...</p> }
+        @else if (detailError()) { <p class="hours-detail-error">{{ detailError() }}</p> }
+        @else if (detail(); as data) {
+          @if (data.items.length === 0) { <p>No hi ha convocatòries comptabilitzades.</p> }
+          @else {
+            <table class="logs-table">
+              <thead><tr><th>Convocatòria</th><th>Data</th><th>Estat</th></tr></thead>
+              <tbody>
+                @for (item of data.items; track item.convocatoriaId) {
+                  <tr>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.startTime | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td><span class="hours-status" [ngClass]="detailStatus(item).css">{{ detailStatus(item).label }}</span></td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+      </div>
+    </div>
   }
 </section>

@@ -377,6 +377,22 @@ export interface TaskExecutionDetailLog extends TaskExecutionLog {
   details: { taskExecutionDetailId: number; eventType: number; occurredAt: string; message: string; detailsJson?: string | null }[];
 }
 
+export interface UserHoursDetail {
+  userId: number;
+  nCarnet: string;
+  items: {
+    convocatoriaId: number;
+    title: string;
+    type?: string | null;
+    startTime: string;
+    finalTime?: string | null;
+    answered: boolean;
+    response: boolean | null;
+    attended: boolean;
+    justified: boolean;
+  }[];
+}
+
 export interface PlaAlfaSimulation {
   principalMunicipality: string | null;
   todayLevel: number | null;
@@ -518,6 +534,10 @@ export class DataService {
 
   deleteCampaignForm(id: number): Observable<CampaignFormRecord> {
     return this.http.delete<CampaignFormRecord>(`/convos/campaign-forms/${id}`);
+  }
+
+  getUserHoursDetail(userId: number): Observable<UserHoursDetail> {
+    return this.http.get<UserHoursDetail>(`/convos/hours/summary/${userId}`);
   }
 
   getHoursSummary(): Observable<UserHoursSummaryResponse> {

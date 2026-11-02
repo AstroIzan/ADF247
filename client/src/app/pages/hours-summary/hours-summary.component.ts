@@ -2,7 +2,7 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { DataService, UserHoursSummaryRow } from '../../services/data.service';
+import { DataService, UserHoursDetail, UserHoursSummaryRow } from '../../services/data.service';
 
 @Component({
   selector: 'app-hours-summary',
@@ -12,6 +12,41 @@ import { DataService, UserHoursSummaryRow } from '../../services/data.service';
   styleUrl: './hours-summary.component.css',
 })
 export class HoursSummaryComponent implements OnInit {
+  detailUser = signal<UserHoursSummaryRow | null>(null);
+  detail = signal<UserHoursDetail | null>(null);
+  detailLoading = signal(false);
+  detailError = signal('');
+
+  openDetail(row: UserHoursSummaryRow) {
+    this.detailUser.set(row);
+    this.detail.set(null);
+    this.detailError.set('');
+    this.detailLoading.set(true);
+    this.dataService.getUserHoursDetail(row.userId).subscribe({
+      next: (detail) => {
+        this.detail.set(detail);
+        this.detailLoading.set(false);
+      },
+      error: (error) => {
+        this.detailLoading.set(false);
+        this.detailError.set(error.error?.message || error.message || 'No s’ha pogut carregar el detall.');
+      },
+    });
+  }
+
+  closeDetail() {
+    this.detailUser.set(null);
+  }
+
+  detailStatus(item: UserHoursDetail['items'][number]) {
+    if (!item.answered) return { label: 'No respost', css: 'status-warn' };
+    if (!item.response) return { label: 'Resposta NO', css: 'status-muted' };
+    if (item.attended) return { label: 'Ha assistit', css: 'status-ok' };
+    return item.justified
+      ? { label: 'No assisteix · justificat', css: 'status-warn' }
+      : { label: 'No assisteix · sense justificar', css: 'status-bad' };
+  }
+
   loading = signal(false);
   error = signal('');
   generatedAt = signal<string | null>(null);

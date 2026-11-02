@@ -268,6 +268,50 @@ public sealed class ConvocatoriaService(
         return new { convocatoria = MapConvocatoria(convo), responsable = convo.Responsable is null ? null : new { convo.Responsable.Id, convo.Responsable.NCarnet, convo.Responsable.Name, convo.Responsable.LastName }, eligibleUsers = eligible, vehicleCatalog, lockedVehicleNames = Array.Empty<string>(), prefill };
     }
 
+    public async Task<object?> GetUserHoursDetailAsync(int userId)
+    {
+        var user = await database.Users.AsNoTracking().SingleOrDefaultAsync(item => item.Id == userId);
+        if (user is null) return null;
+        var configuration = await database.SystemConfigurations.AsNoTracking().SingleOrDefaultAsync(item => item.Id == 1);
+        var typeIds = Deserialize<int[]>(configuration?.CampaignHoursConvoTypeIdsJson ?? "[]") ?? [];
+        if (configuration?.CampaignStartDate is null || configuration.CampaignEndDate is null || typeIds.Length == 0)
+            return new { userId = user.Id, nCarnet = user.NCarnet, items = Array.Empty<object>() };
+
+        var from = configuration.CampaignStartDate.Value.ToDateTime(TimeOnly.MinValue);
+        var to = configuration.CampaignEndDate.Value.AddDays(1).ToDateTime(TimeOnly.MinValue);
+        var convocatorias = await database.Convocatorias
+            .AsNoTracking()
+            .Include(convo => convo.ConvoType)
+            .Where(convo => convo.StartTime <= LocalNow() && convo.Date >= from && convo.Date < to && typeIds.Contains(convo.ConvoTypeId))
+            .OrderByDescending(convo => convo.StartTime)
+            .ToListAsync();
+        var ids = convocatorias.Select(convo => convo.Id).ToList();
+        var responses = (await database.Respuestas
+            .AsNoTracking()
+            .Where(response => ids.Contains(response.ConvoId) && response.UserNCarnet == user.NCarnet)
+            .ToListAsync())
+            .GroupBy(response => response.ConvoId)
+            .ToDictionary(group => group.Key, group => group.OrderBy(response => response.Id).Last());
+
+        var items = convocatorias.Select(convo =>
+        {
+            responses.TryGetValue(convo.Id, out var response);
+            return new
+            {
+                convocatoriaId = convo.Id,
+                title = convo.Title,
+                type = convo.ConvoType?.Name,
+                startTime = convo.StartTime,
+                finalTime = convo.FinalTime,
+                answered = response is not null,
+                response = response?.Response,
+                attended = response is not null && response.Response && response.AttendanceConfirmed,
+                justified = response is not null && response.Response && !response.AttendanceConfirmed && response.AttendanceJustified,
+            };
+        }).ToList();
+        return new { userId = user.Id, nCarnet = user.NCarnet, items };
+    }
+
     public async Task<object> GetHoursSummaryAsync()
     {
         var systemConfiguration = await database.SystemConfigurations
