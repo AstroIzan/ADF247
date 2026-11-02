@@ -38,6 +38,10 @@ export class AdfGlobalComponent implements OnInit {
   convocatories = signal<AdfConvocatoria[]>([]);
   users = signal<AdfUser[]>([]);
   vehicles = signal<AdfVehicle[]>([]);
+  summary = computed(() => {
+    const adf = this.selected();
+    return adf ? this.overview().find((row) => row.adf.id === adf.id) ?? null : null;
+  });
 
   constructor(private dataService: DataService) {}
 
@@ -128,7 +132,7 @@ export class AdfGlobalComponent implements OnInit {
 
   select(adf: Adf) {
     this.selected.set(adf);
-    this.detailTab.set('convocatories');
+    this.detailTab.set('usuaris');
     this.loadDetail(adf);
   }
 
@@ -141,14 +145,10 @@ export class AdfGlobalComponent implements OnInit {
     this.convocatories.set([]);
     this.users.set([]);
     this.vehicles.set([]);
-    let pending = 3;
+    let pending = 2;
     const done = () => {
       if (--pending === 0) this.detailLoading.set(false);
     };
-    this.dataService.getAdfConvocatorias(adf.id).subscribe({
-      next: (items) => { this.convocatories.set(items); done(); },
-      error: (err) => { this.error.set(err?.error?.message || 'Error carregant convocatòries.'); done(); },
-    });
     this.dataService.getAdfVehicles(adf.id).subscribe({
       next: (items) => { this.vehicles.set(items); done(); },
       error: (err) => { this.error.set(err?.error?.message || 'Error carregant vehicles.'); done(); },

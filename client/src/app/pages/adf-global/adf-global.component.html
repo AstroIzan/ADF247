@@ -3,7 +3,7 @@
     <img class="adf-logo" src="secretariat-logo.png" alt="Secretariat ADF de Catalunya" />
     <span class="adf-kicker">Secretariat ADF de Catalunya</span>
     <h1>Secretariat</h1>
-    <p>Resum de totes les ADFs, les seves convocatòries i els seus usuaris.</p>
+    <p>Llista d'ADFs amb voluntaris i vehicles actius.</p>
   </div>
 
   @if (error()) { <div class="adf-alert adf-alert-error">{{ error() }}</div> }
@@ -24,20 +24,16 @@
         <table class="adf-table">
           <thead>
             <tr>
-              <th>ADF</th><th>Poblacions</th><th>Voluntaris actius</th><th>Vehicles actius</th><th>Convocatòries</th><th>Properes</th><th>En curs</th><th>Respostes</th><th></th>
+              <th>ADF</th><th>Poblacions</th><th>Voluntaris actius</th><th>Vehicles actius</th><th></th>
             </tr>
           </thead>
           <tbody>
             @for (row of overview(); track row.adf.id) {
-              <tr [class.selected]="selected()?.id === row.adf.id">
+              <tr>
                 <td><strong>{{ row.adf.number }}</strong> - {{ row.adf.name }}</td>
                 <td>{{ row.adf.municipalities.join(', ') || '-' }}</td>
                 <td>{{ row.activeUsers }}</td>
                 <td>{{ row.vehicles }}</td>
-                <td>{{ row.convocatorias }}</td>
-                <td>{{ row.upcomingConvocatorias }}</td>
-                <td>{{ row.inProgressConvocatorias }}</td>
-                <td>{{ row.responses }}</td>
                 <td class="adf-actions">
                   <button class="adf-btn adf-btn-small" (click)="select(row.adf)">Veure</button>
                   <button class="adf-btn adf-btn-small" (click)="openForm(row.adf)">Editar</button>
@@ -92,91 +88,70 @@
   }
 
   @if (selected(); as adf) {
-    <div class="adf-card">
-      <div class="adf-card-head">
+    <div class="adf-modal-overlay" (click)="selected.set(null)"></div>
+    <section class="adf-modal" role="dialog" [attr.aria-label]="'ADF ' + adf.number">
+      <header class="adf-modal-head">
         <h2>ADF {{ adf.number }} - {{ adf.name }}</h2>
-        <div class="adf-tabs">
-          <button [class.active]="detailTab() === 'convocatories'" (click)="setTab('convocatories')">Convocatòries ({{ convocatories().length }})</button>
-          <button [class.active]="detailTab() === 'usuaris'" (click)="setTab('usuaris')">Voluntaris ({{ users().length }})</button>
-          <button [class.active]="detailTab() === 'vehicles'" (click)="setTab('vehicles')">Vehicles ({{ vehicles().length }})</button>
-        </div>
+        <button class="adf-modal-close" (click)="selected.set(null)" aria-label="Tancar">&times;</button>
+      </header>
+      <div class="adf-modal-body">
+        @if (detailLoading()) {
+          <p>Carregant...</p>
+        } @else {
+          @if (summary(); as s) {
+            <div class="adf-stats">
+              <div><strong>{{ s.convocatorias }}</strong><span>Convocatòries</span></div>
+              <div><strong>{{ s.responses }}</strong><span>Respostes</span></div>
+              <div><strong>{{ s.vehicles }}</strong><span>Vehicles</span></div>
+              <div><strong>{{ s.users }}</strong><span>Usuaris</span></div>
+            </div>
+          }
+          <div class="adf-tabs">
+            <button [class.active]="detailTab() === 'usuaris'" (click)="setTab('usuaris')">Voluntaris ({{ users().length }})</button>
+            <button [class.active]="detailTab() === 'vehicles'" (click)="setTab('vehicles')">Vehicles ({{ vehicles().length }})</button>
+          </div>
+          @if (detailTab() === 'vehicles') {
+            @if (!vehicles().length) { <p>Sense vehicles.</p> } @else {
+              <div class="adf-table-wrap"><table class="adf-table">
+                <thead><tr><th>Indicatiu</th><th>Model</th><th>Matrícula</th><th>Litres</th></tr></thead>
+                <tbody>
+                  @for (vehicle of vehicles(); track vehicle.id) {
+                    <tr>
+                      <td><strong>{{ vehicle.indicatiu }}</strong></td>
+                      <td>{{ vehicle.modelo || '-' }}</td>
+                      <td>{{ vehicle.matricula || '-' }}</td>
+                      <td>{{ vehicle.litres > 0 ? vehicle.litres + ' L' : '-' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table></div>
+            }
+          } @else {
+            @if (!users().length) { <p>Sense usuaris.</p> } @else {
+              <div class="adf-table-wrap"><table class="adf-table">
+                <thead><tr><th>Carnet</th><th>Nom</th><th>Rols</th><th>Estat</th></tr></thead>
+                <tbody>
+                  @for (user of users(); track user.id) {
+                    <tr>
+                      <td>{{ user.nCarnet }}@if (user.nIndicatiu) { · {{ user.nIndicatiu }} }</td>
+                      <td>{{ user.name }} {{ user.lastName }}</td>
+                      <td class="role-badges">
+                        @if (user.isAdmin) { <span class="role-badge dark">Admin</span> }
+                        @if (user.isDeveloper) { <span class="role-badge dark">Dev</span> }
+                        @if (user.isSecretariat) { <span class="role-badge cyan">Secretariat</span> }
+                        @if (user.isCapOperatiu) { <span class="role-badge op">Cap Operatiu</span> }
+                        @if (user.isCapColla) { <span class="role-badge colla">Cap de Colla</span> }
+                        @if (user.isGroc) { <span class="role-badge groc">Groc</span> } @else { <span class="role-badge verd">Verd</span> }
+                      </td>
+                      <td>{{ user.isActive ? 'Actiu' : 'Inactiu' }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table></div>
+            }
+          }
+        }
       </div>
-
-      @if (detailLoading()) {
-        <p>Carregant...</p>
-      } @else if (detailTab() === 'convocatories') {
-        @if (!convocatories().length) {
-          <p>Sense convocatòries.</p>
-        } @else {
-          <div class="adf-table-wrap">
-            <table class="adf-table">
-              <thead><tr><th>Títol</th><th>Tipus</th><th>Inici</th><th>Estat</th><th>Respostes</th></tr></thead>
-              <tbody>
-                @for (convo of convocatories(); track convo.id) {
-                  <tr>
-                    <td>{{ convo.title }}</td>
-                    <td>{{ convo.type }}</td>
-                    <td>{{ convo.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
-                    <td>
-                      @if (convo.actualEndTime) { Finalitzada }
-                      @else if (convo.actualStartTime) { En curs }
-                      @else if (!convo.isActive) { Desactivada }
-                      @else { Pendent }
-                      @if (convo.sortida) { · Sortida }
-                    </td>
-                    <td>{{ convo.responses }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      } @else if (detailTab() === 'vehicles') {
-        @if (!vehicles().length) {
-          <p>Sense vehicles.</p>
-        } @else {
-          <div class="adf-table-wrap">
-            <table class="adf-table">
-              <thead><tr><th>Indicatiu</th><th>Model</th><th>Matrícula</th><th>Litres</th></tr></thead>
-              <tbody>
-                @for (vehicle of vehicles(); track vehicle.id) {
-                  <tr>
-                    <td><strong>{{ vehicle.indicatiu }}</strong></td>
-                    <td>{{ vehicle.modelo || '-' }}</td>
-                    <td>{{ vehicle.matricula || '-' }}</td>
-                    <td>{{ vehicle.litres > 0 ? vehicle.litres + ' L' : '-' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      } @else {
-        @if (!users().length) {
-          <p>Sense usuaris.</p>
-        } @else {
-          <div class="adf-table-wrap">
-            <table class="adf-table">
-              <thead><tr><th>Indicatiu</th><th>Carnet</th><th>Nom</th><th>Rols</th><th>Estat</th></tr></thead>
-              <tbody>
-                @for (user of users(); track user.id) {
-                  <tr>
-                    <td>{{ user.nIndicatiu || '-' }}</td>
-                    <td>{{ user.nCarnet }}</td>
-                    <td>{{ user.name }} {{ user.lastName }}</td>
-                    <td class="role-badges">
-                      @if (user.isCapOperatiu) { <span class="role-badge op">Cap Operatiu</span> }
-                      @if (user.isCapColla) { <span class="role-badge colla">Cap de Colla</span> }
-                      @if (user.isGroc) { <span class="role-badge groc">Groc</span> } @else { <span class="role-badge verd">Verd</span> }
-                    </td>
-                    <td>{{ user.isActive ? 'Actiu' : 'Inactiu' }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      }
-    </div>
+    </section>
   }
 </div>

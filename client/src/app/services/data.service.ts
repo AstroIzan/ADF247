@@ -75,6 +75,9 @@ export interface AdfUser {
   lastName?: string | null;
   nIndicatiu?: string | null;
   isActive: boolean;
+  isAdmin: boolean;
+  isDeveloper: boolean;
+  isSecretariat: boolean;
   isCapOperatiu: boolean;
   isCapColla: boolean;
   isGroc: boolean;
