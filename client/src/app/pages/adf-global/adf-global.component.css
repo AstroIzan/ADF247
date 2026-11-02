@@ -43,3 +43,10 @@
 .adf-check { display: flex !important; grid-template-columns: none; align-items: center; gap: 8px !important; font-weight: 500 !important; font-size: 14px !important; color: #263243 !important; }
 .adf-check input { width: auto; }
 .adf-check small { color: #7a8796; }
+
+.role-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.role-badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #e5e7eb; color: #26303d; }
+.role-badge.op { background: #273445; color: #fff; }
+.role-badge.colla { background: #f0b000; color: #1c1b18; }
+.role-badge.groc { background: #fde047; color: #3f3a00; }
+.role-badge.verd { background: #bbf7d0; color: #14532d; }

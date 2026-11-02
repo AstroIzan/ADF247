@@ -97,6 +97,8 @@ public sealed class AdfController(Adf247DbContext database, CurrentAdf currentAd
                 Upcoming = group.Count(convo => convo.StartTime >= now),
                 InProgress = group.Count(convo => convo.ActualStartTime != null && convo.ActualEndTime == null),
             }).ToListAsync();
+        var vehicleCounts = await database.Vehicles.AsNoTracking().GroupBy(vehicle => vehicle.AdfId)
+            .Select(group => new { AdfId = group.Key, Total = group.Count() }).ToListAsync();
         var responses = await database.Respuestas.AsNoTracking().GroupBy(response => response.AdfId)
             .Select(group => new { AdfId = group.Key, Total = group.Count() }).ToListAsync();
 
@@ -109,6 +111,7 @@ public sealed class AdfController(Adf247DbContext database, CurrentAdf currentAd
                 adf = Map(adf),
                 users = u?.Total ?? 0,
                 activeUsers = u?.Active ?? 0,
+                vehicles = vehicleCounts.FirstOrDefault(item => item.AdfId == adf.Id)?.Total ?? 0,
                 convocatorias = c?.Total ?? 0,
                 upcomingConvocatorias = c?.Upcoming ?? 0,
                 inProgressConvocatorias = c?.InProgress ?? 0,
@@ -150,19 +153,38 @@ public sealed class AdfController(Adf247DbContext database, CurrentAdf currentAd
     {
         if (!await IsPrivilegedAsync()) return Forbid();
         currentAdf.AdfId = null;
-        var items = await database.Users.AsNoTracking()
-            .Where(user => user.AdfId == id)
-            .OrderBy(user => user.Name)
-            .Select(user => new
-            {
-                id = user.Id,
-                adfId = user.AdfId,
-                nCarnet = user.NCarnet,
-                name = user.Name,
-                lastName = user.LastName,
-                nIndicatiu = user.NIndicatiu,
-                isActive = user.IsActive,
-            }).ToListAsync();
+        var items = await (from user in database.Users.AsNoTracking()
+                           where user.AdfId == id
+                           join role in database.Roles.AsNoTracking() on user.NCarnet equals role.NCarnet into roles
+                           from role in roles.DefaultIfEmpty()
+                           orderby user.Name
+                           select new
+                           {
+                               id = user.Id,
+                               adfId = user.AdfId,
+                               nCarnet = user.NCarnet,
+                               name = user.Name,
+                               lastName = user.LastName,
+                               nIndicatiu = user.NIndicatiu,
+                               isActive = user.IsActive,
+                               isCapOperatiu = role != null && role.IsCapOperatiu,
+                               isCapColla = role != null && role.IsCapColla,
+                               isGroc = role != null && role.IsGroc,
+                               isVerd = role == null || !role.IsGroc,
+                           }).ToListAsync();
+        return Ok(items);
+    }
+
+    [HttpGet("{id:int}/vehicles")]
+    public async Task<IActionResult> Vehicles(int id)
+    {
+        if (!await IsPrivilegedAsync()) return Forbid();
+        currentAdf.AdfId = null;
+        var items = await database.Vehicles.AsNoTracking()
+            .Where(vehicle => vehicle.AdfId == id)
+            .OrderBy(vehicle => vehicle.Indicatiu)
+            .Select(vehicle => new { id = vehicle.Id, indicatiu = vehicle.Indicatiu, modelo = vehicle.Modelo, matricula = vehicle.Matricula, litres = vehicle.Litres })
+            .ToListAsync();
         return Ok(items);
     }
 

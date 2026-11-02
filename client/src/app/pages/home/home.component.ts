@@ -974,6 +974,11 @@ export class HomeComponent implements OnInit {
       parts.push(modelo);
     }
 
+    const matricula = String(vehicle?.matricula || '').trim();
+    if (matricula) {
+      parts.push(matricula);
+    }
+
     if (litros > 0) {
       parts.push(`${litros}L`);
     }

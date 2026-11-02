@@ -20,7 +20,7 @@ public sealed record SystemConfigurationRequest(
     decimal NoShowPenaltyHours,
     IReadOnlyList<CampaignVehicleRequest>? VehicleCatalog);
 
-public sealed record CampaignVehicleRequest(string Indicatiu, string? Modelo, decimal Litres, decimal Kms);
+public sealed record CampaignVehicleRequest(string Indicatiu, string? Modelo, decimal Litres, decimal Kms, string? Matricula = null);
 
 public sealed record WeeklyConvocatoriaScheduleRequest(
     int ConvoTypeId,

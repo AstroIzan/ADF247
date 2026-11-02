@@ -27,6 +27,7 @@ export class UsersComponent implements OnDestroy {
   selectedUser = signal<User | null>(null);
   changePassword = signal(false);
   confirmPassword = signal('');
+  generatedPassword = signal('');
   showImportModal = signal(false);
   importCsvName = signal('');
   importCsvHeaders = signal<string[]>([]);
@@ -159,6 +160,7 @@ export class UsersComponent implements OnDestroy {
   openForm(user?: User) {
     this.changePassword.set(false);
     this.confirmPassword.set('');
+    this.generatedPassword.set('');
 
     if (user) {
       this.editingId.set(user.id);
@@ -448,5 +450,14 @@ export class UsersComponent implements OnDestroy {
 
   ngOnDestroy() {
     document.body.classList.remove('modal-open');
+  }
+
+  generatePassword() {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+    const bytes = crypto.getRandomValues(new Uint32Array(10));
+    const value = Array.from(bytes, (b) => chars[b % chars.length]).join('');
+    this.generatedPassword.set(value);
+    this.updateFormField('password', value);
+    this.confirmPassword.set(value);
   }
 }

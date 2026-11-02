@@ -25,7 +25,7 @@ export class SystemConfigurationComponent {
   configuration = signal<SystemConfiguration | null>(null);
   convoTypes = signal<ConvoType[]>([]);
   users = signal<User[]>([]);
-  newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', litres: 0, kms: 0 });
+  newVehicle = signal<SystemConfigurationVehicle>({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 });
   plaAlfaSimulation = signal<PlaAlfaSimulation | null>(null);
   simulationSaving = signal(false);
   batchRunSubmitting = signal(false);
@@ -223,11 +223,12 @@ export class SystemConfigurationComponent {
       vehicleCatalog: [...configuration.vehicleCatalog, {
         indicatiu: vehicle.indicatiu.trim(),
         modelo: vehicle.modelo?.trim() || null,
+        matricula: vehicle.matricula?.trim().toUpperCase() || null,
         litres: Number(vehicle.litres) || 0,
         kms: Number(vehicle.kms) || 0,
       }],
     }));
-    this.newVehicle.set({ indicatiu: '', modelo: '', litres: 0, kms: 0 });
+    this.newVehicle.set({ indicatiu: '', modelo: '', matricula: '', litres: 0, kms: 0 });
   }
 
   removeVehicle(indicatiu: string) {

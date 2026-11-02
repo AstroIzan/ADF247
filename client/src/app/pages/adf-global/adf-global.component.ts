@@ -1,9 +1,9 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Adf, PlaAlfaMunicipalityCatalogItem, AdfConvocatoria, AdfOverview, AdfUser, DataService } from '../../services/data.service';
+import { Adf, PlaAlfaMunicipalityCatalogItem, AdfConvocatoria, AdfOverview, AdfUser, AdfVehicle, DataService } from '../../services/data.service';
 
-type DetailTab = 'convocatories' | 'usuaris';
+type DetailTab = 'convocatories' | 'usuaris' | 'vehicles';
 
 @Component({
   selector: 'app-adf-global',
@@ -37,6 +37,7 @@ export class AdfGlobalComponent implements OnInit {
   detailLoading = signal(false);
   convocatories = signal<AdfConvocatoria[]>([]);
   users = signal<AdfUser[]>([]);
+  vehicles = signal<AdfVehicle[]>([]);
 
   constructor(private dataService: DataService) {}
 
@@ -139,13 +140,18 @@ export class AdfGlobalComponent implements OnInit {
     this.detailLoading.set(true);
     this.convocatories.set([]);
     this.users.set([]);
-    let pending = 2;
+    this.vehicles.set([]);
+    let pending = 3;
     const done = () => {
       if (--pending === 0) this.detailLoading.set(false);
     };
     this.dataService.getAdfConvocatorias(adf.id).subscribe({
       next: (items) => { this.convocatories.set(items); done(); },
       error: (err) => { this.error.set(err?.error?.message || 'Error carregant convocatòries.'); done(); },
+    });
+    this.dataService.getAdfVehicles(adf.id).subscribe({
+      next: (items) => { this.vehicles.set(items); done(); },
+      error: (err) => { this.error.set(err?.error?.message || 'Error carregant vehicles.'); done(); },
     });
     this.dataService.getAdfUsers(adf.id).subscribe({
       next: (items) => { this.users.set(items); done(); },

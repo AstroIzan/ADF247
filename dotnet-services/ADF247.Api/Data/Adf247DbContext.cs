@@ -17,6 +17,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, C
     public DbSet<CampaignForm> CampaignForms => Set<CampaignForm>();
     public DbSet<Intervencio> Intervencions => Set<Intervencio>();
     public DbSet<TypeIncendi> TypeIncendis => Set<TypeIncendi>();
+    public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<UserHoursSummary> UserHoursSummaries => Set<UserHoursSummary>();
     public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
     public DbSet<PlaAlfaMunicipalitySelection> PlaAlfaMunicipalitySelections => Set<PlaAlfaMunicipalitySelection>();
@@ -49,6 +50,9 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, C
                     break;
                 case Intervencio { AdfId: 0 } intervencio:
                     intervencio.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF de la intervención.");
+                    break;
+                case Vehicle { AdfId: 0 } vehicle:
+                    vehicle.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF del vehículo.");
                     break;
                 case PlaAlfaMunicipalitySelection { AdfId: 0 } selection:
                     selection.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF del Pla Alfa.");
@@ -171,6 +175,19 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, C
             entity.HasOne(form => form.Convocatoria).WithMany().HasForeignKey(form => form.ConvocatoriaId);
             entity.Property(form => form.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
             entity.Property(form => form.UpdatedAt).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<Vehicle>(entity =>
+        {
+            entity.ToTable("Vehicles");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.Indicatiu).HasMaxLength(100).IsRequired();
+            entity.Property(item => item.Modelo).HasMaxLength(200);
+            entity.Property(item => item.Matricula).HasMaxLength(30);
+            entity.Property(item => item.Litres).HasPrecision(18, 2);
+            entity.Property(item => item.Kms).HasPrecision(18, 2);
+            entity.HasIndex(item => new { item.AdfId, item.Indicatiu }).IsUnique();
+            entity.HasQueryFilter(item => CurrentAdfId == null || item.AdfId == CurrentAdfId);
         });
 
         modelBuilder.Entity<TypeIncendi>(entity =>

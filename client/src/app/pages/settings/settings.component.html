@@ -4,50 +4,61 @@
     <header class="settings-header">
       <div>
         <h2>Notificacions</h2>
-        <p>Permisos, dispositius i seguiment dels enviaments.</p>
+        <p>Gestiona els avisos d'aquest dispositiu.</p>
       </div>
       <button class="close-btn" type="button" (click)="closeModal()" aria-label="Tancar">&times;</button>
     </header>
 
-    <nav class="settings-tabs">
-      <button type="button" class="settings-tab" [class.active]="activeTab() === 'device'" (click)="setActiveTab('device')">Aquest dispositiu</button>
-
-    </nav>
-
     <div class="settings-body">
       @if (activeTab() === 'device') {
-        <section class="settings-section">
-          <h3>Notificacions en aquest dispositiu</h3>
-          <p class="section-help">Permisos del navegador i registre del dispositiu per rebre avisos.</p>
+        <section class="settings-section device-section">
           @if (deviceLoading()) {
             <div class="loading-state">Sincronitzant estat del dispositiu...</div>
           } @else {
-            <div class="status-card">
-              <strong>Notificacions</strong>
-              <span>
-                @if (pushNotificationsService.permission() === 'granted') { permeses }
-                @else if (pushNotificationsService.permission() === 'denied') { denegades }
-                @else if (pushNotificationsService.permission() === 'unsupported') { no compatibles }
-                @else { pendents }
-              </span>
+            @let granted = pushNotificationsService.permission() === 'granted';
+            @let ready = pushNotificationsService.isDeviceReady();
+            <div class="device-hero" [class.ok]="granted && ready" [class.warn]="!(granted && ready)">
+              <span class="device-icon" aria-hidden="true">{{ granted && ready ? '🔔' : '🔕' }}</span>
+              <div>
+                <strong>{{ granted && ready ? 'Notificacions actives' : 'Notificacions inactives' }}</strong>
+                <span>
+                  @if (granted && ready) { Aquest dispositiu rebrà els avisos de l'ADF. }
+                  @else { Activa-les per rebre avisos de convocatòries i disponibilitat. }
+                </span>
+              </div>
             </div>
+
+            <ul class="device-steps">
+              <li [class.done]="granted" [class.fail]="pushNotificationsService.permission() === 'denied' || pushNotificationsService.permission() === 'unsupported'">
+                <span class="step-dot"></span>
+                <div>
+                  <strong>Permís del navegador</strong>
+                  <small>
+                    @if (granted) { Permès }
+                    @else if (pushNotificationsService.permission() === 'denied') { Denegat: cal activar-lo a la configuració del lloc }
+                    @else if (pushNotificationsService.permission() === 'unsupported') { Aquest navegador no és compatible }
+                    @else { Pendent d'acceptar }
+                  </small>
+                </div>
+              </li>
+              <li [class.done]="ready">
+                <span class="step-dot"></span>
+                <div>
+                  <strong>Dispositiu registrat</strong>
+                  <small>{{ ready ? 'Registrat al servidor' : 'Encara no registrat' }}</small>
+                </div>
+              </li>
+            </ul>
           }
           @if (pushNotificationsService.errorMessage()) { <div class="alert alert-danger">{{ pushNotificationsService.errorMessage() }}</div> }
           @if (pushNotificationsService.infoMessage()) { <div class="alert alert-success">{{ pushNotificationsService.infoMessage() }}</div> }
-          <p class="device-copy">
-            @if (deviceLoading()) { Comprovant permisos, token i registre del dispositiu. }
-            @else if (pushNotificationsService.permission() !== 'granted') { Cal acceptar els permisos del navegador per rebre avisos. }
-            @else if (!pushNotificationsService.isDeviceReady()) { El navegador té permís, però aquest dispositiu encara no està registrat al servidor. }
-            @else { Aquest dispositiu ja està preparat per rebre notificacions. }
-          </p>
           @if (!deviceLoading() && !pushNotificationsService.isDeviceReady()) {
-            <button class="btn btn-primary" type="button" (click)="activateNotifications()" [disabled]="pushNotificationsService.loading()">
+            <button class="btn btn-primary btn-wide" type="button" (click)="activateNotifications()" [disabled]="pushNotificationsService.loading()">
               {{ pushNotificationsService.loading() ? 'Preparant...' : 'Activar notificacions en aquest dispositiu' }}
             </button>
           }
         </section>
       }
-
       @if (activeTab() === 'configurations' && authService.isAdmin()) {
         <section class="settings-section">
           <div class="section-title">

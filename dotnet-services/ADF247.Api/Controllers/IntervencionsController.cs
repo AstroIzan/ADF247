@@ -52,8 +52,7 @@ public sealed class IntervencionsController(Adf247DbContext database) : Controll
             .Select(user => new { id = user.Id, nCarnet = user.NCarnet, name = user.Name, lastName = user.LastName, nIndicatiu = user.NIndicatiu })
             .ToListAsync();
         var types = await database.TypeIncendis.AsNoTracking().OrderBy(type => type.Name).Select(type => new { id = type.Id, name = type.Name }).ToListAsync();
-        var config = await database.SystemConfigurations.AsNoTracking().FirstOrDefaultAsync();
-        var vehicleNames = ReadVehicleCatalog(config?.VehicleCatalogJson);
+        var vehicleNames = await database.Vehicles.AsNoTracking().OrderBy(vehicle => vehicle.Indicatiu).Select(vehicle => vehicle.Indicatiu).ToListAsync();
 
         object? matched = null;
         var candidates = new List<object>();

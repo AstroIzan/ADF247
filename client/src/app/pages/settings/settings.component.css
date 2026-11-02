@@ -26,3 +26,20 @@ th { background: #f7f8fa; color: #586373; }
 .btn-small { padding: 6px 9px; font-size: 12px; }
 .btn:disabled { cursor: default; opacity: .65; }
 @media (max-width: 620px) { .settings-dialog { inset: 0; width: 100vw; max-height: none; transform: none; border: 0; border-radius: 0; } .settings-header, .settings-tabs, .settings-body { padding-left: 14px; padding-right: 14px; } .section-title { flex-direction: column; } }
+
+.settings-dialog { width: min(520px, calc(100vw - 32px)); }
+.device-hero { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 14px; border: 1px solid #d8dde3; }
+.device-hero.ok { background: #e9f8ee; border-color: #b9e2c6; }
+.device-hero.warn { background: #fff7e0; border-color: #f3d57a; }
+.device-hero div { display: grid; gap: 3px; }
+.device-hero span:not(.device-icon) { color: #5c6776; font-size: 13px; }
+.device-icon { font-size: 30px; line-height: 1; }
+.device-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.device-steps li { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid #e0e5eb; border-radius: 12px; }
+.device-steps li div { display: grid; gap: 2px; }
+.device-steps small { color: #667080; font-size: 12px; }
+.step-dot { width: 14px; height: 14px; border-radius: 50%; background: #cbd2da; flex-shrink: 0; }
+.device-steps li.done .step-dot { background: #1e9e55; }
+.device-steps li.fail .step-dot { background: #d92d20; }
+.btn-wide { width: 100%; padding: 12px; }
+.settings-section > .btn.btn-wide { width: 100%; }

@@ -41,6 +41,15 @@ export interface AdfOverview {
   upcomingConvocatorias: number;
   inProgressConvocatorias: number;
   responses: number;
+  vehicles: number;
+}
+
+export interface AdfVehicle {
+  id: number;
+  indicatiu: string;
+  modelo?: string | null;
+  matricula?: string | null;
+  litres: number;
 }
 
 export interface AdfConvocatoria {
@@ -66,6 +75,10 @@ export interface AdfUser {
   lastName?: string | null;
   nIndicatiu?: string | null;
   isActive: boolean;
+  isCapOperatiu: boolean;
+  isCapColla: boolean;
+  isGroc: boolean;
+  isVerd: boolean;
 }
 
 export interface ConvoType {
@@ -126,6 +139,7 @@ export interface Respuesta {
 export interface CampaignVehicleCatalogItem {
   indicativo: string;
   modelo: string;
+  matricula?: string | null;
   litros: number;
   kms: number;
 }
@@ -376,6 +390,7 @@ export interface MessagingConfiguration {
 export interface SystemConfigurationVehicle {
   indicatiu: string;
   modelo?: string | null;
+  matricula?: string | null;
   litres: number;
   kms: number;
 }
@@ -471,6 +486,10 @@ export class DataService {
 
   getAdfConvocatorias(id: number): Observable<AdfConvocatoria[]> {
     return this.http.get<AdfConvocatoria[]>(`/adf/${id}/convocatorias`);
+  }
+
+  getAdfVehicles(id: number): Observable<AdfVehicle[]> {
+    return this.http.get<AdfVehicle[]>("/adf/${id}/vehicles");
   }
 
   getAdfUsers(id: number): Observable<AdfUser[]> {

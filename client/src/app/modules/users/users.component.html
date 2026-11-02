@@ -326,6 +326,13 @@
                   [disabled]="formSubmitting()"
                 />
               </div>
+
+              <div class="form-group">
+                <button type="button" class="btn btn-secondary" (click)="generatePassword()" [disabled]="formSubmitting()">Generar contrasenya temporal</button>
+                @if (generatedPassword()) {
+                  <p class="hint">Contrasenya generada (comunica-la a l'usuari, no es pot consultar després): <strong>{{ generatedPassword() }}</strong></p>
+                }
+              </div>
             }
           }
 

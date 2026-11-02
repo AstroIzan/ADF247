@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
@@ -31,6 +31,8 @@ export class ProfileComponent implements OnInit {
   showModal = signal(false);
   isLoading = signal(false);
   errorMessage = signal('');
+  showPassword = signal(false);
+  initials = computed(() => ((this.formData().name?.[0] ?? '') + (this.formData().lastName?.[0] ?? '')).toUpperCase() || '?');
   successMessage = signal('');
   passwordError = signal('');
 

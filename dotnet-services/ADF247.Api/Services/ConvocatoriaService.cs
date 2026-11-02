@@ -240,20 +240,16 @@ public sealed class ConvocatoriaService(
         var convo = await RequireConvocatoriaAsync(id);
         EnsureManager(convo, userId, isAdmin);
         var eligible = await EligibleUsersAsync(id);
-        var systemConfiguration = await database.SystemConfigurations
-            .AsNoTracking()
-            .SingleOrDefaultAsync(configuration => configuration.Id == 1);
-        var vehicleCatalog = string.IsNullOrWhiteSpace(systemConfiguration?.VehicleCatalogJson)
-            ? []
-            : (JsonSerializer.Deserialize<List<CampaignVehicleRequest>>(systemConfiguration.VehicleCatalogJson) ?? [])
-                .Select(vehicle => new
-                {
-                    indicativo = vehicle.Indicatiu,
-                    modelo = vehicle.Modelo,
-                    litros = vehicle.Litres,
-                    kms = vehicle.Kms,
-                })
-                .ToArray();
+        var vehicleCatalog = (await database.Vehicles.AsNoTracking().OrderBy(vehicle => vehicle.Indicatiu).ToListAsync())
+            .Select(vehicle => new
+            {
+                indicativo = vehicle.Indicatiu,
+                modelo = vehicle.Modelo,
+                matricula = vehicle.Matricula,
+                litros = vehicle.Litres,
+                kms = vehicle.Kms,
+            })
+            .ToArray();
         var form = await database.CampaignForms
             .Where(item => item.ConvocatoriaId == id)
             .OrderByDescending(item => item.Id)
@@ -509,15 +505,10 @@ public sealed class ConvocatoriaService(
 
         if (isFinal)
         {
-            var configuration = await database.SystemConfigurations.SingleOrDefaultAsync(item => item.Id == 1);
-            if (configuration is not null)
+            foreach (var vehicle in await database.Vehicles.ToListAsync())
             {
-                var catalog = Deserialize<List<CampaignVehicleRequest>>(configuration.VehicleCatalogJson) ?? [];
-                configuration.VehicleCatalogJson = JsonSerializer.Serialize(catalog.Select(vehicle =>
-                {
-                    var used = vehicles.LastOrDefault(item => string.Equals(item.VehicleName, vehicle.Indicatiu, StringComparison.OrdinalIgnoreCase));
-                    return used?.FinalKms is > 0 ? vehicle with { Kms = (decimal)used.FinalKms.Value } : vehicle;
-                }));
+                var used = vehicles.LastOrDefault(item => string.Equals(item.VehicleName, vehicle.Indicatiu, StringComparison.OrdinalIgnoreCase));
+                if (used?.FinalKms is > 0) vehicle.Kms = (decimal)used.FinalKms.Value;
             }
         }
     }

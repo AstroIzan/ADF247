@@ -9,7 +9,32 @@ namespace ADF247.Api.Services;
 public sealed class SystemConfigurationService(Adf247DbContext database)
 {
     public async Task<object> GetAsync(CancellationToken cancellationToken) =>
-        ToResponse(await GetEntityAsync(cancellationToken));
+        ToResponse(await GetEntityAsync(cancellationToken), await LoadVehiclesAsync(cancellationToken));
+
+    private async Task<CampaignVehicleRequest[]> LoadVehiclesAsync(CancellationToken cancellationToken) =>
+        (await database.Vehicles.AsNoTracking().OrderBy(vehicle => vehicle.Indicatiu).ToListAsync(cancellationToken))
+            .Select(vehicle => new CampaignVehicleRequest(vehicle.Indicatiu, vehicle.Modelo, vehicle.Litres, vehicle.Kms, vehicle.Matricula))
+            .ToArray();
+
+    private async Task SaveVehiclesAsync(CampaignVehicleRequest[] vehicles, CancellationToken cancellationToken)
+    {
+        var existing = await database.Vehicles.ToListAsync(cancellationToken);
+        foreach (var vehicle in existing.Where(item => !vehicles.Any(v => string.Equals(v.Indicatiu, item.Indicatiu, StringComparison.OrdinalIgnoreCase))))
+            database.Vehicles.Remove(vehicle);
+        foreach (var vehicle in vehicles)
+        {
+            var entity = existing.FirstOrDefault(item => string.Equals(item.Indicatiu, vehicle.Indicatiu, StringComparison.OrdinalIgnoreCase));
+            if (entity is null)
+            {
+                entity = new Vehicle { Indicatiu = vehicle.Indicatiu };
+                database.Vehicles.Add(entity);
+            }
+            entity.Modelo = vehicle.Modelo;
+            entity.Matricula = vehicle.Matricula;
+            entity.Litres = vehicle.Litres;
+            entity.Kms = vehicle.Kms;
+        }
+    }
 
     public async Task<object> UpdateAsync(SystemConfigurationRequest request, CancellationToken cancellationToken)
     {
@@ -61,10 +86,10 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         configuration.UnansweredPenaltyThreshold = request.UnansweredPenaltyThreshold;
         configuration.UnansweredPenaltyHours = request.UnansweredPenaltyHours;
         configuration.NoShowPenaltyHours = request.NoShowPenaltyHours;
-        configuration.VehicleCatalogJson = JsonSerializer.Serialize(vehicles);
+        await SaveVehiclesAsync(vehicles, cancellationToken);
         configuration.UpdatedAt = DateTime.UtcNow;
         await database.SaveChangesAsync(cancellationToken);
-        return ToResponse(configuration);
+        return ToResponse(configuration, await LoadVehiclesAsync(cancellationToken));
     }
 
     private async Task<SystemConfiguration> GetEntityAsync(CancellationToken cancellationToken)
@@ -96,7 +121,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         UpdatedAt = DateTime.UtcNow,
     };
 
-    private static object ToResponse(SystemConfiguration configuration) => new
+    private static object ToResponse(SystemConfiguration configuration, CampaignVehicleRequest[] vehicles) => new
     {
         configuration.AutoCreateUnavailableForUsersWithoutWindow,
         configuration.NotifyOnAutoAvailableResponse,
@@ -115,7 +140,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
         configuration.UnansweredPenaltyThreshold,
         configuration.UnansweredPenaltyHours,
         configuration.NoShowPenaltyHours,
-        VehicleCatalog = Deserialize<CampaignVehicleRequest>(configuration.VehicleCatalogJson),
+        VehicleCatalog = vehicles,
         configuration.UpdatedAt,
     };
 
@@ -127,7 +152,7 @@ public sealed class SystemConfigurationService(Adf247DbContext database)
 
     private static CampaignVehicleRequest[] NormalizeVehicles(IReadOnlyList<CampaignVehicleRequest>? vehicles) =>
         (vehicles ?? [])
-            .Select(vehicle => new CampaignVehicleRequest(vehicle.Indicatiu.Trim(), vehicle.Modelo?.Trim(), vehicle.Litres, vehicle.Kms))
+            .Select(vehicle => new CampaignVehicleRequest(vehicle.Indicatiu.Trim(), vehicle.Modelo?.Trim(), vehicle.Litres, vehicle.Kms, string.IsNullOrWhiteSpace(vehicle.Matricula) ? null : vehicle.Matricula.Trim().ToUpperInvariant()))
             .Where(vehicle => vehicle.Indicatiu.Length > 0)
             .GroupBy(vehicle => vehicle.Indicatiu, StringComparer.OrdinalIgnoreCase)
             .Select(group => group.First())

@@ -24,7 +24,7 @@
         <table class="adf-table">
           <thead>
             <tr>
-              <th>ADF</th><th>Poblacions</th><th>Usuaris</th><th>Convocatòries</th><th>Properes</th><th>En curs</th><th>Respostes</th><th></th>
+              <th>ADF</th><th>Poblacions</th><th>Voluntaris actius</th><th>Vehicles actius</th><th>Convocatòries</th><th>Properes</th><th>En curs</th><th>Respostes</th><th></th>
             </tr>
           </thead>
           <tbody>
@@ -32,7 +32,8 @@
               <tr [class.selected]="selected()?.id === row.adf.id">
                 <td><strong>{{ row.adf.number }}</strong> - {{ row.adf.name }}</td>
                 <td>{{ row.adf.municipalities.join(', ') || '-' }}</td>
-                <td>{{ row.activeUsers }} / {{ row.users }}</td>
+                <td>{{ row.activeUsers }}</td>
+                <td>{{ row.vehicles }}</td>
                 <td>{{ row.convocatorias }}</td>
                 <td>{{ row.upcomingConvocatorias }}</td>
                 <td>{{ row.inProgressConvocatorias }}</td>
@@ -96,7 +97,8 @@
         <h2>ADF {{ adf.number }} - {{ adf.name }}</h2>
         <div class="adf-tabs">
           <button [class.active]="detailTab() === 'convocatories'" (click)="setTab('convocatories')">Convocatòries ({{ convocatories().length }})</button>
-          <button [class.active]="detailTab() === 'usuaris'" (click)="setTab('usuaris')">Usuaris ({{ users().length }})</button>
+          <button [class.active]="detailTab() === 'usuaris'" (click)="setTab('usuaris')">Voluntaris ({{ users().length }})</button>
+          <button [class.active]="detailTab() === 'vehicles'" (click)="setTab('vehicles')">Vehicles ({{ vehicles().length }})</button>
         </div>
       </div>
 
@@ -129,19 +131,44 @@
             </table>
           </div>
         }
+      } @else if (detailTab() === 'vehicles') {
+        @if (!vehicles().length) {
+          <p>Sense vehicles.</p>
+        } @else {
+          <div class="adf-table-wrap">
+            <table class="adf-table">
+              <thead><tr><th>Indicatiu</th><th>Model</th><th>Matrícula</th><th>Litres</th></tr></thead>
+              <tbody>
+                @for (vehicle of vehicles(); track vehicle.id) {
+                  <tr>
+                    <td><strong>{{ vehicle.indicatiu }}</strong></td>
+                    <td>{{ vehicle.modelo || '-' }}</td>
+                    <td>{{ vehicle.matricula || '-' }}</td>
+                    <td>{{ vehicle.litres > 0 ? vehicle.litres + ' L' : '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
       } @else {
         @if (!users().length) {
           <p>Sense usuaris.</p>
         } @else {
           <div class="adf-table-wrap">
             <table class="adf-table">
-              <thead><tr><th>Indicatiu</th><th>Carnet</th><th>Nom</th><th>Estat</th></tr></thead>
+              <thead><tr><th>Indicatiu</th><th>Carnet</th><th>Nom</th><th>Rols</th><th>Estat</th></tr></thead>
               <tbody>
                 @for (user of users(); track user.id) {
                   <tr>
                     <td>{{ user.nIndicatiu || '-' }}</td>
                     <td>{{ user.nCarnet }}</td>
                     <td>{{ user.name }} {{ user.lastName }}</td>
+                    <td class="role-badges">
+                      @if (user.isCapOperatiu) { <span class="role-badge op">Cap Operatiu</span> }
+                      @if (user.isCapColla) { <span class="role-badge colla">Cap de Colla</span> }
+                      @if (user.isGroc) { <span class="role-badge groc">Groc</span> } @else { <span class="role-badge verd">Verd</span> }
+                    </td>
                     <td>{{ user.isActive ? 'Actiu' : 'Inactiu' }}</td>
                   </tr>
                 }
