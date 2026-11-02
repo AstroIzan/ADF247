@@ -29,6 +29,11 @@ export class AvailabilityComponent implements OnInit {
     hour12: false,
   });
   readonly weekdayLabels = ['Dl', 'Dt', 'Dc', 'Dj', 'Dv', 'Ds', 'Dg'];
+
+  isToday(date: Date): boolean {
+    const now = new Date();
+    return date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth() && date.getDate() === now.getDate();
+  }
   readonly hourOptions = this.buildHourOptions();
   readonly minuteOptions = this.buildMinuteOptions();
   windows = signal<AvailabilityWindow[]>([]);

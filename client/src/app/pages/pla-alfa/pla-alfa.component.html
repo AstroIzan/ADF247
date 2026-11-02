@@ -1,12 +1,27 @@
-<div class="pla-alfa-page">
-  <section class="pla-alfa-header">
-    <h1>Pla Alfa municipal</h1>
-    @if (isAdminUser()) {
-      <p>Selecciona els municipis a considerar i consulta el nivell Pla Alfa actual (D) i de demà (D+1).</p>
-    } @else {
-      <p>Consulta el nivell Pla Alfa actual (D) i de demà (D+1) dels municipis configurats pels administradors.</p>
-    }
-  </section>
+<div class="pa-page">
+  <header class="pa-hero">
+    <div class="pa-hero-text">
+      <span class="pa-eyebrow"><i class="fa-solid fa-fire-flame-curved" aria-hidden="true"></i> Pla Alfa</span>
+      <h1>Nivells de risc per municipi</h1>
+      @if (isAdminUser()) {
+        <p>Selecciona els municipis a vigilar i consulta el nivell Pla Alfa d'avui (D) i de demà (D+1).</p>
+      } @else {
+        <p>Nivell Pla Alfa d'avui (D) i de demà (D+1) dels municipis configurats pels administradors.</p>
+      }
+    </div>
+    <div class="pa-hero-stats">
+      <div class="pa-stat">
+        <strong>{{ plaAlfaStatus().length }}</strong>
+        <span>municipis</span>
+      </div>
+      @if (plaAlfaUpdatedAt()) {
+        <div class="pa-stat">
+          <strong>{{ plaAlfaUpdatedAt() | date: 'HH:mm' }}</strong>
+          <span>{{ plaAlfaUpdatedAt() | date: 'dd/MM/yyyy' }}</span>
+        </div>
+      }
+    </div>
+  </header>
 
   @if (plaAlfaError()) {
     <div class="error-alert">{{ plaAlfaError() }}</div>
@@ -19,235 +34,170 @@
   @if (plaAlfaLoading()) {
     <div class="loading">Carregant catàleg de municipis...</div>
   } @else {
-    <div class="pla-alfa-layout" [class.pla-alfa-layout-viewer]="!isAdminUser()">
+    <div class="pa-layout" [class.pa-layout-viewer]="!isAdminUser()">
       @if (isAdminUser()) {
-        <div
-          class="pla-alfa-selector-panel"
-          [class.pla-alfa-selector-panel-mobile]="isMobileSelectorMode()"
-          [class.is-collapsed]="isMobileSelectorMode() && isPlaAlfaSelectorCollapsed()"
-        >
-          <div class="pla-alfa-selector-panel-head" [class.is-expanded]="isMobileSelectorMode() && !isPlaAlfaSelectorCollapsed()">
-            <span class="pla-alfa-selector-title">Configuració de municipis</span>
+        <aside class="pa-config" [class.is-collapsed]="isMobileSelectorMode() && isPlaAlfaSelectorCollapsed()">
+          <button
+            type="button"
+            class="pa-config-head"
+            [disabled]="!isMobileSelectorMode()"
+            [attr.aria-expanded]="!isPlaAlfaSelectorCollapsed()"
+            (click)="isMobileSelectorMode() && togglePlaAlfaSelectorCollapsed()"
+          >
+            <span><i class="fa-solid fa-sliders" aria-hidden="true"></i> Configuració de municipis</span>
             @if (isMobileSelectorMode()) {
-              <button
-                type="button"
-                class="pla-alfa-selector-toggle"
-                [attr.aria-expanded]="!isPlaAlfaSelectorCollapsed()"
-                [attr.aria-label]="isPlaAlfaSelectorCollapsed() ? 'Desplegar configuració de municipis' : 'Plegar configuració de municipis'"
-                (click)="togglePlaAlfaSelectorCollapsed()"
-              >
-                <i class="fa-solid" [class.fa-chevron-down]="isPlaAlfaSelectorCollapsed()" [class.fa-chevron-up]="!isPlaAlfaSelectorCollapsed()" aria-hidden="true"></i>
-              </button>
+              <i class="fa-solid" [class.fa-chevron-down]="isPlaAlfaSelectorCollapsed()" [class.fa-chevron-up]="!isPlaAlfaSelectorCollapsed()" aria-hidden="true"></i>
             }
-          </div>
+          </button>
 
           @if (!isMobileSelectorMode() || !isPlaAlfaSelectorCollapsed()) {
-          <label class="pla-alfa-selector-label" for="plaAlfaSearch">Municipis de Catalunya (Pla Alfa)</label>
-
-          <div class="pla-alfa-filter-row">
-            <input
-              id="plaAlfaSearch"
-              type="search"
-              class="pla-alfa-search-input"
-              placeholder="Buscar municipi o comarca..."
-              (input)="onPlaAlfaSearchInput($event)"
-            />
-
-            <select class="pla-alfa-filter-select" (change)="onPlaAlfaComarcaFilterChange($event)">
-              <option value="all">Totes les comarques</option>
-              @for (comarca of getPlaAlfaComarcaOptions(); track comarca) {
-                <option [value]="comarca">{{ comarca }}</option>
-              }
-            </select>
-
-            <div class="pla-alfa-bulk-actions">
-              <button class="btn btn-secondary" type="button" (click)="toggleSelectAllPlaAlfaMunicipalities()">
-                {{ areAllPlaAlfaMunicipalitiesSelected() ? 'Deseleccionar todo' : 'Seleccionar todo' }}
-              </button>
-              <span class="pla-alfa-selected-count">{{ plaAlfaSelected().length }} seleccionats</span>
-            </div>
-
-            @if (plaAlfaSelected().length) {
-              <div class="pla-alfa-selected-preview" aria-label="Municipis seleccionats">
-                @for (municipality of plaAlfaSelected().slice(0, 20); track municipality) {
-                  <span class="pla-alfa-selected-pill">{{ municipality }}</span>
-                }
-                @if (plaAlfaSelected().length > 20) {
-                  <span class="pla-alfa-selected-pill pla-alfa-selected-pill-more">+{{ plaAlfaSelected().length - 20 }} més</span>
-                }
+            <div class="pa-config-body">
+              <div class="pa-search">
+                <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                <input id="plaAlfaSearch" type="search" placeholder="Buscar municipi o comarca..." (input)="onPlaAlfaSearchInput($event)" />
               </div>
-            }
-          </div>
 
-          <div class="pla-alfa-checkbox-list" role="listbox" aria-label="Llista de municipis Pla Alfa">
-            @for (item of getFilteredPlaAlfaCatalog(); track item.municipality) {
-              <div class="pla-alfa-checkbox-item">
-                <button
-                  type="button"
-                  class="municipality-principal-toggle"
-                  [class.is-active]="isPrincipalMunicipality(item.municipality)"
-                  [class.is-disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
-                  [attr.aria-pressed]="isPrincipalMunicipality(item.municipality)"
-                  [disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
-                  [attr.title]="isPrincipalMunicipality(item.municipality) ? 'Treure municipi principal' : 'Marcar municipi principal'"
-                  [attr.aria-label]="isPrincipalMunicipality(item.municipality) ? 'Treure municipi principal' : 'Marcar municipi principal'"
-                  (click)="setPrincipalMunicipality(item.municipality, !isPrincipalMunicipality(item.municipality))"
-                >
-                  <span class="municipality-principal-chip" aria-hidden="true">
-                    <span class="municipality-principal-icon"></span>
-                  </span>
+              <select class="pa-select" (change)="onPlaAlfaComarcaFilterChange($event)">
+                <option value="all">Totes les comarques</option>
+                @for (comarca of getPlaAlfaComarcaOptions(); track comarca) {
+                  <option [value]="comarca">{{ comarca }}</option>
+                }
+              </select>
+
+              <div class="pa-bulk">
+                <button class="pa-btn pa-btn-ghost" type="button" (click)="toggleSelectAllPlaAlfaMunicipalities()">
+                  {{ areAllPlaAlfaMunicipalitiesSelected() ? 'Deseleccionar tot' : 'Seleccionar tot' }}
                 </button>
-                <label class="municipality-checkbox-toggle">
-                  <input
-                    type="checkbox"
-                    [checked]="isPlaAlfaMunicipalitySelected(item.municipality)"
-                    (change)="togglePlaAlfaMunicipality(item.municipality, $any($event.target).checked)"
-                  />
-                  <span class="municipality-name">{{ item.municipality }}</span>
-                </label>
-                <span class="municipality-comarca">{{ item.comarca || 'Sense comarca' }}</span>
+                <span class="pa-count">{{ plaAlfaSelected().length }} seleccionats</span>
               </div>
-            }
-          </div>
-          <p class="pla-alfa-help">Els municipis seleccionats es mantenen visibles encara que no compleixin els filtres.</p>
 
-          <div class="pla-alfa-actions">
-            <button class="btn btn-primary" type="button" (click)="savePlaAlfaSelection()" [disabled]="plaAlfaSaving()">
-              {{ plaAlfaSaving() ? 'Desant...' : 'Desar municipis seleccionats' }}
-            </button>
-            <button class="btn btn-secondary" type="button" (click)="refreshPlaAlfaStatus(true)" [disabled]="plaAlfaRefreshingStatus() || plaAlfaSaving()">
-              {{ plaAlfaRefreshingStatus() ? 'Actualitzant...' : 'Actualitzar nivells Pla Alfa' }}
-            </button>
-          </div>
+              @if (plaAlfaSelected().length) {
+                <div class="pa-chips" aria-label="Municipis seleccionats">
+                  @for (municipality of plaAlfaSelected().slice(0, 20); track municipality) {
+                    <span class="pa-chip">{{ municipality }}</span>
+                  }
+                  @if (plaAlfaSelected().length > 20) {
+                    <span class="pa-chip pa-chip-more">+{{ plaAlfaSelected().length - 20 }} més</span>
+                  }
+                </div>
+              }
+
+              <div class="pa-list" role="listbox" aria-label="Llista de municipis Pla Alfa">
+                @for (item of getFilteredPlaAlfaCatalog(); track item.municipality) {
+                  <div class="pa-list-item" [class.is-selected]="isPlaAlfaMunicipalitySelected(item.municipality)">
+                    <label class="pa-list-check">
+                      <input
+                        type="checkbox"
+                        [checked]="isPlaAlfaMunicipalitySelected(item.municipality)"
+                        (change)="togglePlaAlfaMunicipality(item.municipality, $any($event.target).checked)"
+                      />
+                      <span class="pa-list-name">{{ item.municipality }}</span>
+                      <span class="pa-list-comarca">{{ item.comarca || 'Sense comarca' }}</span>
+                    </label>
+                    <button
+                      type="button"
+                      class="pa-principal"
+                      [class.is-active]="isPrincipalMunicipality(item.municipality)"
+                      [attr.aria-pressed]="isPrincipalMunicipality(item.municipality)"
+                      [disabled]="!isPlaAlfaMunicipalitySelected(item.municipality)"
+                      [attr.title]="isPrincipalMunicipality(item.municipality) ? 'Treure municipi principal' : 'Marcar municipi principal'"
+                      [attr.aria-label]="isPrincipalMunicipality(item.municipality) ? 'Treure municipi principal' : 'Marcar municipi principal'"
+                      (click)="setPrincipalMunicipality(item.municipality, !isPrincipalMunicipality(item.municipality))"
+                    >
+                      <i class="fa-solid fa-star" aria-hidden="true"></i>
+                    </button>
+                  </div>
+                }
+              </div>
+              <p class="pa-help">Els municipis seleccionats es mantenen visibles encara que no compleixin els filtres. L'estrella marca el municipi principal.</p>
+
+              <div class="pa-config-actions">
+                <button class="pa-btn pa-btn-primary" type="button" (click)="savePlaAlfaSelection()" [disabled]="plaAlfaSaving()">
+                  {{ plaAlfaSaving() ? 'Desant...' : 'Desar municipis' }}
+                </button>
+                <button class="pa-btn pa-btn-ghost" type="button" (click)="refreshPlaAlfaStatus(true)" [disabled]="plaAlfaRefreshingStatus() || plaAlfaSaving()">
+                  <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                  {{ plaAlfaRefreshingStatus() ? 'Actualitzant...' : 'Actualitzar nivells' }}
+                </button>
+              </div>
+            </div>
           }
-        </div>
+        </aside>
       }
 
-        <div class="pla-alfa-table-panel">
-          <div class="pla-alfa-table-head">
-            <div>
-              <h4>Nivells dels municipis seleccionats</h4>
-              @if (plaAlfaUpdatedAt()) {
-                <p class="pla-alfa-updated-at">Última actualització general: {{ plaAlfaUpdatedAt() | date: 'dd/MM/yyyy HH:mm:ss' }}</p>
-              }
-            </div>
-            <span>{{ plaAlfaStatus().length }} municipis</span>
+      <section class="pa-results">
+        @if (!plaAlfaStatus().length) {
+          <div class="pa-empty">
+            <i class="fa-solid fa-map-location-dot" aria-hidden="true"></i>
+            <p>No hi ha municipis seleccionats.</p>
           </div>
-
-          @if (!plaAlfaStatus().length) {
-            <div class="loading">No hi ha municipis seleccionats.</div>
-          } @else {
-            <div class="pla-alfa-table-wrapper">
-              <table class="pla-alfa-table">
-                <thead>
-                  <tr>
-                    <th>Municipi</th>
-                    <th>Comarca</th>
-                    <th>Avui</th>
-                    <th>Demà</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (item of plaAlfaStatus(); track item.municipality) {
-                    @let todayWeather = formatPlaAlfaWeatherSummary(item.todayForecast);
-                    @let tomorrowWeather = formatPlaAlfaWeatherSummary(item.tomorrowForecast);
-                    <tr class="pla-alfa-row">
-                      <td class="pla-col-municipality" data-label="Municipi">
-                        {{ item.municipality }}
-                        @if (item.isPrincipal) {
-                          <span class="pla-alfa-selected-pill">Principal</span>
-                        }
-                      </td>
-                      <td class="pla-col-comarca" data-label="Comarca">{{ item.comarca || '-' }}</td>
-                      <td class="pla-col-day" data-label="Avui">
-                        <div class="pla-alfa-day-cell">
-                        @if (item.foundToday) {
-                          <span class="pla-alfa-level" [class]="'pla-alfa-level ' + getPlaAlfaLevelClass(item.todayLevel)">
-                            {{ getPlaAlfaLevelLabel(item.todayLevel) }}
-                          </span>
-                        } @else {
-                          <span class="pla-alfa-level-missing">No trobat</span>
-                        }
-                        @if (typeof todayWeather === 'string') {
-                          <span class="pla-alfa-weather-missing">{{ todayWeather }}</span>
-                        } @else {
-                          <div class="pla-alfa-weather-block">
-                            <span class="weather-item weather-temp">
-                              <i class="fa-solid fa-temperature-high" aria-hidden="true"></i>
-                              <strong>Temperatura</strong>
-                              <span>{{ todayWeather.temperature }}</span>
-                            </span>
-                            <span class="weather-item weather-wind">
-                              <i class="fa-solid fa-wind" aria-hidden="true"></i>
-                              <strong>Vent</strong>
-                              <span class="weather-wind-value">
-                                {{ todayWeather.windSpeed }}
-                                @if (todayWeather.windDirection) {
-                                  <i class="fa-solid fa-arrow-down wind-direction-icon" [style.transform]="'rotate(' + (todayWeather.windAngleDeg ?? 0) + 'deg)'" aria-hidden="true"></i>
-                                  <span class="wind-direction-code">{{ todayWeather.windDirection }}</span>
-                                  @if (todayWeather.windDirectionName) {
-                                    <span class="wind-direction-name-badge">{{ todayWeather.windDirectionName }}</span>
-                                  }
-                                }
-                              </span>
-                            </span>
-                            <span class="weather-item weather-humidity">
-                              <i class="fa-solid fa-droplet" aria-hidden="true"></i>
-                              <strong>Humitat</strong>
-                              <span>{{ todayWeather.humidity }}</span>
-                            </span>
-                          </div>
-                        }
-                        </div>
-                      </td>
-                      <td class="pla-col-day" data-label="Demà">
-                        <div class="pla-alfa-day-cell">
-                        @if (item.foundTomorrow) {
-                          <span class="pla-alfa-level" [class]="'pla-alfa-level ' + getPlaAlfaLevelClass(item.tomorrowLevel)">
-                            {{ getPlaAlfaLevelLabel(item.tomorrowLevel) }}
-                          </span>
-                        } @else {
-                          <span class="pla-alfa-level-missing">No trobat</span>
-                        }
-                        @if (typeof tomorrowWeather === 'string') {
-                          <span class="pla-alfa-weather-missing">{{ tomorrowWeather }}</span>
-                        } @else {
-                          <div class="pla-alfa-weather-block">
-                            <span class="weather-item weather-temp">
-                              <i class="fa-solid fa-temperature-high" aria-hidden="true"></i>
-                              <strong>Temperatura</strong>
-                              <span>{{ tomorrowWeather.temperature }}</span>
-                            </span>
-                            <span class="weather-item weather-wind">
-                              <i class="fa-solid fa-wind" aria-hidden="true"></i>
-                              <strong>Vent</strong>
-                              <span class="weather-wind-value">
-                                {{ tomorrowWeather.windSpeed }}
-                                @if (tomorrowWeather.windDirection) {
-                                  <i class="fa-solid fa-arrow-down wind-direction-icon" [style.transform]="'rotate(' + (tomorrowWeather.windAngleDeg ?? 0) + 'deg)'" aria-hidden="true"></i>
-                                  <span class="wind-direction-code">{{ tomorrowWeather.windDirection }}</span>
-                                  @if (tomorrowWeather.windDirectionName) {
-                                    <span class="wind-direction-name-badge">{{ tomorrowWeather.windDirectionName }}</span>
-                                  }
-                                }
-                              </span>
-                            </span>
-                            <span class="weather-item weather-humidity">
-                              <i class="fa-solid fa-droplet" aria-hidden="true"></i>
-                              <strong>Humitat</strong>
-                              <span>{{ tomorrowWeather.humidity }}</span>
-                            </span>
-                          </div>
-                        }
-                        </div>
-                      </td>
-                    </tr>
+        } @else {
+          <div class="pa-cards">
+            @for (item of plaAlfaStatus(); track item.municipality) {
+              <article class="pa-card" [class.is-principal]="item.isPrincipal">
+                <div class="pa-card-head">
+                  <div>
+                    <h3>{{ item.municipality }}</h3>
+                    <span class="pa-card-comarca">{{ item.comarca || '-' }}</span>
+                  </div>
+                  @if (item.isPrincipal) {
+                    <span class="pa-badge-principal"><i class="fa-solid fa-star" aria-hidden="true"></i> Principal</span>
                   }
-                </tbody>
-              </table>
-            </div>
-          }
-        </div>
+                </div>
+
+                <div class="pa-days">
+                  @for (day of [
+                    { label: 'Avui', found: item.foundToday, level: item.todayLevel, forecast: item.todayForecast },
+                    { label: 'Demà', found: item.foundTomorrow, level: item.tomorrowLevel, forecast: item.tomorrowForecast }
+                  ]; track day.label) {
+                    @let weather = formatPlaAlfaWeatherSummary(day.forecast);
+                    <div class="pa-day">
+                      <div class="pa-day-top">
+                        <span class="pa-day-label">{{ day.label }}</span>
+                        @if (day.found) {
+                          <span class="pa-level" [ngClass]="getPlaAlfaLevelClass(day.level)">{{ getPlaAlfaLevelLabel(day.level) }}</span>
+                        } @else {
+                          <span class="pa-level-missing">No trobat</span>
+                        }
+                      </div>
+                      @if (typeof weather === 'string') {
+                        <span class="pa-weather-missing">{{ weather }}</span>
+                      } @else {
+                        <ul class="pa-weather">
+                          <li>
+                            <i class="fa-solid fa-temperature-high" aria-hidden="true"></i>
+                            <span>Temperatura</span>
+                            <strong>{{ weather.temperature }}</strong>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-wind" aria-hidden="true"></i>
+                            <span>Vent</span>
+                            <strong>
+                              {{ weather.windSpeed }}
+                              @if (weather.windDirection) {
+                                <i class="fa-solid fa-arrow-down pa-wind-arrow" [style.transform]="'rotate(' + (weather.windAngleDeg ?? 0) + 'deg)'" aria-hidden="true"></i>
+                                {{ weather.windDirection }}
+                                @if (weather.windDirectionName) {
+                                  <em class="pa-wind-name">{{ weather.windDirectionName }}</em>
+                                }
+                              }
+                            </strong>
+                          </li>
+                          <li>
+                            <i class="fa-solid fa-droplet" aria-hidden="true"></i>
+                            <span>Humitat</span>
+                            <strong>{{ weather.humidity }}</strong>
+                          </li>
+                        </ul>
+                      }
+                    </div>
+                  }
+                </div>
+              </article>
+            }
+          </div>
+        }
+      </section>
     </div>
   }
 </div>

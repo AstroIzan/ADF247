@@ -219,18 +219,18 @@ export class PlaAlfaComponent implements OnInit {
 
   getPlaAlfaLevelClass(level: number | null | undefined) {
     if (!Number.isInteger(level) || level === null || level === undefined) {
-      return 'pla-alfa-level-na';
+      return 'pa-level-na';
     }
 
     if (level < 0) {
-      return 'pla-alfa-level-unknown';
+      return 'pa-level-unknown';
     }
 
     if (level > 4) {
-      return 'pla-alfa-level-unknown';
+      return 'pa-level-unknown';
     }
 
-    return `pla-alfa-level-${level}`;
+    return `pa-level-${level}`;
   }
 
   formatPlaAlfaWeatherSummary(forecast: PlaAlfaWeatherForecast | null | undefined) {
