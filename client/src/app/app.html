@@ -7,17 +7,30 @@
 				<button class="nav-btn desktop-nav-btn" routerLink="/availability" routerLinkActive="active">Disponibilitat</button>
 				<button class="nav-btn desktop-nav-btn" routerLink="/pla-alfa" routerLinkActive="active">Pla Alfa</button>
 				@if (authService.isManager()) {
-					<button class="nav-btn desktop-nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
-					<button class="nav-btn desktop-nav-btn" routerLink="/hours-summary" routerLinkActive="active">Hores</button>
+					<button class="nav-btn desktop-nav-btn" routerLink="/hours-summary" routerLinkActive="active">Resum Campanya</button>
 				}
-				@if (authService.isDeveloper()) {
-					<button class="nav-btn desktop-nav-btn" routerLink="/dev" routerLinkActive="active">Dev</button>
-				}
-				@if (authService.isGlobalViewer()) {
-					<button class="nav-btn desktop-nav-btn" routerLink="/secretariat" routerLinkActive="active">Secretariat</button>
-				}
-				@if (authService.isAdmin()) {
-					<button class="nav-btn desktop-nav-btn" routerLink="/system" routerLinkActive="active">Sistema</button>
+				@if (authService.isManager() || authService.isDeveloper() || authService.isGlobalViewer() || authService.isAdmin()) {
+					<div class="admin-menu desktop-nav-btn" (click)="$event.stopPropagation()">
+						<button class="nav-btn admin-menu-trigger" type="button" [class.active]="isAdminRoute()" [attr.aria-expanded]="adminMenuOpen" (click)="toggleAdminMenu()">
+							Administració <span class="admin-caret" aria-hidden="true">▾</span>
+						</button>
+						@if (adminMenuOpen) {
+							<div class="admin-menu-panel" role="menu">
+								@if (authService.isManager()) {
+									<button class="admin-menu-item" role="menuitem" routerLink="/dashboard" routerLinkActive="active" (click)="closeAdminMenu()"><strong>Panell</strong><small>Usuaris, vehicles i formularis</small></button>
+								}
+								@if (authService.isDeveloper()) {
+									<button class="admin-menu-item" role="menuitem" routerLink="/dev" routerLinkActive="active" (click)="closeAdminMenu()"><strong>Dev</strong><small>Eines de desenvolupament</small></button>
+								}
+								@if (authService.isGlobalViewer()) {
+									<button class="admin-menu-item" role="menuitem" routerLink="/secretariat" routerLinkActive="active" (click)="closeAdminMenu()"><strong>Secretariat</strong><small>Vista global de les ADF</small></button>
+								}
+								@if (authService.isAdmin()) {
+									<button class="admin-menu-item" role="menuitem" routerLink="/system" routerLinkActive="active" (click)="closeAdminMenu()"><strong>Sistema</strong><small>Configuració general</small></button>
+								}
+							</div>
+						}
+					</div>
 				}
 			</div>
 
@@ -75,7 +88,7 @@
 				<button class="mobile-menu-item" routerLink="/pla-alfa" routerLinkActive="active" (click)="closeMobileMenu()">Pla Alfa</button>
 				@if (authService.isManager()) {
 					<button class="mobile-menu-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">Panell</button>
-					<button class="mobile-menu-item mobile-menu-item-tablet-up" routerLink="/hours-summary" routerLinkActive="active" (click)="closeMobileMenu()">Hores</button>
+					<button class="mobile-menu-item mobile-menu-item-tablet-up" routerLink="/hours-summary" routerLinkActive="active" (click)="closeMobileMenu()">Resum Campanya</button>
 				}
 									@if (authService.isDeveloper()) {
 										<button class="mobile-menu-item" routerLink="/dev" routerLinkActive="active" (click)="closeMobileMenu()">Dev</button>

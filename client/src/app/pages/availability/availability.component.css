@@ -208,3 +208,9 @@
   .av-range-chip { font-size: 0.58rem; padding: 1px 4px; }
   .av-moment { grid-template-columns: 1fr; }
 }
+
+.av-field-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.av-field-pair .av-field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.av-field-pair small{color:#6b7280;font-size:.75rem;font-weight:600}
+.av-field-pair input{width:100%;box-sizing:border-box;min-width:0}
+.av-form-hint{margin:2px 0 10px;font-size:.8rem;color:#6b7280}

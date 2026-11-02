@@ -231,7 +231,7 @@
                     </button>
                   </div>
                 }
-              } @else {
+              } @else if (!isResponseWindowClosed(convo)) {
                 <div class="hm-answer">
                   <button
                     type="button"
@@ -951,6 +951,7 @@
                             >
                               <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
                             </button>
+                            @if (!adminConvo() || !isResponseWindowClosed(adminConvo()!)) {
                             <button
                               type="button"
                               class="btn btn-sm btn-edit"
@@ -960,6 +961,7 @@
                             >
                               ✎
                             </button>
+                            }
                             @if (!respuesta.attendanceConfirmed) {
                               <button
                                 type="button"
@@ -1025,6 +1027,7 @@
                       >
                         <span class="attendance-toggle-icon" aria-hidden="true">{{ respuesta.attendanceConfirmed ? '✕' : '✓' }}</span>
                       </button>
+                      @if (!adminConvo() || !isResponseWindowClosed(adminConvo()!)) {
                       <button
                         type="button"
                         class="btn btn-sm btn-edit"
@@ -1034,6 +1037,7 @@
                       >
                         ✎
                       </button>
+                      }
                       @if (!respuesta.attendanceConfirmed) {
                         <button
                           type="button"

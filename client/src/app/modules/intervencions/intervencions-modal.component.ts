@@ -19,6 +19,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
   private data = inject(DataService);
 
   @Input() convocatoria: Convocatoria | null = null;
+  @Input() editIntervencio: Intervencio | null = null;
   @Output() closed = new EventEmitter<void>();
   @ViewChild('mapHost') set mapHost(ref: ElementRef<HTMLDivElement> | undefined) {
     if (ref && !this.map) this.initMap(ref.nativeElement);
@@ -54,6 +55,10 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
   private marker: L.CircleMarker | null = null;
 
   ngOnInit(): void {
+    if (this.editIntervencio) {
+      this.openEdit(this.editIntervencio);
+      return;
+    }
     this.reload();
   }
 
@@ -112,6 +117,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
     this.destroyMap();
     this.formOpen.set(false);
     this.error.set('');
+    if (this.editIntervencio) this.closed.emit();
   }
 
   update<K extends keyof IntervencioPayload>(key: K, value: IntervencioPayload[K]): void {
@@ -293,7 +299,7 @@ export class IntervencionsModalComponent implements OnInit, OnDestroy {
       surface: f.surface === null || (f.surface as unknown) === '' ? null : Number(f.surface),
     };
     this.data.saveIntervencio(this.editing()?.id ?? null, payload).subscribe({
-      next: () => { this.saving.set(false); this.closeForm(); this.reload(); },
+      next: () => { this.saving.set(false); this.closeForm(); if (!this.editIntervencio) this.reload(); },
       error: err => { this.saving.set(false); this.error.set(err?.error?.message ?? 'No s\'ha pogut desar la intervenció.'); },
     });
   }

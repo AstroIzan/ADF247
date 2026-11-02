@@ -305,3 +305,10 @@
 .status-muted { background: #eef1f4; color: #536276; }
 .hours-detail-error { color: #a32a30; }
 @media (max-width: 900px) { .hours-eye-col { display: none; } }
+
+.hours-actions{white-space:nowrap}
+.hours-actions .eye-btn{margin-right:4px}
+.iv-detail{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0 0 14px}
+.iv-detail dt{font-weight:700;opacity:.75}
+.iv-detail dd{margin:0;word-break:break-word}
+.iv-detail-actions{display:flex;justify-content:flex-end}

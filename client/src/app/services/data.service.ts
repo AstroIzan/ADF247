@@ -762,7 +762,7 @@ export class DataService {
   }
 
   getIntervencions(params: { convocatoriaId?: number; date?: string }): Observable<Intervencio[]> {
-    const query = params.convocatoriaId ? `?convocatoriaId=${params.convocatoriaId}` : `?date=${params.date ?? ''}`;
+    const query = params.convocatoriaId ? `?convocatoriaId=${params.convocatoriaId}` : (params.date ? `?date=${params.date}` : '');
     return this.http.get<Intervencio[]>(`/intervencions${query}`);
   }
 

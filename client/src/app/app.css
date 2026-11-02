@@ -482,3 +482,37 @@ app-home {
 		transform: translateY(0);
 	}
 }
+
+.admin-menu { position: relative; }
+.admin-caret { margin-left: 4px; font-size: 11px; }
+.admin-menu-panel {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 0;
+	min-width: 240px;
+	display: grid;
+	gap: 2px;
+	padding: 6px;
+	background: #262626;
+	border: 1px solid rgba(240, 176, 0, 0.35);
+	border-radius: 12px;
+	box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+	z-index: 60;
+}
+.admin-menu-item {
+	display: grid;
+	gap: 2px;
+	text-align: left;
+	border: 0;
+	background: transparent;
+	color: #efefef;
+	padding: 9px 12px;
+	border-radius: 8px;
+	cursor: pointer;
+	font: inherit;
+}
+.admin-menu-item strong { font-size: 13px; }
+.admin-menu-item small { color: #a8a8a8; font-size: 11px; }
+.admin-menu-item:hover { background: #343434; }
+.admin-menu-item.active { background: rgba(240, 176, 0, 0.16); }
+.admin-menu-item.active strong { color: #f0b000; }

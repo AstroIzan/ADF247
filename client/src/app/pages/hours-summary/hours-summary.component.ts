@@ -2,16 +2,49 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
-import { DataService, UserHoursDetail, UserHoursSummaryRow } from '../../services/data.service';
+import { DataService, Intervencio, TypeIncendi, UserHoursDetail, UserHoursSummaryRow } from '../../services/data.service';
+import { IntervencionsModalComponent } from '../../modules/intervencions/intervencions-modal.component';
 
 @Component({
   selector: 'app-hours-summary',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, IntervencionsModalComponent],
   templateUrl: './hours-summary.component.html',
   styleUrl: './hours-summary.component.css',
 })
 export class HoursSummaryComponent implements OnInit {
+  intervencions = signal<Intervencio[]>([]);
+  intervencionsLoading = signal(false);
+  intervencionsError = signal('');
+  intervencioTypes = signal<TypeIncendi[]>([]);
+  viewIntervencio = signal<Intervencio | null>(null);
+  editIntervencio = signal<Intervencio | null>(null);
+
+  loadIntervencions() {
+    this.intervencionsLoading.set(true);
+    this.intervencionsError.set('');
+    this.dataService.getIntervencions({}).subscribe({
+      next: (items) => { this.intervencions.set(items); this.intervencionsLoading.set(false); },
+      error: (error) => {
+        this.intervencionsLoading.set(false);
+        this.intervencionsError.set(error.error?.message || 'No s’han pogut carregar les intervencions.');
+      },
+    });
+    this.dataService.getIntervencionsContext({}).subscribe({
+      next: (ctx) => this.intervencioTypes.set(ctx.types),
+      error: () => undefined,
+    });
+  }
+
+  intervencioType(item: Intervencio) {
+    return this.intervencioTypes().find((type) => type.id === item.typeIncendiId)?.name ?? '—';
+  }
+
+  closeIntervencioEdit() {
+    this.editIntervencio.set(null);
+    this.loadIntervencions();
+  }
+
   detailUser = signal<UserHoursSummaryRow | null>(null);
   detail = signal<UserHoursDetail | null>(null);
   detailLoading = signal(false);
@@ -77,6 +110,7 @@ export class HoursSummaryComponent implements OnInit {
     }
 
     this.loadSummary();
+    this.loadIntervencions();
   }
 
   loadSummary() {

@@ -20,10 +20,12 @@ export class App {
   currentPath = '';
   notificationWarning = '';
   isMobileMenuOpen = false;
+  adminMenuOpen = false;
   private notificationCheckInFlight: Promise<void> | null = null;
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
+    this.adminMenuOpen = false;
     const target = event.target as HTMLElement | null;
     if (!target?.classList.contains('modal-overlay')) return;
     const closeButton = target.querySelector<HTMLElement>('.modal-header .close-btn, .close-btn');
@@ -55,6 +57,7 @@ export class App {
         const navEvent = event as NavigationEnd
         this.currentPath = navEvent.urlAfterRedirects
         this.isMobileMenuOpen = false
+        this.adminMenuOpen = false
         void this.handleHomeNotificationCheck()
       })
 
@@ -71,6 +74,18 @@ export class App {
 
   openNotificationsModal() {
     this.settingsComponent?.openModal();
+  }
+
+  toggleAdminMenu() {
+    this.adminMenuOpen = !this.adminMenuOpen;
+  }
+
+  closeAdminMenu() {
+    this.adminMenuOpen = false;
+  }
+
+  isAdminRoute() {
+    return ['/dashboard', '/dev', '/secretariat', '/system'].some(path => this.currentPath.startsWith(path));
   }
 
   toggleMobileMenu() {

@@ -45,12 +45,17 @@ public sealed class IntervencionsController(Adf247DbContext database, CurrentAdf
         else
         {
             if (!identity.Value.IsManager) return Forbid();
-            if (!DateOnly.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day))
-                return BadRequest(new { message = "La fecha debe tener el formato yyyy-MM-dd." });
-            query = query.Where(item => item.Date == day);
+            if (!string.IsNullOrWhiteSpace(date))
+            {
+                if (!DateOnly.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day))
+                    return BadRequest(new { message = "La fecha debe tener el formato yyyy-MM-dd." });
+                query = query.Where(item => item.Date == day);
+            }
         }
 
-        var items = await query.OrderBy(item => item.Date).ThenBy(item => item.StartTime).ThenBy(item => item.Id).ToListAsync();
+        var items = convocatoriaId.HasValue || !string.IsNullOrWhiteSpace(date)
+            ? await query.OrderBy(item => item.Date).ThenBy(item => item.StartTime).ThenBy(item => item.Id).ToListAsync()
+            : await query.OrderByDescending(item => item.Date).ThenByDescending(item => item.StartTime).ThenByDescending(item => item.Id).ToListAsync();
         return Ok(items.Select(Map));
     }
 

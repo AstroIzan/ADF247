@@ -117,12 +117,21 @@ public sealed class MessagingService(Adf247DbContext database)
             var responsable = convocatoria.Responsable is null
                 ? "Sense responsable assignat"
                 : $"{convocatoria.Responsable.NCarnet} {convocatoria.Responsable.Name} {convocatoria.Responsable.LastName}".Trim();
+            var startTemplate = await FindServiceConfigurationAsync("service-start", cancellationToken);
+            var startValues = new Dictionary<string, string>
+            {
+                ["service.time"] = convocatoria.StartTime.ToString("HH:mm"),
+                ["service.grocs"] = grocs.ToString(),
+                ["service.noGrocs"] = noGrocs.ToString(),
+                ["service.vehicles"] = vehicles,
+                ["service.responsable"] = responsable,
+            };
             return await QueueAsync(
                 carnet,
                 convocatoriaId,
                 "service-start",
-                "Sabadell inicia servei",
-                $"Inici de servei a les {convocatoria.StartTime:HH:mm}, {grocs}🟡 + {noGrocs}🟢 + {vehicles}\nComunicacions {responsable}",
+                RenderServiceTemplate(startTemplate.TitleTemplate, startValues, convocatoria),
+                RenderServiceTemplate(startTemplate.BodyTemplate, startValues, convocatoria),
                 new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() },
                 cancellationToken);
         }
@@ -133,12 +142,20 @@ public sealed class MessagingService(Adf247DbContext database)
             var summary = string.IsNullOrWhiteSpace(finalObservations)
                 ? $"Resum del formulari: {(volunteerCount == 1 ? "1 voluntari" : $"{volunteerCount} voluntaris")} · Vehicles: {vehicles}"
                 : finalObservations.Trim();
+            var finishTemplate = await FindServiceConfigurationAsync("service-finish", cancellationToken);
+            var finishValues = new Dictionary<string, string>
+            {
+                ["service.time"] = localNow.ToString("HH:mm"),
+                ["service.summary"] = summary,
+                ["service.vehicles"] = vehicles,
+                ["service.volunteers"] = volunteerCount.ToString(),
+            };
             return await QueueAsync(
                 carnet,
                 convocatoriaId,
                 "service-finish",
-                "Sabadell finalitza servei",
-                $"Fi de servei a les {localNow:HH:mm}.\n{summary}\nMoltes gracies!",
+                RenderServiceTemplate(finishTemplate.TitleTemplate, finishValues, convocatoria),
+                RenderServiceTemplate(finishTemplate.BodyTemplate, finishValues, convocatoria),
                 new Dictionary<string, string> { ["convocatoriaId"] = convocatoriaId.ToString() },
                 cancellationToken);
         }
@@ -149,8 +166,59 @@ public sealed class MessagingService(Adf247DbContext database)
     public async Task<IReadOnlyList<MessagingNotification>> GetNotificationsAsync(CancellationToken cancellationToken) =>
         await database.MessagingNotifications.OrderByDescending(notification => notification.CreatedAt).Take(100).ToListAsync(cancellationToken);
 
-    public async Task<IReadOnlyList<MessagingConfiguration>> GetConfigurationsAsync(CancellationToken cancellationToken) =>
-        await database.MessagingConfigurations.OrderBy(configuration => configuration.Key).ToListAsync(cancellationToken);
+    public async Task<IReadOnlyList<MessagingConfiguration>> GetConfigurationsAsync(CancellationToken cancellationToken)
+    {
+        await EnsureServiceConfigurationsAsync(cancellationToken);
+        return await database.MessagingConfigurations.OrderBy(configuration => configuration.Key).ToListAsync(cancellationToken);
+    }
+
+    private static readonly (string Key, string Name, string Title, string Body, string Timing)[] ServiceDefaults =
+    [
+        ("service-start", "Inici de servei", "Sabadell inicia servei",
+            "Inici de servei a les {{service.time}}, {{service.grocs}}🟡 + {{service.noGrocs}}🟢 + {{service.vehicles}}\nComunicacions {{service.responsable}}", "service-start"),
+        ("service-finish", "Fi de servei", "Sabadell finalitza servei",
+            "Fi de servei a les {{service.time}}.\n{{service.summary}}\nMoltes gracies!", "service-finish"),
+    ];
+
+    private async Task EnsureServiceConfigurationsAsync(CancellationToken cancellationToken)
+    {
+        var existing = await database.MessagingConfigurations.Select(configuration => configuration.Key).ToListAsync(cancellationToken);
+        var added = false;
+        foreach (var item in ServiceDefaults.Where(item => !existing.Contains(item.Key)))
+        {
+            var now = DateTime.UtcNow;
+            database.MessagingConfigurations.Add(new MessagingConfiguration
+            {
+                Key = item.Key,
+                Name = item.Name,
+                TitleTemplate = item.Title,
+                BodyTemplate = item.Body,
+                AudienceRuleJson = $"{{\"messageKind\":\"service\",\"timing\":\"{item.Timing}\",\"recipientSelector\":{{\"response\":\"yes\",\"roles\":{{\"include\":[],\"exclude\":[]}}}}}}",
+                Enabled = true,
+                CreatedAt = now,
+                UpdatedAt = now,
+            });
+            added = true;
+        }
+        if (added) await database.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task<(string TitleTemplate, string BodyTemplate)> FindServiceConfigurationAsync(string key, CancellationToken cancellationToken)
+    {
+        await EnsureServiceConfigurationsAsync(cancellationToken);
+        var configuration = await database.MessagingConfigurations.AsNoTracking()
+            .SingleOrDefaultAsync(item => item.Key == key && item.Enabled, cancellationToken);
+        if (configuration is not null) return (configuration.TitleTemplate, configuration.BodyTemplate);
+        var fallback = ServiceDefaults.First(item => item.Key == key);
+        return (fallback.Title, fallback.Body);
+    }
+
+    private static string RenderServiceTemplate(string template, Dictionary<string, string> values, Convocatoria convocatoria)
+    {
+        foreach (var (key, value) in values)
+            template = template.Replace($"{{{{{key}}}}}", value, StringComparison.OrdinalIgnoreCase);
+        return RenderTemplate(template, convocatoria);
+    }
 
     public async Task<MessagingConfiguration> CreateConfigurationAsync(MessagingConfigurationRequest request, CancellationToken cancellationToken)
     {

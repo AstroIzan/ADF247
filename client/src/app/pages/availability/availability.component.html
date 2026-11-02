@@ -127,32 +127,36 @@
           }
 
           <div class="av-moment">
-            <span class="av-moment-label"><i class="av-dot av-dot-available"></i> Inici</span>
-            <div class="av-field av-field-wide">
-              <input
-                class="av-datetime"
-                type="datetime-local"
-                step="300"
-                [value]="form().fromDateTimeMobile"
-                (change)="updateMobileDateTimeField('fromDateTimeMobile', $any($event.target).value)"
-              />
+            <span class="av-moment-label"><i class="fa-regular fa-calendar" aria-hidden="true"></i> Dies</span>
+            <div class="av-field-pair">
+              <label class="av-field">
+                <small>Dia d'inici</small>
+                <input type="date" [value]="form().fromDate" (change)="updateFormField('fromDate', $any($event.target).value)" />
+              </label>
+              <label class="av-field">
+                <small>Dia de fi</small>
+                <input type="date" [min]="form().fromDate" [value]="form().toDate" (change)="updateFormField('toDate', $any($event.target).value)" />
+              </label>
             </div>
           </div>
 
           <div class="av-moment">
-            <span class="av-moment-label"><i class="av-dot av-dot-end"></i> Fi</span>
-            <div class="av-field av-field-wide">
-              <input
-                class="av-datetime"
-                type="datetime-local"
-                step="300"
-                [min]="form().fromDateTimeMobile"
-                [value]="form().toDateTimeMobile"
-                (change)="updateMobileDateTimeField('toDateTimeMobile', $any($event.target).value)"
-              />
+            <span class="av-moment-label"><i class="fa-regular fa-clock" aria-hidden="true"></i> Horari</span>
+            <div class="av-field-pair">
+              <label class="av-field">
+                <small>De</small>
+                <input type="time" step="300" [value]="form().fromTime" (change)="updateFormField('fromTime', $any($event.target).value)" />
+              </label>
+              <label class="av-field">
+                <small>A</small>
+                <input type="time" step="300" [value]="form().toTime" (change)="updateFormField('toTime', $any($event.target).value)" />
+              </label>
             </div>
           </div>
 
+          @if (!editingWindowId() && form().fromDate && form().toDate) {
+            <p class="av-form-hint">S'aplicarà l'horari {{ form().fromTime }} – {{ form().toTime }} a cada dia entre el {{ formatDateForDisplay(form().fromDate) }} i el {{ formatDateForDisplay(form().toDate) }}.</p>
+          }
 <div class="av-form-actions">
             <button class="av-btn av-btn-primary" type="button" [disabled]="saving()" (click)="saveWindow()">
               {{ saving() ? 'Desant...' : (editingWindowId() ? 'Actualitzar finestra' : 'Crear finestra') }}

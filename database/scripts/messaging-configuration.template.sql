@@ -10,6 +10,7 @@
     {{convocatoria.responsable}}    responsible user's display name
     {{response.deadline}}           response deadline calculated for the dispatch
     {{fire.location}}               fire location/population supplied by the trigger
+    {{service.*}}                   service-start/finish values (time, grocs, noGrocs, vehicles, responsable, summary)
 
   audienceRuleJson declares the intended audience. Keep every configuration
   disabled until the API/worker evaluates both the placeholders and these rules.
@@ -141,6 +142,25 @@ VALUES
     N'Grocs disponibles a brigades en {{response.deadline}}. Responsable: {{convocatoria.responsable}}.',
     N'{"messageKind":"convocatoria","timing":"fire","recipientSelector":{"response":"yes","roles":{"include":["groc"],"exclude":[]}}}',
     0
+  ),
+  (
+    N'service-start',
+    N'Inici de servei',
+    N'Sabadell inicia servei',
+    N'Inici de servei a les {{service.time}}, {{service.grocs}}🟡 + {{service.noGrocs}}🟢 + {{service.vehicles}}
+Comunicacions {{service.responsable}}',
+    N'{"messageKind":"service","timing":"service-start","recipientSelector":{"response":"yes","roles":{"include":[],"exclude":[]}}}',
+    1
+  ),
+  (
+    N'service-finish',
+    N'Fi de servei',
+    N'Sabadell finalitza servei',
+    N'Fi de servei a les {{service.time}}.
+{{service.summary}}
+Moltes gracies!',
+    N'{"messageKind":"service","timing":"service-finish","recipientSelector":{"response":"yes","roles":{"include":[],"exclude":[]}}}',
+    1
   );
 
 MERGE [Messaging].[Configuration] AS [target]
