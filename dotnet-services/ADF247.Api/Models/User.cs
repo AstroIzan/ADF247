@@ -8,9 +8,11 @@ public sealed class User
     public required string Name { get; set; }
     public string? LastName { get; set; }
     public required string Password { get; set; }
+    public int AdfId { get; set; }
     public bool IsActive { get; set; }
     public string? Phone { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
+    public Adf? Adf { get; set; }
     public List<Role> Roles { get; set; } = [];
 }

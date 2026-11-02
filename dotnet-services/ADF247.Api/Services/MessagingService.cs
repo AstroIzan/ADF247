@@ -219,7 +219,7 @@ public sealed class MessagingService(Adf247DbContext database)
             Status = "queued",
             Title = title.Trim(),
             Body = body.Trim(),
-            PayloadJson = data is null ? null : JsonSerializer.Serialize(data),
+            PayloadJson = JsonSerializer.Serialize(new Dictionary<string, string>(data ?? new()) { ["adfId"] = actor.AdfId.ToString() }),
             ActorUserId = actor.Id,
             CreatedAt = DateTime.UtcNow,
         };

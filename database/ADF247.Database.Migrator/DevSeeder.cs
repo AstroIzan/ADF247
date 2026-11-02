@@ -61,8 +61,8 @@ internal static class DevSeeder
         foreach (var user in Users)
         {
             await ExecuteAsync(connection, transaction, """
-                INSERT INTO dbo.[User] (nCarnet, nIndicatiu, name, lastName, password, isActive, updatedAt)
-                VALUES (@nCarnet, @nIndicatiu, @name, @lastName, @password, 1, SYSUTCDATETIME());
+                INSERT INTO dbo.[User] (nCarnet, nIndicatiu, name, lastName, password, isActive, updatedAt, adfId)
+                VALUES (@nCarnet, @nIndicatiu, @name, @lastName, @password, 1, SYSUTCDATETIME(), (SELECT TOP 1 id FROM dbo.ADF ORDER BY number));
                 INSERT INTO dbo.[Role] (nCarnet, isCapOperatiu, isCapColla, isAdmin, isGroc)
                 VALUES (@nCarnet, @isCapOperatiu, @isCapColla, @isAdmin, @isGroc);
                 """,
@@ -91,8 +91,8 @@ internal static class DevSeeder
         {
             var start = DateTime.Parse(convo.Start);
             await ExecuteAsync(connection, transaction, """
-                INSERT INTO dbo.Convocatoria (date, title, ubiSortida, responsableId, convoTypeId, startTime, finalTime, isActive)
-                SELECT @date, @title, @location, u.id, t.id, @start, @final, 1
+                INSERT INTO dbo.Convocatoria (date, title, ubiSortida, responsableId, convoTypeId, startTime, finalTime, isActive, adfId)
+                SELECT @date, @title, @location, u.id, t.id, @start, @final, 1, u.adfId
                 FROM dbo.ConvoType AS t, dbo.[User] AS u
                 WHERE t.name = @type AND u.nCarnet = @responsable;
                 """,

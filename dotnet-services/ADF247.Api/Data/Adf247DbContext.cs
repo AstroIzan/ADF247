@@ -1,10 +1,13 @@
 using ADF247.Api.Models;
+using ADF247.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace ADF247.Api.Data;
 
-public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) : DbContext(options)
+public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, CurrentAdf currentAdf) : DbContext(options)
 {
+    private int? CurrentAdfId => currentAdf.AdfId;
+    public DbSet<Adf> Adfs => Set<Adf>();
     public DbSet<User> Users => Set<User>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<AvailabilityWindow> AvailabilityWindows => Set<AvailabilityWindow>();
@@ -24,13 +27,69 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
     public DbSet<TaskExecutionDetail> TaskExecutionDetails => Set<TaskExecutionDetail>();
     public DbSet<ManualBatchRunRequest> ManualBatchRunRequests => Set<ManualBatchRunRequest>();
 
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default)
+    {
+        await StampAdfAsync(cancellationToken);
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    private async Task StampAdfAsync(CancellationToken cancellationToken)
+    {
+        var entries = ChangeTracker.Entries().Where(entry => entry.State == EntityState.Added).ToList();
+        if (entries.Count == 0) return;
+
+        foreach (var entry in entries)
+        {
+            switch (entry.Entity)
+            {
+                case Convocatoria { AdfId: 0 } convocatoria:
+                    convocatoria.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF de la convocatoria.");
+                    break;
+                case PlaAlfaMunicipalitySelection { AdfId: 0 } selection:
+                    selection.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF del Pla Alfa.");
+                    break;
+                case User { AdfId: 0, Adf: null } user:
+                    user.AdfId = CurrentAdfId
+                        ?? await Adfs.OrderBy(adf => adf.Number).Select(adf => adf.Id).FirstOrDefaultAsync(cancellationToken);
+                    if (user.AdfId == 0) throw new InvalidOperationException("No existe ninguna ADF configurada.");
+                    break;
+            }
+        }
+
+        var pending = entries.Select(entry => entry.Entity).OfType<Respuesta>().Where(respuesta => respuesta.AdfId == 0).ToList();
+        if (pending.Count == 0) return;
+
+        var convoIds = pending.Select(respuesta => respuesta.ConvoId).Distinct().ToList();
+        var adfByConvo = await Convocatorias.IgnoreQueryFilters()
+            .Where(convocatoria => convoIds.Contains(convocatoria.Id))
+            .ToDictionaryAsync(convocatoria => convocatoria.Id, convocatoria => convocatoria.AdfId, cancellationToken);
+        foreach (var respuesta in pending)
+        {
+            respuesta.AdfId = adfByConvo.TryGetValue(respuesta.ConvoId, out var adfId)
+                ? adfId
+                : CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF de la respuesta.");
+        }
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Adf>(entity =>
+        {
+            entity.ToTable("ADF");
+            entity.HasKey(adf => adf.Id);
+            entity.HasIndex(adf => adf.Number).IsUnique();
+            entity.Property(adf => adf.Name).HasMaxLength(200).IsRequired();
+            entity.Property(adf => adf.MunicipalitiesJson).HasColumnName("municipalities").IsRequired();
+            entity.Property(adf => adf.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.Property(adf => adf.UpdatedAt).ValueGeneratedNever();
+        });
         modelBuilder.Entity<User>(entity =>
         {
             entity.ToTable("User");
             entity.HasKey(user => user.Id);
             entity.HasIndex(user => user.NCarnet).IsUnique();
+            entity.HasOne(user => user.Adf).WithMany().HasForeignKey(user => user.AdfId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasQueryFilter(user => CurrentAdfId == null || user.AdfId == CurrentAdfId);
             entity.Property(user => user.NCarnet).HasMaxLength(50);
             entity.Property(user => user.Name).IsRequired();
             entity.Property(user => user.Password).IsRequired();
@@ -52,6 +111,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.ToTable("AvailabilityWindow");
             entity.HasKey(window => window.Id);
             entity.Property(window => window.UserNCarnet).HasMaxLength(50);
+            entity.HasQueryFilter(window => CurrentAdfId == null || window.User!.AdfId == CurrentAdfId);
             entity.Property(window => window.CreatedAt).ValueGeneratedNever();
             entity.Property(window => window.UpdatedAt).ValueGeneratedNever();
             entity.HasOne(window => window.User)
@@ -71,6 +131,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
         {
             entity.ToTable("Convocatoria");
             entity.HasKey(convocatoria => convocatoria.Id);
+            entity.HasQueryFilter(convocatoria => CurrentAdfId == null || convocatoria.AdfId == CurrentAdfId);
             entity.HasOne(convocatoria => convocatoria.ConvoType)
                 .WithMany()
                 .HasForeignKey(convocatoria => convocatoria.ConvoTypeId);
@@ -84,6 +145,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
         {
             entity.ToTable("Respuesta");
             entity.HasKey(respuesta => respuesta.Id);
+            entity.HasQueryFilter(respuesta => CurrentAdfId == null || respuesta.AdfId == CurrentAdfId);
             entity.Property(respuesta => respuesta.UserNCarnet).HasMaxLength(50);
             entity.HasOne(respuesta => respuesta.Convocatoria)
                 .WithMany()
@@ -132,7 +194,8 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
         modelBuilder.Entity<PlaAlfaMunicipalitySelection>(entity =>
         {
             entity.ToTable("MunicipalitySelection", "PlaAlfa");
-            entity.HasKey(selection => selection.Municipality);
+            entity.HasKey(selection => new { selection.AdfId, selection.Municipality });
+            entity.HasQueryFilter(selection => CurrentAdfId == null || selection.AdfId == CurrentAdfId);
             entity.Property(selection => selection.Municipality).HasMaxLength(200);
             entity.Property(selection => selection.UpdatedAt).HasDefaultValueSql("sysutcdatetime()");
         });

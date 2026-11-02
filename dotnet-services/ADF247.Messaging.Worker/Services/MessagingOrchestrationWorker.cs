@@ -80,6 +80,7 @@ public sealed class MessagingOrchestrationWorker(
                     notification.ConvocatoriaId,
                     recipientSelection.Behavior,
                     recipientSelection.RecipientNCarnets,
+                    payload.TryGetValue("adfId", out var adfIdValue) && int.TryParse(adfIdValue, out var parsedAdfId) ? parsedAdfId : null,
                     cancellationToken);
                 var requeuedDeliveries = await repository.RequeueRetryableDeliveriesAsync(
                     notification.Id,

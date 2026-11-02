@@ -1,0 +1,36 @@
+.adf-page { max-width: 1100px; margin: 0 auto; padding: 16px; display: grid; gap: 14px; }
+.adf-hero { padding: 18px 20px; border-radius: 16px; background: #273445; color: #fff; }
+.adf-hero h1 { margin: 2px 0 4px; font-size: 26px; }
+.adf-hero p { margin: 0; color: #c9d3de; font-size: 14px; }
+.adf-kicker { color: #f2b84b; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+
+.adf-card { padding: 16px; border: 1px solid #d9e0e7; border-radius: 16px; background: #fff; }
+.adf-card h2 { margin: 0 0 8px; font-size: 17px; color: #263243; }
+.adf-card-head { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px; }
+
+.adf-table-wrap { overflow-x: auto; }
+.adf-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.adf-table th, .adf-table td { padding: 9px 10px; border-bottom: 1px solid #e6ebf0; text-align: left; vertical-align: middle; }
+.adf-table th { color: #536276; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.adf-table tr.selected { background: #f3f6fa; }
+.adf-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+
+.adf-btn { border: 1px solid #c2ccd7; border-radius: 9px; background: #fff; color: #2a3544; cursor: pointer; font: inherit; font-size: 13px; font-weight: 750; padding: 9px 14px; }
+.adf-btn:disabled { opacity: .55; cursor: not-allowed; }
+.adf-btn-primary { border-color: #273445; background: #273445; color: #fff; }
+.adf-btn-danger { border-color: #d9a0a3; color: #a32a30; }
+.adf-btn-small { padding: 5px 10px; font-size: 12px; }
+
+.adf-form { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.adf-form label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; color: #536276; }
+.adf-form input { padding: 9px 10px; border: 1px solid #c2ccd7; border-radius: 9px; font: inherit; }
+.adf-wide { grid-column: 1 / -1; }
+.adf-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+.adf-tabs { display: flex; gap: 6px; }
+.adf-tabs button { border: 0; border-radius: 9px; background: #eef2f6; color: #536276; cursor: pointer; font: inherit; font-size: 13px; font-weight: 750; padding: 8px 12px; }
+.adf-tabs button.active { background: #273445; color: #fff; }
+
+.adf-alert { padding: 10px 14px; border-radius: 10px; font-size: 14px; }
+.adf-alert-error { background: #fdecec; color: #a32a30; }
+.adf-alert-ok { background: #e8f6ec; color: #1f6b36; }

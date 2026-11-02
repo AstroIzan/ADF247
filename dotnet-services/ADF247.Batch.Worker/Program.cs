@@ -2,6 +2,7 @@ using ADF247.Batch.Worker;
 using ADF247.Batch.Worker.Configuration;
 using ADF247.Batch.Worker.Services;
 using ADF247.Api.Data;
+using ADF247.Api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = Host.CreateApplicationBuilder(args);
@@ -11,6 +12,7 @@ var connectionString = FirstNonEmpty(
     ConvertPrismaSqlServerUrl(builder.Configuration["DATABASE_URL"]));
 
 builder.Services.Configure<BatchDatabaseOptions>(options => options.ConnectionString = connectionString);
+builder.Services.AddScoped<CurrentAdf>();
 builder.Services.AddDbContext<Adf247DbContext>(options =>
 {
     if (string.IsNullOrWhiteSpace(connectionString))

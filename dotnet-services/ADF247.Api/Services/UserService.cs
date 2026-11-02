@@ -28,7 +28,7 @@ public sealed class UserService(Adf247DbContext database)
         return user is null ? null : MapUser(user);
     }
 
-    public async Task<UserResponse?> CreateAsync(CreateUserRequest request)
+    public async Task<UserResponse?> CreateAsync(CreateUserRequest request, bool canAssignAdf = false)
     {
         if (string.IsNullOrWhiteSpace(request.NCarnet)
             || string.IsNullOrWhiteSpace(request.Name)
@@ -38,14 +38,23 @@ public sealed class UserService(Adf247DbContext database)
         }
 
         var nCarnet = request.NCarnet.Trim();
-        if (await database.Users.AnyAsync(user => user.NCarnet == nCarnet))
+        if (await database.Users.IgnoreQueryFilters().AnyAsync(user => user.NCarnet == nCarnet))
         {
             throw new InvalidOperationException("Ya existe un usuario con ese nCarnet.");
+        }
+
+        var adfId = 0;
+        if (request.AdfId.HasValue && canAssignAdf)
+        {
+            if (!await database.Adfs.AnyAsync(adf => adf.Id == request.AdfId.Value))
+                throw new ArgumentException("La ADF indicada no existe.");
+            adfId = request.AdfId.Value;
         }
 
         var user = new User
         {
             NCarnet = nCarnet,
+            AdfId = adfId,
             Name = request.Name.Trim(),
             LastName = NormalizeOptional(request.LastName),
             NIndicatiu = NormalizeOptional(request.NIndicatiu),
@@ -60,13 +69,20 @@ public sealed class UserService(Adf247DbContext database)
         return MapUser(user);
     }
 
-    public async Task<UserResponse?> UpdateAsync(int id, UpdateUserRequest request)
+    public async Task<UserResponse?> UpdateAsync(int id, UpdateUserRequest request, bool canAssignAdf = false)
     {
         var user = await database.Users.Include(user => user.Roles)
             .SingleOrDefaultAsync(user => user.Id == id);
         if (user is null)
         {
             return null;
+        }
+
+        if (request.AdfId.HasValue && canAssignAdf && request.AdfId.Value != user.AdfId)
+        {
+            if (!await database.Adfs.AnyAsync(adf => adf.Id == request.AdfId.Value))
+                throw new ArgumentException("La ADF indicada no existe.");
+            user.AdfId = request.AdfId.Value;
         }
 
         if (request.Name is not null)
@@ -80,7 +96,7 @@ public sealed class UserService(Adf247DbContext database)
             {
                 if (await database.Respuestas.AnyAsync(response => response.UserNCarnet == user.NCarnet))
                     throw new InvalidOperationException("No se puede cambiar nCarnet porque el usuario tiene respuestas asociadas.");
-                if (await database.Users.AnyAsync(existing => existing.NCarnet == nCarnet))
+                if (await database.Users.IgnoreQueryFilters().AnyAsync(existing => existing.NCarnet == nCarnet))
                     throw new InvalidOperationException("Ya existe un usuario con ese nCarnet.");
                 user.NCarnet = nCarnet;
                 foreach (var role in user.Roles) role.NCarnet = nCarnet;
@@ -126,7 +142,7 @@ public sealed class UserService(Adf247DbContext database)
         return MapUser(user);
     }
 
-    public async Task<object> ImportAsync(ImportUsersRequest request)
+    public async Task<object> ImportAsync(ImportUsersRequest request, bool canAssignAdf = false)
     {
         if (string.IsNullOrWhiteSpace(request.CsvContent)) throw new ArgumentException("csvContent es obligatorio.");
         var lines = request.CsvContent.Replace("\r\n", "\n").Replace('\r', '\n').Split('\n', StringSplitOptions.RemoveEmptyEntries);
@@ -142,7 +158,7 @@ public sealed class UserService(Adf247DbContext database)
             {
                 var values = ParseCsvLine(lines[row]);
                 string? Value(string field) => indexes.TryGetValue(field, out var index) && index < values.Count ? values[index] : null;
-                await CreateAsync(new CreateUserRequest(Value("nCarnet"), Value("name"), Value("password"), Value("lastName"), Value("nIndicatiu"), Value("phone"), ParseBoolean(Value("isActive")), new UserRolesRequest(ParseBoolean(Value("isAdmin")), ParseBoolean(Value("isGroc")), ParseBoolean(Value("isCapColla")), ParseBoolean(Value("isCapOperatiu")), ParseBoolean(Value("isDeveloper")))));
+                await CreateAsync(new CreateUserRequest(Value("nCarnet"), Value("name"), Value("password"), Value("lastName"), Value("nIndicatiu"), Value("phone"), ParseBoolean(Value("isActive")), new UserRolesRequest(ParseBoolean(Value("isAdmin")), ParseBoolean(Value("isGroc")), ParseBoolean(Value("isCapColla")), ParseBoolean(Value("isCapOperatiu")), ParseBoolean(Value("isDeveloper")), ParseBoolean(Value("isSecretariat"))), null), canAssignAdf);
                 inserted++;
             }
             catch (Exception error) when (error is ArgumentException or InvalidOperationException) { rejected.Add(new { row = row + 1, message = error.Message }); }
@@ -166,9 +182,11 @@ public sealed class UserService(Adf247DbContext database)
                 role?.IsGroc ?? false,
                 role?.IsCapColla ?? false,
                 role?.IsCapOperatiu ?? false,
-                role?.IsDeveloper ?? false),
+                role?.IsDeveloper ?? false,
+                role?.IsSecretariat ?? false),
             user.CreatedAt,
-            user.UpdatedAt);
+            user.UpdatedAt,
+            user.AdfId);
     }
 
     private static Role CreateRole(string nCarnet, UserRolesRequest? request)
@@ -185,6 +203,7 @@ public sealed class UserService(Adf247DbContext database)
         if (request.IsCapColla.HasValue) role.IsCapColla = request.IsCapColla.Value;
         if (request.IsCapOperatiu.HasValue) role.IsCapOperatiu = request.IsCapOperatiu.Value;
         if (request.IsDeveloper.HasValue) role.IsDeveloper = request.IsDeveloper.Value;
+        if (request.IsSecretariat.HasValue) role.IsSecretariat = request.IsSecretariat.Value;
     }
 
     private static string RequireText(string value, string fieldName) =>

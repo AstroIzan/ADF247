@@ -8,7 +8,8 @@ public sealed record RoleResponse(
     bool IsGroc,
     bool IsCapColla,
     bool IsCapOperatiu,
-    bool IsDeveloper);
+    bool IsDeveloper,
+    bool IsSecretariat = false);
 
 public sealed record UserResponse(
     int Id,
@@ -20,7 +21,8 @@ public sealed record UserResponse(
     bool IsActive,
     RoleResponse Roles,
     DateTime CreatedAt,
-    DateTime UpdatedAt);
+    DateTime UpdatedAt,
+    int AdfId = 0);
 
 public sealed record SessionResponse(
     string AccessToken,

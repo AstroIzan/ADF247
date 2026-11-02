@@ -4,6 +4,7 @@ public sealed class Respuesta
 {
     public int Id { get; set; }
     public int ConvoId { get; set; }
+    public int AdfId { get; set; }
     public required string UserNCarnet { get; set; }
     public bool IsCustom { get; set; }
     public string? CustomText { get; set; }

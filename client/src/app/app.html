@@ -13,6 +13,9 @@
 				@if (authService.isDeveloper()) {
 					<button class="nav-btn desktop-nav-btn" routerLink="/dev" routerLinkActive="active">Dev</button>
 				}
+				@if (authService.isGlobalViewer()) {
+					<button class="nav-btn desktop-nav-btn" routerLink="/adf-global" routerLinkActive="active">Global</button>
+				}
 				@if (authService.isAdmin()) {
 					<button class="nav-btn desktop-nav-btn" routerLink="/system" routerLinkActive="active">Sistema</button>
 				}
@@ -77,6 +80,9 @@
 									@if (authService.isDeveloper()) {
 										<button class="mobile-menu-item" routerLink="/dev" routerLinkActive="active" (click)="closeMobileMenu()">Dev</button>
 									}
+				@if (authService.isGlobalViewer()) {
+					<button class="mobile-menu-item" routerLink="/adf-global" routerLinkActive="active" (click)="closeMobileMenu()">Global</button>
+				}
 				@if (authService.isAdmin()) {
 					<button class="mobile-menu-item" routerLink="/system" routerLinkActive="active" (click)="closeMobileMenu()">Sistema</button>
 				}

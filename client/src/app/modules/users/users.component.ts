@@ -1,7 +1,8 @@
 import { Component, HostListener, Input, Output, EventEmitter, signal, computed, input, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DataService, User, UsersCsvImportResult, UserHoursSummaryRow } from '../../services/data.service';
+import { AuthService } from '../../services/auth.service';
+import { Adf, DataService, User, UsersCsvImportResult, UserHoursSummaryRow } from '../../services/data.service';
 
 @Component({
   selector: 'app-users',
@@ -54,6 +55,7 @@ export class UsersComponent implements OnDestroy {
       isCapColla: false,
       isCapOperatiu: false,
       isDeveloper: false,
+      isSecretariat: false,
     }
   });
 
@@ -104,7 +106,15 @@ export class UsersComponent implements OnDestroy {
     return this.filteredUsers().slice(start, start + this.pageSize());
   });
 
-  constructor(private dataService: DataService) {}
+  adfs = signal<Adf[]>([]);
+  canAssignAdf = signal(false);
+
+  constructor(private dataService: DataService, private authService: AuthService) {
+    if (this.authService.isGlobalViewer()) {
+      this.canAssignAdf.set(true);
+      this.dataService.getAdfs().subscribe({ next: (adfs) => this.adfs.set(adfs), error: () => this.adfs.set([]) });
+    }
+  }
 
   openFilters() {
     this.showFilters.set(true);
@@ -161,6 +171,7 @@ export class UsersComponent implements OnDestroy {
           isCapColla: Boolean(user.roles?.isCapColla),
           isCapOperatiu: Boolean(user.roles?.isCapOperatiu),
           isDeveloper: Boolean(user.roles?.isDeveloper),
+          isSecretariat: Boolean(user.roles?.isSecretariat),
         }
       });
     } else {
@@ -179,6 +190,7 @@ export class UsersComponent implements OnDestroy {
           isCapColla: false,
           isCapOperatiu: false,
           isDeveloper: false,
+          isSecretariat: false,
         }
       });
     }
@@ -399,6 +411,7 @@ export class UsersComponent implements OnDestroy {
       isCapColla: false,
       isCapOperatiu: false,
       isDeveloper: false,
+      isSecretariat: false,
       ...(data.roles || {}),
     } as any;
 
@@ -417,6 +430,7 @@ export class UsersComponent implements OnDestroy {
     if (user.roles?.isGroc) labels.push('Groc');
     if (user.roles?.isCapColla) labels.push('Cap Colla');
     if (user.roles?.isCapOperatiu) labels.push('Cap Operatiu');
+    if (user.roles?.isSecretariat) labels.push('Secretariat');
     if (user.roles?.isDeveloper) labels.push('Dev');
 
     return labels;

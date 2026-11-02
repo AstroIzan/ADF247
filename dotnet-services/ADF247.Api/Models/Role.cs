@@ -9,5 +9,6 @@ public sealed class Role
     public bool IsAdmin { get; set; }
     public bool IsGroc { get; set; }
     public bool IsDeveloper { get; set; }
+    public bool IsSecretariat { get; set; }
     public User? User { get; set; }
 }

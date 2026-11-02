@@ -37,7 +37,7 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
         if (!await IsAdminAsync()) return Forbid();
         try
         {
-            var user = await users.CreateAsync(request);
+            var user = await users.CreateAsync(request, canAssignAdf: true);
             return user is null
                 ? BadRequest(new { message = "nCarnet, name y password son obligatorios." })
                 : CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
@@ -54,14 +54,14 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
         var isAdmin = await IsAdminAsync();
         if (!isAdmin && !IsCurrentUser(id)) return Forbid();
         var isCapOperatiu = !isAdmin && await IsCapOperatiuAsync();
-        var rolesAllowed = isCapOperatiu && request.Roles is { IsAdmin: not true, IsDeveloper: not true };
+        var rolesAllowed = isCapOperatiu && request.Roles is { IsAdmin: not true, IsDeveloper: not true, IsSecretariat: not true };
         if (!isAdmin && (request.NCarnet is not null || request.Phone is not null || request.IsActive.HasValue
             || request.NIndicatiu is not null && !isCapOperatiu
             || request.Roles is not null && !rolesAllowed))
             return Forbid();
         try
         {
-            var user = await users.UpdateAsync(id, request);
+            var user = await users.UpdateAsync(id, request, canAssignAdf: isAdmin);
             return user is null
                 ? NotFound(new { message = "No se ha encontrado el usuario solicitado." })
                 : Ok(user);
@@ -77,7 +77,7 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
     public async Task<IActionResult> Import(ImportUsersRequest request)
     {
         if (!await IsAdminAsync()) return Forbid();
-        try { return Ok(await users.ImportAsync(request)); }
+        try { return Ok(await users.ImportAsync(request, canAssignAdf: true)); }
         catch (ArgumentException error) { return BadRequest(new { message = error.Message }); }
     }
 
@@ -96,7 +96,7 @@ public sealed class UsersController(UserService users, Adf247DbContext database)
         var carnet = User.FindFirst("nCarnet")?.Value;
         return string.IsNullOrWhiteSpace(carnet)
             ? Task.FromResult(false)
-            : database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin);
+            : database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsSecretariat));
     }
 
     private Task<bool> IsCapOperatiuAsync()

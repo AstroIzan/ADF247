@@ -3,6 +3,7 @@ namespace ADF247.Api.Models;
 public sealed class Convocatoria
 {
     public int Id { get; set; }
+    public int AdfId { get; set; }
     public DateTime Date { get; set; }
     public required string Title { get; set; }
     public required string UbiSortida { get; set; }

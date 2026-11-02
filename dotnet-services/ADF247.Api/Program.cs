@@ -15,6 +15,7 @@ var configuredConnectionString = FirstNonEmpty(
 var connectionString = configuredConnectionString
     ?? "Server=localhost;Database=ADF247;Integrated Security=True;TrustServerCertificate=True";
 
+builder.Services.AddScoped<CurrentAdf>();
 builder.Services.AddDbContext<Adf247DbContext>(options =>
     options.UseSqlServer(connectionString));
 
@@ -67,6 +68,22 @@ app.UseExceptionHandler(errorApp =>
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.Use(async (context, next) =>
+{
+    var carnet = context.User.Identity?.IsAuthenticated == true ? context.User.FindFirst("nCarnet")?.Value : null;
+    if (!string.IsNullOrWhiteSpace(carnet))
+    {
+        var database = context.RequestServices.GetRequiredService<Adf247DbContext>();
+        var currentAdf = context.RequestServices.GetRequiredService<CurrentAdf>();
+        currentAdf.AdfId = await database.Users.AsNoTracking()
+            .Where(user => user.NCarnet == carnet)
+            .Select(user => (int?)user.AdfId)
+            .FirstOrDefaultAsync(context.RequestAborted);
+    }
+
+    await next();
+});
 
 app.MapGet("/health", () => Results.Ok(new { ok = true, service = "api-dotnet" }));
 app.MapGet("/api/health", async (

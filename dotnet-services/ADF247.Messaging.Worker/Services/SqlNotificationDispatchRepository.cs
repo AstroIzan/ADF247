@@ -265,6 +265,7 @@ public sealed class SqlNotificationDispatchRepository(
         int? convocatoriaId,
         RecipientSelectionBehavior selectionBehavior,
         IReadOnlyCollection<string>? recipientNCarnets,
+        int? adfId,
         CancellationToken cancellationToken)
     {
         await using var connection = await OpenConnectionAsync(cancellationToken);
@@ -301,6 +302,15 @@ public sealed class SqlNotificationDispatchRepository(
                         AND ISNULL(newer.[userAgent], N'') = ISNULL(r.[userAgent], N'')
                         AND (newer.[lastSeenAt] > r.[lastSeenAt]
                             OR (newer.[lastSeenAt] = r.[lastSeenAt] AND newer.[id] > r.[id]))
+                )
+                AND (
+                    COALESCE(@AdfId, (SELECT cx.[adfId] FROM [dbo].[Convocatoria] cx WHERE cx.[id] = @ConvocatoriaId)) IS NULL
+                    OR EXISTS (
+                        SELECT 1
+                        FROM [dbo].[User] ux
+                        WHERE ux.[nCarnet] = r.[nCarnet]
+                            AND ux.[adfId] = COALESCE(@AdfId, (SELECT cy.[adfId] FROM [dbo].[Convocatoria] cy WHERE cy.[id] = @ConvocatoriaId))
+                    )
                 )
                 AND (
                     @SelectionMode <> @SelectionExplicitRecipients
@@ -363,6 +373,10 @@ public sealed class SqlNotificationDispatchRepository(
         command.Parameters.Add(new SqlParameter("@ConvocatoriaId", System.Data.SqlDbType.Int)
         {
             Value = convocatoriaId.HasValue ? convocatoriaId.Value : DBNull.Value,
+        });
+        command.Parameters.Add(new SqlParameter("@AdfId", System.Data.SqlDbType.Int)
+        {
+            Value = adfId.HasValue ? adfId.Value : DBNull.Value,
         });
         command.Parameters.Add(new SqlParameter("@SelectionMode", System.Data.SqlDbType.Int) { Value = (int)selectionBehavior });
         command.Parameters.Add(new SqlParameter("@SelectionBroadcast", System.Data.SqlDbType.Int) { Value = (int)RecipientSelectionBehavior.BroadcastAllDevices });

@@ -1,0 +1,135 @@
+<div class="adf-page">
+  <div class="adf-hero">
+    <span class="adf-kicker">Vista global</span>
+    <h1>Panell global d'ADFs</h1>
+    <p>Resum de totes les ADFs, les seves convocatòries i els seus usuaris.</p>
+  </div>
+
+  @if (error()) { <div class="adf-alert adf-alert-error">{{ error() }}</div> }
+  @if (notice()) { <div class="adf-alert adf-alert-ok">{{ notice() }}</div> }
+
+  <div class="adf-card">
+    <div class="adf-card-head">
+      <h2>ADFs</h2>
+      <button class="adf-btn adf-btn-primary" (click)="openForm()">Nova ADF</button>
+    </div>
+
+    @if (loading()) {
+      <p>Carregant...</p>
+    } @else if (!overview().length) {
+      <p>No hi ha cap ADF.</p>
+    } @else {
+      <div class="adf-table-wrap">
+        <table class="adf-table">
+          <thead>
+            <tr>
+              <th>ADF</th><th>Poblacions</th><th>Usuaris</th><th>Convocatòries</th><th>Properes</th><th>En curs</th><th>Respostes</th><th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of overview(); track row.adf.id) {
+              <tr [class.selected]="selected()?.id === row.adf.id">
+                <td><strong>{{ row.adf.number }}</strong> - {{ row.adf.name }}</td>
+                <td>{{ row.adf.municipalities.join(', ') || '-' }}</td>
+                <td>{{ row.activeUsers }} / {{ row.users }}</td>
+                <td>{{ row.convocatorias }}</td>
+                <td>{{ row.upcomingConvocatorias }}</td>
+                <td>{{ row.inProgressConvocatorias }}</td>
+                <td>{{ row.responses }}</td>
+                <td class="adf-actions">
+                  <button class="adf-btn adf-btn-small" (click)="select(row.adf)">Veure</button>
+                  <button class="adf-btn adf-btn-small" (click)="openForm(row.adf)">Editar</button>
+                  <button class="adf-btn adf-btn-small adf-btn-danger" (click)="remove(row.adf)">Eliminar</button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+
+  @if (editing()) {
+    <div class="adf-card">
+      <h2>{{ editingId() ? 'Editar ADF' : 'Nova ADF' }}</h2>
+      <div class="adf-form">
+        <label>Número
+          <input type="number" min="1" [ngModel]="formNumber()" (ngModelChange)="formNumber.set($event)" />
+        </label>
+        <label>Nom
+          <input type="text" [ngModel]="formName()" (ngModelChange)="formName.set($event)" />
+        </label>
+        <label class="adf-wide">Poblacions (separades per comes)
+          <input type="text" [ngModel]="formMunicipalities()" (ngModelChange)="formMunicipalities.set($event)" />
+        </label>
+      </div>
+      <div class="adf-form-actions">
+        <button class="adf-btn" (click)="closeForm()" [disabled]="saving()">Cancel·lar</button>
+        <button class="adf-btn adf-btn-primary" (click)="save()" [disabled]="saving()">Desar</button>
+      </div>
+    </div>
+  }
+
+  @if (selected(); as adf) {
+    <div class="adf-card">
+      <div class="adf-card-head">
+        <h2>ADF {{ adf.number }} - {{ adf.name }}</h2>
+        <div class="adf-tabs">
+          <button [class.active]="detailTab() === 'convocatories'" (click)="setTab('convocatories')">Convocatòries ({{ convocatories().length }})</button>
+          <button [class.active]="detailTab() === 'usuaris'" (click)="setTab('usuaris')">Usuaris ({{ users().length }})</button>
+        </div>
+      </div>
+
+      @if (detailLoading()) {
+        <p>Carregant...</p>
+      } @else if (detailTab() === 'convocatories') {
+        @if (!convocatories().length) {
+          <p>Sense convocatòries.</p>
+        } @else {
+          <div class="adf-table-wrap">
+            <table class="adf-table">
+              <thead><tr><th>Títol</th><th>Tipus</th><th>Inici</th><th>Estat</th><th>Respostes</th></tr></thead>
+              <tbody>
+                @for (convo of convocatories(); track convo.id) {
+                  <tr>
+                    <td>{{ convo.title }}</td>
+                    <td>{{ convo.type }}</td>
+                    <td>{{ convo.startTime | date: 'dd/MM/yyyy HH:mm' }}</td>
+                    <td>
+                      @if (convo.actualEndTime) { Finalitzada }
+                      @else if (convo.actualStartTime) { En curs }
+                      @else if (!convo.isActive) { Desactivada }
+                      @else { Pendent }
+                      @if (convo.sortida) { · Sortida }
+                    </td>
+                    <td>{{ convo.responses }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      } @else {
+        @if (!users().length) {
+          <p>Sense usuaris.</p>
+        } @else {
+          <div class="adf-table-wrap">
+            <table class="adf-table">
+              <thead><tr><th>Indicatiu</th><th>Carnet</th><th>Nom</th><th>Estat</th></tr></thead>
+              <tbody>
+                @for (user of users(); track user.id) {
+                  <tr>
+                    <td>{{ user.nIndicatiu || '-' }}</td>
+                    <td>{{ user.nCarnet }}</td>
+                    <td>{{ user.name }} {{ user.lastName }}</td>
+                    <td>{{ user.isActive ? 'Actiu' : 'Inactiu' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    </div>
+  }
+</div>

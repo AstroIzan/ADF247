@@ -13,13 +13,59 @@ export interface User {
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
+  adfId?: number;
   roles: {
     isCapOperatiu: boolean;
     isCapColla: boolean;
     isAdmin: boolean;
     isGroc: boolean;
     isDeveloper: boolean;
+    isSecretariat?: boolean;
   };
+}
+
+export interface Adf {
+  id: number;
+  number: number;
+  name: string;
+  municipalities: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdfOverview {
+  adf: Adf;
+  users: number;
+  activeUsers: number;
+  convocatorias: number;
+  upcomingConvocatorias: number;
+  inProgressConvocatorias: number;
+  responses: number;
+}
+
+export interface AdfConvocatoria {
+  id: number;
+  adfId: number;
+  title: string;
+  date: string;
+  startTime: string;
+  finalTime?: string | null;
+  isActive: boolean;
+  sortida: boolean;
+  actualStartTime?: string | null;
+  actualEndTime?: string | null;
+  type: string;
+  responses: number;
+}
+
+export interface AdfUser {
+  id: number;
+  adfId: number;
+  nCarnet: string;
+  name: string;
+  lastName?: string | null;
+  nIndicatiu?: string | null;
+  isActive: boolean;
 }
 
 export interface ConvoType {
@@ -405,6 +451,31 @@ export interface PlaAlfaSimulation {
 export class DataService {
 
   constructor(private http: HttpService) {}
+
+  // === ADF ===
+  getAdfs(): Observable<Adf[]> {
+    return this.http.get<Adf[]>('/adf');
+  }
+
+  getAdfOverview(): Observable<AdfOverview[]> {
+    return this.http.get<AdfOverview[]>('/adf/overview');
+  }
+
+  saveAdf(id: number | null, data: { number: number; name: string; municipalities: string[] }): Observable<Adf> {
+    return id ? this.http.put<Adf>(`/adf/${id}`, data) : this.http.post<Adf>('/adf', data);
+  }
+
+  deleteAdf(id: number): Observable<Adf> {
+    return this.http.delete<Adf>(`/adf/${id}`);
+  }
+
+  getAdfConvocatorias(id: number): Observable<AdfConvocatoria[]> {
+    return this.http.get<AdfConvocatoria[]>(`/adf/${id}/convocatorias`);
+  }
+
+  getAdfUsers(id: number): Observable<AdfUser[]> {
+    return this.http.get<AdfUser[]>(`/adf/${id}/users`);
+  }
 
   // === USERS ===
   getUsers(): Observable<User[]> {

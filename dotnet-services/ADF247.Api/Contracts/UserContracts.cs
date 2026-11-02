@@ -5,7 +5,8 @@ public sealed record UserRolesRequest(
     bool? IsGroc,
     bool? IsCapColla,
     bool? IsCapOperatiu,
-    bool? IsDeveloper);
+    bool? IsDeveloper,
+    bool? IsSecretariat = null);
 
 public sealed record CreateUserRequest(
     string? NCarnet,
@@ -15,7 +16,8 @@ public sealed record CreateUserRequest(
     string? NIndicatiu,
     string? Phone,
     bool? IsActive,
-    UserRolesRequest? Roles);
+    UserRolesRequest? Roles,
+    int? AdfId = null);
 
 public sealed record UpdateUserRequest(
     string? NCarnet,
@@ -25,6 +27,7 @@ public sealed record UpdateUserRequest(
     string? NIndicatiu,
     string? Phone,
     bool? IsActive,
-    UserRolesRequest? Roles);
+    UserRolesRequest? Roles,
+    int? AdfId = null);
 
 public sealed record ImportUsersRequest(string? CsvContent, string? FileName);

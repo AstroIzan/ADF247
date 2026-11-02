@@ -10,6 +10,7 @@ public sealed class BatchOrchestrator(
     Adf247DbContext database,
     BatchTaskExecutionService taskExecutions,
     PlaAlfaLevelProvider plaAlfaLevels,
+    CurrentAdf currentAdf,
     ILogger<BatchOrchestrator> logger)
 {
     private static readonly TimeZoneInfo LocalTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Madrid");
@@ -101,6 +102,82 @@ public sealed class BatchOrchestrator(
 
         try
         {
+            var adfs = await database.Adfs.AsNoTracking().OrderBy(adf => adf.Number).ToListAsync(cancellationToken);
+            var results = new List<object>();
+            var failures = new List<string>();
+            var generated = 0;
+            var pending = 0;
+            var succeeded = 0;
+            try
+            {
+                foreach (var adf in adfs)
+                {
+                    currentAdf.AdfId = adf.Id;
+                    try
+                    {
+                        var result = await GenerateWeeklyForCurrentAdfAsync(configuration, localNow, manual, cancellationToken);
+                        generated += result.Generated;
+                        pending += result.Pending;
+                        if (result.Succeeded)
+                            succeeded++;
+                        results.Add(new { adf = adf.Number, status = result.Succeeded ? "succeeded" : "skipped", message = result.Message, details = result.Details });
+                        logger.LogInformation("{BatchTask} ADF {AdfNumber}: {Message}", taskName, adf.Number, result.Message);
+                    }
+                    catch (Exception exception) when (exception is not OperationCanceledException)
+                    {
+                        database.ChangeTracker.Clear();
+                        failures.Add($"ADF {adf.Number}: {exception.Message}");
+                        results.Add(new { adf = adf.Number, status = "failed", message = exception.Message });
+                        logger.LogError(exception, "{BatchTask} failed for ADF {AdfNumber}.", taskName, adf.Number);
+                    }
+                }
+            }
+            finally
+            {
+                currentAdf.AdfId = null;
+            }
+
+            if (failures.Count > 0)
+                throw new InvalidOperationException(string.Join(" | ", failures));
+
+            if (succeeded == 0)
+            {
+                await taskExecutions.CompleteAsync(
+                    executionId.Value,
+                    "skipped",
+                    "Cap ADF ha generat convocatòries (Pla Alfa sense configurar, sense risc o sense dades).",
+                    new { adfs = results },
+                    cancellationToken);
+                return;
+            }
+
+            await taskExecutions.CompleteAsync(
+                executionId.Value,
+                "succeeded",
+                $"Generated {generated} weekly convocatoria(s) across {succeeded} ADF(s) and queued the weekly availability notifications.",
+                new { generated, pendingRecipients = pending, adfs = results },
+                cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            await taskExecutions.CompleteAsync(
+                executionId.Value,
+                "failed",
+                $"GenerateAndNotifyWeeklyConvos failed: {exception.Message}",
+                new { error = exception.Message },
+                cancellationToken);
+            throw;
+        }
+    }
+
+    private sealed record WeeklyAdfResult(bool Succeeded, string Message, object? Details, int Generated, int Pending);
+
+    private async Task<WeeklyAdfResult> GenerateWeeklyForCurrentAdfAsync(
+        SystemConfiguration configuration,
+        DateTimeOffset localNow,
+        bool manual,
+        CancellationToken cancellationToken)
+    {
             var municipalities = await database.PlaAlfaMunicipalitySelections
                 .AsNoTracking()
                 .Select(item => item.Municipality)
@@ -108,26 +185,20 @@ public sealed class BatchOrchestrator(
             if (municipalities.Count == 0)
             {
                 const string message = "Pla Alfa no està configurat; no es generen convocatòries.";
-                await taskExecutions.CompleteAsync(executionId.Value, "skipped", message, null, cancellationToken);
-                logger.LogWarning("{BatchTask} {Message}", taskName, message);
-                return;
+                return new WeeklyAdfResult(false, message, null, 0, 0);
             }
 
             var level = await plaAlfaLevels.GetHighestLevelAsync(municipalities, manual, cancellationToken);
             if (!level.HasValue)
             {
                 const string message = "No s'ha pogut determinar el nivell del Pla Alfa del dia en curs; no es generen convocatòries.";
-                await taskExecutions.CompleteAsync(executionId.Value, "skipped", message, null, cancellationToken);
-                logger.LogWarning("{BatchTask} {Message}", taskName, message);
-                return;
+                return new WeeklyAdfResult(false, message, null, 0, 0);
             }
 
             if (level.Value == 0)
             {
                 const string message = "Pla alfa del dia en curs es de nivell 0, sense risc, no es generen convocatories";
-                await taskExecutions.CompleteAsync(executionId.Value, "skipped", message, new { plaAlfaLevel = level }, cancellationToken);
-                logger.LogInformation("{BatchTask} {Message}", taskName, message);
-                return;
+                return new WeeklyAdfResult(false, message, new { plaAlfaLevel = level }, 0, 0);
             }
 
             var typeName = configuration.PviEnabled ? "PVI" : "Guardia";
@@ -211,30 +282,7 @@ public sealed class BatchOrchestrator(
                 notificationId,
                 nextMonday,
             };
-            await taskExecutions.CompleteAsync(
-                executionId.Value,
-                "succeeded",
-                $"Generated {created.Count} weekly convocatoria(s) and queued the weekly availability notification.",
-                details,
-                cancellationToken);
-            logger.LogInformation(
-                "GenerateAndNotifyWeeklyConvos completed. PlaAlfaLevel: {PlaAlfaLevel}. Type: {ConvoType}. Generated: {Generated}. PendingRecipients: {PendingRecipients}. NotificationId: {NotificationId}.",
-                level,
-                typeName,
-                created.Count,
-                pendingCarnets.Count,
-                notificationId);
-        }
-        catch (Exception exception)
-        {
-            await taskExecutions.CompleteAsync(
-                executionId.Value,
-                "failed",
-                $"GenerateAndNotifyWeeklyConvos failed: {exception.Message}",
-                new { error = exception.Message },
-                cancellationToken);
-            throw;
-        }
+            return new WeeklyAdfResult(true, $"Generated {created.Count} weekly convocatoria(s).", details, created.Count, pendingCarnets.Count);
     }
 
     private async Task RunDailyNotificationsAsync(
@@ -257,6 +305,78 @@ public sealed class BatchOrchestrator(
 
         try
         {
+            var adfs = await database.Adfs.AsNoTracking().OrderBy(adf => adf.Number).ToListAsync(cancellationToken);
+            var totalConvocatorias = 0;
+            var totalUsers = 0;
+            var totalQueued = 0;
+            var failures = new List<string>();
+            try
+            {
+                foreach (var adf in adfs)
+                {
+                    currentAdf.AdfId = adf.Id;
+                    try
+                    {
+                        var (convocatoriaCount, userCount, queued) = await RunDailyForCurrentAdfAsync(localNow, cancellationToken);
+                        totalConvocatorias += convocatoriaCount;
+                        totalUsers += userCount;
+                        totalQueued += queued;
+                    }
+                    catch (Exception exception) when (exception is not OperationCanceledException)
+                    {
+                        database.ChangeTracker.Clear();
+                        failures.Add($"ADF {adf.Number}: {exception.Message}");
+                        logger.LogError(exception, "DailyConvoNotifications failed for ADF {AdfNumber}.", adf.Number);
+                    }
+                }
+            }
+            finally
+            {
+                currentAdf.AdfId = null;
+            }
+
+            if (failures.Count > 0)
+                throw new InvalidOperationException(string.Join(" | ", failures));
+
+            if (totalConvocatorias == 0)
+            {
+                await taskExecutions.CompleteAsync(
+                    executionId.Value,
+                    "skipped",
+                    "No hi ha convocatòries actives per avui.",
+                    null,
+                    cancellationToken);
+                return;
+            }
+
+            await taskExecutions.CompleteAsync(
+                executionId.Value,
+                "succeeded",
+                $"DailyConvoNotifications completed. Queued {totalQueued} notification(s).",
+                new { convocatoriaCount = totalConvocatorias, activeUserCount = totalUsers, queuedNotifications = totalQueued, adfCount = adfs.Count },
+                cancellationToken);
+            logger.LogInformation(
+                "DailyConvoNotifications completed. Convocatorias: {ConvocatoriaCount}. ActiveUsers: {ActiveUserCount}. QueuedNotifications: {QueuedNotifications}.",
+                totalConvocatorias,
+                totalUsers,
+                totalQueued);
+        }
+        catch (Exception exception)
+        {
+            await taskExecutions.CompleteAsync(
+                executionId.Value,
+                "failed",
+                $"DailyConvoNotifications failed: {exception.Message}",
+                new { error = exception.Message },
+                cancellationToken);
+            throw;
+        }
+    }
+
+    private async Task<(int Convocatorias, int Users, int Queued)> RunDailyForCurrentAdfAsync(
+        DateTimeOffset localNow,
+        CancellationToken cancellationToken)
+    {
             var todayStart = DateOnly.FromDateTime(localNow.Date).ToDateTime(TimeOnly.MinValue);
             var tomorrowStart = todayStart.AddDays(1);
             var convocatorias = await database.Convocatorias
@@ -267,13 +387,7 @@ public sealed class BatchOrchestrator(
                 .ToListAsync(cancellationToken);
             if (convocatorias.Count == 0)
             {
-                await taskExecutions.CompleteAsync(
-                    executionId.Value,
-                    "skipped",
-                    "No hi ha convocatòries actives per avui.",
-                    null,
-                    cancellationToken);
-                return;
+                return (0, 0, 0);
             }
 
             var ids = convocatorias.Select(item => item.Id).ToArray();
@@ -342,28 +456,7 @@ public sealed class BatchOrchestrator(
                 }
             }
 
-            await taskExecutions.CompleteAsync(
-                executionId.Value,
-                "succeeded",
-                $"DailyConvoNotifications completed. Queued {queued} notification(s).",
-                new { convocatoriaCount = convocatorias.Count, activeUserCount = users.Count, queuedNotifications = queued },
-                cancellationToken);
-            logger.LogInformation(
-                "DailyConvoNotifications completed. Convocatorias: {ConvocatoriaCount}. ActiveUsers: {ActiveUserCount}. QueuedNotifications: {QueuedNotifications}.",
-                convocatorias.Count,
-                users.Count,
-                queued);
-        }
-        catch (Exception exception)
-        {
-            await taskExecutions.CompleteAsync(
-                executionId.Value,
-                "failed",
-                $"DailyConvoNotifications failed: {exception.Message}",
-                new { error = exception.Message },
-                cancellationToken);
-            throw;
-        }
+            return (convocatorias.Count, users.Count, queued);
     }
 
     private async Task<long?> QueueConvocatoriaNotificationAsync(
@@ -413,6 +506,8 @@ public sealed class BatchOrchestrator(
         };
         if (convocatoriaId.HasValue)
             payload["convocatoriaId"] = convocatoriaId.Value.ToString();
+        if (currentAdf.AdfId.HasValue)
+            payload["adfId"] = currentAdf.AdfId.Value.ToString();
 
         var notification = new MessagingNotification
         {

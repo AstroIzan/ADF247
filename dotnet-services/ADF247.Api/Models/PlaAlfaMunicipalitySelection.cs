@@ -2,6 +2,7 @@ namespace ADF247.Api.Models;
 
 public sealed class PlaAlfaMunicipalitySelection
 {
+    public int AdfId { get; set; }
     public required string Municipality { get; set; }
     public bool IsPrincipal { get; set; }
     public int? SimulationTodayLevel { get; set; }

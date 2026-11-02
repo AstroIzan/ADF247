@@ -229,6 +229,18 @@
             />
           </div>
 
+          @if (canAssignAdf()) {
+            <div class="form-group">
+              <label>ADF</label>
+              <select [value]="formData().adfId || ''" (change)="updateFormField('adfId', +$any($event.target).value || undefined)" [disabled]="formSubmitting()">
+                @if (!editingId()) { <option value="">ADF actual</option> }
+                @for (adf of adfs(); track adf.id) {
+                  <option [value]="adf.id" [selected]="formData().adfId === adf.id">ADF {{ adf.number }} - {{ adf.name }}</option>
+                }
+              </select>
+            </div>
+          }
+
           <div class="form-group">
             <label>Telèfon</label>
             <input
@@ -381,6 +393,18 @@
                 />
                 Desenvolupador
               </label>
+
+              @if (canAssignAdf()) {
+                <label class="checkbox-label">
+                  <input
+                    type="checkbox"
+                    [checked]="formData().roles?.isSecretariat"
+                    (change)="updateRoleField('isSecretariat', $any($event.target).checked)"
+                    [disabled]="formSubmitting()"
+                  />
+                  Secretariat
+                </label>
+              }
             </div>
           </div>
         </div>

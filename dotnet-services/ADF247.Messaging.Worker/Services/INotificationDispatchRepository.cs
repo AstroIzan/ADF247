@@ -26,6 +26,7 @@ public interface INotificationDispatchRepository
         int? convocatoriaId,
         RecipientSelectionBehavior selectionBehavior,
         IReadOnlyCollection<string>? recipientNCarnets,
+        int? adfId,
         CancellationToken cancellationToken);
     Task<int> RequeueRetryableDeliveriesAsync(long notificationId, int maxAttempts, CancellationToken cancellationToken);
     Task<IReadOnlyList<ClaimedDelivery>> ClaimPendingDeliveriesAsync(long notificationId, int batchSize, CancellationToken cancellationToken);

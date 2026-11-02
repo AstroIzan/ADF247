@@ -10,6 +10,8 @@ import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { managerGuard } from './guards/manager.guard';
 import { developerGuard } from './guards/developer.guard';
+import { globalGuard } from './guards/global.guard';
+import { AdfGlobalComponent } from './pages/adf-global/adf-global.component';
 import { DevComponent } from './pages/dev/dev.component';
 
 export const routes: Routes = [
@@ -51,6 +53,11 @@ export const routes: Routes = [
     path: 'system',
     component: SystemConfigurationComponent,
     canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'adf-global',
+    component: AdfGlobalComponent,
+    canActivate: [authGuard, globalGuard]
   },
   {
     path: 'dev',

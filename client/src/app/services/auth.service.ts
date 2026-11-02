@@ -24,6 +24,7 @@ export interface LoginResponse {
       isAdmin?: boolean;
       isGroc?: boolean;
       isDeveloper?: boolean;
+      isSecretariat?: boolean;
     } | Array<{
       id: number;
       nCarnet: string;
@@ -32,6 +33,7 @@ export interface LoginResponse {
       isAdmin: boolean;
       isGroc: boolean;
       isDeveloper: boolean;
+      isSecretariat?: boolean;
     }>;
   };
 }
@@ -48,12 +50,14 @@ export interface CurrentUser {
     isAdmin?: boolean;
     isGroc?: boolean;
     isDeveloper?: boolean;
+    isSecretariat?: boolean;
   } | Array<{
     isCapOperatiu?: boolean;
     isCapColla?: boolean;
     isAdmin?: boolean;
     isGroc?: boolean;
     isDeveloper?: boolean;
+    isSecretariat?: boolean;
   }>;
 }
 
@@ -204,6 +208,14 @@ export class AuthService {
     return this.hasRole('isDeveloper');
   }
 
+  isSecretariat(): boolean {
+    return this.hasRole('isSecretariat');
+  }
+
+  isGlobalViewer(): boolean {
+    return this.isAdmin() || this.isSecretariat();
+  }
+
   isCapOperatiu(): boolean {
     return this.hasRole('isCapOperatiu');
   }
@@ -212,7 +224,7 @@ export class AuthService {
     return this.isAdmin() || this.hasRole('isCapOperatiu') || this.hasRole('isCapColla');
   }
 
-  private hasRole(flag: 'isDeveloper' | 'isCapOperatiu' | 'isCapColla'): boolean {
+  private hasRole(flag: 'isDeveloper' | 'isCapOperatiu' | 'isCapColla' | 'isSecretariat'): boolean {
     const roles = this.getCurrentUser()?.roles;
     return Array.isArray(roles)
       ? roles.some((role) => Boolean(role[flag]))
