@@ -1,0 +1,180 @@
+<section class="dev-page">
+  <header class="dev-hero">
+    <p class="dev-kicker">Només Developer</p>
+    <h1>Dev</h1>
+    <p>Execució manual de runbooks, simulació de Pla Alfa, registre de notificacions i execucions Batch.</p>
+  </header>
+
+  <nav class="dev-tabs">
+    <button type="button" [class.active]="activeTab() === 'runbooks'" (click)="setTab('runbooks')">Runbooks i simulació</button>
+    <button type="button" [class.active]="activeTab() === 'registre'" (click)="setTab('registre')">Registre de notificacions</button>
+    <button type="button" [class.active]="activeTab() === 'execucions'" (click)="setTab('execucions')">Execucions</button>
+  </nav>
+
+  @if (error()) { <div class="dev-alert dev-alert-error">{{ error() }}</div> }
+  @if (notice()) { <div class="dev-alert dev-alert-ok">{{ notice() }}</div> }
+
+  @if (activeTab() === 'runbooks') {
+    <article class="dev-card">
+      <h2>Simulació de Pla Alfa</h2>
+      @if (simulation(); as sim) {
+        @if (sim.principalMunicipality) {
+          <p>Els nivells s’apliquen <strong>només a les execucions manuals</strong> per a <strong>{{ sim.principalMunicipality }}</strong>. Les execucions automàtiques sempre consulten el servei real.</p>
+          <div class="dev-row">
+            <label>Nivell D (avui)
+              <select [value]="sim.todayLevel ?? ''" (change)="updateLevel('todayLevel', $any($event.target).value)">
+                <option value="">Sense simulació</option>
+                @for (level of levels; track level) { <option [value]="level">Nivell {{ level }}</option> }
+              </select>
+            </label>
+            <label>Nivell D+1 (demà)
+              <select [value]="sim.tomorrowLevel ?? ''" (change)="updateLevel('tomorrowLevel', $any($event.target).value)">
+                <option value="">Sense simulació</option>
+                @for (level of levels; track level) { <option [value]="level">Nivell {{ level }}</option> }
+              </select>
+            </label>
+            <button class="dev-btn dev-btn-primary" type="button" [disabled]="simulationSaving()" (click)="saveSimulation()">
+              {{ simulationSaving() ? 'Desant...' : 'Desar simulació' }}
+            </button>
+          </div>
+        } @else {
+          <p class="dev-empty">Cal marcar un municipi com a principal a Pla Alfa abans de simular-ne el nivell.</p>
+        }
+      } @else {
+        <p class="dev-empty">Carregant simulació...</p>
+      }
+    </article>
+
+    <article class="dev-card">
+      <h2>Runbooks</h2>
+      <div class="dev-runbooks">
+        @for (runbook of runbooks; track runbook.key) {
+          <div class="dev-runbook">
+            <div>
+              <strong>{{ runbook.name }}</strong>
+              <p>{{ runbook.description }}</p>
+            </div>
+            <button class="dev-btn" [class.dev-btn-primary]="runbook.key === 'all'" type="button" [disabled]="runningRunbook() !== null" (click)="run(runbook.key)">
+              {{ runningRunbook() === runbook.key ? 'Sol·licitant...' : 'Executar' }}
+            </button>
+          </div>
+        }
+      </div>
+    </article>
+  }
+
+  @if (activeTab() === 'registre') {
+    <article class="dev-card">
+      <div class="dev-card-head">
+        <h2>Registre de notificacions</h2>
+        <button class="dev-btn" type="button" [disabled]="loadingLogs()" (click)="loadLogs()">Actualitzar</button>
+      </div>
+      @if (loadingLogs()) { <p class="dev-empty">Carregant...</p> }
+      @else if (logs().length === 0) { <p class="dev-empty">Encara no hi ha notificacions registrades.</p> }
+      @else {
+        <div class="dev-table-wrap">
+          <table>
+            <thead><tr><th>Hora</th><th>Acció</th><th>Títol</th><th>Estat</th><th>Resultat</th><th></th></tr></thead>
+            <tbody>
+              @for (log of logs(); track log.id) {
+                <tr>
+                  <td>{{ log.createdAt | date:'short' }}</td>
+                  <td>{{ log.trigger }}</td>
+                  <td>{{ log.title }}</td>
+                  <td>{{ log.status }}</td>
+                  <td>{{ log.successCount }}/{{ log.requestedCount }} lliurades</td>
+                  <td><button class="dev-btn dev-btn-small" type="button" (click)="openDeliveries(log)">Destinataris</button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </article>
+  }
+
+  @if (activeTab() === 'execucions') {
+    <article class="dev-card">
+      <div class="dev-card-head">
+        <h2>Execucions Batch</h2>
+        <button class="dev-btn" type="button" [disabled]="loadingExecutions()" (click)="loadExecutions()">Actualitzar</button>
+      </div>
+      @if (loadingExecutions()) { <p class="dev-empty">Carregant...</p> }
+      @else if (executions().length === 0) { <p class="dev-empty">Encara no hi ha execucions registrades.</p> }
+      @else {
+        <div class="dev-table-wrap">
+          <table>
+            <thead><tr><th>Tasca</th><th>Inici</th><th>Fi</th><th>Estat</th><th></th></tr></thead>
+            <tbody>
+              @for (execution of executions(); track execution.taskExecutionId) {
+                <tr>
+                  <td>{{ execution.taskName }}</td>
+                  <td>{{ execution.startedAt | date:'short' }}</td>
+                  <td>{{ execution.finishedAt ? (execution.finishedAt | date:'short') : 'En curs' }}</td>
+                  <td>{{ execution.finalStatus || 'En curs' }}</td>
+                  <td><button class="dev-btn dev-btn-small" type="button" (click)="openExecution(execution)">Detall</button></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </article>
+  }
+
+  @if (selectedNotification(); as notification) {
+    <div class="dev-overlay" (click)="closeDeliveries()">
+      <div class="dev-modal" (click)="$event.stopPropagation()">
+        <div class="dev-card-head">
+          <h2>Destinataris · {{ notification.title }}</h2>
+          <button class="dev-btn dev-btn-small" type="button" (click)="closeDeliveries()">Tancar</button>
+        </div>
+        @if (loadingDeliveries()) { <p class="dev-empty">Carregant...</p> }
+        @else if (deliveries().length === 0) { <p class="dev-empty">Aquesta notificació no té lliuraments registrats.</p> }
+        @else {
+          <div class="dev-table-wrap">
+            <table>
+              <thead><tr><th>Carnet</th><th>Estat</th><th>Intents</th><th>Enviada</th><th>Error</th></tr></thead>
+              <tbody>
+                @for (delivery of deliveries(); track delivery.id) {
+                  <tr>
+                    <td>{{ delivery.nCarnet }}</td>
+                    <td>{{ delivery.status }}</td>
+                    <td>{{ delivery.attemptCount }}</td>
+                    <td>{{ delivery.sentAt ? (delivery.sentAt | date:'short') : '-' }}</td>
+                    <td>{{ delivery.errorMessage || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (selectedExecution(); as execution) {
+    <div class="dev-overlay" (click)="closeExecution()">
+      <div class="dev-modal" (click)="$event.stopPropagation()">
+        <div class="dev-card-head">
+          <h2>{{ execution.taskName }}</h2>
+          <button class="dev-btn dev-btn-small" type="button" (click)="closeExecution()">Tancar</button>
+        </div>
+        @if (loadingExecutionDetail()) { <p class="dev-empty">Carregant...</p> }
+        @else {
+          <ul class="dev-timeline">
+            @for (detail of execution.details; track detail.taskExecutionDetailId) {
+              <li>
+                <span>{{ detail.occurredAt | date:'mediumTime' }}</span>
+                <div>
+                  <strong>{{ detail.message }}</strong>
+                  @if (detail.detailsJson) { <pre>{{ detail.detailsJson }}</pre> }
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+    </div>
+  }
+</section>

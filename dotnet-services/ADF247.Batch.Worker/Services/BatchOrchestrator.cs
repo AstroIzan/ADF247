@@ -13,6 +13,7 @@ public sealed class BatchOrchestrator(
     ILogger<BatchOrchestrator> logger)
 {
     private static readonly TimeZoneInfo LocalTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Madrid");
+    private const int SlotWindowMinutes = 30;
 
     public async Task RunDueJobsAsync(DateTimeOffset utcNow, CancellationToken cancellationToken)
     {
@@ -27,19 +28,28 @@ public sealed class BatchOrchestrator(
 
         var localNow = TimeZoneInfo.ConvertTime(utcNow, LocalTimeZone);
         await RunManualRequestsAsync(configuration, localNow, cancellationToken);
-        if (localNow.DayOfWeek == (DayOfWeek)configuration.WeeklyRequestWeekday
-            && localNow.Hour == configuration.WeeklyRequestHour
-            && localNow.Minute == configuration.WeeklyRequestMinute)
+
+        var weeklySlot = GetSlot(localNow, configuration.WeeklyRequestHour, configuration.WeeklyRequestMinute);
+        if (localNow.DayOfWeek == (DayOfWeek)configuration.WeeklyRequestWeekday && IsWithinSlot(localNow, weeklySlot))
         {
-            await RunWeeklyConvosAsync(configuration, localNow, cancellationToken);
+            await RunWeeklyConvosAsync(configuration, localNow, weeklySlot, false, cancellationToken);
         }
 
-        if (localNow.Hour == configuration.DailyNotificationsHour
-            && localNow.Minute == configuration.DailyNotificationsMinute)
+        var dailySlot = GetSlot(localNow, configuration.DailyNotificationsHour, configuration.DailyNotificationsMinute);
+        if (IsWithinSlot(localNow, dailySlot))
         {
-            await RunDailyNotificationsAsync(localNow, cancellationToken);
+            await RunDailyNotificationsAsync(localNow, dailySlot, false, cancellationToken);
         }
     }
+
+    private static DateTimeOffset GetSlot(DateTimeOffset localNow, int hour, int minute)
+    {
+        var local = new DateTime(localNow.Year, localNow.Month, localNow.Day, hour, minute, 0, DateTimeKind.Unspecified);
+        return new DateTimeOffset(local, LocalTimeZone.GetUtcOffset(local));
+    }
+
+    private static bool IsWithinSlot(DateTimeOffset now, DateTimeOffset slot) =>
+        now >= slot && now < slot.AddMinutes(SlotWindowMinutes);
 
     private async Task RunManualRequestsAsync(
         SystemConfiguration configuration,
@@ -54,8 +64,10 @@ public sealed class BatchOrchestrator(
 
         try
         {
-            await RunWeeklyConvosAsync(configuration, localNow, cancellationToken);
-            await RunDailyNotificationsAsync(localNow, cancellationToken);
+            if (request.Runbook is "all" or "weekly-convos")
+                await RunWeeklyConvosAsync(configuration, localNow, localNow, true, cancellationToken);
+            if (request.Runbook is "all" or "daily-notifications")
+                await RunDailyNotificationsAsync(localNow, localNow, true, cancellationToken);
             request.ProcessedAt = DateTime.UtcNow;
             await database.SaveChangesAsync(cancellationToken);
         }
@@ -71,15 +83,19 @@ public sealed class BatchOrchestrator(
     private async Task RunWeeklyConvosAsync(
         SystemConfiguration configuration,
         DateTimeOffset localNow,
+        DateTimeOffset slot,
+        bool manual,
         CancellationToken cancellationToken)
     {
         const string taskName = "batch:GenerateAndNotifyWeeklyConvos";
         var executionId = await taskExecutions.TryStartAsync(
             taskName,
-            localNow,
-            "GenerateAndNotifyWeeklyConvos started.",
-            new { scheduledFor = localNow.ToString("O") },
-            cancellationToken);
+            slot,
+            manual ? "GenerateAndNotifyWeeklyConvos started manually." : "GenerateAndNotifyWeeklyConvos started.",
+            new { scheduledFor = slot.ToString("O"), manual },
+            cancellationToken,
+            manual ? 1 : SlotWindowMinutes,
+            manual);
         if (!executionId.HasValue)
             return;
 
@@ -97,7 +113,7 @@ public sealed class BatchOrchestrator(
                 return;
             }
 
-            var level = await plaAlfaLevels.GetHighestLevelAsync(municipalities, cancellationToken);
+            var level = await plaAlfaLevels.GetHighestLevelAsync(municipalities, manual, cancellationToken);
             if (!level.HasValue)
             {
                 const string message = "No s'ha pogut determinar el nivell del Pla Alfa del dia en curs; no es generen convocatòries.";
@@ -219,15 +235,21 @@ public sealed class BatchOrchestrator(
         }
     }
 
-    private async Task RunDailyNotificationsAsync(DateTimeOffset localNow, CancellationToken cancellationToken)
+    private async Task RunDailyNotificationsAsync(
+        DateTimeOffset localNow,
+        DateTimeOffset slot,
+        bool manual,
+        CancellationToken cancellationToken)
     {
         const string taskName = "batch:DailyConvoNotifications";
         var executionId = await taskExecutions.TryStartAsync(
             taskName,
-            localNow,
-            "DailyConvoNotifications started.",
-            new { scheduledFor = localNow.ToString("O") },
-            cancellationToken);
+            slot,
+            manual ? "DailyConvoNotifications started manually." : "DailyConvoNotifications started.",
+            new { scheduledFor = slot.ToString("O"), manual },
+            cancellationToken,
+            manual ? 1 : SlotWindowMinutes,
+            manual);
         if (!executionId.HasValue)
             return;
 

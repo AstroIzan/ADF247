@@ -106,7 +106,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
-        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
         return Ok(await messaging.GetNotificationsAsync(cancellationToken));
     }
 
@@ -115,7 +115,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
-        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
 
         var lastNotification = await database.MessagingNotifications
             .OrderByDescending(notification => notification.CreatedAt)
@@ -162,7 +162,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
-        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
         var deliveries = await database.NotificationDeliveries
             .Where(delivery => delivery.NotificationId == notificationId)
             .OrderByDescending(delivery => delivery.CreatedAt)
@@ -175,7 +175,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
-        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
         var definitions = await database.TaskDefinitions
             .Where(definition => definition.Name.StartsWith("batch:"))
             .OrderBy(definition => definition.Name)
@@ -194,7 +194,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
-        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
         var normalizedLimit = Math.Clamp(limit, 1, 200);
         var executions = await database.TaskExecutions
             .Include(execution => execution.TaskDefinition)
@@ -220,7 +220,7 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
     {
         var carnet = GetCarnet();
         if (carnet is null) return Unauthorized();
-        if (!await IsAdminAsync(carnet, cancellationToken)) return Forbid();
+        if (!await IsAdminOrDeveloperAsync(carnet, cancellationToken)) return Forbid();
         var execution = await database.TaskExecutions
             .Include(candidate => candidate.TaskDefinition)
             .Include(candidate => candidate.Details)
@@ -286,6 +286,9 @@ public sealed class MessagingController(MessagingService messaging, Adf247DbCont
 
     private Task<bool> IsManagerAsync(string carnet, CancellationToken cancellationToken) =>
         database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsCapOperatiu || role.IsCapColla), cancellationToken);
+
+    private Task<bool> IsAdminOrDeveloperAsync(string carnet, CancellationToken cancellationToken) =>
+        database.Roles.AnyAsync(role => role.NCarnet == carnet && (role.IsAdmin || role.IsDeveloper), cancellationToken);
 
     private Task<bool> IsAdminAsync(string carnet, CancellationToken cancellationToken) =>
         database.Roles.AnyAsync(role => role.NCarnet == carnet && role.IsAdmin, cancellationToken);

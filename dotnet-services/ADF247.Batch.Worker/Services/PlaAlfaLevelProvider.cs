@@ -11,18 +11,22 @@ public sealed class PlaAlfaLevelProvider(HttpClient client, Adf247DbContext data
 
     public async Task<int?> GetHighestLevelAsync(
         IReadOnlyCollection<string> municipalities,
+        bool useSimulation,
         CancellationToken cancellationToken)
     {
         if (municipalities.Count == 0)
             return null;
 
-        var simulatedLevel = await database.PlaAlfaMunicipalitySelections
-            .AsNoTracking()
-            .Where(selection => selection.IsPrincipal)
-            .Select(selection => selection.SimulationTodayLevel)
-            .SingleOrDefaultAsync(cancellationToken);
-        if (simulatedLevel.HasValue)
-            return simulatedLevel.Value;
+        if (useSimulation)
+        {
+            var simulatedLevel = await database.PlaAlfaMunicipalitySelections
+                .AsNoTracking()
+                .Where(selection => selection.IsPrincipal)
+                .Select(selection => selection.SimulationTodayLevel)
+                .SingleOrDefaultAsync(cancellationToken);
+            if (simulatedLevel.HasValue)
+                return simulatedLevel.Value;
+        }
 
         var quotedMunicipalities = string.Join(
             ',',

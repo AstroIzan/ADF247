@@ -70,14 +70,19 @@ public sealed class SystemConfigurationController(
     }
 
     [HttpPost("developer/run-all-batch")]
-    public async Task<IActionResult> RunAllBatch(CancellationToken cancellationToken)
+    public async Task<IActionResult> RunAllBatch([FromBody] RunBatchRequest? body, CancellationToken cancellationToken)
     {
         var carnet = User.FindFirst("nCarnet")?.Value;
         if (string.IsNullOrWhiteSpace(carnet) || !await IsDeveloperAsync(cancellationToken)) return Forbid();
 
+        var runbook = string.IsNullOrWhiteSpace(body?.Runbook) ? "all" : body.Runbook.Trim();
+        if (runbook is not ("all" or "weekly-convos" or "daily-notifications"))
+            return BadRequest(new { message = "Runbook desconegut." });
+
         var request = new ManualBatchRunRequest
         {
             RequestedByNCarnet = carnet,
+            Runbook = runbook,
             RequestedAt = DateTime.UtcNow,
         };
         database.ManualBatchRunRequests.Add(request);

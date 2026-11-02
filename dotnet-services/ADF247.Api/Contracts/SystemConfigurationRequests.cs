@@ -29,3 +29,4 @@ public sealed record WeeklyConvocatoriaScheduleRequest(
     TimeOnly EndTime);
 
 public sealed record PlaAlfaSimulationRequest(int? TodayLevel, int? TomorrowLevel);
+public sealed record RunBatchRequest(string? Runbook);

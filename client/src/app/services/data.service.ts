@@ -363,6 +363,20 @@ export interface SystemConfiguration {
   updatedAt: string;
 }
 
+export interface NotificationDeliveryLog {
+  id: number;
+  nCarnet: string;
+  status: string;
+  attemptCount: number;
+  sentAt?: string | null;
+  errorMessage?: string | null;
+  createdAt: string;
+}
+
+export interface TaskExecutionDetailLog extends TaskExecutionLog {
+  details: { taskExecutionDetailId: number; eventType: number; occurredAt: string; message: string; detailsJson?: string | null }[];
+}
+
 export interface PlaAlfaSimulation {
   principalMunicipality: string | null;
   todayLevel: number | null;
@@ -422,8 +436,16 @@ export class DataService {
     return this.http.put<PlaAlfaSimulation>('/system-configuration/developer/pla-alfa-simulation', payload);
   }
 
-  runAllBatchJobs(): Observable<{ id: number; requestedAt: string }> {
-    return this.http.post<{ id: number; requestedAt: string }>('/system-configuration/developer/run-all-batch', {});
+  runAllBatchJobs(runbook: 'all' | 'weekly-convos' | 'daily-notifications' = 'all'): Observable<{ id: number; requestedAt: string }> {
+    return this.http.post<{ id: number; requestedAt: string }>('/system-configuration/developer/run-all-batch', { runbook });
+  }
+
+  getNotificationDeliveries(notificationId: number): Observable<NotificationDeliveryLog[]> {
+    return this.http.get<NotificationDeliveryLog[]>(`/messaging/${notificationId}/deliveries`);
+  }
+
+  getTaskExecutionDetail(executionId: number): Observable<TaskExecutionDetailLog> {
+    return this.http.get<TaskExecutionDetailLog>(`/messaging/task-executions/${executionId}`);
   }
 
   getConvoTypeById(id: number): Observable<ConvoType> {

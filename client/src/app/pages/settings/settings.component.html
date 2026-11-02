@@ -11,10 +11,7 @@
 
     <nav class="settings-tabs">
       <button type="button" class="settings-tab" [class.active]="activeTab() === 'device'" (click)="setActiveTab('device')">Aquest dispositiu</button>
-      @if (authService.isAdmin()) {
-        <button type="button" class="settings-tab" [class.active]="activeTab() === 'messaging'" (click)="setActiveTab('messaging')">Registre</button>
-        <button type="button" class="settings-tab" [class.active]="activeTab() === 'tasks'" (click)="setActiveTab('tasks')">Execucions</button>
-      }
+
     </nav>
 
     <div class="settings-body">

@@ -9,6 +9,8 @@ import { SystemConfigurationComponent } from './pages/system-configuration/syste
 import { authGuard } from './guards/auth.guard';
 import { adminGuard } from './guards/admin.guard';
 import { managerGuard } from './guards/manager.guard';
+import { developerGuard } from './guards/developer.guard';
+import { DevComponent } from './pages/dev/dev.component';
 
 export const routes: Routes = [
   {
@@ -49,6 +51,11 @@ export const routes: Routes = [
     path: 'system',
     component: SystemConfigurationComponent,
     canActivate: [authGuard, adminGuard]
+  },
+  {
+    path: 'dev',
+    component: DevComponent,
+    canActivate: [authGuard, developerGuard]
   },
   {
     path: '**',

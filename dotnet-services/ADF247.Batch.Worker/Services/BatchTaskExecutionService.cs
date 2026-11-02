@@ -13,7 +13,9 @@ public sealed class BatchTaskExecutionService(Adf247DbContext database)
         DateTimeOffset localMinute,
         string message,
         object details,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        int windowMinutes = 1,
+        bool force = false)
     {
         var minuteStart = new DateTimeOffset(
             localMinute.Year,
@@ -24,7 +26,7 @@ public sealed class BatchTaskExecutionService(Adf247DbContext database)
             0,
             localMinute.Offset);
         var startUtc = minuteStart.UtcDateTime;
-        var endUtc = minuteStart.AddMinutes(1).UtcDateTime;
+        var endUtc = minuteStart.AddMinutes(windowMinutes).UtcDateTime;
 
         await using var transaction = await database.Database.BeginTransactionAsync(IsolationLevel.Serializable, cancellationToken);
         var definition = await database.TaskDefinitions.SingleOrDefaultAsync(
@@ -41,7 +43,7 @@ public sealed class BatchTaskExecutionService(Adf247DbContext database)
             await database.SaveChangesAsync(cancellationToken);
         }
 
-        var alreadyStarted = await database.TaskExecutions.AnyAsync(
+        var alreadyStarted = !force && await database.TaskExecutions.AnyAsync(
             item => item.TaskDefinitionId == definition.TaskDefinitionId
                 && item.StartedAt >= startUtc
                 && item.StartedAt < endUtc,

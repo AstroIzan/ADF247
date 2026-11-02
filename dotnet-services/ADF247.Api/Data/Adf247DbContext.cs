@@ -224,6 +224,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options) :
             entity.ToTable("ManualRunRequest", "Taskling");
             entity.HasKey(request => request.Id);
             entity.Property(request => request.RequestedByNCarnet).HasMaxLength(50);
+            entity.Property(request => request.Runbook).HasMaxLength(50).HasDefaultValue("all");
             entity.Property(request => request.RequestedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
         });
     }

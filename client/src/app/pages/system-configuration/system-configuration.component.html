@@ -281,50 +281,6 @@
               }
             </div>
           </details>
-
-        @if (isDeveloper()) {
-          <section class="developer-simulation">
-            <div class="developer-simulation-heading">
-              <div>
-                <p class="panel-kicker">Simulació Batch</p>
-                <h4>Pla Alfa del municipi principal</h4>
-              </div>
-              <span class="developer-simulation-badge">Només Developer</span>
-            </div>
-            @if (plaAlfaSimulation(); as simulation) {
-              @if (simulation.principalMunicipality) {
-                <p>Les properes execucions Batch faran servir aquests nivells simulats per a <strong>{{ simulation.principalMunicipality }}</strong>, abans de consultar el servei extern.</p>
-                <div class="schedule-inputs schedule-inputs-two">
-                  <label>Nivell avui
-                    <select [value]="simulation.todayLevel ?? ''" (change)="updatePlaAlfaSimulation('todayLevel', $any($event.target).value)">
-                      <option value="">Sense simulació</option>
-                      <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
-                    </select>
-                  </label>
-                  <label>Nivell demà
-                    <select [value]="simulation.tomorrowLevel ?? ''" (change)="updatePlaAlfaSimulation('tomorrowLevel', $any($event.target).value)">
-                      <option value="">Sense simulació</option>
-                      <option [value]="0">Nivell 0</option><option [value]="1">Nivell 1</option><option [value]="2">Nivell 2</option><option [value]="3">Nivell 3</option><option [value]="4">Nivell 4</option><option [value]="5">Nivell 5</option>
-                    </select>
-                  </label>
-                </div>
-                <button class="btn btn-primary" type="button" [disabled]="simulationSaving()" (click)="savePlaAlfaSimulation()">
-                  {{ simulationSaving() ? 'Desant simulació...' : 'Desar simulació' }}
-                </button>
-                <button class="btn btn-secondary" type="button" [disabled]="batchRunSubmitting()" (click)="runAllBatchJobs()">
-                  {{ batchRunSubmitting() ? 'Iniciant runbooks...' : 'Executar tots els runbooks' }}
-                </button>
-                @if (batchRunNotice()) {
-                  <p class="success-message">{{ batchRunNotice() }}</p>
-                }
-              } @else {
-                <p class="empty-copy">Cal marcar un municipi com a principal a Pla Alfa abans de poder simular-ne el nivell.</p>
-              }
-            } @else {
-              <p class="empty-copy">Carregant la configuració de proves...</p>
-            }
-          </section>
-        }
         </article>
       </section>
   }

@@ -23,12 +23,23 @@ public sealed class PlaAlfaService(Adf247DbContext database, IHttpClientFactory 
         if (municipalities is null) throw new ArgumentException("El campo \"municipalities\" debe ser un array de strings.");
         var list = municipalities.Where(value => !string.IsNullOrWhiteSpace(value)).Select(value => value.Trim()).Distinct(StringComparer.OrdinalIgnoreCase).OrderBy(value => value, StringComparer.CurrentCulture).ToList();
         var selected = new Selection(list, !string.IsNullOrWhiteSpace(principal) && list.Contains(principal.Trim(), StringComparer.OrdinalIgnoreCase) ? principal.Trim() : null);
+        var previousSimulation = await database.PlaAlfaMunicipalitySelections.AsNoTracking()
+            .Where(item => item.SimulationTodayLevel != null || item.SimulationTomorrowLevel != null)
+            .OrderByDescending(item => item.IsPrincipal)
+            .Select(item => new { item.SimulationTodayLevel, item.SimulationTomorrowLevel })
+            .FirstOrDefaultAsync();
         await database.PlaAlfaMunicipalitySelections.ExecuteDeleteAsync();
-        database.PlaAlfaMunicipalitySelections.AddRange(selected.Municipalities.Select(municipality => new PlaAlfaMunicipalitySelection
+        database.PlaAlfaMunicipalitySelections.AddRange(selected.Municipalities.Select(municipality =>
         {
-            Municipality = municipality,
-            IsPrincipal = string.Equals(municipality, selected.PrincipalMunicipality, StringComparison.OrdinalIgnoreCase),
-            UpdatedAt = DateTime.UtcNow,
+            var isPrincipal = string.Equals(municipality, selected.PrincipalMunicipality, StringComparison.OrdinalIgnoreCase);
+            return new PlaAlfaMunicipalitySelection
+            {
+                Municipality = municipality,
+                IsPrincipal = isPrincipal,
+                SimulationTodayLevel = isPrincipal ? previousSimulation?.SimulationTodayLevel : null,
+                SimulationTomorrowLevel = isPrincipal ? previousSimulation?.SimulationTomorrowLevel : null,
+                UpdatedAt = DateTime.UtcNow,
+            };
         }));
         await database.SaveChangesAsync();
         StatusCache.Clear();

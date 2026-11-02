@@ -10,6 +10,9 @@
 					<button class="nav-btn desktop-nav-btn" routerLink="/dashboard" routerLinkActive="active">Panell</button>
 					<button class="nav-btn desktop-nav-btn" routerLink="/hours-summary" routerLinkActive="active">Hores</button>
 				}
+				@if (authService.isDeveloper()) {
+					<button class="nav-btn desktop-nav-btn" routerLink="/dev" routerLinkActive="active">Dev</button>
+				}
 				@if (authService.isAdmin()) {
 					<button class="nav-btn desktop-nav-btn" routerLink="/system" routerLinkActive="active">Sistema</button>
 				}
@@ -71,6 +74,9 @@
 					<button class="mobile-menu-item" routerLink="/dashboard" routerLinkActive="active" (click)="closeMobileMenu()">Panell</button>
 					<button class="mobile-menu-item mobile-menu-item-tablet-up" routerLink="/hours-summary" routerLinkActive="active" (click)="closeMobileMenu()">Hores</button>
 				}
+									@if (authService.isDeveloper()) {
+										<button class="mobile-menu-item" routerLink="/dev" routerLinkActive="active" (click)="closeMobileMenu()">Dev</button>
+									}
 				@if (authService.isAdmin()) {
 					<button class="mobile-menu-item" routerLink="/system" routerLinkActive="active" (click)="closeMobileMenu()">Sistema</button>
 				}
