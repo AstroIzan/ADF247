@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DataService, Convocatoria, ConvoType, User } from '../../services/data.service';
 import { AuthService } from '../../services/auth.service';
+import { IntervencionsModalComponent } from '../intervencions/intervencions-modal.component';
 import { DateFormatService } from '../../services/date-format.service';
 
 type ConvocatoriaFormData = Partial<Convocatoria> & {
@@ -12,7 +13,7 @@ type ConvocatoriaFormData = Partial<Convocatoria> & {
 @Component({
   selector: 'app-convos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IntervencionsModalComponent],
   templateUrl: './convos.component.html',
   styleUrl: './convos.component.css'
 })
@@ -108,6 +109,18 @@ export class ConvosComponent implements OnDestroy {
     private dataService: DataService,
     private authService: AuthService,
   ) {}
+
+  intervencionsOpen = signal(false);
+  intervencionsConvo = signal<Convocatoria | null>(null);
+
+  openIntervencions(convo: Convocatoria | null) {
+    this.intervencionsConvo.set(convo);
+    this.intervencionsOpen.set(true);
+  }
+
+  canIntervene(convo: Convocatoria) {
+    return this.authService.isManager() || (convo.responsableId != null && convo.responsableId === this.authService.currentUser()?.id);
+  }
 
   isAdmin() {
     return this.authService.isManager();

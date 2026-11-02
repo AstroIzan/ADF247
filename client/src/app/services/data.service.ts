@@ -735,8 +735,96 @@ export class DataService {
     return this.http.put<{ updatedAt: string; municipalities: string[]; principalMunicipality: string | null }>('/pla-alfa/municipalities', payload);
   }
 
+  getIntervencions(params: { convocatoriaId?: number; date?: string }): Observable<Intervencio[]> {
+    const query = params.convocatoriaId ? `?convocatoriaId=${params.convocatoriaId}` : `?date=${params.date ?? ''}`;
+    return this.http.get<Intervencio[]>(`/intervencions${query}`);
+  }
+
+  getIntervencionsContext(params: { date?: string; time?: string; convocatoriaId?: number }): Observable<IntervencioContext> {
+    const q = new URLSearchParams();
+    if (params.date) q.set('date', params.date);
+    if (params.time) q.set('time', params.time);
+    if (params.convocatoriaId) q.set('convocatoriaId', String(params.convocatoriaId));
+    return this.http.get<IntervencioContext>(`/intervencions/context?${q.toString()}`);
+  }
+
+  saveIntervencio(id: number | null, payload: IntervencioPayload): Observable<Intervencio> {
+    return id
+      ? this.http.put<Intervencio>(`/intervencions/${id}`, payload)
+      : this.http.post<Intervencio>('/intervencions', payload);
+  }
+
+  deleteIntervencio(id: number): Observable<{ id: number }> {
+    return this.http.delete<{ id: number }>(`/intervencions/${id}`);
+  }
+
+  createTypeIncendi(name: string): Observable<TypeIncendi> {
+    return this.http.post<TypeIncendi>('/intervencions/types', { name });
+  }
   getPlaAlfaMunicipalitiesStatus(forceRefresh = false): Observable<PlaAlfaMunicipalitiesStatusResponse> {
     const query = forceRefresh ? '?refresh=true' : '';
     return this.http.get<PlaAlfaMunicipalitiesStatusResponse>(`/pla-alfa/municipalities${query}`);
   }
+}
+export interface TypeIncendi { id: number; name: string; }
+export interface OtherAdfEntry { adf: string; vehicle: string; firstIntervention: boolean; }
+export interface BomberEntry { vehicle: string; firstIntervention: boolean; }
+
+export interface IntervencioPayload {
+  convocatoriaId: number | null;
+  responsableUserId: number | null;
+  responsableName: string | null;
+  responsableAdf: string | null;
+  date: string;
+  noticeTime: string | null;
+  startTime: string | null;
+  endTime: string | null;
+  level: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  municipality: string | null;
+  sector: string | null;
+  comarca: string | null;
+  ownVehicles: string[];
+  otherAdfsAttended: boolean;
+  otherAdfs: OtherAdfEntry[];
+  otherAdfsGrocs: number;
+  otherAdfsVerds: number;
+  bombersAttended: boolean;
+  bombers: BomberEntry[];
+  ownGrocs: number;
+  ownVerds: number;
+  customGrocs: number;
+  customVerds: number;
+  surface: number | null;
+  typeIncendiId: number | null;
+}
+
+export interface Intervencio extends IntervencioPayload {
+  id: number;
+  adfId: number;
+  responsableDisplay: string | null;
+  mapsUrl: string | null;
+  totalGrocs: number;
+  totalVerds: number;
+}
+
+export interface IntervencioConvoCandidate {
+  id: number;
+  title: string;
+  type: string | null;
+  startTime: string;
+  finalTime: string | null;
+  started: boolean;
+  responsableId: number | null;
+  responsableName: string | null;
+}
+
+export interface IntervencioContext {
+  users: { id: number; nCarnet: string; name: string; lastName: string; nIndicatiu: string | null }[];
+  types: TypeIncendi[];
+  vehicleCatalog: string[];
+  matched: IntervencioConvoCandidate | null;
+  candidates: IntervencioConvoCandidate[];
+  convocatoriaVehicles: { vehicleName: string; grocs: number; verds: number }[];
 }

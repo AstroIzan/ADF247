@@ -15,6 +15,8 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, C
     public DbSet<ConvoType> ConvoTypes => Set<ConvoType>();
     public DbSet<Respuesta> Respuestas => Set<Respuesta>();
     public DbSet<CampaignForm> CampaignForms => Set<CampaignForm>();
+    public DbSet<Intervencio> Intervencions => Set<Intervencio>();
+    public DbSet<TypeIncendi> TypeIncendis => Set<TypeIncendi>();
     public DbSet<UserHoursSummary> UserHoursSummaries => Set<UserHoursSummary>();
     public DbSet<SystemConfiguration> SystemConfigurations => Set<SystemConfiguration>();
     public DbSet<PlaAlfaMunicipalitySelection> PlaAlfaMunicipalitySelections => Set<PlaAlfaMunicipalitySelection>();
@@ -44,6 +46,9 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, C
             {
                 case Convocatoria { AdfId: 0 } convocatoria:
                     convocatoria.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF de la convocatoria.");
+                    break;
+                case Intervencio { AdfId: 0 } intervencio:
+                    intervencio.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF de la intervención.");
                     break;
                 case PlaAlfaMunicipalitySelection { AdfId: 0 } selection:
                     selection.AdfId = CurrentAdfId ?? throw new InvalidOperationException("No se ha podido determinar la ADF del Pla Alfa.");
@@ -166,6 +171,37 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, C
             entity.HasOne(form => form.Convocatoria).WithMany().HasForeignKey(form => form.ConvocatoriaId);
             entity.Property(form => form.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
             entity.Property(form => form.UpdatedAt).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<TypeIncendi>(entity =>
+        {
+            entity.ToTable("TypeIncendis");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.Name).HasMaxLength(150).IsRequired();
+        });
+
+        modelBuilder.Entity<Intervencio>(entity =>
+        {
+            entity.ToTable("Intervencions");
+            entity.HasKey(item => item.Id);
+            entity.Property(item => item.Date).HasColumnType("date");
+            entity.Property(item => item.NoticeTime).HasColumnType("time(0)");
+            entity.Property(item => item.StartTime).HasColumnType("time(0)");
+            entity.Property(item => item.EndTime).HasColumnType("time(0)");
+            entity.Property(item => item.Surface).HasPrecision(12, 2);
+            entity.Property(item => item.ResponsableName).HasMaxLength(200);
+            entity.Property(item => item.ResponsableAdf).HasMaxLength(200);
+            entity.Property(item => item.MapsUrl).HasMaxLength(500);
+            entity.Property(item => item.Municipality).HasMaxLength(200);
+            entity.Property(item => item.Sector).HasMaxLength(200);
+            entity.Property(item => item.Comarca).HasMaxLength(200);
+            entity.Property(item => item.CreatedByNCarnet).HasMaxLength(50);
+            entity.HasOne(item => item.Convocatoria).WithMany().HasForeignKey(item => item.ConvocatoriaId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(item => item.Responsable).WithMany().HasForeignKey(item => item.ResponsableUserId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasOne(item => item.TypeIncendi).WithMany().HasForeignKey(item => item.TypeIncendiId).OnDelete(DeleteBehavior.NoAction);
+            entity.HasQueryFilter(item => CurrentAdfId == null || item.AdfId == CurrentAdfId);
+            entity.Property(item => item.CreatedAt).HasDefaultValueSql("sysutcdatetime()").ValueGeneratedOnAdd();
+            entity.Property(item => item.UpdatedAt).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<UserHoursSummary>(entity =>

@@ -1,0 +1,187 @@
+<div class="iv-overlay" (click)="closed.emit()">
+  <div class="iv-modal" (click)="$event.stopPropagation()">
+    <div class="iv-header">
+      <h2>{{ formOpen() ? (editing() ? 'Editar intervenció' : 'Nova intervenció') : title() }}</h2>
+      <button type="button" class="iv-close" (click)="closed.emit()" aria-label="Tancar">×</button>
+    </div>
+
+    <div class="iv-body">
+      @if (error()) { <div class="iv-error">{{ error() }}</div> }
+
+      @if (!formOpen()) {
+        <div class="iv-toolbar">
+          @if (!convocatoria) {
+            <label>Dia
+              <input type="date" [ngModel]="listDate()" (ngModelChange)="changeListDate($event)" />
+            </label>
+          }
+          <button type="button" class="iv-btn iv-primary" (click)="openNew()">+ Nova intervenció</button>
+        </div>
+
+        @if (loading()) {
+          <p class="iv-muted">Carregant…</p>
+        } @else if (!items().length) {
+          <p class="iv-muted">No hi ha intervencions.</p>
+        } @else {
+          <div class="iv-list">
+            @for (item of items(); track item.id) {
+              <div class="iv-card">
+                <div class="iv-card-main">
+                  <strong>{{ item.municipality || 'Sense ubicació' }}</strong>
+                  <span>{{ item.date }} · {{ item.startTime || item.noticeTime || '--:--' }}@if (item.endTime) { – {{ item.endTime }} }</span>
+                  <span>Responsable: {{ item.responsableDisplay || '—' }}</span>
+                  <span>Grocs: {{ item.totalGrocs }} · Verds: {{ item.totalVerds }}@if (item.level != null) { · Nivell {{ item.level }} }</span>
+                  @if (item.mapsUrl) { <a [href]="item.mapsUrl" target="_blank" rel="noopener">Google Maps</a> }
+                </div>
+                <div class="iv-card-actions">
+                  <button type="button" class="iv-btn" (click)="openEdit(item)">Editar</button>
+                  @if (deleteConfirm() === item.id) {
+                    <button type="button" class="iv-btn iv-danger" (click)="remove(item.id)">Confirmar</button>
+                    <button type="button" class="iv-btn" (click)="deleteConfirm.set(null)">Cancel·lar</button>
+                  } @else {
+                    <button type="button" class="iv-btn iv-danger" (click)="deleteConfirm.set(item.id)">Eliminar</button>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      } @else {
+        @let f = form();
+        <div class="iv-form">
+          <section>
+            <h3>Responsable</h3>
+            @if (suggestion()) { <p class="iv-hint">{{ suggestion() }}</p> }
+            <div class="iv-row">
+              <label><input type="radio" name="resp" [checked]="!manualResponsable()" (change)="onResponsableMode(false)" /> Usuari de l'ADF</label>
+              <label><input type="radio" name="resp" [checked]="manualResponsable()" (change)="onResponsableMode(true)" /> Manual</label>
+            </div>
+            @if (!manualResponsable()) {
+              <select [ngModel]="f.responsableUserId" (ngModelChange)="update('responsableUserId', $event)">
+                <option [ngValue]="null">— Sense responsable —</option>
+                @for (u of context()?.users ?? []; track u.id) {
+                  <option [ngValue]="u.id">{{ u.nIndicatiu ? u.nIndicatiu + ' · ' : '' }}{{ u.name }} {{ u.lastName }}</option>
+                }
+              </select>
+            } @else {
+              <div class="iv-row">
+                <input type="text" placeholder="Nom" [ngModel]="f.responsableName" (ngModelChange)="update('responsableName', $event)" />
+                <input type="text" placeholder="ADF" [ngModel]="f.responsableAdf" (ngModelChange)="update('responsableAdf', $event)" />
+              </div>
+            }
+          </section>
+
+          <section>
+            <h3>Data i hores</h3>
+            <div class="iv-grid">
+              <label>Data<input type="date" [ngModel]="f.date" (ngModelChange)="update('date', $event); refreshContext()" /></label>
+              <label>Hora d'avís<input type="time" [ngModel]="f.noticeTime" (ngModelChange)="update('noticeTime', $event); refreshContext()" /></label>
+              <label>Inici actuació<input type="time" [ngModel]="f.startTime" (ngModelChange)="update('startTime', $event)" /></label>
+              <label>Final actuació<input type="time" [ngModel]="f.endTime" (ngModelChange)="update('endTime', $event)" /></label>
+              <label>Nivell Pla Alfa
+                <select [ngModel]="f.level" (ngModelChange)="update('level', $event)">
+                  <option [ngValue]="null">—</option>
+                  @for (l of levels; track l) { <option [ngValue]="l">{{ l }}</option> }
+                </select>
+              </label>
+            </div>
+            @if (levelHint()) { <p class="iv-hint">{{ levelHint() }}</p> }
+          </section>
+
+          <section>
+            <h3>Ubicació</h3>
+            <p class="iv-hint">Fes clic al mapa per marcar el punt{{ geocoding() ? ' (obtenint adreça…)' : '' }}.</p>
+            <div #mapHost class="iv-map"></div>
+            <div class="iv-grid">
+              <label>Població<input type="text" [ngModel]="f.municipality" (ngModelChange)="update('municipality', $event)" /></label>
+              <label>Sector<input type="text" [ngModel]="f.sector" (ngModelChange)="update('sector', $event)" /></label>
+              <label>Comarca<input type="text" [ngModel]="f.comarca" (ngModelChange)="update('comarca', $event)" /></label>
+            </div>
+            @if (mapsUrl()) {
+              <p class="iv-hint">{{ f.latitude }}, {{ f.longitude }} · <a [href]="mapsUrl()" target="_blank" rel="noopener">Obrir a Google Maps</a></p>
+            }
+          </section>
+
+          <section>
+            <h3>Vehicles nostres</h3>
+            <div class="iv-checks">
+              @for (v of vehicleOptions(); track v) {
+                <label><input type="checkbox" [checked]="f.ownVehicles.includes(v)" (change)="onVehiclesChange(v, $any($event.target).checked)" /> {{ v }}</label>
+              } @empty { <span class="iv-muted">Cap vehicle al catàleg.</span> }
+            </div>
+          </section>
+
+          <section>
+            <h3>Altres ADF</h3>
+            <label class="iv-inline"><input type="checkbox" [ngModel]="f.otherAdfsAttended" (ngModelChange)="update('otherAdfsAttended', $event)" /> Han assistit altres ADF</label>
+            @if (f.otherAdfsAttended) {
+              @for (e of f.otherAdfs; track $index) {
+                <div class="iv-row">
+                  <input type="text" placeholder="ADF" [ngModel]="e.adf" (ngModelChange)="patchOtherAdf($index, { adf: $event })" />
+                  <input type="text" placeholder="Vehicle" [ngModel]="e.vehicle" (ngModelChange)="patchOtherAdf($index, { vehicle: $event })" />
+                  <label class="iv-inline"><input type="checkbox" [ngModel]="e.firstIntervention" (ngModelChange)="patchOtherAdf($index, { firstIntervention: $event })" /> Primera intervenció</label>
+                  <button type="button" class="iv-btn iv-danger" (click)="removeOtherAdf($index)">×</button>
+                </div>
+              }
+              <button type="button" class="iv-btn" (click)="addOtherAdf()">+ ADF</button>
+              <div class="iv-grid">
+                <label>Grocs<input type="number" min="0" [ngModel]="f.otherAdfsGrocs" (ngModelChange)="update('otherAdfsGrocs', num($event))" /></label>
+                <label>Verds<input type="number" min="0" [ngModel]="f.otherAdfsVerds" (ngModelChange)="update('otherAdfsVerds', num($event))" /></label>
+              </div>
+            }
+          </section>
+
+          <section>
+            <h3>Bombers</h3>
+            <label class="iv-inline"><input type="checkbox" [ngModel]="f.bombersAttended" (ngModelChange)="update('bombersAttended', $event)" /> Han assistit Bombers</label>
+            @if (f.bombersAttended) {
+              @for (e of f.bombers; track $index) {
+                <div class="iv-row">
+                  <input type="text" placeholder="Vehicle" [ngModel]="e.vehicle" (ngModelChange)="patchBomber($index, { vehicle: $event })" />
+                  <label class="iv-inline"><input type="checkbox" [ngModel]="e.firstIntervention" (ngModelChange)="patchBomber($index, { firstIntervention: $event })" /> Primera intervenció</label>
+                  <button type="button" class="iv-btn iv-danger" (click)="removeBomber($index)">×</button>
+                </div>
+              }
+              <button type="button" class="iv-btn" (click)="addBomber()">+ Vehicle</button>
+            }
+          </section>
+
+          <section>
+            <h3>Voluntaris que han actuat</h3>
+            <div class="iv-grid">
+              <label>Propis grocs<input type="number" min="0" [ngModel]="f.ownGrocs" (ngModelChange)="update('ownGrocs', num($event))" /></label>
+              <label>Propis verds<input type="number" min="0" [ngModel]="f.ownVerds" (ngModelChange)="update('ownVerds', num($event))" /></label>
+              <label>Addicionals grocs<input type="number" min="0" [ngModel]="f.customGrocs" (ngModelChange)="update('customGrocs', num($event))" /></label>
+              <label>Addicionals verds<input type="number" min="0" [ngModel]="f.customVerds" (ngModelChange)="update('customVerds', num($event))" /></label>
+            </div>
+            <p class="iv-total">Total: {{ totalGrocs() }} grocs · {{ totalVerds() }} verds ({{ totalGrocs() + totalVerds() }})</p>
+          </section>
+
+          <section>
+            <h3>Incendi</h3>
+            <div class="iv-grid">
+              <label>Superfície (ha)<input type="number" min="0" step="0.01" [ngModel]="f.surface" (ngModelChange)="update('surface', $event)" /></label>
+              <label>Tipus
+                <select [ngModel]="f.typeIncendiId" (ngModelChange)="update('typeIncendiId', $event)">
+                  <option [ngValue]="null">—</option>
+                  @for (t of types(); track t.id) { <option [ngValue]="t.id">{{ t.name }}</option> }
+                </select>
+              </label>
+            </div>
+            <div class="iv-row">
+              <input type="text" placeholder="Nou tipus d'incendi" [ngModel]="newTypeName()" (ngModelChange)="newTypeName.set($event)" />
+              <button type="button" class="iv-btn" (click)="addType()">Afegir tipus</button>
+            </div>
+          </section>
+        </div>
+      }
+    </div>
+
+    @if (formOpen()) {
+      <div class="iv-footer">
+        <button type="button" class="iv-btn" (click)="closeForm()">Cancel·lar</button>
+        <button type="button" class="iv-btn iv-primary" [disabled]="saving()" (click)="save()">{{ saving() ? 'Desant…' : 'Desar' }}</button>
+      </div>
+    }
+  </div>
+</div>

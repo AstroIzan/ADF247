@@ -9,6 +9,9 @@
       <button type="button" class="btn icon-filter-btn" (click)="openFilters()" aria-label="Obrir filtres de convocatòries">
         <span class="filter-icon" aria-hidden="true"></span>
       </button>
+      @if (isAdmin()) {
+        <button (click)="openIntervencions(null)" class="btn btn-secondary">Intervencions</button>
+      }
       <button (click)="openForm()" class="btn btn-primary">+ Nova Convocatòria</button>
     </div>
   </div>
@@ -69,6 +72,9 @@
                     </button>
                   }
                 }
+                @if (canIntervene(convo)) {
+                  <button (click)="openIntervencions(convo)" class="btn btn-sm btn-secondary">Intervencions</button>
+                }
                 <button (click)="openForm(convo)" class="btn btn-sm btn-edit">Editar</button>
                 <div class="delete-menu">
                   <button (click)="requestDelete(convo.id); $event.stopPropagation()" class="btn btn-sm btn-danger">Eliminar</button>
@@ -117,6 +123,9 @@
                     Avisar sortida
                   </button>
                 }
+              }
+              @if (canIntervene(convo)) {
+                <button (click)="openIntervencions(convo); $event.stopPropagation();" class="btn btn-sm btn-secondary">Intervencions</button>
               }
               <button (click)="openForm(convo); $event.stopPropagation();" class="btn btn-sm btn-edit">Editar</button>
               <div class="delete-menu">
@@ -565,3 +574,7 @@
     </div>
   }
 </div>
+
+@if (intervencionsOpen()) {
+  <app-intervencions-modal [convocatoria]="intervencionsConvo()" (closed)="intervencionsOpen.set(false)" />
+}
