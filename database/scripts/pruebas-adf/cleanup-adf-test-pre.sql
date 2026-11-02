@@ -7,6 +7,17 @@ SET XACT_ABORT ON;
 
 BEGIN TRANSACTION;
 
+/* Datos de las ADFs 901-910 (incluye los de versiones anteriores del script) */
+DELETE r FROM dbo.Respuesta r INNER JOIN dbo.ADF a ON a.id = r.adfId WHERE a.number BETWEEN 901 AND 910;
+DELETE f FROM dbo.FormulariCampanya f INNER JOIN dbo.Convocatoria c ON c.id = f.convocatoriaId
+  INNER JOIN dbo.ADF a ON a.id = c.adfId WHERE a.number BETWEEN 901 AND 910;
+DELETE c FROM dbo.Convocatoria c INNER JOIN dbo.ADF a ON a.id = c.adfId WHERE a.number BETWEEN 901 AND 910;
+DELETE s FROM dbo.UserHoursSummary s INNER JOIN dbo.[User] u ON u.id = s.userId
+  INNER JOIN dbo.ADF a ON a.id = u.adfId WHERE a.number BETWEEN 901 AND 910;
+DELETE ro FROM dbo.Role ro INNER JOIN dbo.[User] u ON u.nCarnet = ro.nCarnet
+  INNER JOIN dbo.ADF a ON a.id = u.adfId WHERE a.number BETWEEN 901 AND 910;
+DELETE u FROM dbo.[User] u INNER JOIN dbo.ADF a ON a.id = u.adfId WHERE a.number BETWEEN 901 AND 910;
+DELETE v FROM dbo.Vehicles v INNER JOIN dbo.ADF a ON a.id = v.adfId WHERE a.number BETWEEN 901 AND 910;
 DELETE r FROM dbo.Respuesta r
   WHERE r.convoId IN (SELECT id FROM dbo.Convocatoria WHERE title LIKE N'[[]TEST ADF]%')
      OR r.userNCarnet IN (SELECT nCarnet FROM dbo.[User] WHERE lastName = N'(Prova)');
