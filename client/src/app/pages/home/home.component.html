@@ -578,58 +578,50 @@
           } @else if (campaignRecords().length === 0) {
             <div class="empty-state">No hi ha formularis registrats en aquesta convocatòria.</div>
           } @else {
-            <div class="rec-list">
+            <div class="cfs-list">
               @for (form of campaignRecords(); track form.id) {
-                <article class="rec-card" [class.is-end]="form.serviceMoment === 'END'">
-                  <header class="rec-head">
+                <article class="cfs-card" [class.is-end]="form.serviceMoment === 'END'">
+                  <header class="cfs-head">
                     <div>
-                      <span class="rec-kicker">{{ getCampaignFormMomentLabel(form.serviceMoment) }}</span>
-                      <strong>{{ form.dia | date:'dd/MM/yyyy HH:mm' }}</strong>
+                      <span class="cfs-chip">{{ getCampaignFormMomentLabel(form.serviceMoment) }}</span>
+                      <span class="cfs-date">{{ form.dia | date:'dd/MM/yyyy HH:mm' }}</span>
                     </div>
-                    <span class="rec-id">#{{ form.id }}</span>
+                    <span class="cfs-id">#{{ form.id }}</span>
                   </header>
-                  <div class="rec-meta">
-                    <span><i class="fa-solid fa-user-shield"></i> Responsable: <b>{{ getCampaignFormResponsableLabel(form) }}</b></span>
-                    <span><i class="fa-solid fa-users"></i> {{ getCampaignFormVolunteersCount(form) }} voluntaris</span>
-                    <span><i class="fa-solid fa-truck-field"></i> {{ getCampaignFormVehiclesCount(form) }} vehicles</span>
+                  <div class="cfs-stats">
+                    <div class="cfs-stat"><small>Responsable</small><strong>{{ getCampaignFormResponsableLabel(form) }}</strong></div>
+                    <div class="cfs-stat"><small>Voluntaris</small><strong>{{ getCampaignFormVolunteersCount(form) }}</strong></div>
+                    <div class="cfs-stat"><small>Vehicles</small><strong>{{ getCampaignFormVehiclesCount(form) }}</strong></div>
                   </div>
-
-                  @for (vehicle of form.vehicles; track vehicle.vehicleName) {
-                    <section class="rec-vehicle" [class.is-withdrawn]="vehicle.status === 'withdrawn'">
-                      <div class="rec-vehicle-head">
-                        <strong>{{ vehicle.vehicleName }}</strong>
-                        <span>{{ vehicle.initialKms || 0 }} km @if (vehicle.finalKms != null) { → {{ vehicle.finalKms }} km }</span>
-                        <em>{{ vehicle.status === 'withdrawn' ? 'Baixa' : 'En servei' }}</em>
-                      </div>
-                      <ul class="rec-crew">
-                        @for (member of getCampaignFormVehicleCrew(form, vehicle); track member.carnet + member.label) {
-                          <li>
-                            <span>{{ member.label }}</span>
-                            @if (member.isDriver) { <span class="rec-tag rec-tag-driver">Conductor</span> }
-                            @if (member.isResponsable) { <span class="rec-tag rec-tag-resp">Responsable</span> }
-                          </li>
-                        } @empty {
-                          <li class="rec-empty">Sense tripulació</li>
-                        }
-                      </ul>
-                      @if (vehicle.statusNotes) {
-                        <p class="rec-note"><strong>Incidència:</strong> {{ vehicle.statusNotes }}</p>
-                      }
-                    </section>
-                  }
-
-                  @if (form.finalObservations) {
-                    <p class="rec-note"><strong>Observacions finals:</strong> {{ form.finalObservations }}</p>
-                  }
-
-                  <footer class="rec-foot">
+                  <div class="cfs-body">
+                    @for (vehicle of form.vehicles; track vehicle.vehicleName) {
+                      <section class="cfs-box" [class.is-withdrawn]="vehicle.status === 'withdrawn'">
+                        <div class="cfs-veh-head">
+                          <strong>{{ vehicle.vehicleName }}</strong>
+                          <span class="cfs-km">{{ vehicle.initialKms || 0 }} km@if (vehicle.finalKms != null) { → {{ vehicle.finalKms }} km }</span>
+                          <span class="cfs-state">{{ vehicle.status === 'withdrawn' ? 'Baixa' : 'En servei' }}</span>
+                        </div>
+                        <ul class="cfs-crew">
+                          @for (member of getCampaignFormVehicleCrew(form, vehicle); track member.carnet + member.label) {
+                            <li>
+                              <span>{{ member.label }}</span>
+                              @if (member.isDriver) { <span class="cfs-tag cfs-tag-driver">Conductor</span> }
+                              @if (member.isResponsable) { <span class="cfs-tag cfs-tag-resp">Responsable</span> }
+                            </li>
+                          } @empty {
+                            <li>Sense tripulació</li>
+                          }
+                        </ul>
+                        @if (vehicle.statusNotes) { <p class="cfs-note"><strong>Incidència:</strong> {{ vehicle.statusNotes }}</p> }
+                      </section>
+                    }
+                    @if (form.finalObservations) {
+                      <section class="cfs-box"><h4>Observacions finals</h4><p class="cfs-note">{{ form.finalObservations }}</p></section>
+                    }
+                  </div>
+                  <footer class="cfs-foot">
                     <small>Creat per {{ getCampaignFormCreatedByLabel(form) }} · {{ form.createdAt | date:'dd/MM HH:mm' }}</small>
-                    <button
-                      type="button"
-                      class="btn btn-danger btn-xs"
-                      [disabled]="campaignRecordsDeletingId() === form.id"
-                      (click)="deleteCampaignFormRecord(form)"
-                    >
+                    <button type="button" class="btn btn-danger btn-sm" [disabled]="campaignRecordsDeletingId() === form.id" (click)="deleteCampaignFormRecord(form)">
                       {{ campaignRecordsDeletingId() === form.id ? 'Eliminant...' : 'Eliminar' }}
                     </button>
                   </footer>

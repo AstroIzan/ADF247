@@ -101,4 +101,21 @@ export class CampaignFormsComponent implements OnInit {
   getCampaignFormVehicleVolunteerLabels(vehicle: CampaignFormRecord['vehicles'][number]) {
     return (vehicle.volunteerUserIds || []).map((userId) => this.getUserLabelById(userId));
   }
+
+  getResponsableLabel(form: CampaignFormRecord) {
+    if (form.responsableId) return this.getUserLabelById(form.responsableId);
+    return form.responsableNCarnet || '-';
+  }
+
+  getVehicleCrew(form: CampaignFormRecord, vehicle: CampaignFormRecord['vehicles'][number]) {
+    const ids = Array.from(new Set([
+      ...(vehicle.conductorUserId != null ? [vehicle.conductorUserId] : []),
+      ...(vehicle.volunteerUserIds || []),
+    ]));
+    return ids.map((id) => ({
+      label: this.getUserLabelById(id),
+      isDriver: vehicle.conductorUserId === id,
+      isResponsable: form.responsableId === id,
+    }));
+  }
 }

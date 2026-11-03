@@ -13,24 +13,11 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging()
 
-// Els missatges són només de dades: el SDK no els mostra, ho fem aquí perquè el clic obri l'app.
-messaging.onBackgroundMessage((payload) => {
-  const data = payload.data || {}
-  const title = data.notificationTitle || payload.notification?.title || 'ADF247'
-  const options = {
-    body: data.notificationBody || payload.notification?.body || '',
-    data: { ...data, link: data.link || '/home' },
-    icon: data.notificationIcon || '/icons/notification-icon-512.png',
-    badge: data.notificationBadge || '/icons/favicon-64.png',
-    tag: data.collapseTag || undefined,
-  }
-
-  return self.registration.showNotification(title, options)
-})
-
+// El SDK mostra les notificacions (bloc notification); aquí només gestionem el clic.
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const link = event.notification?.data?.link || '/home'
+  const nd = event.notification?.data || {}
+  const link = nd.link || nd.FCM_MSG?.data?.link || '/home'
   const target = new URL(link, self.location.origin).href
 
   event.waitUntil(

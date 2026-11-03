@@ -16,91 +16,66 @@
           } @else if (campaignForms().length === 0) {
             <div class="empty-state">No hi ha formularis registrats encara.</div>
           } @else {
-            <div class="table-wrap">
-              <table class="logs-table">
-                <thead>
-                  <tr>
-                    <th>Data</th>
-                    <th>Moment</th>
-                    <th>Convocatòria</th>
-                    <th>Responsable</th>
-                    <th>Voluntaris</th>
-                    <th>Vehicles</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  @for (row of campaignForms(); track row.id) {
-                    <tr>
-                      <td>{{ row.dia | date:'dd/MM/yyyy HH:mm' }}</td>
-                      <td>{{ row.serviceMoment === 'START' ? 'Inici de servei' : 'Final de servei' }}</td>
-                      <td>{{ row.convocatoria?.title || ('#' + row.convocatoriaId) }}</td>
-                      <td>{{ row.responsableNCarnet || '-' }}</td>
-                      <td>{{ row.voluntaris.length }}</td>
-                      <td>{{ row.vehicles.length }}</td>
-                      <td>
-                        <div class="campaign-form-actions">
-                          <button class="btn btn-secondary btn-sm" (click)="toggleCampaignFormDetails(row.id)">
-                            {{ isCampaignFormDetailsOpen(row.id) ? 'Menys info' : '+ info' }}
-                          </button>
-                          <button class="btn btn-danger btn-sm" (click)="requestCampaignFormDelete(row)">
-                            Eliminar
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+            <div class="cfs-list">
+              @for (row of campaignForms(); track row.id) {
+                <article class="cfs-card" [class.is-end]="row.serviceMoment === 'END'">
+                  <header class="cfs-head">
+                    <div>
+                      <span class="cfs-chip">{{ row.serviceMoment === 'START' ? 'Inici de servei' : 'Final de servei' }}</span>
+                      <span class="cfs-title">{{ row.convocatoria?.title || ('#' + row.convocatoriaId) }}</span>
+                      <span class="cfs-date">{{ row.dia | date:'dd/MM/yyyy HH:mm' }}</span>
+                    </div>
+                    <span class="cfs-id">#{{ row.id }}</span>
+                  </header>
+                  <div class="cfs-stats">
+                    <div class="cfs-stat"><small>Responsable</small><strong>{{ getResponsableLabel(row) }}</strong></div>
+                    <div class="cfs-stat"><small>Voluntaris</small><strong>{{ row.voluntaris.length }}</strong></div>
+                    <div class="cfs-stat"><small>Vehicles</small><strong>{{ row.vehicles.length }}</strong></div>
+                  </div>
 
-                    @if (isCampaignFormDetailsOpen(row.id)) {
-                      <tr class="campaign-forms-detail-row">
-                        <td colspan="7">
-                          <div class="campaign-forms-detail-grid">
-                            <div>
-                              <strong>Voluntaris assignats</strong>
-                              @if (getCampaignFormVolunteerLabels(row).length === 0) {
-                                <p>Sense voluntaris.</p>
-                              } @else {
-                                <ul>
-                                  @for (label of getCampaignFormVolunteerLabels(row); track label) {
-                                    <li>{{ label }}</li>
-                                  }
-                                </ul>
-                              }
-                            </div>
-
-                            <div>
-                              <strong>Vehicles</strong>
-                              @if (row.vehicles.length === 0) {
-                                <p>Sense vehicles.</p>
-                              } @else {
-                                @for (vehicle of row.vehicles; track vehicle.vehicleName) {
-                                  <details class="campaign-forms-vehicle-item">
-                                    <summary>{{ vehicle.vehicleName }} · {{ vehicle.kms || 0 }} km</summary>
-                                    <div>
-                                      <p><strong>Conductor:</strong> {{ getCampaignFormVehicleConductorLabel(vehicle) }}</p>
-                                      @if (getCampaignFormVehicleVolunteerLabels(vehicle).length === 0) {
-                                        <p><strong>Voluntaris vehicle:</strong> Sense voluntaris.</p>
-                                      } @else {
-                                        <p><strong>Voluntaris vehicle:</strong></p>
-                                        <ul>
-                                          @for (label of getCampaignFormVehicleVolunteerLabels(vehicle); track label) {
-                                            <li>{{ label }}</li>
-                                          }
-                                        </ul>
-                                      }
-                                    </div>
-                                  </details>
-                                }
-                              }
-                            </div>
+                  @if (isCampaignFormDetailsOpen(row.id)) {
+                    <div class="cfs-body">
+                      @for (vehicle of row.vehicles; track vehicle.vehicleName) {
+                        <section class="cfs-box" [class.is-withdrawn]="vehicle.status === 'withdrawn'">
+                          <div class="cfs-veh-head">
+                            <strong>{{ vehicle.vehicleName }}</strong>
+                            <span class="cfs-km">{{ vehicle.initialKms || 0 }} km@if (vehicle.finalKms != null) { → {{ vehicle.finalKms }} km }</span>
+                            <span class="cfs-state">{{ vehicle.status === 'withdrawn' ? 'Baixa' : 'En servei' }}</span>
                           </div>
-                        </td>
-                      </tr>
-                    }
+                          <ul class="cfs-crew">
+                            @for (member of getVehicleCrew(row, vehicle); track member.label) {
+                              <li>
+                                <span>{{ member.label }}</span>
+                                @if (member.isDriver) { <span class="cfs-tag cfs-tag-driver">Conductor</span> }
+                                @if (member.isResponsable) { <span class="cfs-tag cfs-tag-resp">Responsable</span> }
+                              </li>
+                            } @empty {
+                              <li>Sense tripulació</li>
+                            }
+                          </ul>
+                          @if (vehicle.statusNotes) { <p class="cfs-note"><strong>Incidència:</strong> {{ vehicle.statusNotes }}</p> }
+                        </section>
+                      } @empty {
+                        <section class="cfs-box"><h4>Vehicles</h4><p class="cfs-note">Sense vehicles.</p></section>
+                      }
+                      @if (row.finalObservations) {
+                        <section class="cfs-box"><h4>Observacions finals</h4><p class="cfs-note">{{ row.finalObservations }}</p></section>
+                      }
+                    </div>
                   }
-                </tbody>
-              </table>
-            </div>
-          }
+
+                  <footer class="cfs-foot">
+                    <small>{{ row.createdByNCarnet ? 'Creat per ' + row.createdByNCarnet : '' }}</small>
+                    <div class="cfs-actions">
+                      <button class="btn btn-secondary btn-sm" (click)="toggleCampaignFormDetails(row.id)">
+                        {{ isCampaignFormDetailsOpen(row.id) ? 'Menys detall' : 'Veure detall' }}
+                      </button>
+                      <button class="btn btn-danger btn-sm" (click)="requestCampaignFormDelete(row)">Eliminar</button>
+                    </div>
+                  </footer>
+                </article>
+              }
+            </div>          }
         </section>
 
     @if (campaignFormToDelete(); as formToDelete) {
