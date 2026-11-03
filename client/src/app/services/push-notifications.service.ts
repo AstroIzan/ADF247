@@ -333,11 +333,18 @@ export class PushNotificationsService {
       this.infoMessage.set(`Notificació rebuda: ${title}`)
 
       if (this.permission() === 'granted' && typeof Notification !== 'undefined') {
-        try {
-          new Notification(title, { body, icon, badge })
-        } catch {
-          // Ignore display errors in foreground notifications.
+        const options = { body, icon, badge, tag: payload.collapseKey || undefined, data: { ...(payload.data || {}), link: payload.data?.['link'] || '/home' } }
+        const showViaWorker = async () => {
+          const registration = await navigator.serviceWorker?.getRegistration()
+          if (registration) {
+            await registration.showNotification(title, options)
+            return
+          }
+          new Notification(title, options)
         }
+        showViaWorker().catch(() => {
+          // Ignore display errors in foreground notifications.
+        })
       }
     })
 

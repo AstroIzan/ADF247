@@ -13,27 +13,34 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging()
 
+// Els missatges són només de dades: el SDK no els mostra, ho fem aquí perquè el clic obri l'app.
 messaging.onBackgroundMessage((payload) => {
-  if (payload.notification) {
-    return
-  }
-
-  const title = payload.data?.notificationTitle || 'ADF247'
-  const icon = payload.data?.notificationIcon || '/icons/notification-icon-512.png'
-  const badge = payload.data?.notificationBadge || '/icons/favicon-64.png'
+  const data = payload.data || {}
+  const title = data.notificationTitle || payload.notification?.title || 'ADF247'
   const options = {
-    body: payload.data?.notificationBody || '',
-    data: payload.data || {},
-    icon,
-    badge,
+    body: data.notificationBody || payload.notification?.body || '',
+    data: { ...data, link: data.link || '/home' },
+    icon: data.notificationIcon || '/icons/notification-icon-512.png',
+    badge: data.notificationBadge || '/icons/favicon-64.png',
+    tag: data.collapseTag || undefined,
   }
 
-  self.registration.showNotification(title, options)
+  return self.registration.showNotification(title, options)
 })
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
-  const targetPath = event.notification?.data?.link || '/home'
+  const link = event.notification?.data?.link || '/home'
+  const target = new URL(link, self.location.origin).href
 
-  event.waitUntil(clients.openWindow(targetPath))
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (new URL(client.url).origin === self.location.origin && 'focus' in client) {
+          return client.focus().then((focused) => ('navigate' in focused ? focused.navigate(target) : focused))
+        }
+      }
+      return clients.openWindow(target)
+    })
+  )
 })

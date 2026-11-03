@@ -316,6 +316,7 @@ public sealed class IntervencionsController(Adf247DbContext database, CurrentAdf
         entity.Comarca = Clean(request.Comarca);
         entity.OwnVehiclesJson = JsonSerializer.Serialize(request.OwnVehicles ?? [], Json);
         entity.FirstInterventionVehicle = request.OwnVehicles is not null && !string.IsNullOrWhiteSpace(request.FirstInterventionVehicle) && request.OwnVehicles.Contains(request.FirstInterventionVehicle) ? request.FirstInterventionVehicle.Trim() : null;
+        entity.Observacions = string.IsNullOrWhiteSpace(request.Observacions) ? null : request.Observacions.Trim()[..Math.Min(request.Observacions.Trim().Length, 2000)];
         entity.OtherAdfsAttended = request.OtherAdfsAttended;
         entity.OtherAdfsJson = JsonSerializer.Serialize(request.OtherAdfsAttended ? request.OtherAdfs ?? [] : [], Json);
         entity.OtherAdfsGrocs = request.OtherAdfsAttended ? Math.Max(0, request.OtherAdfsGrocs) : 0;
@@ -365,6 +366,7 @@ public sealed class IntervencionsController(Adf247DbContext database, CurrentAdf
         comarca = item.Comarca,
         ownVehicles = Parse<List<string>>(item.OwnVehiclesJson) ?? [],
         firstInterventionVehicle = item.FirstInterventionVehicle,
+        observacions = item.Observacions,
         otherAdfsAttended = item.OtherAdfsAttended,
         otherAdfs = Parse<List<OtherAdfEntry>>(item.OtherAdfsJson) ?? [],
         otherAdfsGrocs = item.OtherAdfsGrocs,
@@ -424,4 +426,5 @@ public sealed record IntervencioRequest(
     int CustomVerds,
     decimal? Surface,
     int? TypeIncendiId,
-    string? FirstInterventionVehicle = null);
+    string? FirstInterventionVehicle = null,
+    string? Observacions = null);

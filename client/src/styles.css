@@ -807,4 +807,37 @@ body .automation-toggle.automation-toggle .toggle-text { flex: 1; font-size: 14p
 .modal-service-form .service-vehicle-note { display: grid; gap: 6px; padding: 12px 16px 16px; margin: 0; border-top: 1px dashed var(--border, #d9dde3); }
 .modal-service-form .service-vehicle-note label { font-weight: 600; font-size: .85rem; }
 .modal-service-form .service-vehicle-note input { min-height: 46px; padding: 10px 12px; border-radius: 10px; font-size: 1rem; }
-body app-users .role-chip.rc-dark{background:#374151;color:#fff}body app-users .role-chip.rc-sec{background:#006ecc;color:#fff}body app-users .role-chip.rc-op{background:#003485;color:#fff}body app-users .role-chip.rc-colla{background:#a30824;color:#fff}body app-users .role-chip.rc-groc{background:#e5a500;color:#1c1b18}body app-users .role-chip.rc-verd{background:#107c10;color:#fff}
+
+/* ===== Tanda 11-2026: formularis, franges i mòbil ===== */
+body .modal-service-form .service-vehicle-card .service-vehicle-note { display: block; width: auto; max-width: 100%; box-sizing: border-box; margin: 0; padding: 12px 15px 15px; border: 0; border-top: 1px dashed #d8d0c3; background: transparent; box-shadow: none; }
+body .modal-service-form .service-vehicle-card .service-vehicle-note label { display: block; margin: 0 0 6px; }
+body .modal-service-form .service-vehicle-card .service-vehicle-note input { display: block; width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; margin: 0; }
+body input[type="date"], body input[type="time"], body input[type="datetime-local"], body .modal select { max-width: 100%; min-width: 0; box-sizing: border-box; }
+body .modal, body .modal-content { max-width: 100%; overflow-x: hidden; }
+body .form-grid-2 > *, body .form-group { min-width: 0; }
+body .weekly-slot-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto; gap: 8px; align-items: end; margin-bottom: 8px; }
+body .weekly-slot-row .time-field { display: grid; gap: 4px; min-width: 0; }
+body .weekly-slot-row .slot-label { font-size: .75rem; font-weight: 700; color: #615a4f; }
+body .slot-add { margin-top: 6px; width: 100%; }
+body .seg-control { display: flex; flex-wrap: nowrap; gap: 6px; width: 100%; box-sizing: border-box; }
+body .seg-control .seg-btn { flex: 1 1 0; min-width: 0; white-space: normal; line-height: 1.2; padding: 10px 8px; text-align: center; }
+@media (max-width: 640px) {
+  html, body { overflow-x: hidden; max-width: 100%; }
+  body .weekly-slot-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  body .weekly-slot-row .slot-remove { grid-column: 1 / -1; }
+  body .form-grid-2 { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* Rols com a pills (Panell i Secretariat) */
+body app-users .role-chip, body app-adf-global .role-badge { display: inline-flex; align-items: center; justify-content: center; padding: 2px 9px; border-radius: 6px; border: 1px solid transparent; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .2px; white-space: nowrap; }
+body app-users .role-chip.rc-dark, body app-adf-global .role-badge.dark { background: #fff; border-color: #374151; color: #374151; }
+body app-users .role-chip.rc-sec, body app-adf-global .role-badge.cyan { background: #dcecfa; border-color: #006ecc; color: #004f91; }
+body app-users .role-chip.rc-op, body app-adf-global .role-badge.op { background: #dbe5f7; border-color: #003485; color: #003485; }
+body app-users .role-chip.rc-colla, body app-adf-global .role-badge.colla { background: #f8dde2; border-color: #a30824; color: #a30824; }
+body app-users .role-chip.rc-groc, body app-adf-global .role-badge.groc { background: #fff2c9; border-color: #e5a500; color: #7a5605; }
+body app-users .role-chip.rc-verd, body app-adf-global .role-badge.verd { background: #ddf3e3; border-color: #107c10; color: #0b5a0b; }
+
+body .iv-obs { margin-top: 10px; } body .iv-obs-text { white-space: pre-wrap; font-weight: 500; font-size: .9rem; }
+
+body app-availability input[type='date'], body app-availability app-time24, body app-availability app-datetime24 { width: 100%; max-width: 100%; min-width: 0; box-sizing: border-box; }
+body app-availability .av-field-pair { grid-template-columns: minmax(0,1fr) minmax(0,1fr); }

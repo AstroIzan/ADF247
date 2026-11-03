@@ -218,6 +218,12 @@
             </ul>
           </section>
         </div>
+        @if (iv.observacions) {
+          <section class="iv-box iv-obs">
+            <h4>Observacions</h4>
+            <p class="iv-main iv-obs-text">{{ iv.observacions }}</p>
+          </section>
+        }
         <p class="iv-resp">Responsable: {{ iv.responsableDisplay || '—' }}</p>        <div class="iv-detail-actions">
           <button type="button" class="btn btn-secondary" (click)="editIntervencio.set(iv); viewIntervencio.set(null)">Editar</button>
         </div>

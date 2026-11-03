@@ -520,7 +520,7 @@
                         </div>
                       </div>
 
-                      <div class="form-group service-vehicle-note">
+                      <div class="service-vehicle-note">
                         <label>Incidència, baixa o canvi de vehicle</label>
                         <input [value]="vehicle.statusNotes" placeholder="Descriu qualsevol incidència o canvi produït durant el servei" (change)="updateCampaignVehicleStatusNotes(vehicle.vehicleName, $any($event.target).value)" />
                       </div>
@@ -1396,33 +1396,28 @@
 
             <div class="form-group">
               <div class="weekly-slots-header">
-                <label>{{ isGuardiaTypeSelected() ? 'Franges addicionals (opcional)' : 'Franges horàries' }}</label>
-                <button type="button" class="btn btn-sm btn-edit" (click)="addSemanalSlot()">+ Fila</button>
+                <label>{{ isGuardiaTypeSelected() ? 'Franges horàries addicionals (opcional)' : 'Horari de cada dia' }}</label>
               </div>
+              <p class="guardia-help-text">{{ isGuardiaTypeSelected() ? 'Cada franja es repeteix tots els dies del rang.' : 'De quina hora a quina hora, repetit cada dia del rang.' }}</p>
 
               <div class="weekly-slots-list">
                 @for (slot of createConvoForm().semanalSlots; track $index) {
                   <div class="weekly-slot-row">
                     <div class="time-field">
+                      <span class="slot-label">De</span>
                       <app-time24 [value]="slot.start" (valueChange)="updateSemanalSlot($index, 'start', $event)" />
-                      
                     </div>
-                    <span>a</span>
                     <div class="time-field">
+                      <span class="slot-label">A</span>
                       <app-time24 [value]="slot.end" (valueChange)="updateSemanalSlot($index, 'end', $event)" />
-                      
                     </div>
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-secondary"
-                      [disabled]="createConvoForm().semanalSlots.length <= 1"
-                      (click)="removeSemanalSlot($index)"
-                    >
-                      -
-                    </button>
+                    @if (isGuardiaTypeSelected() || $index > 0) {
+                      <button type="button" class="btn btn-sm btn-secondary slot-remove" aria-label="Eliminar franja" (click)="removeSemanalSlot($index)">Treure</button>
+                    }
                   </div>
                 }
               </div>
+              <button type="button" class="btn btn-sm btn-edit slot-add" (click)="addSemanalSlot()">+ Afegir franja</button>
             </div>
 
             <p class="guardia-help-text">

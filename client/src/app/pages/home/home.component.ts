@@ -560,7 +560,7 @@ export class HomeComponent implements OnInit {
       return 'finish';
     }
 
-    return 'edit';
+    return null;
   }
 
   getFinishActionLabel() {
@@ -2657,6 +2657,7 @@ export class HomeComponent implements OnInit {
           next.recurringMode = 'single';
           next.semanalRangeStart = current.date || this.selectedDate();
           next.semanalRangeEnd = current.date || this.selectedDate();
+          next.semanalSlots = [];
         }
       }
 
@@ -2907,7 +2908,7 @@ export class HomeComponent implements OnInit {
     const current = this.createConvoForm();
     const slots = [...(current.semanalSlots || [])];
 
-    if (slots.length <= 1) {
+    if (slots.length <= 1 && !this.isGuardiaTypeById(current.convoTypeId)) {
       return;
     }
 
@@ -2958,7 +2959,7 @@ export class HomeComponent implements OnInit {
     }
 
     const type = this.convoTypes().find((item) => item.id === convoTypeId);
-    return Boolean(type?.name && /guardia/i.test(type.name));
+    return Boolean(type?.name && /(guardia|pvi)/i.test(type.name));
   }
 
   private isGuardiaOrPviTypeById(convoTypeId: number | null) {

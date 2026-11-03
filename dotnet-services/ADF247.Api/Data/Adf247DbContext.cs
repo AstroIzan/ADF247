@@ -213,6 +213,7 @@ public sealed class Adf247DbContext(DbContextOptions<Adf247DbContext> options, C
             entity.Property(item => item.Sector).HasMaxLength(200);
             entity.Property(item => item.Comarca).HasMaxLength(200);
             entity.Property(item => item.FirstInterventionVehicle).HasMaxLength(100);
+            entity.Property(item => item.Observacions).HasMaxLength(2000);
             entity.Property(item => item.CreatedByNCarnet).HasMaxLength(50);
             entity.HasOne(item => item.Convocatoria).WithMany().HasForeignKey(item => item.ConvocatoriaId).OnDelete(DeleteBehavior.NoAction);
             entity.HasOne(item => item.Responsable).WithMany().HasForeignKey(item => item.ResponsableUserId).OnDelete(DeleteBehavior.NoAction);

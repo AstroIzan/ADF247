@@ -23,17 +23,19 @@ public sealed class FirebaseNotificationSender(
     {
         _ = EnsureFirebaseApp();
 
+        var messageData = data?.ToDictionary(pair => pair.Key, pair => pair.Value) ?? new Dictionary<string, string>();
+        messageData["notificationTitle"] = title;
+        messageData["notificationBody"] = body;
+        messageData["collapseTag"] = collapseTag;
+        messageData.TryAdd("link", "/home");
+
+        // Missatge només de dades: el service worker el mostra i gestiona el clic (obrir l'app).
         var message = new Message
         {
             Token = token,
-            Notification = new Notification
-            {
-                Title = title,
-                Body = body,
-            },
-            Webpush = new WebpushConfig { Notification = new WebpushNotification { Title = title, Body = body, Tag = collapseTag } },
-            Android = new AndroidConfig { CollapseKey = collapseTag, Notification = new AndroidNotification { Tag = collapseTag } },
-            Data = data?.ToDictionary(pair => pair.Key, pair => pair.Value) ?? new Dictionary<string, string>(),
+            Webpush = new WebpushConfig { Headers = new Dictionary<string, string> { ["Urgency"] = "high" } },
+            Android = new AndroidConfig { Priority = Priority.High, CollapseKey = collapseTag },
+            Data = messageData,
         };
 
         return await FirebaseMessaging.DefaultInstance.SendAsync(message, cancellationToken);

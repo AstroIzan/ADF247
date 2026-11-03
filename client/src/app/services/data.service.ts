@@ -813,6 +813,7 @@ export interface IntervencioPayload {
   comarca: string | null;
   ownVehicles: string[];
   firstInterventionVehicle?: string | null;
+  observacions?: string | null;
   otherAdfsAttended: boolean;
   otherAdfs: OtherAdfEntry[];
   otherAdfsGrocs: number;
