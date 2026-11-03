@@ -30,7 +30,7 @@
                   <strong>{{ item.municipality || 'Sense ubicació' }}</strong>
                   <span>{{ item.date }} · {{ item.startTime || item.noticeTime || '--:--' }}@if (item.endTime) { – {{ item.endTime }} }</span>
                   <span>Responsable: {{ item.responsableDisplay || '—' }}</span>
-                  <span>Grocs: {{ item.totalGrocs }} · Verds: {{ item.totalVerds }}@if (item.level != null) { · Nivell {{ item.level }} }</span>
+                  <span>Grocs: {{ item.totalGrocs }} · Verds: {{ item.totalVerds }}@if (item.level != null) { · Pla Alfa{{ item.level > 0 ? ' ' + item.level : '' }} }</span>
                   @if (item.mapsUrl) { <a [href]="item.mapsUrl" target="_blank" rel="noopener">Google Maps</a> }
                 </div>
                 <div class="iv-card-actions">

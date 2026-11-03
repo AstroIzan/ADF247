@@ -1120,7 +1120,7 @@
 .hm-status-yes { background: #dcf5e6; color: #14532d; }
 .hm-status-no { background: #fde2e2; color: #991b1b; }
 
-.hm-tools { display: flex; gap: 6px; overflow-x: auto; margin: 0 -2px; padding: 2px; scrollbar-width: none; }
+.hm-tools { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 2px 0; }
 .hm-tools::-webkit-scrollbar { display: none; }
 .hm-tool {
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 999px;

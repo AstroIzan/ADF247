@@ -45,16 +45,6 @@
 .adf-check small { color: #7a8796; }
 
 .role-badges { display: flex; flex-wrap: wrap; gap: 4px; }
-.role-badge { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; background: #e5e7eb; color: #26303d; }
-.role-badge.op { background: #273445; color: #fff; }
-.role-badge.colla { background: #f0b000; color: #1c1b18; }
-.role-badge.groc { background: #fde047; color: #3f3a00; }
-.role-badge.verd { background: #bbf7d0; color: #14532d; }
-
-.role-badge.op { background: #1d4ed8; color: #fff; }
-.role-badge.colla { background: #dc2626; color: #fff; }
-.role-badge.dark { background: #374151; color: #fff; }
-.role-badge.cyan { background: #cffafe; color: #155e75; }
 .adf-modal-overlay { position: fixed; inset: 0; background: rgba(18,25,35,.58); z-index: 1400; }
 .adf-modal-overlay.adf-modal-top { z-index: 1500; }
 .adf-modal.adf-modal-top { z-index: 1501; }
@@ -98,8 +88,3 @@
   .adf-form-actions .adf-btn { width: 100%; }
 }
 
-.role-badge.cyan { background: #006ecc; color: #fff; }
-.role-badge.op { background: #003485; color: #fff; }
-.role-badge.colla { background: #a30824; color: #fff; }
-.role-badge.groc { background: #e5a500; color: #1c1b18; }
-.role-badge.verd { background: #107c10; color: #fff; }
