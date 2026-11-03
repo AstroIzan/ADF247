@@ -78,7 +78,7 @@
             <tbody>
               @for (log of logs(); track log.id) {
                 <tr>
-                  <td>{{ log.createdAt | date:'short' }}</td>
+                  <td>{{ log.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
                   <td>{{ log.trigger }}</td>
                   <td>{{ log.title }}</td>
                   <td>{{ log.status }}</td>
@@ -109,8 +109,8 @@
               @for (execution of executions(); track execution.taskExecutionId) {
                 <tr>
                   <td>{{ execution.taskName }}</td>
-                  <td>{{ execution.startedAt | date:'short' }}</td>
-                  <td>{{ execution.finishedAt ? (execution.finishedAt | date:'short') : 'En curs' }}</td>
+                  <td>{{ execution.startedAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td>{{ execution.finishedAt ? (execution.finishedAt | date:'dd/MM/yyyy HH:mm') : 'En curs' }}</td>
                   <td>{{ execution.finalStatus || 'En curs' }}</td>
                   <td><button class="dev-btn dev-btn-small" type="button" (click)="openExecution(execution)">Detall</button></td>
                 </tr>
@@ -141,7 +141,7 @@
                     <td>{{ delivery.nCarnet }}</td>
                     <td>{{ delivery.status }}</td>
                     <td>{{ delivery.attemptCount }}</td>
-                    <td>{{ delivery.sentAt ? (delivery.sentAt | date:'short') : '-' }}</td>
+                    <td>{{ delivery.sentAt ? (delivery.sentAt | date:'dd/MM/yyyy HH:mm') : '-' }}</td>
                     <td>{{ delivery.errorMessage || '-' }}</td>
                   </tr>
                 }

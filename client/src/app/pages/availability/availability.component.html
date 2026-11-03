@@ -145,11 +145,11 @@
             <div class="av-field-pair">
               <label class="av-field">
                 <small>De</small>
-                <input type="time" step="300" [value]="form().fromTime" (change)="updateFormField('fromTime', $any($event.target).value)" />
+                <app-time24 [value]="form().fromTime" (valueChange)="updateFormField('fromTime', $event)" />
               </label>
               <label class="av-field">
                 <small>A</small>
-                <input type="time" step="300" [value]="form().toTime" (change)="updateFormField('toTime', $any($event.target).value)" />
+                <app-time24 [value]="form().toTime" (valueChange)="updateFormField('toTime', $event)" />
               </label>
             </div>
           </div>

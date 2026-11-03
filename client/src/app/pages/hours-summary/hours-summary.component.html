@@ -7,7 +7,7 @@
     </div>
     <div class="hours-hero-actions">
       @if (generatedAt()) {
-        <span class="generated-at">Actualitzat {{ generatedAt() | date:'short' }}</span>
+        <span class="generated-at">Actualitzat {{ generatedAt() | date:'dd/MM/yyyy HH:mm' }}</span>
       }
       <button type="button" class="btn btn-secondary" (click)="loadSummary()" [disabled]="loading()">
         {{ loading() ? 'Actualitzant...' : 'Actualitzar resum' }}

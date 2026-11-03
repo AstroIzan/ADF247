@@ -166,9 +166,9 @@
                 <li>
                   <i class="fa-regular fa-clock" aria-hidden="true"></i><span class="hm-meta-label">Horari</span>
                   <strong>
-                    {{ convo.startTime | date:'shortTime' }}
+                    {{ convo.startTime | date:'HH:mm' }}
                     @if (convo.finalTime) {
-                      – {{ convo.finalTime | date:'shortTime' }}
+                      – {{ convo.finalTime | date:'HH:mm' }}
                     }
                   </strong>
                 </li>
@@ -322,29 +322,13 @@
               <label>Horari personalitzat (opcional)</label>
               <div class="time-range-row">
                 <div class="time-field">
-                  <input
-                    #customStartTimeInput
-                    type="time"
-                    step="60"
-                    [value]="customResponse().customStartTime"
-                    (change)="updateCustomField('customStartTime', $any($event.target).value)"
-                  />
-                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customStartTimeInput, 'customStartTime')">
-                    <span class="time-picker-icon" aria-hidden="true"></span>
-                  </button>
+                  <app-time24 [value]="customResponse().customStartTime" (valueChange)="updateCustomField('customStartTime', $event)" />
+                  
                 </div>
                 <span>a</span>
                 <div class="time-field">
-                  <input
-                    #customEndTimeInput
-                    type="time"
-                    step="60"
-                    [value]="customResponse().customEndTime"
-                    (change)="updateCustomField('customEndTime', $any($event.target).value)"
-                  />
-                  <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(customEndTimeInput, 'customEndTime')">
-                    <span class="time-picker-icon" aria-hidden="true"></span>
-                  </button>
+                  <app-time24 [value]="customResponse().customEndTime" (valueChange)="updateCustomField('customEndTime', $event)" />
+                  
                 </div>
               </div>
             </div>
@@ -674,20 +658,12 @@
           <p><strong>Convocatòria:</strong> {{ lifecycleConvo()!.title }}</p>
           <div class="form-group">
             <label>Hora real d'inici</label>
-            <input
-              type="datetime-local"
-              [value]="lifecycleForm().actualStartTime"
-              (change)="updateLifecycleField('actualStartTime', $any($event.target).value)"
-            />
+            <app-datetime24 [value]="lifecycleForm().actualStartTime" (valueChange)="updateLifecycleField('actualStartTime', $event)" />
           </div>
 
           <div class="form-group">
             <label>Hora real de fi</label>
-            <input
-              type="datetime-local"
-              [value]="lifecycleForm().actualEndTime"
-              (change)="updateLifecycleField('actualEndTime', $any($event.target).value)"
-            />
+            <app-datetime24 [value]="lifecycleForm().actualEndTime" (valueChange)="updateLifecycleField('actualEndTime', $event)" />
           </div>
         </div>
 
@@ -733,23 +709,12 @@
 
             <div class="form-group">
               <label>Inici (data i hora)</label>
-              <input
-                type="datetime-local"
-                step="300"
-                [value]="adminConvoForm().date + 'T' + adminConvoForm().startTime"
-                (change)="setAdminConvoStart($any($event.target).value)"
-              />
+              <app-datetime24 [value]="adminConvoForm().date + 'T' + adminConvoForm().startTime" (valueChange)="setAdminConvoStart($event)" />
             </div>
 
             <div class="form-group">
               <label>Hora de fi</label>
-              <input
-                type="time"
-                step="300"
-                [min]="adminConvoForm().startTime"
-                [value]="adminConvoForm().finalTime"
-                (change)="updateAdminConvoField('finalTime', $any($event.target).value)"
-              />
+              <app-time24 [value]="adminConvoForm().finalTime" (valueChange)="updateAdminConvoField('finalTime', $event)" />
             </div>
             <div class="form-group">
               <label>Ubicació</label>
@@ -1213,21 +1178,11 @@
               <label>Horari personalitzat</label>
               <div class="time-range-row">
                 <div class="time-field">
-                  <input
-                    type="time"
-                    step="60"
-                    [value]="adminResponseEditForm().customStartTime"
-                    (change)="updateAdminResponseEditField('customStartTime', $any($event.target).value)"
-                  />
+                  <app-time24 [value]="adminResponseEditForm().customStartTime" (valueChange)="updateAdminResponseEditField('customStartTime', $event)" />
                 </div>
                 <span>a</span>
                 <div class="time-field">
-                  <input
-                    type="time"
-                    step="60"
-                    [value]="adminResponseEditForm().customEndTime"
-                    (change)="updateAdminResponseEditField('customEndTime', $any($event.target).value)"
-                  />
+                  <app-time24 [value]="adminResponseEditForm().customEndTime" (valueChange)="updateAdminResponseEditField('customEndTime', $event)" />
                 </div>
               </div>
             </div>
@@ -1449,29 +1404,13 @@
                 @for (slot of createConvoForm().semanalSlots; track $index) {
                   <div class="weekly-slot-row">
                     <div class="time-field">
-                      <input
-                        #semanalStartInput
-                        type="time"
-                        step="60"
-                        [value]="slot.start"
-                        (change)="updateSemanalSlot($index, 'start', $any($event.target).value)"
-                      />
-                      <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(semanalStartInput, 'semanalStartTime', $index)">
-                        <span class="time-picker-icon" aria-hidden="true"></span>
-                      </button>
+                      <app-time24 [value]="slot.start" (valueChange)="updateSemanalSlot($index, 'start', $event)" />
+                      
                     </div>
                     <span>a</span>
                     <div class="time-field">
-                      <input
-                        #semanalEndInput
-                        type="time"
-                        step="60"
-                        [value]="slot.end"
-                        (change)="updateSemanalSlot($index, 'end', $any($event.target).value)"
-                      />
-                      <button type="button" class="time-picker-btn" title="Obrir selector d'hora" aria-label="Obrir selector d'hora" (click)="openTimePicker(semanalEndInput, 'semanalEndTime', $index)">
-                        <span class="time-picker-icon" aria-hidden="true"></span>
-                      </button>
+                      <app-time24 [value]="slot.end" (valueChange)="updateSemanalSlot($index, 'end', $event)" />
+                      
                     </div>
                     <button
                       type="button"
@@ -1522,22 +1461,11 @@
             <div class="form-grid-2">
               <div class="form-group">
                 <label>Inici (data i hora)</label>
-                <input
-                  type="datetime-local"
-                  step="300"
-                  [value]="createConvoForm().date + 'T' + createConvoForm().startTime"
-                  (change)="setCreateConvoStart($any($event.target).value)"
-                />
+                <app-datetime24 [value]="createConvoForm().date + 'T' + createConvoForm().startTime" (valueChange)="setCreateConvoStart($event)" />
               </div>
               <div class="form-group">
                 <label>Hora de fi</label>
-                <input
-                  type="time"
-                  step="300"
-                  [min]="createConvoForm().startTime"
-                  [value]="createConvoForm().finalTime"
-                  (change)="updateCreateConvoField('finalTime', $any($event.target).value)"
-                />
+                <app-time24 [value]="createConvoForm().finalTime" (valueChange)="updateCreateConvoField('finalTime', $event)" />
               </div>
             </div>
           }

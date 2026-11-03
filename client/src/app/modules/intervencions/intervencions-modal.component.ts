@@ -5,13 +5,14 @@ import * as L from 'leaflet';
 import {
   BomberEntry, Convocatoria, DataService, Intervencio, IntervencioContext, IntervencioPayload, OtherAdfEntry, TypeIncendi,
 } from '../../services/data.service';
+import { Time24Component, Datetime24Component } from '../shared/time-fields.component';
 
 const DEFAULT_CENTER: L.LatLngTuple = [41.7, 1.8];
 
 @Component({
   selector: 'app-intervencions-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [Time24Component, Datetime24Component, CommonModule, FormsModule],
   templateUrl: './intervencions-modal.component.html',
   styleUrl: './intervencions-modal.component.css',
 })

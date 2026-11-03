@@ -75,9 +75,9 @@
             <h3>Data i hores</h3>
             <div class="iv-grid">
               <label>Data<input type="date" [ngModel]="f.date" (ngModelChange)="update('date', $event); refreshContext()" /></label>
-              <label>Hora d'avís<input type="time" [ngModel]="f.noticeTime" (ngModelChange)="update('noticeTime', $event); refreshContext()" /></label>
-              <label>Inici actuació<input type="time" [ngModel]="f.startTime" (ngModelChange)="update('startTime', $event)" /></label>
-              <label>Final actuació<input type="time" [ngModel]="f.endTime" (ngModelChange)="update('endTime', $event)" /></label>
+              <label>Hora d'avís<app-time24 [value]="f.noticeTime" (valueChange)="update('noticeTime', $event); refreshContext()" /></label>
+              <label>Inici actuació<app-time24 [value]="f.startTime" (valueChange)="update('startTime', $event)" /></label>
+              <label>Final actuació<app-time24 [value]="f.endTime" (valueChange)="update('endTime', $event)" /></label>
               <label>Nivell Pla Alfa
                 <select [ngModel]="f.level" (ngModelChange)="update('level', $event)">
                   <option [ngValue]="null">—</option>

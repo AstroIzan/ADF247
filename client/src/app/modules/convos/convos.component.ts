@@ -5,6 +5,7 @@ import { DataService, Convocatoria, ConvoType, User } from '../../services/data.
 import { AuthService } from '../../services/auth.service';
 import { IntervencionsModalComponent } from '../intervencions/intervencions-modal.component';
 import { DateFormatService } from '../../services/date-format.service';
+import { Time24Component, Datetime24Component } from '../shared/time-fields.component';
 
 type ConvocatoriaFormData = Partial<Convocatoria> & {
   incendiReadyInMinutes?: number;
@@ -13,7 +14,7 @@ type ConvocatoriaFormData = Partial<Convocatoria> & {
 @Component({
   selector: 'app-convos',
   standalone: true,
-  imports: [CommonModule, FormsModule, IntervencionsModalComponent],
+  imports: [Time24Component, Datetime24Component, CommonModule, FormsModule, IntervencionsModalComponent],
   templateUrl: './convos.component.html',
   styleUrl: './convos.component.css'
 })

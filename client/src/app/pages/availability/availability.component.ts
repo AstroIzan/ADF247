@@ -6,11 +6,12 @@ import { forkJoin } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { AvailabilityWindow, DataService } from '../../services/data.service';
 import { DateFormatService } from '../../services/date-format.service';
+import { Time24Component, Datetime24Component } from '../../modules/shared/time-fields.component';
 
 @Component({
   selector: 'app-availability',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [Time24Component, Datetime24Component, CommonModule, FormsModule],
   templateUrl: './availability.component.html',
   styleUrl: './availability.component.css',
 })

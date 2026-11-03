@@ -32,7 +32,7 @@
                 <tbody>
                   @for (row of campaignForms(); track row.id) {
                     <tr>
-                      <td>{{ row.dia | date:'short' }}</td>
+                      <td>{{ row.dia | date:'dd/MM/yyyy HH:mm' }}</td>
                       <td>{{ row.serviceMoment === 'START' ? 'Inici de servei' : 'Final de servei' }}</td>
                       <td>{{ row.convocatoria?.title || ('#' + row.convocatoriaId) }}</td>
                       <td>{{ row.responsableNCarnet || '-' }}</td>

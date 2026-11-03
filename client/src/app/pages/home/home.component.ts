@@ -7,10 +7,11 @@ import { CampaignVehicleCatalogItem, DataService, CampaignFormContext, CampaignF
 import { DateFormatService } from '../../services/date-format.service';
 
 import { IntervencionsModalComponent } from '../../modules/intervencions/intervencions-modal.component';
+import { Time24Component, Datetime24Component } from '../../modules/shared/time-fields.component';
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, IntervencionsModalComponent],
+  imports: [Time24Component, Datetime24Component, CommonModule, IntervencionsModalComponent],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',
 })
